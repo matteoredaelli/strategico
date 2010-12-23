@@ -558,7 +558,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   graph1 = paste(CONFIG$values[value], "graph_best.png", sep = "")
                                         # Write graph to a file
-  bitmap(unit="px",file.path(directory, graph1), width = 720, height = 480)
+  bitmap(units="px",file.path(directory, graph1), width = 720, height = 480)
   plot.ltp(obj, plot.try.models = c("best"), color.forecast = c("green", 
                                                "red", "blue"), color.ic = "red", plot.trend = TRUE, 
            title = obj$BestModel)
@@ -567,7 +567,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   graph2 = paste(CONFIG$values[value], "graph_all.png", sep = "")
   ## Write graph to a file
-  bitmap(unit="px",file.path(directory, graph2), width = 720, height = 480)
+  bitmap(units="px",file.path(directory, graph2), width = 720, height = 480)
   plot.ltp(obj, plot.try.models = c("all"), color.forecast = c("green", "red", "blue","gray","black"), color.ic = "red", plot.trend = TRUE, title = "All Predictors")
   ## plot.ts(data, main = paste(project.path, ':', names(obj)))
   dev.off()
@@ -602,7 +602,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
     cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
     HTML(file = file.path(directory, HTMLFileName), report(obj[[modType]]$model))
     residPlot = paste(CONFIG$values[value], "resid_", modType,".png", sep = "")
-    bitmap(unit="px",file.path(directory, residPlot), width = 720, height = 480)
+    bitmap(units="px",file.path(directory, residPlot), width = 720, height = 480)
     plot(obj[[modType]]$Residuals, type = "p", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
     abline(0, 0)
     dev.off()
