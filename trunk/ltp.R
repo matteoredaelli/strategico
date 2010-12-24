@@ -614,11 +614,11 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   form = paste("<h2>Run the engine</h2>
 	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
             Params:
-			  <input type=\"text\" name=\"params\" id=\"params\" size=\"120\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
+			  <input type=\"text\" name=\"params\" id=\"params\" size=\"150\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
               <input type=\"hidden\" name=\"item_folder\" value=\"",.get_item_path(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
-              <input type=\"submit\" value=\"Run\" />			  
+              <input type=\"submit\" name=\"run\" value=\"Run\" />			  
         </form>",sep="")
   
 
