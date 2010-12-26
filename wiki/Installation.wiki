@@ -2,7 +2,7 @@
 
 = Requirements =
 
- * R: release >= 2.11
+ * [http://www.r-project.org R]: release >= 2.11
  * [http://cran.r-project.org/web/packages/forecast/index.html Forecast library]
  * [http://cran.r-project.org/web/packages/R2HTML/index.html R2HTML library]
  * [http://cran.r-project.org/web/packages/xtable/index.html Xtable library]
