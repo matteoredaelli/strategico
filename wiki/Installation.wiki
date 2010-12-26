@@ -3,6 +3,9 @@
 = Requirements =
 
  * R: release >= 2.11
+ * [http://cran.r-project.org/web/packages/forecast/index.html Forecast library]
+ * [http://cran.r-project.org/web/packages/R2HTML/index.html R2HTML library]
+ * [http://cran.r-project.org/web/packages/xtable/index.html Xtable library]
  * [http://sirio.stat.unipd.it/index.php?id=libast Ast library]
 
 = Installation =
