@@ -51,7 +51,7 @@ eval_item_by_value <- function(project.path, keys, item.data, value, param=NULL)
   }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
-    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),3),rep("-",3),model[[model$BestModel]][c("AIC","IC.width","maxJump")]), dim(model$values)[1]))
+    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),3),rep("-",3),model[[model$BestModel]][c("AIC","IC.width","maxJump")]), nrow(model$values)))
     write.table(file = paste(directory, "/item-", CONFIG$values[value], ".summary", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
 }
