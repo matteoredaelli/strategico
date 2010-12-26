@@ -1,12 +1,8 @@
-#summary One-sentence summary of this page.
+#summary How to install strategico
 
 = Requirements =
 
  * R: release >= 2.11
  * [http://sirio.stat.unipd.it/index.php?id=libast Ast library]
-= Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+= Installation =
