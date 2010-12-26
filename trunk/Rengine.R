@@ -13,12 +13,6 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-ITEMDATA <- "item"
-ITEMDATA_FILE <- paste(ITEMDATA, ".Rdata", sep="")
-ITEMS <- "items"
-ITEMS_FILE <- paste(ITEMS, ".Rdata", sep="")
-
-
 project.get_config <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
   conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
                                         #e assegnazione dei valori indicati dal file ai parametri
@@ -93,12 +87,12 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
 }
 
 
-                                        #trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
-                                        #restituisce la stringa
+##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
+##restituisce la stringa
 .get_fields <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields),value=TRUE)
 }
-                                        #restituisce l'id
+##restituisce l'id
 .get_fields.id <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
 }
@@ -158,16 +152,16 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
   item_data <- as.data.frame(matrix(unlist(temp),ncol=length(vals.names)))
   rownames(item_data) <- names(temp)[!sapply(temp,is.null)]
   colnames(item_data) <- vals.names
-  save(item_data, file= paste(folder, ITEMDATA_FILE, sep="/"))
+  save(item_data, file= paste(folder, "item.Rdata", sep="/"))
   
   if (csv)
     write.csv(item_data,
-              file= paste(folder, ITEMDATA, ".csv", sep="/"),
+              file= paste(folder, "item.csv", sep="/"),
               row.names = FALSE
               )
   if (stats)
     .stats.records(
-                   paste(folder, ITEMDATA, ".png", sep="/"),
+                   paste(folder, "item.png", sep="/"),
                    item_data,
                    key)
   
@@ -176,10 +170,10 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
     newKeys <- keys[-1]
     keyValues <- levels(factor(data[,key]))   ###CHANGED
     for (keyValue in keyValues) {
-                                        #	   print(keyValue)
+      ##	   print(keyValue)
       newValues = values
       newValues[key] = (keyValue)
-                                        #	    print( values[1,])
+      ##	    print( values[1,])
       
       newData <- data[data[,key]==keyValue,]
       
@@ -203,7 +197,7 @@ project.update_items_data <- function(projectPath, projectData) {
   }
   
   leaves <- unique(subset(projectData, select=key_fields) )
-  outfile <- paste(projectPath, "/", ITEMS_FILE, sep="") 
+  outfile <- paste(projectPath, "/items.Rdata", sep="") 
   
   Items=leaves
   for (i in (dim(leaves)[2]):2){
@@ -214,7 +208,7 @@ project.update_items_data <- function(projectPath, projectData) {
   save( Items, file=outfile)
   
   write.csv(Items,
-            file= paste(projectPath, "/", ITEMS, ".csv", sep=""),
+            file= paste(projectPath, "/items.csv", sep=""),
             row.names = FALSE
             )	
   print(key_fields)			
