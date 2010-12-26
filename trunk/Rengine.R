@@ -45,7 +45,7 @@ project.get_config <- function(project.config.fileName="project.config") { #cerc
     period.start = period.start,
     period.end = period.end,
     save=save)
-  for (i in 1:dim(conf)[1])
+  for (i in 1:nrow(conf))
     eval(parse(text=paste("CONFIG$param$",conf[i,]),))
   
   source(CONFIG$connector.package)		
@@ -200,7 +200,7 @@ project.update_items_data <- function(projectPath, projectData) {
   outfile <- paste(projectPath, "/items.Rdata", sep="") 
   
   Items=leaves
-  for (i in (dim(leaves)[2]):2){
+  for (i in (ncol(leaves)):2){
     leaves[,i]=NA
     leaves= unique(leaves)
     Items=rbind(Items,unique(leaves))

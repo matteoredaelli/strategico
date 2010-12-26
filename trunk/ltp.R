@@ -45,7 +45,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
 
   period.start = result.normalize$start
   product = result.normalize$product
-  n = dim(product)[1]
+  n = nrow(product)
   
   
   if(idLog) logtransform = IDlog(product,period.start)
@@ -113,7 +113,7 @@ ltp.normalizeData <- function(product, range, NA2value,period.start,period.freq,
   period.start = as.numeric(strsplit(rownames(product)[1],"-")[[1]])
   
   times=sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
-  temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
+  temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,nrow(product))),],na.rm=TRUE))
   if(period.start[2]>1) temp = c(temp[period.start[2]:period.freq], temp[1:(period.start[2]-1)])
   productnew=data.frame( rep(temp, len = length(times) ))
   rownames(productnew)=times
@@ -125,11 +125,11 @@ ltp.normalizeData <- function(product, range, NA2value,period.start,period.freq,
   if (temp>0) {
     productnew=productnew[1:which(rownames(productnew)==paste(period.end,collapse="-")),,drop=FALSE]
   } else {
-    return(list(product=productnew[-(1:dim(productnew)[1]), ,drop=FALSE],start=NA))
+    return(list(product=productnew[-(1:nrow(productnew)), ,drop=FALSE],start=NA))
   }
   
 
-  n = dim(productnew)[1]
+  n = nrow(productnew)
 
   if(n>0){
     flag = TRUE
@@ -142,7 +142,7 @@ ltp.normalizeData <- function(product, range, NA2value,period.start,period.freq,
       }
       else flag = FALSE
     }
-    if(dim(productnew)[1]==0) return(productnew)
+    if(nrow(productnew)==0) return(productnew)
     productnew[is.na(productnew), ] = NA2value
     productnew[productnew < range[1], ] = range[1]
     productnew[productnew > range[2], ] = range[2]
@@ -165,7 +165,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   if(is.null(formula.right.lm)) formula.right.lm = match.arg(formula.right.lm, " S * trend + S * trend2")
   
   y = as.vector(product)
-  n = max(length(y), dim(y)[1])
+  n = max(length(y), nrow(y))
   y = ts(y, start = period.start, frequency = period.freq)
   attr(y, "product") = names(product)
   
@@ -206,7 +206,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   lm.AIC = AIC(modlm, k = 2)
   lm.R2 = summary(modlm)$r.squared
   ic.delta = mean(IC.pred.modlm$upr - IC.pred.modlm$lwr)
-  maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modlm[1:period.freq]-1),na.rm=TRUE)
+  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.modlm[1:period.freq]-1),na.rm=TRUE)
   res = ts(residuals(modlm), start = period.start, frequency = period.freq)
                                         #media_errori = mean(errori_lm)
   lista.lm = list(ts.product = y, model = modlm, prediction = pred.modlm, 
@@ -217,7 +217,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
 mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.q,max.P,
                       max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima) {
   y = as.vector(product)
-  n = max(length(y), dim(y)[1])
+  n = max(length(y), nrow(y))
   ## vettore errori
   ## errori_arima = rep(NA,fuori)
   y = ts(y, start = period.start, frequency = period.freq)
@@ -264,7 +264,7 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
   arima.R2 = r2
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.arima$upr - IC.pred.arima$lwr)
-  maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
+  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
   lista.arima = list(ts.product = y, model = mod.arima, prediction = pred.arima, 
     IC = IC.pred.arima, AIC = arima.AIC, R2 = arima.R2, IC.width = ic.delta, maxJump=maxJump,Residuals = res)
   lista.arima
@@ -273,7 +273,7 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
 ############## best.es()
 mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.es, stepwise) {
   y = as.vector(product)
-  n = max(length(y), dim(y)[1])
+  n = max(length(y), nrow(y))
   y = ts(y, start = period.start, frequency = period.freq)
   ## data mancanti mercato
   ## stima_le = window(y,end=end_stima)
@@ -328,7 +328,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
   es.R2 = r2
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.modle$upr - IC.pred.modle$lwr)
-  maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
+  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
   lista.es = list(ts.product = y, model = modle, prediction = pred.modle, 
     IC = IC.pred.modle, AIC = es.AIC, R2 = es.R2, IC.width = ic.delta, maxJump=maxJump,Residuals = res)
   lista.es
@@ -641,7 +641,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
 "report.Arima" <- function(model, ...) {
   Coefficients = cbind(Estimate = model$coef, Std.Error=matrix(sqrt(diag(model$var.coef))))
   colnames(Coefficients) = c("Estimate", "Std. Error")
-  if (dim(Coefficients)[1]==0) Coefficients=rbind(Coefficients,NA)
+  if (nrow(Coefficients)==0) Coefficients=rbind(Coefficients,NA)
   
   list(Call = model$call, residuals = summary(model$residuals), 
        Coefficients = Coefficients, Residuals = paste("Residuals standard error:", 
