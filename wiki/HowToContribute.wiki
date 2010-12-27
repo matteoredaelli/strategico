@@ -1,0 +1,9 @@
+#summary Would you like to contribute?
+
+= How to contribute =
+
+If you want to contribute to improve this software, you are welcome! You can contribute in many ways:
+ * using and distributing this software and let us know where/how  
+ * submitting bug, enhancements and (statistical) suggestion issues in the Issue tab
+ * submitting patches and then becoming a committer of teh project
+ 
