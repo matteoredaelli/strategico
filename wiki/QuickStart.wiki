@@ -1,4 +1,4 @@
-#summary How to install strategico
+#summary How to install and use strategico
 
 = Requirements =
 
