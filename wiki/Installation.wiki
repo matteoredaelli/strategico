@@ -2,10 +2,16 @@
 
 = Requirements =
 
- * [http://www.r-project.org R]: release >= 2.11
+You need to install 
+ *the [http://www.r-project.org R] (release >= 2.11) statistical software
+
+and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN] for a full list of R libraries):
+ * [http://cran.r-project.org/web/packages/RODBC/index.html RODBC library]
  * [http://cran.r-project.org/web/packages/forecast/index.html Forecast library]
  * [http://cran.r-project.org/web/packages/R2HTML/index.html R2HTML library]
  * [http://cran.r-project.org/web/packages/xtable/index.html Xtable library]
  * [http://sirio.stat.unipd.it/index.php?id=libast Ast library]
 
 = Installation =
+
+Download and unzip strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab]
