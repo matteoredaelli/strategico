@@ -15,3 +15,5 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
 = Installation =
 
 Download and unzip strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab]
+
+= Usage =
