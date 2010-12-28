@@ -3,7 +3,7 @@
 = Requirements =
 
 You need to install 
- *the [http://www.r-project.org R] (release >= 2.11) statistical software
+ * the [http://www.r-project.org R] (release >= 2.11) statistical software
 
 and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN] for a full list of R libraries):
  * [http://cran.r-project.org/web/packages/RODBC/index.html RODBC library]
