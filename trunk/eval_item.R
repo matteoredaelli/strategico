@@ -24,4 +24,4 @@ item.params <- args[9]
 msg <- paste("Project=", project.path, ", Item=", item.path, sep="")
 print(msg)
 
-project.eval_item(project.path=project.path, pathToItem=item.path, values=item.values, param=item.params)                                          
+EvalItem(project.path=project.path, pathToItem=item.path, values=item.values, param=item.params)                                          

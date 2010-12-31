@@ -529,9 +529,9 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   HTMLFileName = "index.html"
   
-  if(is.null(directory)) directory =  paste(.get_item_path(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
+  if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
-  title = paste(.get_item_name(keys), CONFIG$values[value], sep = " - ")
+  title = paste(.GetItemName(keys), CONFIG$values[value], sep = " - ")
   ## ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,5),"")
   colnames(ReporTable) = c("model", "AIC", "R2","IC.width","maxJump","selected")
@@ -580,7 +580,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   cat(text, append = FALSE, file = file.path(directory, HTMLFileName))
   
   ## HTML(file = file.path(directory, HTMLFileName), summary(obj[[obj$BestModel]]$model))
-  ## HTML(file = file.path(directory, 'index.html'), paste(paste(.get_item_name(keys), CONFIG$values[value],sep=' - '),'<br>',sep=''))
+  ## HTML(file = file.path(directory, 'index.html'), paste(paste(.GetItemName(keys), CONFIG$values[value],sep=' - '),'<br>',sep=''))
   ## HTML(file = file.path(directory, 'index.html'), '<br>')
   
   HTML(file = file.path(directory, HTMLFileName), xtable(ReporTable, 
@@ -616,7 +616,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
             Params:
 			  <input type=\"text\" name=\"params\" id=\"params\" size=\"150\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
-              <input type=\"hidden\" name=\"item_folder\" value=\"",.get_item_path(keys),"\" /> 
+              <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
               <input type=\"submit\" name=\"run\" value=\"Run\" />			  
         </form>",sep="")

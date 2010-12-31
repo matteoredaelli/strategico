@@ -16,7 +16,7 @@
 
 source("ltp.R")
 
-eval_item_by_value <- function(project.path, keys, item.data, value, param=NULL) {
+EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
 
@@ -29,7 +29,7 @@ eval_item_by_value <- function(project.path, keys, item.data, value, param=NULL)
                period.start = CONFIG$period.start, period.end = CONFIG$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform)
   
-  directory = .get_item_path(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
+  directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
   dir.create(directory, showWarnings = FALSE)
 
   ## write results in .RData

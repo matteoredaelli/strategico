@@ -13,7 +13,7 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-project.get_config <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
+GetProjectConfig <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
   conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
                                         #e assegnazione dei valori indicati dal file ai parametri
   project.name <- conf$V2[conf$V1=="project.name"]
@@ -21,18 +21,18 @@ project.get_config <- function(project.config.fileName="project.config") { #cerc
   eval.package <- conf$V2[conf$V1=="eval.package"]
   eval(parse(text=paste("save=c(",conf$V2[conf$V1=="save"],")"),))
   
-  keys <- conf$V2[.get_fields.id(conf$V1,"key")]
-  names(keys) <- .get_fields(conf$V1,"key")
+  keys <- conf$V2[.GetFieldsId(conf$V1,"key")]
+  names(keys) <- .GetFields(conf$V1,"key")
   
-  values <- conf$V2[.get_fields.id(conf$V1,"value")]
-  names(values) <- .get_fields(conf$V1,"value")
+  values <- conf$V2[.GetFieldsId(conf$V1,"value")]
+  names(values) <- .GetFields(conf$V1,"value")
   connector.package <- conf$V2[conf$V1=="connector.package"]
   
-  period.freq <- as.numeric(conf$V2[.get_fields.id(conf$V1,"period.freq")])
-  period.start <- as.numeric(strsplit(conf$V2[.get_fields.id(conf$V1,"period.start")],"-")[[1]] )
-  period.end <- as.numeric(strsplit(conf$V2[.get_fields.id(conf$V1,"period.end")],"-")[[1]] )
+  period.freq <- as.numeric(conf$V2[.GetFieldsId(conf$V1,"period.freq")])
+  period.start <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.start")],"-")[[1]] )
+  period.end <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.end")],"-")[[1]] )
   
-  conf = conf[ .get_fields.id(conf$V1,"eval.param"),"V2",drop=FALSE] 
+  conf = conf[ .GetFieldsId(conf$V1,"eval.param"),"V2",drop=FALSE] 
   
   CONFIG=list(project.name = project.name,
     connector.package=connector.package,
@@ -53,64 +53,64 @@ project.get_config <- function(project.config.fileName="project.config") { #cerc
   CONFIG
 }
 
-project.get_items <- function(project.path) {
+GetItemsList <- function(project.path) {
   items.rdata <- paste( project.path, "items.Rdata", sep="/")
   load(items.rdata)
   Items
 }
 
-project.get_item_data <- function(project.path, keys) {
-  load( paste(.get_item_path(keys,project.path), "item.Rdata", sep="/"))
+GetItemData <- function(project.path, keys) {
+  load( paste(.GetItemPath(keys,project.path), "item.Rdata", sep="/"))
   item_data
 }
 
-project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, param=NULL) {
-  if(!exists("CONFIG")) assign("CONFIG", project.get_config(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, param=NULL) {
+  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
   if(!is.null(pathToItem)) keys=strsplit(pathToItem,"/")[[1]]
 
-  item.data <- project.get_item_data(project.path, keys)
+  item.data <- GetItemData(project.path, keys)
 
   if (is.null(values)) values <- names(CONFIG$values)
 
-  if(!is.null(keys)) print( paste(" Loading item: ", .get_item_name(keys) , sep=""))
+  if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
   for (i in 1:length(values)) {
     print( paste(" Evaluating ", values[i],": ", CONFIG$values[values[i]], sep=""))  
-    eval_item_by_value(project.path, keys, item.data, value=values[i],param=param)
+    EvalItemByValue(project.path, keys, item.data, value=values[i],param=param)
   }
 }
 
 
 ##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
 ##restituisce la stringa
-.get_fields <- function(fields,pattern) {
+.GetFields <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields),value=TRUE)
 }
 
 ##restituisce l'id
-.get_fields.id <- function(fields,pattern) {
+.GetFieldsId <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
 }
 
 
-.safe_name <- function(String) {
+.SafeName <- function(String) {
   gsub("[ '/\"\\:-<>]+", "_", String)
 }
 
-.get_item_name <- function( keys ) { 
-  new_keys <- sapply( keys, .safe_name)
+.GetItemName <- function( keys ) { 
+  new_keys <- sapply( keys, .SafeName)
   paste( new_keys, collapse="-")
 }
 
-.get_item_path <- function( keys ,project.path=NULL,extra=NULL) {  
-  new_keys <- sapply( keys[!is.na(keys)], .safe_name)
+.GetItemPath <- function( keys ,project.path=NULL,extra=NULL) {  
+  new_keys <- sapply( keys[!is.na(keys)], .SafeName)
   subpath <- paste( new_keys, collapse="/")
   if (!is.null(project.path)) subpath <- paste(project.path, subpath, sep="/")
-  if (!is.null(extra))  subpath <- paste(subpath,.safe_name(extra), sep="/")
+  if (!is.null(extra))  subpath <- paste(subpath,.SafeName(extra), sep="/")
   subpath
 }
 
-.stats.records <- function(filename, records, key, title="item records", top=25) {
+.StatsRecords <- function(filename, records, key, title="item records", top=25) {
   library(lattice)
   bitmap(filename)
   ## retriving top values
@@ -130,17 +130,17 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
   dev.off()
 }
 
-.project.update_items_data_recursively <- function(projectPath, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
+.UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
   if (is.null(values))
-    folder <- projectPath
+    folder <- project.path
   else
-    folder <- paste(projectPath, paste(values,collapse="/"), sep="/")
+    folder <- paste(project.path, paste(values,collapse="/"), sep="/")
 
   print(folder)
   dir.create(folder, recursive = TRUE, showWarnings = FALSE)
 
   ##print( paste("Folder=", folder, "Key=", key) )
-  vals.names <- .get_fields(names(data),"value")
+  vals.names <- .GetFields(names(data),"value")
   temp=by(data[,vals.names],data$PERIOD, function(x) apply(x,2, sum, na.rm=TRUE))
   item_data <- as.data.frame(matrix(unlist(temp),ncol=length(vals.names)))
   rownames(item_data) <- names(temp)[!sapply(temp,is.null)]
@@ -153,7 +153,7 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
               row.names = FALSE
               )
   if (stats)
-    .stats.records(
+    .StatsRecords(
                    paste(folder, "item.png", sep="/"),
                    item_data,
                    key)
@@ -170,27 +170,27 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
       
       newData <- data[data[,key]==keyValue,]
       
-      .project.update_items_data_recursively(projectPath=projectPath, data=newData, keys=newKeys, values=newValues)
+      .UpdateItemsDataRecursively(project.path=project.path, data=newData, keys=newKeys, values=newValues)
     }
   }
 }
 
 
 ###########################aggiornamento dati - crea items.Rdata e item.RData
-project.update_items_data <- function(projectPath, projectData, csv=FALSE) {
+UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 
   ## estrai/filtra la lista degli item e li salva nel file items.Rdata
 
-  key_fields <- .get_fields( colnames(projectData) ,"key" )
+  key_fields <- .GetFields( colnames(projectData) ,"key" )
   
   projectData$PERIOD <- factor(projectData$PERIOD)
   for (i in key_fields){
     projectData[,i] <- factor(projectData[,i])
-    levels(projectData[,i]) <- .safe_name(levels(projectData[,i]))
+    levels(projectData[,i]) <- .SafeName(levels(projectData[,i]))
   }
   
   leaves <- unique(subset(projectData, select=key_fields) )
-  outfile <- paste(projectPath, "/items.Rdata", sep="") 
+  outfile <- paste(project.path, "/items.Rdata", sep="") 
   
   Items=leaves
   for (i in (ncol(leaves)):2){
@@ -202,17 +202,17 @@ project.update_items_data <- function(projectPath, projectData, csv=FALSE) {
 
   if (CSV)
     write.csv(Items,
-              file= paste(projectPath, "/items.csv", sep=""),
+              file= paste(project.path, "/items.csv", sep=""),
               row.names = FALSE
               )	
   print(key_fields)			
-  .project.update_items_data_recursively(projectPath, projectData, keys=key_fields, values=NULL )
+  .UpdateItemsDataRecursively(project.path, projectData, keys=key_fields, values=NULL )
   
 } # end function
 
 
 ##input  da db. 
-project.import_items_data.db <- function(projectPath, DB, DBUSER, DBPWD, sql_statement ) {
+ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
   
   library(RODBC)
 
@@ -220,11 +220,11 @@ project.import_items_data.db <- function(projectPath, DB, DBUSER, DBPWD, sql_sta
   result <- sqlQuery(channel, sql_statement)
   odbcClose(channel)
 
-  project.update_items_data(projectPath, result)
+  UpdateItemsData(project.path, result)
 }
 
 ##input da da csv. 
-project.import_items_data.csv <- function(projectPath, filename=NULL, KEY=c("KEY1","KEY2"), timesKeys=c("YEAR","SEMESTER"), VALUE=c("CORP")){ 
+ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KEY2"), timesKeys=c("YEAR","SEMESTER"), VALUE=c("CORP")){ 
 
   ##restituisce una list (itemList) con una ts per ogni elemento. 
   ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
@@ -240,7 +240,7 @@ project.import_items_data.csv <- function(projectPath, filename=NULL, KEY=c("KEY
   names.data[VALUE]=paste(VALUE,1:length(VALUE),sep="")
 
   names(data) = names.data
-  data$PERIOD=.get_item_name(data[,timesKeys])
+  data$PERIOD=.GetItemName(data[,timesKeys])
 
-  project.update_items_data(projectPath, data[,c(KEY,"PERIOD",VALUE)])
+  UpdateItemsData(project.path, data[,c(KEY,"PERIOD",VALUE)])
 }
