@@ -32,7 +32,6 @@ project.get_config <- function(project.config.fileName="project.config") { #cerc
   period.start <- as.numeric(strsplit(conf$V2[.get_fields.id(conf$V1,"period.start")],"-")[[1]] )
   period.end <- as.numeric(strsplit(conf$V2[.get_fields.id(conf$V1,"period.end")],"-")[[1]] )
   
-  
   conf = conf[ .get_fields.id(conf$V1,"eval.param"),"V2",drop=FALSE] 
   
   CONFIG=list(project.name = project.name,
@@ -60,17 +59,12 @@ project.get_items <- function(project.path) {
   Items
 }
 
-
 project.get_item_data <- function(project.path, keys) {
-
   load( paste(.get_item_path(keys,project.path), "item.Rdata", sep="/"))
   item_data
 }
 
-
 project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, param=NULL) {
-
-
   if(!exists("CONFIG")) assign("CONFIG", project.get_config(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
   if(!is.null(pathToItem)) keys=strsplit(pathToItem,"/")[[1]]
@@ -92,6 +86,7 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
 .get_fields <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields),value=TRUE)
 }
+
 ##restituisce l'id
 .get_fields.id <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
@@ -107,7 +102,6 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
   paste( new_keys, collapse="-")
 }
 
-                                        #CHANGED
 .get_item_path <- function( keys ,project.path=NULL,extra=NULL) {  
   new_keys <- sapply( keys[!is.na(keys)], .safe_name)
   subpath <- paste( new_keys, collapse="/")
@@ -137,7 +131,6 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
 }
 
 .project.update_items_data_recursively <- function(projectPath, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
-
   if (is.null(values))
     folder <- projectPath
   else
@@ -184,7 +177,7 @@ project.eval_item <- function(project.path, keys=NULL, pathToItem=NULL, values =
 
 
 ###########################aggiornamento dati - crea items.Rdata e item.RData
-project.update_items_data <- function(projectPath, projectData) {
+project.update_items_data <- function(projectPath, projectData, csv=FALSE) {
 
   ## estrai/filtra la lista degli item e li salva nel file items.Rdata
 
@@ -206,17 +199,16 @@ project.update_items_data <- function(projectPath, projectData) {
     Items=rbind(Items,unique(leaves))
   }
   save( Items, file=outfile)
-  
-  write.csv(Items,
-            file= paste(projectPath, "/items.csv", sep=""),
-            row.names = FALSE
-            )	
+
+  if (CSV)
+    write.csv(Items,
+              file= paste(projectPath, "/items.csv", sep=""),
+              row.names = FALSE
+              )	
   print(key_fields)			
   .project.update_items_data_recursively(projectPath, projectData, keys=key_fields, values=NULL )
   
 } # end function
-
-
 
 
 ##input  da db. 
