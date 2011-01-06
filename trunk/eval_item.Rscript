@@ -13,13 +13,13 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 library(methods)
-source("Rengine.R")
+source("engine.R")
 
 args <- commandArgs()
 
 project.path <- args[6]
 item.path <- args[7]
-item.values <- args[8]
+item.values <- toupper(args[8])
 item.params <- args[9]
 
 msg <- paste("Project=", project.path, ", Item=", item.path, sep="")
