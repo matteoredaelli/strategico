@@ -1,16 +1,15 @@
 #summary What missing features would you like to add in this projects?
 
-= EVAL_* Funtions =
-
- * which new features/models for the Long Term Prediction funtion?
- * adding an eval_stp, a *Short Term Prediction* (monthly?)?
-
 = ENGINE =
 
 == CONNECTORS ==
 
 == WEB INTERFACE ==
 
+= EVAL Funtions =
+
+ * which new features/models for the Long Term Prediction funtion?
+ * adding an eval_stp, a *Short Term Prediction* (monthly?)?
 
 
 
