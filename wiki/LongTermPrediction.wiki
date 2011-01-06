@@ -12,6 +12,11 @@ Add your content here.  Format your content with:
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
 
+
+http://strategico.googlecode.com/svn-history/r46/trunk/doc/ltp/residuals1.jpg
+
+http://strategico.googlecode.com/svn-history/r46/trunk/doc/ltp/residuals2.jpg
+
 = Parameters =
 
 = References and external documents =
