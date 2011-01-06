@@ -3,8 +3,11 @@
 = How to contribute =
 
 If you want to contribute to improve this software, you are welcome! You can contribute in many ways:
- * link this project to you web sites
- * using and distributing this software and let us know where/how 
- * submitting bug, enhancements and (statistical) suggestion issues in the Issue tab
- * submitting patches and then becoming a committer of teh project
+ 
+ * *using and distributing this software* and let us know where/how 
+ * *advertising*: link and share this project to other web sites, blogs and forums
+ * submitting *feedbacks* and *statistical suggestions* in the Issue tab
+ * submitting *patches* (bugs and features) and then *becoming a committer* of this project
+
+Regards
  
