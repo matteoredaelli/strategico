@@ -1,1 +1,1 @@
-#summary Short Term Prediction
+#summary Short Term Time Series Prediction
