@@ -83,7 +83,7 @@ EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, pa
 
 ImportItemsData <- function(project.path) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
-  connector.importItemsData()
+  connector.importItemsData(project.path)
 }
 
 
