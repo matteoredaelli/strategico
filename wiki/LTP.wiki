@@ -1,5 +1,10 @@
 #summary Long Term Time Series Prediction
 
+== Sample results ==
+
+http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_bestfit.jpg
+http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_all.jpg
+
 == R 2 ==
 L'R 2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
 Se l'indice è prossimo a 1 il modello riesce a cogliere gran parte della variabilità dai dati;
@@ -21,11 +26,11 @@ Buoni residui presentano un grafico con una nuvola di punti distribuiti casualme
 
 Un esempio di buoni residui è il seguente:
 
-http://strategico.googlecode.com/svn-history/r46/trunk/doc/ltp/residuals1.jpg
+http://strategico.googlecode.com/svn/trunk/doc/ltp/residuals1.jpg
 
 Un esempio di residui non soddisfacenti è invece il seguente:
 
-http://strategico.googlecode.com/svn-history/r46/trunk/doc/ltp/residuals2.jpg
+http://strategico.googlecode.com/svn/trunk/doc/ltp/residuals2.jpg
 
 
 == References ==
