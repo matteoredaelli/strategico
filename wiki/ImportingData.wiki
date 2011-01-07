@@ -2,7 +2,7 @@
 
 = Introduction =
 
-When you create a new project (ex. myproject), you should create a file *myproject-connector.R* and add there a function *connector.importItemsData(project.path)* that gets external dato to a R dataframe with colnames like th following
+When you create a new project (ex. myproject), you should create a file *myproject-connector.R* and add there a function *connector.importItemsData(project.path)* that gets the external data into a R dataframe with the following colnames:
 
  * KEY1
  * KEY2
