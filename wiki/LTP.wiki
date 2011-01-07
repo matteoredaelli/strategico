@@ -1,7 +1,7 @@
 #summary Long Term Time Series Prediction
 
-== R2 ==
-L'R2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
+== R 2 ==
+L'R 2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
 Se l'indice è prossimo a 1 il modello riesce a cogliere gran parte della variabilità dai dati;
 in caso contrario (indice prossimo a 0) modello il modello potrebbe non essere adeguato.
  
