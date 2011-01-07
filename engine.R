@@ -81,6 +81,11 @@ EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, pa
   }
 }
 
+ImportItemsData <- function(project.path) {
+  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+  connector.importItemsData()
+}
+
 
 ##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
 ##restituisce la stringa
