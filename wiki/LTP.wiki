@@ -1,22 +1,31 @@
 #summary Long Term Time Series Prediction
 
-= Introduction =
+== R2 ==
+L' R2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
+Se l'indice è prossimo a 1 il modello riesce a cogliere gran parte della variabilità dai dati;
+in caso contrario (indice prossimo a 0) modello il modello potrebbe non essere adeguato.
+ 
+== AIC ==
+L'AIC è un indice statistico utilizzato per valutare la bonta di un modello. L'indice prevede una penalizzazione crescente all'aumentare del numero di parametri utilizzati.
+In generale il modello che presenta AIC inferiore è preferibile.
+ 
+== IC.width ==
+IC.width rappresenta la media delle ampiezze degli intervalli di confidenza di ogni previsione fatta. 
+Una previsione caratterizzata da piccolo IC.whith risulterà soggetta a minore variabilità rispetto ad una previsione con IC.whith maggiore; in generale quindi la stima 
+risulterà più precisa nel caso di basso IC.whith. 
 
-Add your content here.
 
+== Residui ==
 
-= Models =
+Buoni residui presentano un grafico con una nuvola di punti distribuiti casualmente intorno allo 0; non devono essere presenti evidenti relazioni lineari o paraboliche.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
-
+Un esempio di buoni residui è il seguente:
 
 http://strategico.googlecode.com/svn-history/r46/trunk/doc/ltp/residuals1.jpg
 
+Un esempio di residui non soddisfacenti è invece il seguente:
+
 http://strategico.googlecode.com/svn-history/r46/trunk/doc/ltp/residuals2.jpg
 
-= Parameters =
 
-= References and external doc
+== References ==
