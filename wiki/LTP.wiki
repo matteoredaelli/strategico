@@ -2,8 +2,8 @@
 
 == Sample results ==
 
-http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_bestfit.jpg
-http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_all.jpg
+http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_bestfit.png
+http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_all.png
 
 == R 2 ==
 L'R 2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
