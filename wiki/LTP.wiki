@@ -1,26 +1,34 @@
 #summary Long Term Time Series Prediction
 
+== Models ==
+
+ * Arima
+ * Exponential smoothing
+ * Linear
+ * XX
+ * XXX
+
 == Sample results ==
 
 http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_bestfit.png
 http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_all.png
 
-== R 2 ==
+=== R 2 ===
 L'R 2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
 Se l'indice è prossimo a 1 il modello riesce a cogliere gran parte della variabilità dai dati;
 in caso contrario (indice prossimo a 0) modello il modello potrebbe non essere adeguato.
  
-== AIC ==
+=== AIC ===
 L'AIC è un indice statistico utilizzato per valutare la bonta di un modello. L'indice prevede una penalizzazione crescente all'aumentare del numero di parametri utilizzati.
 In generale il modello che presenta AIC inferiore è preferibile.
  
-== IC.width ==
+=== IC.width ===
 IC.width rappresenta la media delle ampiezze degli intervalli di confidenza di ogni previsione fatta. 
 Una previsione caratterizzata da piccolo IC.whith risulterà soggetta a minore variabilità rispetto ad una previsione con IC.whith maggiore; in generale quindi la stima 
 risulterà più precisa nel caso di basso IC.whith. 
 
 
-== Residui ==
+=== Residui ===
 
 Buoni residui presentano un grafico con una nuvola di punti distribuiti casualmente intorno allo 0; non devono essere presenti evidenti relazioni lineari o paraboliche.
 
