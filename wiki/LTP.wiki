@@ -5,8 +5,8 @@
  * Arima
  * Exponential smoothing
  * Linear
- * XX
- * XXX
+ * Mean
+ * Trend
 
 == Sample results ==
 
