@@ -12,8 +12,8 @@ http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_bestfit.png
 
 http://strategico.googlecode.com/svn/trunk/doc/ltp/ltp_all.png
 
-== R2 == 
-L' R2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
+== R 2 == 
+L'R2 è un indice statistico che rappresenta il rapporto tra varianza spiegata dal modello e varianza totale dei dati.L'indice è compreso tra 0 e 1. 
  * Se l'indice è prossimo a 1 il modello riesce a cogliere gran parte della variabilità dai dati;
  * in caso contrario (indice prossimo a 0) modello il modello potrebbe non essere adeguato.
 
@@ -53,10 +53,9 @@ http://strategico.googlecode.com/svn/trunk/doc/ltp/residuals2.jpg
 == Linear Model ==
 I principali indicatori per valutare la qualità di un modello lineare sono R2, il test F e la tabella dei "Coefficients".
  * R2 è la proporzione di varianza spiegata dai predittori; è compreso tra 0 e 1 e "più alto è meglio". Vedi anche commenti sopra riportati.
- * La statistica F verifica se il fenomeno è in relazione con i predittori del modello; valuta cioè se l'indice R2 è significativamente diverso da 0 o se questo valore 
-possa essere attribuita al caso. Affinchè la relazione tra predittori e fenomeno studiato sia statisticamente significativa, il valore di P-value deve essere 
-quanto più basso possibile (almeno minore di .01).
+ * La statistica F verifica se il fenomeno è in relazione con i predittori del modello; valuta cioè se l'indice R2 è significativamente diverso da 0 o se questo valore possa essere attribuita al caso. Affinchè la relazione tra predittori e fenomeno studiato sia statisticamente significativa, il valore di P-value deve essere quanto più basso possibile (almeno minore di .01).
  * (SOLO) se il test F risulta significativo può essere utile valutare l'influenza dei singoli predittori. La colonna "Estimate" indica l'effetto stimato sulla y al crescere 
 di una unità del predittore; il P-value per la verifica che questo effetto sia significativo (cioè non diverso da 0 solo per caso) è riportato nella colonna "Pr(>|t|)" 
 (basso è meglio)
+
 == References ==
