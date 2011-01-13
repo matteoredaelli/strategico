@@ -19,18 +19,27 @@ source("ltp.R")
 
 EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   
+  ##item.data <- as.vector(item.data)
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
+  ## for (param.name in names(CONFIG$param)) {
+  ## if (is.character(CONFIG$param[[param.name]]) & (length(CONFIG$param[[param.name]]) ==  1)) {
+  ## CONFIG$param[[param.name]] = paste("\"", CONFIG$param[[param.name]], "\"", sep = "")
+  ## }
+  ## if (!exists(param.name, mode = "numeric")) 
+  ## eval(parse(text = paste(param.name, "=", CONFIG$param[param.name], sep = "")))
+  ## }
 
-
-### optimize with ltp
-  
+  ## optimize with ltp
+  ## LTPCONFIG=CONFIG$param
   model <- ltp(product = item.data[, value, drop = FALSE], 
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = CONFIG$period.freq, 
                period.start = CONFIG$period.start, period.end = CONFIG$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform)
+                                        # model <- ltp(product=item.data[,value,drop=FALSE], try.model=LTPCONFIG$try.model, n.ahead=LTPCONFIG$n.ahead,period.freq=CONFIG$period.freq,period.start=CONFIG$period.start,period.end=CONFIG$period.end,n.min=LTPCONFIG$n.min,
+                                        # NA2value=LTPCONFIG$NA2value, range=LTPCONFIG$range)
   
-  directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
+  directory = .get_item_path(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
   dir.create(directory, showWarnings = FALSE)
 
   ## write results in .RData
@@ -41,7 +50,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     rownames(prediction)=sapply (0:(length(model[[model$BestModel]]$prediction)-1),function(i) paste(.incSampleTime(now=start(model[[model$BestModel]]$prediction), period.freq = frequency(model[[model$BestModel]]$prediction), increment = i),collapse="-"))
     colnames(prediction)=colnames(model$values)
     keydf = data.frame(t(keys)) 
-    ##names(keydf) = names(CONFIG$keys)
+                                        #names(keydf) = names(CONFIG$keys)
     data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
     if("csv"%in%CONFIG$save)  write.csv(file = paste(directory, "/item-", CONFIG$values[value], "-results.csv", sep = ""), data)
     ## write report
@@ -52,7 +61,8 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
-    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),3),rep("-",3),model[[model$BestModel]][c("AIC","IC.width","maxJump")]), nrow(model$values)))
+    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump")]), dim(model$values)[1]))
     write.table(file = paste(directory, "/item-", CONFIG$values[value], ".summary", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
 }
+
