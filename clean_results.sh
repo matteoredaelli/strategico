@@ -12,5 +12,5 @@ value=$2
 echo $project_path
 
 for dir in $(find $project_path -name "report-${value}" -type d ) ; do 
-	rm  ${dir}/*${value}*
+	rm -r  ${dir}
 done
