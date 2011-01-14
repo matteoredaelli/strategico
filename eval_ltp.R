@@ -39,7 +39,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
                                         # model <- ltp(product=item.data[,value,drop=FALSE], try.model=LTPCONFIG$try.model, n.ahead=LTPCONFIG$n.ahead,period.freq=CONFIG$period.freq,period.start=CONFIG$period.start,period.end=CONFIG$period.end,n.min=LTPCONFIG$n.min,
                                         # NA2value=LTPCONFIG$NA2value, range=LTPCONFIG$range)
   
-  directory = .get_item_path(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
+  directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
   dir.create(directory, showWarnings = FALSE)
 
   ## write results in .RData
