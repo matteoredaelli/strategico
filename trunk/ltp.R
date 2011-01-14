@@ -608,16 +608,16 @@ plot.ltp = function(model, plot.try.models = c("best",
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL,CONFIG=CONFIG) {
+ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   library(R2HTML)
   library(xtable)
   
   HTMLFileName = "index.html"
   
-  if(is.null(directory)) directory =  paste(.get_item_path(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
+  if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
   
-  title = paste(.get_item_name(keys), CONFIG$values[value], sep = " - ")
+  title = paste(.GetItemName(keys), CONFIG$values[value], sep = " - ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,5),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","selected")
@@ -719,7 +719,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL,CONFIG=CONFIG) 
             Params:
 			  <input type=\"text\" name=\"params\" id=\"params\" size=\"120\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
-              <input type=\"hidden\" name=\"item_folder\" value=\"",.get_item_path(keys),"\" /> 
+              <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
               <input type=\"submit\" value=\"Run\" />			  
          </form></body> </html>",sep="")
