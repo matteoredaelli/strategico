@@ -206,7 +206,7 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
   }
   save( Items, file=outfile)
 
-  if (CSV)
+  if (csv)
     write.csv(Items,
               file= paste(project.path, "/items.csv", sep=""),
               row.names = FALSE
