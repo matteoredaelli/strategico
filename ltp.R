@@ -155,7 +155,9 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
                                         # product
 ## }
 
-ltp.normalizeData <- function(product, range, NA2value,period.start,period.freq,increment,period.end) {
+
+
+ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.freq,increment,period.end) {
   period.start = as.numeric(strsplit(rownames(product)[1],"-")[[1]])
   
   times=sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
@@ -189,7 +191,11 @@ ltp.normalizeData <- function(product, range, NA2value,period.start,period.freq,
       else flag = FALSE
     }
     if(dim(productnew)[1]==0) return(productnew)
-    productnew[is.na(productnew), ] = NA2value
+	if (!is.null(NA2value))    productnew[is.na(productnew), ] = NA2value
+	else{
+		for(i in 1:period.freq) 
+			productnew[seq(from=i,by=period.freq,to=dim(productnew)[1])[is.na(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),])],]=mean(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),],na.rm=TRUE)
+	}
     productnew[productnew < range[1], ] = range[1]
     productnew[productnew > range[2], ] = range[2]
 
@@ -633,7 +639,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
                         compon})
     terms=terms[!sapply(terms,is.null)] 
     
-    es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"]),"*","+")))
+    es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
   }
   
   
@@ -713,6 +719,8 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
                                         # form per ri-lanciare la procedura
 
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
+  param <- param[names(param)!=""]
+
   form = paste( 
     "<hr> <h2>Run the engine</h2>
 	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
