@@ -23,11 +23,12 @@ for file in $(find . -maxdepth 2 -mindepth 2 -name item.Rdata) ; do
 	file_path=$(dirname $file)
 	new_item_path=$(echo ${item_path}/${file_path} | sed -e 's://:/:g' -e "s:\./::g")
 	all_params="${project_path} ${new_item_path} ${value} \"${params}\""
+	job_name=${project_name}/${new_item_path}/${value}
 	echo "Running params ${all_params}"
 	if [ "${user}" == "r" ] ; then
-		sbatch --workdir=/tmp --job-name=${project_name}/${new_item_path}/${value} ${script_path}/eval_items.sh ${all_params}
+		sbatch --workdir=/tmp --job-name=${job_name} ${script_path}/eval_items.sh ${all_params}
 	else
-		sudo sbatch --uid=1001 --gid=1001 --job-name=${project_name}/${new_item_path} --workdir=/tmp ${script_path}/eval_items.sh ${all_params}
+		sudo sbatch --uid=1001 --gid=1001 --job-name=${job_name} --workdir=/tmp ${script_path}/eval_items.sh ${all_params}
 	fi
 done
 
