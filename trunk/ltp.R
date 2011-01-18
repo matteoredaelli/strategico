@@ -733,7 +733,18 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
          </form></body> </html> <h2>Recorded and Predicted Data</h2>",sep="")
 
   cat(form, append = TRUE, file = file.path(directory, HTMLFileName))     	
-HTML(file = file.path(directory, HTMLFileName), obj$values,digits=12)
+  y = obj$values
+  names(y)="values"
+  if(!is.null(obj$BestModel)){ 	 
+	pred = round(obj[[obj$BestModel]]$prediction,0)
+	period.freq = frequency(obj[[obj$BestModel]]$ts.product)
+	end_serie = end(obj[[obj$BestModel]]$ts.product)
+    pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
+	rownames(pred)=pred.names
+	colnames(pred)="values"
+	y=rbind(y,pred)
+	}
+HTML(file = file.path(directory, HTMLFileName), y,digits=12)
 
 }
 
