@@ -147,8 +147,8 @@ ImportItemsData <- function(project.path) {
 
   ##print( paste("Folder=", folder, "Key=", key) )
   vals.names <- .GetFields(names(data),"value")
+  item_data <- as.data.frame(t(matrix(unlist(temp),nrow=length(vals.names))))
   temp=by(data[,vals.names],data$PERIOD, function(x) apply(x,2, sum, na.rm=TRUE))
-  item_data <- as.data.frame(matrix(unlist(temp),ncol=length(vals.names)))
   rownames(item_data) <- names(temp)[!sapply(temp,is.null)]
   colnames(item_data) <- vals.names
   save(item_data, file= paste(folder, "item.Rdata", sep="/"))
