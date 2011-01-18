@@ -683,8 +683,8 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
-    ifelse("csv"%in%CONFIG$save, paste("  <a href=\"item-", CONFIG$values[value], "-results.csv\">Link to data</a>\n", sep = ""),""),"
-		<h2>Charts</h2>\n<h3>Best Model </h3>\n<img src=\"", 
+    #ifelse("csv"%in%CONFIG$save, paste("  <a href=\"item-", CONFIG$values[value], "-results.csv\">Link to data</a>\n", sep = ""),""),
+	"<h2>Charts</h2>\n<h3>Best Model </h3>Recorded and predicted data are reported below\n<img src=\"", 
     graph1, "\" />\n<h3>All Models </h3>\n<img src=\"", graph2, "\" />\n<h2>Summary for All Models </h3>\n", sep = "")
   
   cat(text, append = FALSE, file = file.path(directory, HTMLFileName))
@@ -730,10 +730,10 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
               <input type=\"submit\" value=\"Run\" />			  
-         </form></body> </html>",sep="")
+         </form></body> </html> <h2>Recorded and Predicted Data</h2>",sep="")
 
   cat(form, append = TRUE, file = file.path(directory, HTMLFileName))     	
-
+HTML(file = file.path(directory, HTMLFileName), obj$values,digits=12)
 
 }
 
