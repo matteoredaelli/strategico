@@ -736,7 +736,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   y = obj$values
   names(y)="values"
   if(!is.null(obj$BestModel)){ 	 
-	pred = round(obj[[obj$BestModel]]$prediction,0)
+	pred = as.matrix(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
 	period.freq = frequency(obj[[obj$BestModel]]$ts.product)
 	end_serie = end(obj[[obj$BestModel]]$ts.product)
     pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
