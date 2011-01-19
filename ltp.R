@@ -618,7 +618,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   library(R2HTML)
   library(xtable)
   
-  HTMLFileName = "index.html"
+  HTMLFileName = "summary.html"
   
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
