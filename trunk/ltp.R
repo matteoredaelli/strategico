@@ -42,11 +42,11 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
                 period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL) {
   
 #####################################
-                                        ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
-                                        ## l'importante secondo me e' che venga aggiornata anche il nuovo period.start
+  ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
+  ## l'importante secondo me e' che venga aggiornata anche il nuovo period.start
 #####################################
   
-                                        ## result.normalize <- ltp.normalizeData(product, range, NA2value,period.end)
+  ## result.normalize <- ltp.normalizeData(product, range, NA2value,period.end)
   result.normalize <- ltp.normalizeData(product=product,range=range,NA2value=NA2value,period.start=period.start,increment=increment,period.end=period.end,period.freq=period.freq)
 
   period.start = result.normalize$start
@@ -191,11 +191,11 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
       else flag = FALSE
     }
     if(dim(productnew)[1]==0) return(productnew)
-	if (!is.null(NA2value))    productnew[is.na(productnew), ] = NA2value
-	else{
-		for(i in 1:period.freq) 
-			productnew[seq(from=i,by=period.freq,to=dim(productnew)[1])[is.na(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),])],]=mean(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),],na.rm=TRUE)
-	}
+    if (!is.null(NA2value))    productnew[is.na(productnew), ] = NA2value
+    else{
+      for(i in 1:period.freq) 
+        productnew[seq(from=i,by=period.freq,to=dim(productnew)[1])[is.na(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),])],]=mean(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),],na.rm=TRUE)
+    }
     productnew[productnew < range[1], ] = range[1]
     productnew[productnew > range[2], ] = range[2]
 
@@ -623,7 +623,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
   
-  title = paste(.GetItemName(keys), CONFIG$values[value], sep = " - ")
+  title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", CONFIG$values[value], sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,5),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","selected")
@@ -664,7 +664,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   ReporTable[obj$BestModel,"selected"]="BEST"
   
 ### plot SELECTED model
-  graph1 = paste(CONFIG$values[value], "graph_best.png", sep = "")
+  graph1 = "best_model.png"
                                         # Write graph to a file
   bitmap(units="px",file.path(directory, graph1), width = 720, height = 480)
   plot.ltp(obj, plot.try.models = c("best"), color.forecast = c("green", "red", "blue"), color.ic = "red", plot.trend = TRUE, title = obj$BestModel)
@@ -673,7 +673,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   
 ### plot ALL models
-  graph2 = paste(CONFIG$values[value], "graph_all.png", sep = "")
+  graph2 = "all_models.png"
                                         # Write graph to a file
   bitmap(units="px",file.path(directory, graph2), width = 720, height = 480)
   plot.ltp(obj, plot.try.models = c("all"), color.forecast = c("green", "red", "blue","gray","black"), color.ic = "red", plot.trend = TRUE, title = "All Predictors")
@@ -683,28 +683,24 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
-    #ifelse("csv"%in%CONFIG$save, paste("  <a href=\"item-", CONFIG$values[value], "-results.csv\">Link to data</a>\n", sep = ""),""),
-	"<h2>Charts</h2>\n<h3>Best Model </h3>Recorded and predicted data are reported below\n<img src=\"", 
-    graph1, "\" />\n<h3>All Models </h3>\n<img src=\"", graph2, "\" />\n<h2>Summary for All Models </h3>\n", sep = "")
+                                        #ifelse("csv"%in%CONFIG$save, paste("  <a href=\"item-", CONFIG$values[value], "-results.csv\">Link to data</a>\n", sep = ""),""),
+    "<h2>Best Model </h2>Recorded and predicted data are reported below\n<img src=\"", 
+    graph1, "\" />\n<h2>All Models </h2>\n<img src=\"", graph2, "\" />\n", sep = "")
   
   cat(text, append = FALSE, file = file.path(directory, HTMLFileName))
   
   HTML(file = file.path(directory, HTMLFileName), xtable(ReporTable, align = c("l", "l", "c", "c", "c", "c", "c"), digits = 4))
   
-  
-  text = paste("\n<hr><h2>Detailed Summaries and Diagnostic Plots</h2>", sep = "")
-  cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
-  
                                         #	apply(cbind(round(obj$LinearModel$model$coefficients[c("(Intercept)","trend","trend2")],3),c( "1","trend","trend^2")),1,paste,collapse="*")
 
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
-
+  
   for (modType in names(notNA[notNA])) {
-    text = paste("\n<hr><br><br><h2> Model: ",modType,"</h2>", sep = "")
+    text = paste("\n<h3> Model: ",modType,"</h3>", sep = "")
     cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
     HTML(file = file.path(directory, HTMLFileName), report(obj[[modType]]$model,obj[[modType]]))
-    residPlot = paste(CONFIG$values[value], "resid_", modType,".png", sep = "")
+    residPlot = paste("resid_", modType,".png", sep = "")
     bitmap(units="px",file.path(directory, residPlot), width = 720, height = 480)
     plot(obj[[modType]]$Residuals, type = "p", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
     abline(0, 0)
@@ -713,7 +709,23 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
     cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
   }
 
-                                        # text = paste("\n<h2>Run the engine</h2> ", 
+  text = "<h2>Recorded and Predicted Data</h2>"
+  cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
+  
+  y = obj$values
+  names(y)="values"
+  if(!is.null(obj$BestModel)){ 	 
+    pred = as.matrix(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
+    period.freq = frequency(obj[[obj$BestModel]]$ts.product)
+    end_serie = end(obj[[obj$BestModel]]$ts.product)
+    pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
+    rownames(pred)=pred.names
+    colnames(pred)="values"
+    y=rbind(y,pred)
+  }
+  HTML(file = file.path(directory, HTMLFileName), y,digits=12)
+
+                                          # text = paste("\n<h2>Run the engine</h2> ", 
                                         # paste(names(CONFIG$param),CONFIG$param,sep="=",collapse="; "),sep = "")
 
                                         # form per ri-lanciare la procedura
@@ -722,7 +734,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   param <- param[names(param)!=""]
 
   form = paste( 
-    "<hr> <h2>Run the engine</h2>
+    "<h2>Run the engine</h2>
 	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
             Params:
 			  <input type=\"text\" name=\"params\" id=\"params\" size=\"120\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
@@ -730,21 +742,9 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
               <input type=\"submit\" value=\"Run\" />			  
-         </form></body> </html> <h2>Recorded and Predicted Data</h2>",sep="")
+         </form></body> </html>",sep="")
 
-  cat(form, append = TRUE, file = file.path(directory, HTMLFileName))     	
-  y = obj$values
-  names(y)="values"
-  if(!is.null(obj$BestModel)){ 	 
-	pred = as.matrix(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
-	period.freq = frequency(obj[[obj$BestModel]]$ts.product)
-	end_serie = end(obj[[obj$BestModel]]$ts.product)
-    pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
-	rownames(pred)=pred.names
-	colnames(pred)="values"
-	y=rbind(y,pred)
-	}
-HTML(file = file.path(directory, HTMLFileName), y,digits=12)
+  cat(form, append = TRUE, file = file.path(directory, HTMLFileName))  
 
 }
 
