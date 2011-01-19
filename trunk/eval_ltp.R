@@ -43,7 +43,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   dir.create(directory, showWarnings = FALSE)
 
   ## write results in .RData
-  if("Rdata"%in%CONFIG$save) save(file =  paste(directory, "/item-", CONFIG$values[value], "-results.RData", sep = ""), model)
+  if("Rdata"%in%CONFIG$save) save(file =  paste(directory, "/item-results.RData", sep = ""), model)
   if (!is.null(model$BestModel)) {
     ## write data and prediction in .csv
     prediction= data.frame(model[[model$BestModel]]$prediction)
@@ -52,7 +52,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     keydf = data.frame(t(keys)) 
                                         #names(keydf) = names(CONFIG$keys)
     data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
-    if("csv"%in%CONFIG$save)  write.csv(file = paste(directory, "/item-", CONFIG$values[value], "-results.csv", sep = ""), data)
+    if("csv"%in%CONFIG$save)  write.csv(file = paste(directory, "/item-results.csv", sep = ""), data)
     ## write report
     if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value,param,directory)
   }
@@ -62,7 +62,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
     onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump")]), dim(model$values)[1]))
-    write.table(file = paste(directory, "/item-", CONFIG$values[value], ".summary", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
+    write.table(file = paste(directory, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
 }
 
