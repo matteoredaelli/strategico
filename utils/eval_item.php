@@ -4,7 +4,7 @@
 </head>
 <body>
 <?php
-	if ($_POST['run']) {
+	if ($_POST['eval']) {
 	$command = "sudo /apps/slurm/bin/sbatch --uid=1001 --gid=1001 --workdir=/tmp /apps/strategico/eval_item.sh " 
 	//$command = "/apps/strategico/eval_items_slurm.sh" 
 		. " " . $_POST['project_path']
@@ -27,7 +27,7 @@
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-2387554-8']);
+  _gaq.push(['_setAccount', 'UA-20402785-2']);
   _gaq.push(['_trackPageview']);
 
   (function() {
