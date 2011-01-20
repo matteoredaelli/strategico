@@ -32,22 +32,3 @@ Period is a string with two numbers separated by "," Usually the first number is
 == VALUES ==
 
 For the each *item* you can have one or more time series (for instance the sales of your company and sales of competitors).
-
-= project.config
-
-Each project has a configuration file project.config like the followind one
-
- * project.name:sample
- * connector.package:sample_connector.r
- * eval.package:eval_ltp.r
- * period.start:1993-1
- * period.end:2010-1
- * period.freq:2
- * key1:Country
- * key2:Category
- * key3:Manufacturer
- * save:'summary','Rdata','report','csv'
- * value1:MySales
- * value2:CompetitorsSales
- * eval.param01:XXX
- * ...
