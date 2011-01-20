@@ -54,15 +54,15 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     
     if("fullcsv"%in%CONFIG$save) {
       data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
-      write.csv(file = paste(directory, "/item-results.csv", sep = ""), data)
+      write.csv(data, file = paste(directory, "/item-results.csv", sep = ""))
     }
     if("csv"%in%CONFIG$save) {
       data = prediction
-      write.csv(file = paste(directory, "/item-results.csv", sep = ""), data)
+      write.csv(data, file = paste(directory, "/item-results.csv", sep = ""))
     }
     if("t_csv"%in%CONFIG$save) {
       data = t(prediction)
-      write.csv(file = paste(directory, "/item-results.csv", sep = ""), data)
+      write.csv(data, file = paste(directory, "/item-results.csv", sep = ""), row.names = FALSE)
     }
     ## write report
     if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value,param,directory)
