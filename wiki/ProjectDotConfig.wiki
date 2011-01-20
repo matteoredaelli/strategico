@@ -19,6 +19,7 @@
 == save ==
 
  * report: generates charts, html page, ...
- * csv
- * t_csv
- * full_csv
+ * csv: save only predicted data in cols
+ * t_csv: save only predicted data in cols
+ * fullcsv: save historical and predicted data in rows
+ * summary
