@@ -614,16 +614,16 @@ plot.ltp = function(model, plot.try.models = c("best",
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
+ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=NULL) {
   library(R2HTML)
   library(xtable)
   
   HTMLFileName = "summary.html"
   
-  if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-",CONFIG$values[value], sep = "") , sep = "")
+  if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
   
-  title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", CONFIG$values[value], sep = " ")
+  title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", value.description, sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,5),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","selected")
@@ -683,7 +683,7 @@ ltp.HTMLreport <- function(obj, keys, value,param,directory=NULL) {
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
-                                        #ifelse("csv"%in%CONFIG$save, paste("  <a href=\"item-", CONFIG$values[value], "-results.csv\">Link to data</a>\n", sep = ""),""),
+                                       
     "<h2>Best Model </h2>Recorded and predicted data are reported below\n<img src=\"", 
     graph1, "\" />\n<h2>All Models </h2>\n<img src=\"", graph2, "\" />\n", sep = "")
   

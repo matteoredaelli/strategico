@@ -65,7 +65,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
       write.csv(data, file = paste(directory, "/item-results.csv", sep = ""), row.names = FALSE)
     }
     ## write report
-    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value,param,directory)
+    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param,directory)
   }
   else {
     print("no data")
