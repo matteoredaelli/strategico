@@ -77,7 +77,8 @@ EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, pa
   if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
   for (i in 1:length(values)) {
     print( paste(" Evaluating ", values[i],": ", CONFIG$values[values[i]], sep=""))  
-    EvalItemByValue(project.path, keys, item.data, value=values[i],param=param)
+    prediction = EvalItemByValue(project.path, keys, item.data, value=values[i],param=param)
+    print(t(prediction))
   }
 }
 
