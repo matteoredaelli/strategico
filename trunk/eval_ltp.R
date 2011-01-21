@@ -75,5 +75,6 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump")]), dim(model$values)[1]))
     write.table(file = paste(directory, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
+  prediction
 }
 
