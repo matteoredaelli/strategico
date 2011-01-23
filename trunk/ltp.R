@@ -706,17 +706,20 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   cat(text, append = TRUE, file = html.filename)
   
   y = obj$values
-  names(y)="values"
+  names(y)="Historical values"
+  HTML(file = html.filename, y,digits=12)
+  
   if(!is.null(obj$BestModel)){ 	 
     pred = as.matrix(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
     period.freq = frequency(obj[[obj$BestModel]]$ts.product)
     end_serie = end(obj[[obj$BestModel]]$ts.product)
     pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
-    colnames(pred)="values"
-    y=rbind(y,pred)
+    colnames(pred)="Predicted values"
+    HTML(file = html.filename, pred,digits=12)
   }
-  HTML(file = html.filename, y,digits=12)
+  
+  
 
                                           # text = paste("\n<h2>Run the engine</h2> ", 
                                         # paste(names(CONFIG$param),CONFIG$param,sep="=",collapse="; "),sep = "")
