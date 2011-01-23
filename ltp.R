@@ -733,16 +733,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
 
-  form = paste( 
-    "<h2>Run the engine</h2>
-	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
-            Params:
-			  <input type=\"text\" name=\"params\" id=\"params\" size=\"120\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
-              <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
-              <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
-              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
-              <input type=\"submit\" value=\"Run\" />			  
-         </form></body> </html>",sep="")
+  form = StrHTMLformEvalItem(project.path, keys, value, param)
 
   cat(form, append = TRUE, file = file.path(directory, HTMLFileName))  
 
@@ -805,4 +796,17 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   ## plot((1-0.3330807)^k,type="l")
   ## plot((1-0.9)^k,type="l")
   
+}
+
+StrHTMLformEvalItem <- function(project.path, keys, value, param) {
+  paste( 
+        "<h2>Run the engine</h2>
+	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
+            Params:
+			  <input type=\"text\" name=\"params\" id=\"params\" size=\"120\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
+              <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
+              <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
+              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
+              <input type=\"submit\" value=\"Run\" />			  
+         </form></body> </html>",sep="")
 }
