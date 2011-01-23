@@ -612,11 +612,11 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   library(R2HTML)
   library(xtable)
   
-  HTMLFileName = "summary.html"
-  
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
-  
+
+  html.filename = file.path(directory, "summary.html")
+
   title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", value.description, sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,5),"")
@@ -680,9 +680,9 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
                                        
     "<h2>Best Model </h2>Recorded and predicted data are reported below\n<img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models\" />\n", sep = "")
   
-  cat(text, append = FALSE, file = file.path(directory, HTMLFileName))
+  cat(text, append = FALSE, file = html.filename)
   
-  HTML(file = file.path(directory, HTMLFileName), xtable(ReporTable, align = c("l", "l", "c", "c", "c", "c", "c"), digits = 4))
+  HTML(file = html.filename, xtable(ReporTable, align = c("l", "l", "c", "c", "c", "c", "c"), digits = 4))
   
                                         #	apply(cbind(round(obj$LinearModel$model$coefficients[c("(Intercept)","trend","trend2")],3),c( "1","trend","trend^2")),1,paste,collapse="*")
 
@@ -691,19 +691,19 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   
   for (modType in names(notNA[notNA])) {
     text = paste("\n<h3> Model: ",modType,"</h3>", sep = "")
-    cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
-    HTML(file = file.path(directory, HTMLFileName), report(obj[[modType]]$model,obj[[modType]]))
+    cat(text, append = TRUE, file = html.filename)
+    HTML(file = html.filename, report(obj[[modType]]$model,obj[[modType]]))
     residPlot = paste("resid_", modType,".png", sep = "")
     bitmap(units="px",file.path(directory, residPlot), width = width, height = height)
     plot(obj[[modType]]$Residuals, type = "p", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
     abline(0, 0)
     dev.off()
     text = paste("\n<img src=\"", residPlot, "\" />", sep = "")
-    cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
+    cat(text, append = TRUE, file = html.filename)
   }
 
   text = "<h2>Recorded and Predicted Data</h2>"
-  cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
+  cat(text, append = TRUE, file = html.filename)
   
   y = obj$values
   names(y)="values"
@@ -716,7 +716,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
     colnames(pred)="values"
     y=rbind(y,pred)
   }
-  HTML(file = file.path(directory, HTMLFileName), y,digits=12)
+  HTML(file = html.filename, y,digits=12)
 
                                           # text = paste("\n<h2>Run the engine</h2> ", 
                                         # paste(names(CONFIG$param),CONFIG$param,sep="=",collapse="; "),sep = "")
@@ -728,7 +728,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
 
   form = StrHTMLformEvalItem(project.path, keys, value, param)
 
-  cat(form, append = TRUE, file = file.path(directory, HTMLFileName))  
+  cat(form, append = TRUE, file = html.filename)  
 
 }
 
