@@ -65,6 +65,19 @@ GetItemData <- function(project.path, keys) {
   item_data
 }
 
+GetSubItems <- function(Items, keys) {
+  len <- length(keys)
+  row <- cbind(keys)
+  colnames(row) <- colnames(Items)[1:len]
+  merge(row,Items[1:len+1])
+}
+
+GetAllSubItems <- function(Items, keys) {
+  row <- cbind(keys)
+  colnames(row) <- colnames(Items)[1:length(keys)]
+  merge(Items, row)
+}
+
 EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, param=NULL) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
@@ -78,7 +91,7 @@ EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, pa
   for (i in 1:length(values)) {
     print( paste(" Evaluating ", values[i],": ", CONFIG$values[values[i]], sep=""))  
     prediction = EvalItemByValue(project.path, keys, item.data, value=values[i],param=param)
-    print(t(prediction))
+    print(prediction)
   }
 }
 
