@@ -588,12 +588,6 @@ IDlog = function(product,period.start){
   } 
                                         # dev.off()
 }
-####################### decidere per il nome grafico e filename
-
-## possibili nomi per i file
-                                        #paste('All model-',names(product),'.bmp',sep='')
-                                        #paste('Best model for--',names(product),'.bmp',sep='')
-                                        #paste('Best model for--',names(product),'.bmp',sep='')
 
 ## best Ã¨ la il risultato fornito da ltp una lista che contiene il model migliore
 plot.ltp = function(model, plot.try.models = c("best", 
@@ -614,7 +608,7 @@ plot.ltp = function(model, plot.try.models = c("best",
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=NULL) {
+ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=NULL, width=720, height=480) {
   library(R2HTML)
   library(xtable)
   
@@ -666,7 +660,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
 ### plot SELECTED model
   graph1 = "best_model.png"
                                         # Write graph to a file
-  bitmap(units="px",file.path(directory, graph1), width = 720, height = 480)
+  bitmap(units="px",file.path(directory, graph1), width = width, height = height)
   plot.ltp(obj, plot.try.models = c("best"), color.forecast = c("green", "red", "blue"), color.ic = "red", plot.trend = TRUE, title = obj$BestModel)
                                         #plot.ts(data, main = paste(project.path, ':', names(obj)))
   dev.off()
@@ -675,7 +669,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
 ### plot ALL models
   graph2 = "all_models.png"
                                         # Write graph to a file
-  bitmap(units="px",file.path(directory, graph2), width = 720, height = 480)
+  bitmap(units="px",file.path(directory, graph2), width = width, height = height)
   plot.ltp(obj, plot.try.models = c("all"), color.forecast = c("green", "red", "blue","gray","black"), color.ic = "red", plot.trend = TRUE, title = "All Predictors")
                                         #plot.ts(data, main = paste(project.path, ':', names(obj)))
   dev.off()
@@ -684,8 +678,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
                                        
-    "<h2>Best Model </h2>Recorded and predicted data are reported below\n<img src=\"", 
-    graph1, "\" />\n<h2>All Models </h2>\n<img src=\"", graph2, "\" />\n", sep = "")
+    "<h2>Best Model </h2>Recorded and predicted data are reported below\n<img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models\" />\n", sep = "")
   
   cat(text, append = FALSE, file = file.path(directory, HTMLFileName))
   
@@ -701,7 +694,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
     cat(text, append = TRUE, file = file.path(directory, HTMLFileName))
     HTML(file = file.path(directory, HTMLFileName), report(obj[[modType]]$model,obj[[modType]]))
     residPlot = paste("resid_", modType,".png", sep = "")
-    bitmap(units="px",file.path(directory, residPlot), width = 720, height = 480)
+    bitmap(units="px",file.path(directory, residPlot), width = width, height = height)
     plot(obj[[modType]]$Residuals, type = "p", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
     abline(0, 0)
     dev.off()
