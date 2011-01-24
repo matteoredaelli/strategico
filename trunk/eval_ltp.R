@@ -69,6 +69,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   }
   else {
     print("no data")
+    prediction=NA
   }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
