@@ -860,6 +860,6 @@ StrHTMLformEvalItem <- function(project.path, keys, value, param) {
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
-              <input type=\"submit\" value=\"Run\" />			  
+              <input type=\"submit\" name=\"submit\" value=\"Run\" />			  
          </form></body> </html>",sep="")
 }
