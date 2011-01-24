@@ -608,9 +608,9 @@ plot.ltp = function(model, plot.try.models = c("best",
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=NULL, width=720, height=480) {
+ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=NULL, width=1000, height=600) {
   library(R2HTML)
-  library(xtable)
+  library(hwriter)
   
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
@@ -677,12 +677,9 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
-                                       
-    "<h2>Best Model </h2>Recorded and predicted data are reported below\n<img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n", sep = "")
-  
+    "<h2>Best Model</h2><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
+    hwrite(ReporTable), sep = "")
   cat(text, append = FALSE, file = html.filename)
-  
-  HTML(file = html.filename, xtable(ReporTable, align = c("l", "l", "c", "c", "c", "c", "c"), digits = 4))
   
                                         #	apply(cbind(round(obj$LinearModel$model$coefficients[c("(Intercept)","trend","trend2")],3),c( "1","trend","trend^2")),1,paste,collapse="*")
 
@@ -690,16 +687,15 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
   
   for (modType in names(notNA[notNA])) {
-    text = paste("\n<h3> Model: ",modType,"</h3>", sep = "")
+
+    residPlot = paste("resid_", modType,".png", sep = "")
+    bitmap(units="px",file.path(directory, residPlot), width = width * 0.6, height = height * 0.6 )
+    plot(obj[[modType]]$Residuals, type = "p", col="blue", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
+    abline(0, 0, col="red")
+    dev.off()
+    text = paste("\n<h3> Model: ", modType, "</h3>\n<img src=\"", residPlot, "\" />", sep = "")
     cat(text, append = TRUE, file = html.filename)
     HTML(file = html.filename, report(obj[[modType]]$model,obj[[modType]]))
-    residPlot = paste("resid_", modType,".png", sep = "")
-    bitmap(units="px",file.path(directory, residPlot), width = width, height = height)
-    plot(obj[[modType]]$Residuals, type = "p", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
-    abline(0, 0)
-    dev.off()
-    text = paste("\n<img src=\"", residPlot, "\" />", sep = "")
-    cat(text, append = TRUE, file = html.filename)
   }
 
   text = "<h2>Recorded and Predicted Data</h2>"
@@ -707,7 +703,8 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   
   y = obj$values
   names(y)="Historical values"
-  HTML(file = html.filename, y,digits=12)
+  #HTML(file = html.filename, y,digits=12)
+  cat(hwrite(y), append = TRUE, file = html.filename) 
   
   if(!is.null(obj$BestModel)){ 	 
     pred = as.matrix(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
@@ -716,7 +713,8 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
     pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
-    HTML(file = html.filename, pred,digits=12)
+    ##HTML(file = html.filename, pred,digits=12)
+    cat(hwrite(pred), append = TRUE, file = html.filename) 
   }
   
   
@@ -743,7 +741,6 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   summary(model)
 }
 
-
 "report.Arima" <- function(model,list, ...) {
   AIC = list$AIC
   R2 = list$R2
@@ -757,9 +754,9 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
        Residuals = paste("Residuals standard error:", round(sqrt(model$sigma2), 4), sep = " "))
 }
 
-
 "report.expSmoothingFit" <- function(model,list, ...) {
   ## ritornare una list eventualmente con table come elementi simile a quella per Arima
+  equations = .eq.es(model) 
   list(Drift= paste("type Trend:",model$drift, sep = " "),
        Seasonality=paste("type Seasonality:",model$seasonality, sep = " "),
        ## Innovation=paste("Innovation:",model$innovation, sep = " "),
@@ -767,7 +764,11 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
        beta=paste("Parameter Smoothing Seasonality:",model$par[4], sep = " "),
        gamma=paste("Parameter Smoothing Trend:",model$par[3], sep = " "),
        R2=paste("R2:",list$R2, sep = " "),AIC=paste("AIC:",list$AIC, sep = " "),
-       paste("Residuals standard error:",round(sqrt(model$sigma2), 4), sep = " "))
+       paste("Residuals standard error:",round(sqrt(model$sigma2), 4), sep = " "),
+       list(paste("Recursive equations:",sep = " "),
+			paste(equations[1]),paste(equations[2]),paste(equations[3]))
+		)
+  
   
   
   ## se la stagionalita' moltiplicativa ed è presente trend:
@@ -794,15 +795,71 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   
 }
 
+
+
+
+.eq.es = function(model) {
+  trend = model$drift
+  sea = model$seasonality
+  if ((trend=="additive") | (trend=="c/additive") | (trend=="d/additive"))  {trend="additive"}
+    else { if ((trend=="multiplicative") | (trend=="c/multiplicative")) trend="multiplicative"} 
+
+  if ((sea=="additive") | (sea=="c/additive"))  {sea="additive"}
+    else { if ((sea=="multiplicative") | (sea=="c/multiplicative")) sea="multiplicative"} 
+  
+  if ((trend=="none")&(sea=="none")) {
+     eq1 = paste("level(t)=","(1-",model$par[1],") * level(t-1) + ",model$par[1]," * y(t)",sep="")
+     eq2 = "Trend none"
+     eq3 = "Seasonality none" }
+    else if ((trend=="additive")&(sea=="none")) {
+              eq1 = paste("level(t)=","(1-",model$par[1],") * (level(t-1) + drift(t-1)) + ",model$par[1]," * y(t)",sep="")
+              eq2 = paste("drift(t)=","(1-",model$par[3],") * drift(t-1) + ",model$par[3]," * (level(t) - level(t-1))",sep="")
+              eq3 = "Seasonality none"  }
+            else if ((trend=="multiplicative")&(sea=="none")) {
+                      eq1 = paste("level(t)=","(1-",model$par[1],") * level(t-1) * drift(t-1) + ",model$par[1]," * y(t)",sep="")
+                      eq2 = paste("drift(t)=","(1-",model$par[3],") * drift(t-1) + ",model$par[3]," * (level(t) / level(t-1))",sep="")
+                      eq3 = "Seasonality none"  }
+                    else if ((trend=="none")&(sea=="additive")) {
+                              eq1 = paste("level(t)=","(1-",model$par[1],") * level(t-1) + ",model$par[1]," * (y(t) - sea(t-f))",sep="")
+                              eq2 = "Trend none"
+                              eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) - level(t-1))",sep="")  }
+                            else if ((trend=="none")&(sea=="multiplicative")) {
+                                      eq1 = paste("level(t)=","(1-",model$par[1],") * level(t-1) + ",model$par[1]," * (y(t) / sea(t-f))",sep="")
+                                      eq2 = "Trend none"
+                                      eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) / level(t-1))",sep="")  }                                   
+            
+            
+  if ((trend=="additive")&(sea=="additive")) {
+     eq1 = paste("level(t)=","(1-",model$par[1],") * ((level(t-1) + drift(t-1)) + ",model$par[1]," * (y(t) - sea(t-f))",sep="")
+     eq2 = paste("drift(t)=","(1-",model$par[3],") * drift(t-1) + ",model$par[3]," * (level(t) - level(t-1))",sep="")
+     eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) - level(t-1) - drift(t-1))",sep="") }
+  
+  if ((trend=="additive")&(sea=="multiplicative")) {
+     eq1 = paste("level(t)=","(1-",model$par[1],") * ((level(t-1) + drift(t-1)) + ",model$par[1]," * (y(t)/sea(t-f))",sep="")
+     eq2 = paste("drift(t)=","(1-",model$par[3],") * drift(t-1) + ",model$par[3]," * (level(t) - level(t-1))",sep="")
+     eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) / (level(t-1) - drift(t-1)) )",sep="") }  
+     
+  if ((sea=="additive")&(trend=="multiplicative")) {
+     eq1 = paste("level(t)=","(1-",model$par[1],") * level(t-1) * drift(t-1) + ",model$par[1]," * (y(t) - sea(t-f))",sep="")
+     eq2 = paste("drift(t)=","(1-",model$par[3],") * drift(t-1) + ",model$par[3]," * (level(t) / level(t-1))",sep="")
+     eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) - level(t-1) - drift(t-1))",sep="") }
+
+  if ((trend=="multiplicative")&(sea=="multiplicative")) {
+     eq1 = paste("level(t)=","(1-",model$par[1],") * level(t-1) * drift(t-1) + ",model$par[1]," * (y(t) / sea(t-f))",sep="")
+     eq2 = paste("drift(t)=","(1-",model$par[3],") * drift(t-1) + ",model$par[3]," * (level(t) / level(t-1))",sep="")
+     eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) / (level(t-1) - drift(t-1)) )",sep="") }
+ c(eq1,eq2,eq3)
+ }
+
 StrHTMLformEvalItem <- function(project.path, keys, value, param) {
   paste( 
         "<h2>Run the engine</h2>
 	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
             Params:
-			  <input type=\"text\" name=\"params\" id=\"params\" size=\"120\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=", ")),"\" />
+			  <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=",")),"\" />
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
-              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> 
+              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
               <input type=\"submit\" value=\"Run\" />			  
          </form></body> </html>",sep="")
 }
