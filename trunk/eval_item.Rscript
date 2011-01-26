@@ -1,4 +1,3 @@
-#!/usr/bin/env Rscript
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
@@ -12,17 +11,21 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 library(methods)
-source("engine.R")
+source("Rengine.R")
 
 args <- commandArgs()
 
 project.path <- args[6]
 item.path <- args[7]
-item.values <- toupper(args[8])
+item.values <- args[8]
 item.params <- args[9]
 
 msg <- paste("Project=", project.path, ", Item=", item.path, sep="")
 print(msg)
+msg <- paste("item.values=", item.values, ", item.params=", item.params, sep="")
+print(msg)
 
-EvalItem(project.path=project.path, pathToItem=item.path, values=item.values, param=item.params)                                          
+eval(parse(text=paste("param=list(",item.params,")")))
+EvalItem(project.path=project.path, pathToItem=item.path, values=item.values, param=param)
