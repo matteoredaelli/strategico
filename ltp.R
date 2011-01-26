@@ -118,7 +118,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
   
   ID.model <- switch(criterion, BestIC = which.min(IC.width), BestAIC = which.min(AIC) )		
   results = list(values = product, Mean = Mean, Trend = Trend, LinearModel = LinearModel, 
-    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model))
+    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), criterion=criterion)
   results
   
 }
@@ -158,7 +158,8 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
 
 
 ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.freq,increment,period.end) {
-  period.start = as.numeric(strsplit(rownames(product)[1],"-")[[1]])
+  period.start.fix = period.start
+  period.start = apply(matrix(as.numeric(unlist(strsplit(rownames(product),"-"))),nrow=2),1,min)
   
   times=sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
   temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
@@ -167,6 +168,14 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
   rownames(productnew)=times
   colnames(productnew)=colnames(product)
   productnew[rownames(product),]=product
+  
+  id.start=grep(paste(period.start.fix,collapse="-"),rownames(product))
+  if( length(id.start)>0 ) {
+	productnew=productnew[id.start:dim(productnew)[1],,drop=FALSE]
+	period.start=period.start.fix
+  } else if( period.start.fix*c(2,1) > period.start*c(2,1) ){
+	return(list(product=productnew[-(1:dim(productnew)[1]),,drop=FALSE],start=NA))
+  }  #else go on
   
   temp=mean(product[grep(period.end[1],rownames(product)),],na.rm=TRUE) #mean of values in last year
   temp=ifelse(is.na(temp),0,temp)
@@ -505,11 +514,8 @@ IDlog = function(product,period.start){
   
   if (plot.trend) {
     trend.best = try(smooth.spline(y.best),TRUE)
-    if(!is(trend.best,"try-error")) lines(trend.best, col = color.forecast[1], lwd = 1)
+    if(!is(trend.best,"try-error"))  lines(trend.best, col = color.forecast[1], lwd = 1)
   }
-  
-                                        # dev.off()
-  
 }
 
 .plot.all = function(model, color.forecast, plot.trend = TRUE, fies.name, title) {
@@ -521,9 +527,10 @@ IDlog = function(product,period.start){
   
   pred=list(pred.lm = model[["LinearModel"]]$prediction,
     pred.arima = model[["Arima"]]$prediction,
-    pred.es = model[["ExponentialSmooth"]]$prediction,
+	pred.es = model[["ExponentialSmooth"]]$prediction,
     pred.trend = model[["Trend"]]$prediction,
     pred.mean = model[["Mean"]]$prediction)
+  names(pred)=c("LinearModel","Arima","ExponentialSmooth","Trend","Mean")
   
   
   pred = lapply(pred, function(pr){ if (!is.null(pr))  if (!is.ts(pr)) pr = ts(pr, start = start_pred, frequency = period.freq); pr})
@@ -541,58 +548,43 @@ IDlog = function(product,period.start){
       yy[[i]] = ts(yy[[i]], start = period.start, frequency = period.freq)
     }
   }
-  
-                                        # p.lm = append(as.vector(window(y, end = end_serie)), pred.lm[1])
-                                        # p.lm = ts(p.lm, start = period.start, frequency = period.freq)
-                                        # #concateno tutte le previsioni per il trend
-                                        # y.lm = append(as.vector(window(y, end = end_serie)), pred.lm)
-                                        # y.lm = ts(y.lm, start = period.start, frequency = period.freq)
-  
-                                        # p.es = append(as.vector(window(y, end = end_serie)), pred.es[1])
-                                        # p.es = ts(p.es, start = period.start, frequency = period.freq)
-                                        # y.es = append(as.vector(window(y, end = end_serie)), pred.es)
-                                        # y.es = ts(y.es, start = period.start, frequency = period.freq)
-  
-                                        # p.arima = append(as.vector(window(y, end = end_serie)), pred.arima[1])
-                                        # p.arima = ts(p.arima, start = period.start, frequency = period.freq)
-                                        # y.arima = append(as.vector(window(y, end = end_serie)), pred.arima)
-                                        # y.arima = ts(y.arima, start = period.start, frequency = period.freq)
-  
 
   inf = min(unlist(pred), y,na.rm = TRUE)
   sup = max(unlist(pred), y,na.rm = TRUE)
   
                                         #bmp(file=fies.name)
-  plot(window(p$pred.mean, end = start_pred), ylim = c((inf - (inf/4)), 
-                                                (sup + (sup/2))), xlim = c(period.start[1], end(p$pred.mean)[1]), 
-       col = color.forecast[1], lwd = 2, main = title,ylab="y")
-  for(i in which(sapply(pred,function(pp)!is.null(pp) ))){
+  plot(window(p$Mean, end = start_pred), ylim = c((inf - (inf/4)), 
+                                                (sup + (sup/2))), xlim = c(period.start[1], end(p$Mean)[1]), 
+       col = color.forecast["Mean"], lwd = 2, main = title,ylab="y")
+  for(i in names(pred)[which(sapply(pred,function(pp)!is.null(pp) ))]){
     lines(p[[i]], col = color.forecast[i], pch = "*", cex = 2, lwd = 2)
-                                        #				lines(pred[[i]], col = color.forecast[i], pch = "*", cex = 2, lwd = 2)
   }
   
-                                        # lines(p.es, pch = "*", col = color.forecast[2], cex = 2, lwd = 2)
-                                        # lines(pred.es, col = color.forecast[2], pch = "*", cex = 2,lwd = 2)
-                                        # lines(p.arima, pch = "*", col = color.forecast[3], cex = 2, lwd = 2)
-                                        # lines(pred.arima, col = color.forecast[3], pch = "*", cex = 2, lwd = 2)
-                                        # lines(y, pch = "*", lwd = 2)
-  legend(x = period.start[1], y = (sup + (sup/2)), legend = c("Linear Model","Exp. Smooth" , "Arima" ,"Trend" ,"Mean" ), 
-         col = color.forecast, lty = 1, lwd = 2, horiz = FALSE, x.intersp = 1)
+  legend(x = period.start[1], y = (sup + (sup/2)), legend = c("Linear Model","Arima" , "Exp. Smooth" , "Trend" ,"Mean" )[which(sapply(pred,function(pp)!is.null(pp) ))], 
+         col = color.forecast[names(color.forecast)[which(sapply(pred,function(pp)!is.null(pp) ))]], lty = 1, lwd = 2, horiz = FALSE, x.intersp = 1)
   if (plot.trend) {
     for(i in which(sapply(pred,function(yyy)!is.null(yyy) ))){
       trend = try(smooth.spline(yy[[i]]),TRUE)
       if(!is(trend,"try-error")) lines(trend, pch = "*", col = color.forecast[i], lwd = 1)
     }
-
-                                        #abline(h=start_pred,type='h')
   } 
-                                        # dev.off()
 }
+####################### decidere per il nome grafico e filename
+
+## possibili nomi per i file
+                                        #paste('All model-',names(product),'.bmp',sep='')
+                                        #paste('Best model for--',names(product),'.bmp',sep='')
+                                        #paste('Best model for--',names(product),'.bmp',sep='')
 
 ## best Ã¨ la il risultato fornito da ltp una lista che contiene il model migliore
 plot.ltp = function(model, plot.try.models = c("best", 
-                             "all"), color.forecast = c("green", "red", "blue","gray","black"), color.ic = "red", 
+                             "all"), color.forecast = NULL, color.ic = "red", 
   plot.trend = TRUE, title = "Time Series") {
+  
+  if(is.null(color.forecast)) {
+	color.forecast=c("green", "red", "blue","gray","black")
+	names(color.forecast)=c("LinearModel","Arima","ExponentialSmooth","Trend","Mean")
+	}
   
   for (i in plot.try.models) {
     if (i == "all") 
@@ -600,7 +592,7 @@ plot.ltp = function(model, plot.try.models = c("best",
                 plot.trend = plot.trend, title = title)
     if (i == "best") 
       .plot.best(best = model[[model$BestModel]], color.ic = color.ic, 
-                 plot.trend = plot.trend, color.forecast = color.forecast, 
+                 plot.trend = plot.trend, color.forecast = color.forecast[model$BestModel], 
                  title = title)
   }
 }
@@ -608,15 +600,18 @@ plot.ltp = function(model, plot.try.models = c("best",
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=NULL, width=1000, height=600) {
+ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory=NULL, width=1000, height=600) {
   library(R2HTML)
   library(hwriter)
   
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE)
 
+
+  
   html.filename = file.path(directory, "summary.html")
 
+  
   title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", value.description, sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,5),"")
@@ -661,7 +656,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   graph1 = "best_model.png"
                                         # Write graph to a file
   bitmap(units="px",file.path(directory, graph1), width = width, height = height)
-  plot.ltp(obj, plot.try.models = c("best"), color.forecast = c("green", "red", "blue"), color.ic = "red", plot.trend = TRUE, title = obj$BestModel)
+  plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = TRUE, title = obj$BestModel)
                                         #plot.ts(data, main = paste(project.path, ':', names(obj)))
   dev.off()
   
@@ -669,24 +664,30 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
 ### plot ALL models
   graph2 = "all_models.png"
                                         # Write graph to a file
-  bitmap(units="px",file.path(directory, graph2), width = width, height = height)
-  plot.ltp(obj, plot.try.models = c("all"), color.forecast = c("green", "red", "blue","gray","black"), color.ic = "red", plot.trend = TRUE, title = "All Predictors")
+   bitmap(units="px",file.path(directory, graph2), width = width, height = height)
+  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = TRUE, title = "All Predictors")
                                         #plot.ts(data, main = paste(project.path, ':', names(obj)))
   dev.off()
   
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
-    "<h2>Best Model</h2><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
-    hwrite(ReporTable), sep = "")
-  cat(text, append = FALSE, file = html.filename)
+
+    "<h2>Best Model</h2>Criterion:",obj$criterion,"<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
+
   
-                                        #	apply(cbind(round(obj$LinearModel$model$coefficients[c("(Intercept)","trend","trend2")],3),c( "1","trend","trend^2")),1,paste,collapse="*")
+ hwrite(ReporTable), sep = "")
+  cat(text, append = FALSE, file = html.filename)
+
+  
 
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
   
-  for (modType in names(notNA[notNA])) {
+    for (modType in names(notNA[notNA])) {
+
+
+
 
     residPlot = paste("resid_", modType,".png", sep = "")
     bitmap(units="px",file.path(directory, residPlot), width = width * 0.6, height = height * 0.6 )
@@ -713,9 +714,11 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
     pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
+
     ##HTML(file = html.filename, pred,digits=12)
     cat(hwrite(pred), append = TRUE, file = html.filename) 
   }
+
   
   
 
@@ -726,6 +729,16 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
 
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
+
+
+
+
+
+
+
+
+
+
 
   form = StrHTMLformEvalItem(project.path, keys, value, param)
 
@@ -741,6 +754,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
   summary(model)
 }
 
+
 "report.Arima" <- function(model,list, ...) {
   AIC = list$AIC
   R2 = list$R2
@@ -754,17 +768,18 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
        Residuals = paste("Residuals standard error:", round(sqrt(model$sigma2), 4), sep = " "))
 }
 
+
 "report.expSmoothingFit" <- function(model,list, ...) {
   ## ritornare una list eventualmente con table come elementi simile a quella per Arima
   equations = .eq.es(model) 
   list(Drift= paste("type Trend:",model$drift, sep = " "),
        Seasonality=paste("type Seasonality:",model$seasonality, sep = " "),
        ## Innovation=paste("Innovation:",model$innovation, sep = " "),
-       alpha=paste("Parameter Smoothing Level:",model$par[1], sep = " "),
-       beta=paste("Parameter Smoothing Seasonality:",model$par[4], sep = " "),
-       gamma=paste("Parameter Smoothing Trend:",model$par[3], sep = " "),
-       R2=paste("R2:",list$R2, sep = " "),AIC=paste("AIC:",list$AIC, sep = " "),
-       paste("Residuals standard error:",round(sqrt(model$sigma2), 4), sep = " "),
+       alpha=paste("Parameter Smoothing Level:",round(model$par[1],4), sep = " "),
+       beta=paste("Parameter Smoothing Seasonality:",round(model$par[4],4), sep = " "),
+       gamma=paste("Parameter Smoothing Trend:",round(model$par[3],4), sep = " "),
+       R2=paste("R2:",round(list$R2,4), sep = " "),AIC=paste("AIC:",round(list$AIC,3), sep = " "),
+       paste("Residuals standard error:",round(sqrt(model$sigma2), 2), sep = " "),
        list(paste("Recursive equations:",sep = " "),
 			paste(equations[1]),paste(equations[2]),paste(equations[3]))
 		)
@@ -799,6 +814,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
 
 
 .eq.es = function(model) {
+ model$par[c(1,3,4)] =round(model$par[c(1,3,4)],4)
   trend = model$drift
   sea = model$seasonality
   if ((trend=="additive") | (trend=="c/additive") | (trend=="d/additive"))  {trend="additive"}
@@ -851,6 +867,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param,directory=
  c(eq1,eq2,eq3)
  }
 
+ 
 StrHTMLformEvalItem <- function(project.path, keys, value, param) {
   paste( 
         "<h2>Run the engine</h2>
@@ -860,6 +877,6 @@ StrHTMLformEvalItem <- function(project.path, keys, value, param) {
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
-              <input type=\"submit\" name=\"submit\" value=\"Run\" />			  
+              <input type=\"submit\" value=\"Run\" />			  
          </form></body> </html>",sep="")
 }
