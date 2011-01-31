@@ -31,7 +31,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
 
   ## optimize with ltp
   ## LTPCONFIG=CONFIG$param
-  model <- ltp(product = item.data[, value, drop = FALSE], 
+  model <- ltp(product = item.data[, value, drop = FALSE], criterion=param$criterion,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = CONFIG$period.freq, 
                period.start = CONFIG$period.start, period.end = CONFIG$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
@@ -69,7 +69,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   }
   else {
     print("no data")
-    prediction=NA
+	prediction=NA
   }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {

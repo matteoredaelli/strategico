@@ -256,9 +256,8 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   if (stepwise) steps=100 
   else steps=0
   modlm = step(lm(form,data=stima),steps=steps, direction = "both", trace = 0)
-  
+ 
   pred = predict(modlm, newdata = new.data, interval = "prediction", level = 0.95)
-  
   
   if (logtransform) {
     pred.modlm = exp(pred[, "fit",drop=FALSE])
@@ -268,6 +267,8 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
     pred.modlm = (pred[, "fit",drop=FALSE])
     IC.pred.modlm = list(upr = pred[, "upr"], lwr = pred[, "lwr"])
   }
+  
+  pred.modlm=ts(pred.modlm, start=.incSampleTime(now=end(y), period.freq = period.freq) , frequency=period.freq)
   
   lm.AIC = AIC(modlm, k = 2)
   lm.R2 = summary(modlm)$r.squared
@@ -553,11 +554,11 @@ IDlog = function(product,period.start){
   sup = max(unlist(pred), y,na.rm = TRUE)
   
                                         #bmp(file=fies.name)
-  plot(window(p$Mean, end = start_pred), ylim = c((inf - (inf/4)), 
-                                                (sup + (sup/2))), xlim = c(period.start[1], end(p$Mean)[1]), 
-       col = color.forecast["Mean"], lwd = 2, main = title,ylab="y")
-  for(i in names(pred)[which(sapply(pred,function(pp)!is.null(pp) ))]){
-    lines(p[[i]], col = color.forecast[i], pch = "*", cex = 2, lwd = 2)
+  plot(y, ylim = c((inf - (inf/4)), (sup + (sup/2))), xlim = c(period.start[1], end(p[[model$BestModel]])[1]), 
+       lwd = 2, main = title,ylab="y")
+ 
+ for(i in names(pred)[which(sapply(pred,function(pp)!is.null(pp) ))]){
+    lines(window(p[[i]], start = end_serie) , col = color.forecast[i], pch = "*", cex = 2, lwd = 2)
   }
   
   legend(x = period.start[1], y = (sup + (sup/2)), legend = c("Linear Model","Arima" , "Exp. Smooth" , "Trend" ,"Mean" )[which(sapply(pred,function(pp)!is.null(pp) ))], 
@@ -708,10 +709,10 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   cat(hwrite(y), append = TRUE, file = html.filename) 
   
   if(!is.null(obj$BestModel)){ 	 
-    pred = as.matrix(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
+    pred = as.data.frame(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
     period.freq = frequency(obj[[obj$BestModel]]$ts.product)
     end_serie = end(obj[[obj$BestModel]]$ts.product)
-    pred.names = sapply(1:length(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
+    pred.names = sapply(1:dim(pred)[1],function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
 
@@ -719,27 +720,8 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
     cat(hwrite(pred), append = TRUE, file = html.filename) 
   }
 
-  
-  
-
-                                          # text = paste("\n<h2>Run the engine</h2> ", 
-                                        # paste(names(CONFIG$param),CONFIG$param,sep="=",collapse="; "),sep = "")
-
-                                        # form per ri-lanciare la procedura
-
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
-
-
-
-
-
-
-
-
-
-
-
   form = StrHTMLformEvalItem(project.path, keys, value, param)
 
   cat(form, append = TRUE, file = html.filename)  
@@ -873,7 +855,7 @@ StrHTMLformEvalItem <- function(project.path, keys, value, param) {
         "<h2>Run the engine</h2>
 	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
             Params:
-			  <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",gsub("\"","'",paste(names(param),param,sep="=",collapse=",")),"\" />
+			  <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=","))),"\" />
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
