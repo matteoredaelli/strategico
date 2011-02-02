@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
 
-if [ $# -ne 3 ]
+if [ $# -ne 4 ]
 then
-  echo "Usage: `basename $0` projectPath results|summary valueName"
+  echo "Usage: `basename $0` projectPath results|summary depth valueName"
   exit 1
 fi
 
 project_path=$1
 report=$2
-value=$3
+maxdepth=$3
+value=$4
 
-target_file=${project_path}/report-${value}/children-${report}.csv
-
-head=$(head -1 $project_path/report-${value}/item-${report}.csv)
-echo "Key,${head}" 
-for folder in $(find $project_path -name "report-${value}" -type d -maxdepth 2 -mindepth 2) 
+for folder in $(find $project_path -maxdepth $maxdepth -mindepth 2 -name "report-${value}" -type d)
 do
 	itemfolder=$(dirname $folder)
 	key=$(basename $itemfolder)	
-	prediction=$(tail -1 ${folder}/item-${report}.csv)
-	echo "${key},${prediction}"
+	for row in $(grep -v VALUE ${folder}/item-${report}.csv)
+	do
+		echo "${itemfolder},${row}"
+	done
 done
