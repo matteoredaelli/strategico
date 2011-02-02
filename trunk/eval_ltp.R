@@ -48,12 +48,21 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     ## write data and prediction in .csv
     prediction= data.frame(model[[model$BestModel]]$prediction)
     rownames(prediction)=sapply (0:(length(model[[model$BestModel]]$prediction)-1),function(i) paste(.incSampleTime(now=start(model[[model$BestModel]]$prediction), period.freq = frequency(model[[model$BestModel]]$prediction), increment = i),collapse="-"))
-    colnames(prediction)=colnames(model$values)
-    keydf = data.frame(t(keys)) 
+    #keydf = data.frame(t(keys)) 
                                         #names(keydf) = names(CONFIG$keys)
     
+    ## write report
+    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param,directory)
+  }
+  else {
+    print("No data")
+    prediction=data.frame(rep(0, param$n.ahead))
+  }
+    colnames(prediction)=colnames(model$values)
     if("fullcsv"%in%CONFIG$save) {
-      data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
+      #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
+      #data = rbind(model$values[, , drop = FALSE], prediction)
+      data = rbind(item.data[, value, drop = FALSE], prediction)
       write.csv(data, file = paste(directory, "/item-results.csv", sep = ""))
     }
     if("csv"%in%CONFIG$save) {
@@ -64,13 +73,6 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
       data = t(prediction)
       write.csv(data, file = paste(directory, "/item-results.csv", sep = ""), row.names = FALSE)
     }
-    ## write report
-    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param,directory)
-  }
-  else {
-    print("no data")
-	prediction=NA
-  }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
     onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump")]), dim(model$values)[1]))
