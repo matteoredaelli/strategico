@@ -15,7 +15,8 @@ script_path=/apps/strategico
 
 cd $script_path
 	
-command="${script_path}/eval_item.Rscript ${project_path} ${item_path} ${value} \"${params}\""
+#command="${script_path}/eval_item.Rscript ${project_path} ${item_path} ${value} \"${params}\""
+command="${script_path}/eval_item.Rscript ${project_path} ${item_path} ${value} ${params}"
 echo "Running ${command}"
 
 /apps/R/bin/Rscript $command
