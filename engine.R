@@ -14,6 +14,9 @@
 
 ## Authors: L. Finos, M. Redaelli
 
+library(RODBC)
+source("strategico.config")
+
 GetProjectConfig <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
   conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
                                         #e assegnazione dei valori indicati dal file ai parametri
@@ -218,10 +221,20 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 } # end function
 
 
+ExportItemsDataToDB <- function(project.path, data, value, update=FALSE) {
+  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass)
+  tablename = paste(CONFIG$project.name, value, sep="_")
+
+  if(update) 
+    sqlUpdate(channel, data, tablename=tablename, index=append(names(CONFIG$keys), "PERIOD"), verbose=TRUE)
+  else
+    sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=TRUE)
+  odbcClose(channel)
+}
+
 ##input  da db. 
 ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
   
-  library(RODBC)
 
   channel <- odbcConnect(DB, DBUSER, DBPWD)
   result <- sqlQuery(channel, sql_statement)
@@ -251,3 +264,4 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
 
   UpdateItemsData(project.path, data[,c(KEY,"PERIOD",VALUE)])
 }
+
