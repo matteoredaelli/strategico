@@ -173,7 +173,7 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
   if( length(id.start)>0 ) {
 	productnew=productnew[id.start:dim(productnew)[1],,drop=FALSE]
 	period.start=period.start.fix
-  } else if( period.start.fix*c(2,1) > period.start*c(2,1) ){
+  } else if( sum(period.start.fix*c(period.freq,1)) > sum(period.start*c(period.freq,1)) ){
 	return(list(product=productnew[-(1:dim(productnew)[1]),,drop=FALSE],start=NA))
   }  #else go on
   

@@ -58,7 +58,8 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     print("No data")
     prediction=data.frame(rep(0, param$n.ahead))
   }
-    colnames(prediction)=colnames(model$values)
+    #colnames(prediction)=colnames(model$values)
+    colnames(prediction)=value
     if("fullcsv"%in%CONFIG$save) {
       #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
       #data = rbind(model$values[, , drop = FALSE], prediction)
@@ -72,6 +73,19 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
     if("t_csv"%in%CONFIG$save) {
       data = t(prediction)
       write.csv(data, file = paste(directory, "/item-results.csv", sep = ""), row.names = FALSE)
+    }
+    if("db_insert"%in%CONFIG$save | "db_update"%in%CONFIG$save) {
+      fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
+      keydf = data.frame(t(fullkeys)) 
+      names(keydf) = names(CONFIG$keys)
+      data = cbind(keydf, prediction)
+      data$PERIOD = rownames(data)
+
+      if("db_update"%in%CONFIG$save)
+         update=TRUE
+      else
+         update=FALSE
+      ExportItemsDataToDB(project.path, data, value, update=update)
     }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
