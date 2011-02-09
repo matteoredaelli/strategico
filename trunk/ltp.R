@@ -681,6 +681,10 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   cat(text, append = FALSE, file = html.filename)
 
   
+  param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
+  param <- param[names(param)!=""]
+  form = StrHTMLformEvalItem(project.path, keys, value, param)
+  cat(form, append = TRUE, file = html.filename)  
 
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
@@ -720,11 +724,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
     cat(hwrite(pred), append = TRUE, file = html.filename) 
   }
 
-  param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
-  param <- param[names(param)!=""]
-  form = StrHTMLformEvalItem(project.path, keys, value, param)
-
-  cat(form, append = TRUE, file = html.filename)  
+  cat("</body> </html>", append = TRUE, file = html.filename)  
 
 }
 
@@ -852,7 +852,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
  
 StrHTMLformEvalItem <- function(project.path, keys, value, param) {
   paste( 
-        "<h2>Run the engine</h2>
+        "<h3>Run the engine</h3>
 	        <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
             Params:
 			  <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=","))),"\" />
@@ -860,5 +860,5 @@ StrHTMLformEvalItem <- function(project.path, keys, value, param) {
               <input type=\"hidden\" name=\"item_folder\" value=\"",.GetItemPath(keys),"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
               <input type=\"submit\" name=\"submit\" value=\"Run\" />			  
-         </form></body> </html>",sep="")
+         </form>",sep="")
 }
