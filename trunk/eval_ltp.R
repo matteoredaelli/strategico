@@ -57,6 +57,9 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   else {
     print("No data")
     prediction=data.frame(rep(0, param$n.ahead))
+        rownames(prediction)=
+        sapply (1:CONFIG$param$n.ahead, function(i) paste(.incSampleTime(now=CONFIG$period.end, period.freq = CONFIG$period.freq, increment = i),collapse="-"))
+
   }
     #colnames(prediction)=colnames(model$values)
     colnames(prediction)=value
@@ -78,7 +81,9 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
       fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
       keydf = data.frame(t(fullkeys)) 
       names(keydf) = names(CONFIG$keys)
-      data = cbind(keydf, prediction)
+      data = rbind(item.data[, value, drop = FALSE], prediction)
+      #data = cbind(keydf, prediction)
+      data = cbind(keydf, data)
       data$PERIOD = rownames(data)
 
       if("db_update"%in%CONFIG$save)
