@@ -83,13 +83,15 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
 }
 
 EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL) {
-  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
   if(!is.null(item.path)) keys=strsplit(item.path,"/")[[1]]
 
   item.data <- GetItemData(project.path, keys)
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = values, param=param)
+}
 
-  if (is.null(values)) values <- names(CONFIG$values)
+EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, param=NULL) {
+  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
   if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
   for (i in 1:length(values)) {
@@ -98,7 +100,7 @@ EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, par
     directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
     dir.create(directory, showWarnings = FALSE)
 
-    prediction = EvalItemByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
+    prediction = EvalItemDataByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
     print(t(prediction))
   }
 }
