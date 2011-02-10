@@ -17,7 +17,7 @@
 
 source("ltp.R")
 
-EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
+EvalItemByValue <- function(project.path, keys, item.data, value, output.path=".", param=NULL) {
   
   ##item.data <- as.vector(item.data)
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
@@ -39,11 +39,8 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
                                         # model <- ltp(product=item.data[,value,drop=FALSE], try.model=LTPCONFIG$try.model, n.ahead=LTPCONFIG$n.ahead,period.freq=CONFIG$period.freq,period.start=CONFIG$period.start,period.end=CONFIG$period.end,n.min=LTPCONFIG$n.min,
                                         # NA2value=LTPCONFIG$NA2value, range=LTPCONFIG$range)
   
-  directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
-  dir.create(directory, showWarnings = FALSE)
-
   ## write results in .RData
-  if("Rdata"%in%CONFIG$save) save(file =  paste(directory, "/item-results.RData", sep = ""), model)
+  if("Rdata"%in%CONFIG$save) save(file =  paste(output.path, "/item-results.RData", sep = ""), model)
   if (!is.null(model$BestModel)) {
     ## write data and prediction in .csv
     prediction= data.frame(model[[model$BestModel]]$prediction)
@@ -52,7 +49,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
                                         #names(keydf) = names(CONFIG$keys)
     
     ## write report
-    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param,directory)
+    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param,output.path)
   }
   else {
     print("No data")
@@ -67,15 +64,15 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
       #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
       #data = rbind(model$values[, , drop = FALSE], prediction)
       data = rbind(item.data[, value, drop = FALSE], prediction)
-      write.csv(data, file = paste(directory, "/item-results.csv", sep = ""))
+      write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
     }
     if("csv"%in%CONFIG$save) {
       data = prediction
-      write.csv(data, file = paste(directory, "/item-results.csv", sep = ""))
+      write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
     }
     if("t_csv"%in%CONFIG$save) {
       data = t(prediction)
-      write.csv(data, file = paste(directory, "/item-results.csv", sep = ""), row.names = FALSE)
+      write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
     }
     if("db_insert"%in%CONFIG$save | "db_update"%in%CONFIG$save) {
       fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
@@ -95,7 +92,7 @@ EvalItemByValue <- function(project.path, keys, item.data, value, param=NULL) {
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
     onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump")]), dim(model$values)[1]))
-    write.table(file = paste(directory, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
+    write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
   prediction
 }
