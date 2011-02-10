@@ -68,10 +68,10 @@ GetItemData <- function(project.path, keys) {
   item_data
 }
 
-EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, param=NULL) {
+EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
-  if(!is.null(pathToItem)) keys=strsplit(pathToItem,"/")[[1]]
+  if(!is.null(item.path)) keys=strsplit(item.path,"/")[[1]]
 
   item.data <- GetItemData(project.path, keys)
 
@@ -79,8 +79,12 @@ EvalItem <- function(project.path, keys=NULL, pathToItem=NULL, values = NULL, pa
 
   if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
   for (i in 1:length(values)) {
-    print( paste(" Evaluating ", values[i],": ", CONFIG$values[values[i]], sep=""))  
-    prediction = EvalItemByValue(project.path, keys, item.data, value=values[i],param=param)
+    value <- values[i]
+    print( paste(" Evaluating ", value,": ", CONFIG$values[value], sep=""))  
+    directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
+    dir.create(directory, showWarnings = FALSE)
+
+    prediction = EvalItemByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
     print(t(prediction))
   }
 }
