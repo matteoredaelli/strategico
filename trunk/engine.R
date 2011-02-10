@@ -68,6 +68,20 @@ GetItemData <- function(project.path, keys) {
   item_data
 }
 
+
+GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
+  paste(
+        "<h3>Run the engine</h3>
+                <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
+            Params:
+                          <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=","))),"\" />
+              <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
+              <input type=\"hidden\" name=\"item_folder\" value=\"",item.path,"\" /> 
+              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
+              <input type=\"submit\" name=\"submit\" value=\"Run\" />                     
+         </form>",sep="")
+}
+
 EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
