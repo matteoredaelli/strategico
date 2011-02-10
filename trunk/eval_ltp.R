@@ -17,7 +17,7 @@
 
 source("ltp.R")
 
-EvalItemByValue <- function(project.path, keys, item.data, value, output.path=".", param=NULL) {
+EvalItemDataByValue <- function(project.path, keys, item.data, value, output.path=".", param=NULL) {
   
   ##item.data <- as.vector(item.data)
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
