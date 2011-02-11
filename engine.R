@@ -173,7 +173,10 @@ ImportItemsData <- function(project.path) {
   now
 }
 
-
+BuildPeriodRange <- function(period.start, period.freq, n) {
+  sapply (1:n, function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+}
+                            
 .UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
   if (is.null(values))
     folder <- project.path
