@@ -94,6 +94,7 @@ EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, para
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
   if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
+  print( paste("  Time series: length=", nrow(item.data)))
   for (i in 1:length(values)) {
     value <- values[i]
     print( paste(" Evaluating ", value,": ", CONFIG$values[value], sep=""))  
@@ -159,6 +160,19 @@ ImportItemsData <- function(project.path) {
   print(img)
   dev.off()
 }
+
+
+
+###non sono riuscito a trovare .incSampleTime(
+## immagino dovrebbe fare ciÃ² che segue
+.incSampleTime <- function(now, period.freq = 2, increment = 1) {
+  if (now[2] + increment - 1 <= period.freq - 1) 
+    now[2] = now[2] + increment
+  else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
+         ((now[2] + increment - 1)%%period.freq) + 1)
+  now
+}
+
 
 .UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
   if (is.null(values))
@@ -267,7 +281,7 @@ ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement
 ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KEY2"), timesKeys=c("YEAR","SEMESTER"), VALUE=c("CORP")){ 
 
   ##restituisce una list (itemList) con una ts per ogni elemento. 
-  ##names(itemList) � una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
+  ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
   ##torna utile in seguito, nelle creazioni degli output dell'analisi
   
   if (is.null(filename)) filename=file.choose()
