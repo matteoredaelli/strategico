@@ -1,0 +1,60 @@
+## -*- mode: R -*-
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+library(methods)
+source("engine.R")
+
+args <- commandArgs()
+
+project.path <- args[6]
+keys <- args[7]
+ts.string <- args[8]
+ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
+period.start.string <- args[9]
+period.start <- unlist(lapply(strsplit(period.start.string, "-"), as.numeric))
+period.freq <- as.integer(args[10])
+item.params <- args[11]
+
+
+item.data <- cbind(ts.values)
+
+rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+#  sapply (1:length(ts.values), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+period.end.string <- rownames(item.data)[ length(rownames(item.data))]
+period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
+colnames(item.data) <- c("VALUE1")
+
+assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+
+CONFIG$period.start = period.start
+CONFIG$period.end = period.end
+CONFIG$period.freq = period.freq
+CONFIG$values = c("VALUE1")
+
+source(CONFIG$eval.package)
+
+msg <- paste("Project=", project.path, ", TS=", ts.string, sep="")
+print(msg)
+msg <- paste("item.params=", item.params, sep="")
+print(msg)
+msg <- paste("period.start=", period.start, sep="")
+print(msg)
+msg <- paste("period.end=", period.end, sep="")
+print(msg)
+eval(parse(text=paste("param=list(",item.params,")")))
+
+
+summary(item.data)
+EvalItemData(project.path=project.path, keys=keys, item.data=item.data, values="VALUE1", param=item.params)
