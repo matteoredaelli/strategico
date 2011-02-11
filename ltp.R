@@ -460,18 +460,6 @@ IDlog = function(product,period.start){
   logtransform
 } 
 
-
-###non sono riuscito a trovare .incSampleTime(
-## immagino dovrebbe fare ciÃ² che segue
-.incSampleTime <- function(now, period.freq = 2, increment = 1) {
-  if (now[2] + increment - 1 <= period.freq - 1) 
-    now[2] = now[2] + increment
-  else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
-         ((now[2] + increment - 1)%%period.freq) + 1)
-  now
-}
-
-
 #####################################
 
 .plot.best = function(best, plot.trend, color.ic, 
