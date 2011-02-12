@@ -36,10 +36,10 @@
 
 ############## ltp()
 
-ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC", n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
+ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC", criterionExcludeSdJumpsGreater = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
                 period.freq = 2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
                 xreg.arima = NULL,idDiff=FALSE,idLog=FALSE, stationary.arima = FALSE, period.start = c(1997, 1),
-                period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL) {
+                period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negToZero = TRUE, predictInteger = TRUE) {
   
 #####################################
   ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
@@ -64,8 +64,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
   
   AIC <- rep(NA,5)
   names(AIC) <- c("Mean","Trend","ExponentialSmooth","LinearModel","Arima")
-  IC.width = AIC
-  R2 = AIC
+  IC.width <- R2 <- sdJumps <- AIC
   
   NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima
   
@@ -73,54 +72,57 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
     Mean = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = NA, logtransform = FALSE, 
-      stepwise = FALSE, formula.right.lm = 'S')
+      stepwise = FALSE, formula.right.lm = 'S', negToZero=negToZero,predictInteger=predictInteger)
     AIC["Mean"] = Mean$AIC
     IC.width["Mean"] = Mean$IC.width
     R2["Mean"] = Mean$R2
+	sdJumps["Mean"] = Mean$sdJumps
   }
   if (("trend" %in% try.models)&(n >= 5 )) {
     Trend = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = NA, logtransform = FALSE, 
-      stepwise = FALSE, formula.right.lm = 'S+trend')
+      stepwise = FALSE, formula.right.lm = 'S+trend', negToZero=negToZero,predictInteger=predictInteger)
     AIC["Trend"] = Trend$AIC
     IC.width["Trend"] = Trend$IC.width
     R2["Trend"] = Trend$R2
+	sdJumps["Trend"] = Trend$sdJumps
   }
   if (("lm" %in% try.models)&(n >= n.min )) {
     LinearModel = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = xreg.lm, logtransform = logtransform, 
-      stepwise = stepwise, formula.right.lm = formula.right.lm)
+      stepwise = stepwise, formula.right.lm = formula.right.lm, negToZero=negToZero,predictInteger=predictInteger)
     AIC["LinearModel"] = LinearModel$AIC
     IC.width["LinearModel"] = LinearModel$IC.width
     R2["LinearModel"] = LinearModel$R2
+	sdJumps["LinearModel"] = LinearModel$sdJumps
   }
   if (("es" %in% try.models)&(n >= n.min )) {
     ExponentialSmooth = mod.es(product = product, n.ahead = n.ahead, 
       period.freq = period.freq, period.start = period.start, 
-      logtransform.es = logtransform.es, stepwise = stepwise)
+      logtransform.es = logtransform.es, stepwise = stepwise, negToZero=negToZero,predictInteger=predictInteger)
     AIC["ExponentialSmooth"] = ExponentialSmooth$AIC
     IC.width["ExponentialSmooth"] = ExponentialSmooth$IC.width
     R2["ExponentialSmooth"] = ExponentialSmooth$R2
+	sdJumps["ExponentialSmooth"] = ExponentialSmooth$sdJumps
   }
   if (("arima" %in% try.models)&(n >= n.min )) {
     Arima = mod.arima(product=product,logtransform=logtransform,
       diff.sea=diff.sea,diff.trend=diff.trend,idDiff=idDiff,max.p=max.p,max.q=max.q,
       max.P=max.P,max.Q=max.Q,stationary.arima=stationary.arima,n.ahead=n.ahead,
-      period.freq=period.freq,xreg.arima=xreg.arima,period.start=period.start,stepwise=stepwise)
+      period.freq=period.freq,xreg.arima=xreg.arima,period.start=period.start,stepwise=stepwise, negToZero=negToZero,predictInteger=predictInteger)
     AIC["Arima"] = Arima$AIC
     IC.width["Arima"] = Arima$IC.width
     R2["Arima"] = Arima$R2
+	sdJumps["Arima"] = Arima$sdJumps
   }
-  
-  
-  
-  ID.model <- switch(criterion, BestIC = which.min(IC.width), BestAIC = which.min(AIC) )		
+ 
+  ID.model <- switch(criterion, BestIC = which.min(IC.width*(ifelse(sdJumps<criterionExcludeSdJumpsGreater,1,NA))), 
+                                BestAIC = which.min(AIC*(ifelse(sdJumps<criterionExcludeSdJumpsGreater,1,NA))) )		
   results = list(values = product, Mean = Mean, Trend = Trend, LinearModel = LinearModel, 
-    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), criterion=criterion)
+    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), criterion=criterion, criterionExcludeSdJumpsGreater=criterionExcludeSdJumpsGreater)
   results
-  
 }
 
 ## tronca le prime osservazioni se ==0 o NA
@@ -225,7 +227,7 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
 ## oltre ai data product con la forma originaes.
 
 ############## best.lm()
-mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, logtransform, stepwise, formula.right.lm = NULL) {
+mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, logtransform, stepwise, formula.right.lm = NULL,negToZero=negToZero,predictInteger=predictInteger) {
   
   if(is.null(formula.right.lm)) formula.right.lm = match.arg(formula.right.lm, " S * trend + S * trend2")
   
@@ -267,6 +269,14 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
     pred.modlm = (pred[, "fit",drop=FALSE])
     IC.pred.modlm = list(upr = pred[, "upr"], lwr = pred[, "lwr"])
   }
+  if(negToZero) {
+	pred.modlm[pred.modlm<0]=0
+	IC.pred.modlm$upr[IC.pred.modlm$upr<0]=0
+	IC.pred.modlm$lwr[IC.pred.modlm$lwr<0]=0
+	}
+  if(predictInteger) {
+	pred.modlm=round(pred.modlm,0)
+	}
   
   pred.modlm=ts(pred.modlm, start=.incSampleTime(now=end(y), period.freq = period.freq) , frequency=period.freq)
   
@@ -274,15 +284,19 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   lm.R2 = summary(modlm)$r.squared
   ic.delta = mean(IC.pred.modlm$upr - IC.pred.modlm$lwr)
   maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modlm[1:period.freq]-1),na.rm=TRUE)
+  m=matrix(NA,period.freq, ceiling((dim(pred.modlm)[1])/period.freq)+1)
+  m[1:(length(pred.modlm)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.modlm)
+  m=apply(m,2,mean,na.rm=TRUE)
+  sdJumps = sd(m[-1]/m[-length(m)])
   res = ts(residuals(modlm), start = period.start, frequency = period.freq)
                                         #media_errori = mean(errori_lm)
   lista.lm = list(ts.product = y, model = modlm, prediction = pred.modlm, 
-    IC = IC.pred.modlm, AIC = lm.AIC, R2 = lm.R2, IC.width = ic.delta, maxJump=maxJump, Residuals = res)
+    IC = IC.pred.modlm, AIC = lm.AIC, R2 = lm.R2, IC.width = ic.delta, maxJump=maxJump, sdJumps=sdJumps, Residuals = res)
   lista.lm
 }
 ############## best.arima()
 mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.q,max.P,
-                      max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima) {
+                      max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima,negToZero=negToZero,predictInteger=predictInteger) {
   y = as.vector(product)
   n = max(length(y), dim(y)[1])
                                         # vettore errori
@@ -342,11 +356,18 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
     colnames(ic_arima) = c("lwr", "upr")
     IC.pred.arima = list(lwr = ic_arima[, "lwr"], upr = ic_arima[, "upr"])
 
-
     tss = var(y) * (n - 1)
     res = residuals(mod.arima)
   }
-                                        #errori_arima = abs(as.vector(log(validazione_arima) - log(pred.arima[1:fuori])))
+   if(negToZero) {
+	pred.arima[pred.arima<0]=0
+	IC.pred.arima$upr[IC.pred.arima$upr<0]=0
+	IC.pred.arima$lwr[IC.pred.arima$lwr<0]=0
+	} 
+   if(predictInteger) {
+	pred.arima=round(pred.arima,0)
+	}
+	#errori_arima = abs(as.vector(log(validazione_arima) - log(pred.arima[1:fuori])))
                                         #media_errori = mean(errori_arima)
                                         #res=mod.arima[[1]]$residuals
   rss = sum(res^2)
@@ -357,13 +378,17 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.arima$upr - IC.pred.arima$lwr)
   maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
+  m=matrix(NA,period.freq, ceiling((length(pred.arima))/period.freq)+1)
+  m[1:(length(pred.arima)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.arima)
+  m=apply(m,2,mean,na.rm=TRUE)
+  sdJumps = sd(m[-1]/m[-length(m)])
   lista.arima = list(ts.product = y, model = mod.arima, prediction = pred.arima, 
-    IC = IC.pred.arima, AIC = arima.AIC, R2 = arima.R2, IC.width = ic.delta, maxJump=maxJump,Residuals = res)
+    IC = IC.pred.arima, AIC = arima.AIC, R2 = arima.R2, IC.width = ic.delta, maxJump=maxJump,  sdJumps=sdJumps, Residuals = res)
   lista.arima
 }
 
 ############## best.es()
-mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.es, stepwise) {
+mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.es, stepwise,negToZero=negToZero,predictInteger=predictInteger) {
   y = as.vector(product)
   n = max(length(y), dim(y)[1])
   y = ts(y, start = period.start, frequency = period.freq)
@@ -413,6 +438,15 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
                                         #media_errori = mean(errori_le)
     }
   }
+  if(negToZero) {
+	pred.modle[pred.modle<0]=0
+	IC.pred.modle$upr[IC.pred.modle$upr<0]=0
+	IC.pred.modle$lwr[IC.pred.modle$lwr<0]=0
+	}
+  if(predictInteger) {
+	pred.modle=round(pred.modle,0)
+	}
+	
   res = residuals(modle)
   rss = sum(res^2)
   r2 = 1 - (rss/tss)
@@ -421,8 +455,12 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.modle$upr - IC.pred.modle$lwr)
   maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
+  m=matrix(NA,period.freq, ceiling((length(pred.modle))/period.freq)+1)
+  m[1:(length(pred.modle)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.modle)
+  m=apply(m,2,mean,na.rm=TRUE)
+  sdJumps = sd(m[-1]/m[-length(m)])
   lista.es = list(ts.product = y, model = modle, prediction = pred.modle, 
-    IC = IC.pred.modle, AIC = es.AIC, R2 = es.R2, IC.width = ic.delta, maxJump=maxJump,Residuals = res)
+    IC = IC.pred.modle, AIC = es.AIC, R2 = es.R2, IC.width = ic.delta, maxJump=maxJump, sdJumps=sdJumps,Residuals = res)
   lista.es
 }
 
@@ -603,8 +641,8 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   
   title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", value.description, sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
-  ReporTable = cbind(matrix("--",5,5),"")
-  colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","selected")
+  ReporTable = cbind(matrix("--",5,6),"")
+  colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","sdJumps","selected")
   rownames(ReporTable) = c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean")
                                         #ReporTable[, 1] <- as.character(ReporTable$model)
                                         #as.character(obj$LinearModel$model$call[2])
@@ -626,17 +664,18 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
               ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
               ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Tren$model$call[[2]])$term.labels,collapse="+"),sep="")),
               ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
-  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump")]), 
-    unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump")]))
-  colnames(temp)= c("R2", "AIC", "IC.width","maxJump")
+  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","sdJumps")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","sdJumps")]), 
+  unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","sdJumps")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","sdJumps")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","sdJumps")]))
+  colnames(temp)= c("R2", "AIC", "IC.width","maxJump","sdJumps")
   
 
   temp[,"R2"]=round(temp[,"R2"],4)	
   temp[,"AIC"]=round(temp[,"AIC"],2)
   temp[,"IC.width"]=round(temp[,"IC.width"],0)
   temp[,"maxJump"]=round(temp[,"maxJump"],3)
+  temp[,"sdJumps"]=round(temp[,"sdJumps"],3)
 
-  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump")] = as.matrix(temp)
+  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump","sdJumps")] = as.matrix(temp)
   ReporTable=as.data.frame(ReporTable)
   levels(ReporTable$selected)=c("","BEST")
   ReporTable[obj$BestModel,"selected"]="BEST"
@@ -662,7 +701,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
 
-    "<h2>Best Model</h2>Criterion:",obj$criterion,"<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
+    "<h2>Best Model</h2>Criterion:",obj$criterion,", and sdJumps < ",obj$criterionExcludeSdJumpsGreater,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
 
   
  hwrite(ReporTable), sep = "")
@@ -701,7 +740,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   cat(hwrite(y), append = TRUE, file = html.filename) 
   
   if(!is.null(obj$BestModel)){ 	 
-    pred = as.data.frame(round(obj[[obj$BestModel]]$prediction,0),ncol=1)
+    pred = as.data.frame(obj[[obj$BestModel]]$prediction,ncol=1)
     period.freq = frequency(obj[[obj$BestModel]]$ts.product)
     end_serie = end(obj[[obj$BestModel]]$ts.product)
     pred.names = sapply(1:dim(pred)[1],function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
