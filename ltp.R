@@ -407,7 +407,6 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
       pred.modle = exp(unlist( pred[,c("mean"),drop=FALSE][,1]))
-#############OCCHIO QUI
       pred.modle[abs(pred.modle) == Inf] = NA
       pred[abs(pred[,"97.5%"]) == Inf ,"97.5%"] =NA			
       pred[abs(pred[,"2.5%"]) == Inf ,"2.5%"] =NA
@@ -664,18 +663,18 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
               ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
               ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Tren$model$call[[2]])$term.labels,collapse="+"),sep="")),
               ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
-  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","sdJumps")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","sdJumps")]), 
-  unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","sdJumps")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","sdJumps")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","sdJumps")]))
-  colnames(temp)= c("R2", "AIC", "IC.width","maxJump","sdJumps")
+  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","MaxPredRatio")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","MaxPredRatio")]), 
+  unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]))
+  colnames(temp)= c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")
   
 
   temp[,"R2"]=round(temp[,"R2"],4)	
   temp[,"AIC"]=round(temp[,"AIC"],2)
   temp[,"IC.width"]=round(temp[,"IC.width"],0)
   temp[,"maxJump"]=round(temp[,"maxJump"],3)
-  temp[,"sdJumps"]=round(temp[,"sdJumps"],3)
+  temp[,"MaxPredRatio"]=round(temp[,"MaxPredRatio"],3)
 
-  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump","sdJumps")] = as.matrix(temp)
+  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")] = as.matrix(temp)
   ReporTable=as.data.frame(ReporTable)
   levels(ReporTable$selected)=c("","BEST")
   ReporTable[obj$BestModel,"selected"]="BEST"
