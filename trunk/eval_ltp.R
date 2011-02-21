@@ -74,7 +74,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
       data = t(prediction)
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
     }
-    if("db_insert"%in%CONFIG$save | "db_update"%in%CONFIG$save) {
+    if("db"%in%CONFIG$save) {
       fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
       keydf = data.frame(t(fullkeys)) 
       names(keydf) = names(CONFIG$keys)
@@ -83,11 +83,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
       data = cbind(keydf, data)
       data$PERIOD = rownames(data)
 
-      if("db_update"%in%CONFIG$save)
-         update=TRUE
-      else
-         update=FALSE
-      ExportItemsDataToDB(project.path, data, value, update=update)
+      ExportItemsDataToDB(project.path, data, value)
     }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
