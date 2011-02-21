@@ -259,7 +259,7 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 
 
 ExportItemsDataToDB <- function(project.path, data, value, update=FALSE) {
-  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass)
+  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE))
   tablename = paste(CONFIG$project.name, value, sep="_")
 
   if(update) 
