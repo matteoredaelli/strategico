@@ -258,14 +258,25 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 } # end function
 
 
-ExportItemsDataToDB <- function(project.path, data, value, update=FALSE) {
-  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE))
+ExportItemsDataToDB <- function(project.path, data, value) {
+  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
   tablename = paste(CONFIG$project.name, value, sep="_")
 
-  if(update) 
-    sqlUpdate(channel, data, tablename=tablename, index=append(names(CONFIG$keys), "PERIOD"), verbose=TRUE)
-  else
-    sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=TRUE)
+  print(data)
+  key_values <- unlist(data[1,1:length(CONFIG$keys)])
+  key_names <- names(CONFIG$keys)
+  quoted_keys <- gsub("^(.*)$", "'\\1'", key_values)
+  where_opt <- paste(key_names, quoted_keys, sep="=", collapse=" and ")
+
+  delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
+  delete_sql <- gsub("__TABLE__", tablename, delete_sql)
+  delete_sql <- gsub("__WHERE_OPT__", where_opt, delete_sql)
+
+  print(delete_sql)
+
+  sqlQuery(channel, delete_sql)
+  sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=TRUE)
+
   odbcClose(channel)
 }
 
