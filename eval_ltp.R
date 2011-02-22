@@ -31,7 +31,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
 
   ## optimize with ltp
   ## LTPCONFIG=CONFIG$param
-  model <- ltp(product = item.data[, value, drop = FALSE], criterion=param$criterion,
+  model <- ltp(product = item.data[, value, drop = FALSE], criterion=param$criterion, criterionExcludeMaxGreaterThan=param$criterionExcludeMaxGreaterThan,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = CONFIG$period.freq, 
                period.start = CONFIG$period.start, period.end = CONFIG$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
@@ -87,7 +87,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
     }
   ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
   if("summary"%in%CONFIG$save) {
-    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","sdJumps")]), dim(model$values)[1]))
+    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPreRatio")]), dim(model$values)[1]))
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
   prediction
