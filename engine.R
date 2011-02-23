@@ -258,6 +258,16 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 } # end function
 
 
+BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) {
+  quoted_keys <- gsub("^(.*)$", "'\\1'", key_values)
+  where_opt <- paste(key_names, quoted_keys, sep="=", collapse=" and ")
+
+  delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
+  delete_sql <- gsub("__TABLE__", tablename, delete_sql)
+  delete_sql <- gsub("__WHERE_OPT__", where_opt, delete_sql)
+
+}
+
 ExportDataToDB <- function(data, tablename, delete_sql=NULL) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
@@ -270,16 +280,15 @@ ExportDataToDB <- function(data, tablename, delete_sql=NULL) {
   odbcClose(channel)
 }
 
+# NOTES: ExportItemsDataToDB has some limits
+# -) the first fields of the dataframe "data" must be the "KEY1", "KEY2", ...
+# -) data must contain records with the same values of KEY1, KEY2, ...
+
 ExportItemsDataToDB <- function(project.path, data, value) {
   tablename = paste(CONFIG$project.name, value, sep="_")
   key_values <- unlist(data[1,1:length(CONFIG$keys)])
   key_names <- names(CONFIG$keys)
-  quoted_keys <- gsub("^(.*)$", "'\\1'", key_values)
-  where_opt <- paste(key_names, quoted_keys, sep="=", collapse=" and ")
-
-  delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
-  delete_sql <- gsub("__TABLE__", tablename, delete_sql)
-  delete_sql <- gsub("__WHERE_OPT__", where_opt, delete_sql)
+  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_names, key_values)
 
   ExportDataToDB(data, tablename, delete_sql)
 }
