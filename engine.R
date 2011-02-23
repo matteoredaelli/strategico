@@ -271,7 +271,7 @@ BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) 
 ExportDataToDB <- function(data, tablename, key_values) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
-  key_values <- unlist(data[1,1:length(CONFIG$keys)])
+  #key_values <- unlist(data[1,1:length(CONFIG$keys)])
   key_names <- names(CONFIG$keys)
   delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_names, key_values)
   if(!is.null(delete_sql)) {
