@@ -60,6 +60,8 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
   }
     #colnames(prediction)=colnames(model$values)
     colnames(prediction)=value
+    fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
+
     if("fullcsv"%in%CONFIG$save) {
       #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
       #data = rbind(model$values[, , drop = FALSE], prediction)
@@ -75,7 +77,6 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
     }
     if("db"%in%CONFIG$save) {
-      fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
       keydf = data.frame(t(fullkeys)) 
       names(keydf) = names(CONFIG$keys)
       data = rbind(item.data[, value, drop = FALSE], prediction)
@@ -83,17 +84,19 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
       data = cbind(keydf, data)
       data$PERIOD = rownames(data)
 
-      ExportItemsDataToDB(project.path, data, value)
+      tablename = paste(CONFIG$project.name, value, sep="_")
+      ExportDataToDB(data, tablename, fullkeys)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
-    onerow.summ = onerow.summary(model)
+    onerow.summ = onerow.summary(fullkeys, model)
   }
   if("summary_csv"%in%CONFIG$save) {
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
   }
   if("summary_db"%in%CONFIG$save) {
-      ExportItemsDataToDB(project.path, onerow.summ, value)  #DA CONTROLLARE
+      tablename = paste(CONFIG$project.name, value, "summary", sep="_")
+      ExportDataToDB(onerow.summ, tablename, fullkeys)
   }
   prediction
 }

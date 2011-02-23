@@ -268,29 +268,18 @@ BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) 
 
 }
 
-ExportDataToDB <- function(data, tablename, delete_sql=NULL) {
+ExportDataToDB <- function(data, tablename, key_values) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
-  
+  key_values <- unlist(data[1,1:length(CONFIG$keys)])
+  key_names <- names(CONFIG$keys)
+  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_names, key_values)
   if(!is.null(delete_sql)) {
     print(delete_sql)
     sqlQuery(channel, delete_sql)
   }
   sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=TRUE)
   odbcClose(channel)
-}
-
-# NOTES: ExportItemsDataToDB has some limits
-# -) the first fields of the dataframe "data" must be the "KEY1", "KEY2", ...
-# -) data must contain records with the same values of KEY1, KEY2, ...
-
-ExportItemsDataToDB <- function(project.path, data, value) {
-  tablename = paste(CONFIG$project.name, value, sep="_")
-  key_values <- unlist(data[1,1:length(CONFIG$keys)])
-  key_names <- names(CONFIG$keys)
-  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_names, key_values)
-
-  ExportDataToDB(data, tablename, delete_sql)
 }
 
 ##input  da db. 
