@@ -884,9 +884,9 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
 
 
 onerow.summary <- function(keys, model){
-  stats=unlist(ifelse(rep(is.null(model$BestModel),5),rep("-",5),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPredRatio")]))
-  names(stats)=c("R2","AIC","IC.width","maxJump","MaxPredRatio")
-  stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
-  stats["IC.width"] = round(stats["IC.width"],0)
-  summ=data.frame( t(keys), t(stats), n=dim(model$values)[1])
+stats=unlist(ifelse(rep(is.null(model$BestModel),5),rep("-",5),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPredRatio")]))
+names(stats)=c("R2","AIC","ICwidth","maxJump","MaxPredRatio")
+stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
+stats["ICwidth"] = round(stats["ICwidth"],0)
+summ=data.frame( t(keys), t(stats), n=dim(model$values)[1])
 }
