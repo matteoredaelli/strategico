@@ -705,7 +705,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
-    title, "</h1><a href=\"https://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
+    title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
 
     "<h2>Best Model</h2>Criterion:",obj$criterion,", and MaxPredRatioNOTGreaterThan < ",obj$criterionExcludeMaxGreaterThan,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
 
@@ -882,3 +882,11 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
  c(eq1,eq2,eq3)
  }
 
+
+onerow.summary <- function(keys, model){
+stats=unlist(ifelse(rep(is.null(model$BestModel),5),rep("-",5),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPredRatio")]))
+names(stats)=c("R2","AIC","IC.width","maxJump","MaxPredRatio")
+stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
+stats["IC.width"] = round(stats["IC.width"],0)
+summ=data.frame( t(keys), t(stats), n=dim(model$values)[1])
+}

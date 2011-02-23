@@ -85,11 +85,15 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
 
       ExportItemsDataToDB(project.path, data, value)
     }
-  ## write a single-line   item*.summary with short summary \t(to be merged in report-summary.csv)
-  if("summary"%in%CONFIG$save) {
-    onerow.summ = t(c(FALSE, keys, ifelse(rep(is.null(model$BestModel),4),rep("-",4),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPreRatio")]), dim(model$values)[1]))
+  ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
+  if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
+    onerow.summ = onerow.summary(model)
+  }
+  if("summary_csv"%in%CONFIG$save) {
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
+  }
+  if("summary_db"%in%CONFIG$save) {
+      ExportItemsDataToDB(project.path, onerow.summ, value)  #DA CONTROLLARE
   }
   prediction
 }
-
