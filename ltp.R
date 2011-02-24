@@ -884,10 +884,11 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
 
 
 onerow.summary <- function(keys, model){
-	stats=unlist(ifelse(rep(is.null(model$BestModel),5),rep("-",5),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPredRatio")]))
+	stats=unlist(ifelse(rep(is.null(model$BestModel),5),rep("",5),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPredRatio")]))
 	names(stats)=c("R2","AIC","ICwidth","maxJump","MaxPredRatio")
-	stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
-	stats["ICwidth"] = round(stats["ICwidth"],0)
-	stats["BestModel"] = model$BestModel
+	#stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
+	#stats["ICwidth"] = round(stats["ICwidth"],0)
+	stats["BestModel"] = ifelse(is.null(model$BestModel),"",model$BestModel)
+	stats["Timestamp"] = as.character(Sys.time())
 	summ=data.frame( t(keys), t(stats), points=nrow(model$values))
 }
