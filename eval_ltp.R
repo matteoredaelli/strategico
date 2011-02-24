@@ -89,7 +89,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
-    onerow.summ = onerow.summary(keys, model)
+    onerow.summ = onerow.summary(fullkeys, model)
   }
   if("summary_csv"%in%CONFIG$save) {
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = FALSE, col.names = FALSE)
