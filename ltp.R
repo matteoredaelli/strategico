@@ -884,11 +884,33 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
 
 
 onerow.summary <- function(keys, model){
-	stats=unlist(ifelse(rep(is.null(model$BestModel),5),rep("",5),model[[model$BestModel]][c("R2","AIC","IC.width","maxJump","MaxPredRatio")]))
-	names(stats)=c("R2","AIC","ICwidth","maxJump","MaxPredRatio")
-	#stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
-	#stats["ICwidth"] = round(stats["ICwidth"],0)
-	stats["BestModel"] = ifelse(is.null(model$BestModel),"",model$BestModel)
+	stats=rep(NA,14)
+	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues","MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues","Timestamp")
+	if(!is.null(model$BestModel)){
+		stats[c("R2","AIC","maxJump","MaxPredRatio")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","MaxPredRatio")]),4)
+		stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
+		stats["Points"]=nrow(model$values)
+		#non zero values
+		stats["NotZeroPoints"]=sum(model$values!=0)
+		#find (che cum sum of) not equal (ie constant) consecutive values
+		temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
+		#length of last not-constant consecutives serie of values
+		stats["LastNotEqualValues"]=sum(temp==max(temp))-1
+		
+		#mean predicted
+		stats["MeanPedicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
+		#mean values (ie observed data)
+		stats["MeanValues"]=mean(model$values,na.rm=TRUE)
+		#mean predicted over mean values (ie observed data)
+		stats["MeanPedictedRatioMeanValues"]=stats["MeanPedicted"]/stats["MeanValues"]
+		#and rounding
+		stats[c("MeanPedicted","MeanValues","MeanPedictedRatioMeanValues")]=round(stats[c("MeanPedicted","MeanValues","MeanPedictedRatioMeanValues")],3)
+		#sd predicted over sd values (ie observed data)
+		stats["SdPedictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
+		
+		#note: stat is changed from numeric to string
+		stats["BestModel"] = model$BestModel
+	}
 	stats["Timestamp"] = as.character(Sys.time())
-	summ=data.frame( t(keys), t(stats), points=nrow(model$values))
+	summ=data.frame( t(keys), t(stats))
 }
