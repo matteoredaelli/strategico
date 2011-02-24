@@ -888,5 +888,6 @@ onerow.summary <- function(keys, model){
 	names(stats)=c("R2","AIC","ICwidth","maxJump","MaxPredRatio")
 	stats[c("R2","AIC","maxJump","MaxPredRatio")] = round(stats[c("R2","AIC","maxJump","MaxPredRatio")],4)
 	stats["ICwidth"] = round(stats["ICwidth"],0)
-	summ=data.frame( t(keys), t(stats), n=dim(model$values)[1])
+	stats["BestModel"] = model$BestModel
+	summ=data.frame( t(keys), t(stats), points=nrow(model$values))
 }
