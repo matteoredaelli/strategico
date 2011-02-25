@@ -99,7 +99,7 @@ EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, para
     value <- values[i]
     print( paste(" Evaluating ", value,": ", CONFIG$values[value], sep=""))  
     directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
-    dir.create(directory, showWarnings = FALSE)
+    dir.create(directory, showWarnings = FALSE, recursive = TRUE)
 
     prediction = EvalItemDataByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
     print(t(prediction))
