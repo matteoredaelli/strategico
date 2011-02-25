@@ -268,24 +268,23 @@ BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) 
 
 }
 
-ExportDataToDB <- function(data, tablename, key_values) {
+ExportDataToDB <- function(data, tablename, key_values, verbose=FALSE) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
   #key_values <- unlist(data[1,1:length(CONFIG$keys)])
   key_names <- names(CONFIG$keys)
   delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_names, key_values)
   if(!is.null(delete_sql)) {
-    print(delete_sql)
+    #print(delete_sql)
     sqlQuery(channel, delete_sql)
   }
-  sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=TRUE)
+  sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=verbose)
   odbcClose(channel)
 }
 
 ##input  da db. 
 ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
   
-
   channel <- odbcConnect(DB, DBUSER, DBPWD)
   result <- sqlQuery(channel, sql_statement)
   odbcClose(channel)
