@@ -638,7 +638,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   library(hwriter)
   
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
-  dir.create(directory, showWarnings = FALSE)
+  dir.create(directory, showWarnings = FALSE, recursive = TRUE)
 
 
   
