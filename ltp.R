@@ -705,7 +705,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   
   
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
-    title, "</h1><a href=/strategico/help/ltp/>Quick Help</a>",
+    title, "</h1><a href=\"http://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
 
     "<h2>Best Model</h2>Criterion:",obj$criterion,", and MaxPredRatioNOTGreaterThan < ",obj$criterionExcludeMaxGreaterThan,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
 
