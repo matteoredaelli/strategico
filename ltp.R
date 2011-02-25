@@ -668,7 +668,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   ReporTable[, 1] = c(ifelse(is.null(obj$LinearModel),"--",	gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),#paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
               ifelse(is.null(obj$Arima),"--",ifelse(length(obj$Arima$model$coef)==0,"-constant-",paste(obj$Arima$model$series,"=",paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
               ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
-              ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Tren$model$call[[2]])$term.labels,collapse="+"),sep="")),
+              ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
               ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
   temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","MaxPredRatio")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","MaxPredRatio")]), 
   unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]))
