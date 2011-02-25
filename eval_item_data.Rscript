@@ -12,6 +12,8 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## sample usage
+## Rscript eval_item_data.Rscript /path/to/projects/web UUID "1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90" 2001-1  2
 
 library(methods)
 source("engine.R")
