@@ -884,8 +884,10 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
 
 
 BuildOneRowSummary <- function(keys, model, manual.model){
-	stats=rep(NA,14)
-	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues","MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues","Timestamp")
+	stats=rep(NA,16)
+	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues",
+	"MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues",
+	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
 	if(!is.null(model$BestModel)){
 		stats[c("R2","AIC","maxJump","MaxPredRatio")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","MaxPredRatio")]),4)
 		stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
@@ -908,6 +910,9 @@ BuildOneRowSummary <- function(keys, model, manual.model){
 		#sd predicted over sd values (ie observed data)
 		stats["SdPedictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
+		#Best Model if not exclusion criterion were performed
+		stats["BestAICNoOutRangeExclude"]=names(which.min(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC)))
+		stats["BestICNoOutRangeExclude"]=names(which.min(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width)))
 		#note: stat is changed from numeric to string
 		stats["BestModel"] = model$BestModel
 	}
