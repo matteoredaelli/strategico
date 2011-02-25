@@ -883,7 +883,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
  }
 
 
-onerow.summary <- function(keys, model){
+onerow.summary <- function(keys, model, manual.model){
 	stats=rep(NA,14)
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues","MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues","Timestamp")
 	if(!is.null(model$BestModel)){
@@ -912,5 +912,6 @@ onerow.summary <- function(keys, model){
 		stats["BestModel"] = model$BestModel
 	}
 	stats["Timestamp"] = as.character(Sys.time())
+	stats["ManualModel"] = manual.model
 	summ=data.frame( t(keys), t(stats))
 }
