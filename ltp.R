@@ -633,7 +633,7 @@ plot.ltp = function(model, plot.try.models = c("best",
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory=NULL, width=1000, height=600) {
+ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form.eval="", directory=NULL, width=1000, height=600) {
   library(R2HTML)
   library(hwriter)
   
@@ -714,10 +714,9 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, directory
   cat(text, append = FALSE, file = html.filename)
 
   
-  param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
-  param <- param[names(param)!=""]
-  form = GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
-  cat(form, append = TRUE, file = html.filename)  
+
+  #html.form.eval = GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
+  cat(html.form.eval, append = TRUE, file = html.filename)  
 
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
