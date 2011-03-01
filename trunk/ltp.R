@@ -507,7 +507,7 @@ IDlog = function(product,period.start){
 #####################################
 
 .plot.best = function(best, plot.trend, color.ic, 
-  color.forecast, fies.name, title) {
+  color.forecast, fies.name, title,filename="modelBest.png", width = width, height = height) {
   
   y = best$ts.product
   period.freq = frequency(y)
@@ -532,6 +532,7 @@ IDlog = function(product,period.start){
   inf = min(ic.lwr,y,na.rm = TRUE)
   sup = max(ic.upr,y,na.rm = TRUE)
   
+  bitmap(units="px",filename, width = width, height = height)
   plot(window(p.best, end = start_pred), ylim = c((inf - (inf/4)), 
                                            (sup + (sup/2))), xlim = c(period.start[1], end(pred)[1]), 
        main = title,ylab="y")
@@ -549,9 +550,10 @@ IDlog = function(product,period.start){
     trend.best = try(smooth.spline(y.best),TRUE)
     if(!is(trend.best,"try-error"))  lines(trend.best, col = color.forecast[1], lwd = 1)
   }
+  dev.off()
 }
 
-.plot.all = function(model, color.forecast, plot.trend = TRUE, fies.name, title) {
+.plot.all = function(model, color.forecast, plot.trend = TRUE, fies.name, title,filename="modelAll.png",width = width, height = height) {
   y = model[[model$BestModel]]$ts.product
   period.freq = frequency(y)
   end_serie = end(y)
@@ -585,7 +587,9 @@ IDlog = function(product,period.start){
   inf = min(unlist(pred), y,na.rm = TRUE)
   sup = max(unlist(pred), y,na.rm = TRUE)
   
+  
                                         #bmp(file=fies.name)
+  bitmap(units="px",filename, width = width, height = height)
   plot(y, ylim = c((inf - (inf/4)), (sup + (sup/2))), xlim = c(period.start[1], end(p[[model$BestModel]])[1]), 
        lwd = 2, main = title,ylab="y")
  
@@ -601,7 +605,9 @@ IDlog = function(product,period.start){
       if(!is(trend,"try-error")) lines(trend, pch = "*", col = color.forecast[i], lwd = 1)
     }
   } 
-}
+dev.off()
+  }
+
 ####################### decidere per il nome grafico e filename
 
 ## possibili nomi per i file
@@ -612,7 +618,7 @@ IDlog = function(product,period.start){
 ## best Ã¨ la il risultato fornito da ltp una lista che contiene il model migliore
 plot.ltp = function(model, plot.try.models = c("best", 
                              "all"), color.forecast = NULL, color.ic = "red", 
-  plot.trend = TRUE, title = "Time Series") {
+  plot.trend = TRUE, title = "Time Series", filename,width = width, height = height) {
   
   if(is.null(color.forecast)) {
 	color.forecast=c("green", "red", "blue","gray","black")
@@ -622,11 +628,11 @@ plot.ltp = function(model, plot.try.models = c("best",
   for (i in plot.try.models) {
     if (i == "all") 
       .plot.all(model = model, color.forecast = color.forecast, 
-                plot.trend = plot.trend, title = title)
+                plot.trend = plot.trend, title = title,filename=filename, width = width, height = height)
     if (i == "best") 
       .plot.best(best = model[[model$BestModel]], color.ic = color.ic, 
                  plot.trend = plot.trend, color.forecast = color.forecast[model$BestModel], 
-                 title = title)
+                 title = title, filename = filename,width = width, height = height)
   }
 }
 
@@ -687,23 +693,16 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
   ReporTable[obj$BestModel,"selected"]="BEST"
   
 ### plot SELECTED model
-  graph1 = "best_model.png"
                                         # Write graph to a file
-  bitmap(units="px",file.path(directory, graph1), width = width, height = height)
-  plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = TRUE, title = obj$BestModel)
+  plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = TRUE, title = obj$BestModel ,filename=file.path(directory, "best_model.png"),width = width, height = height)
                                         #plot.ts(data, main = paste(project.path, ':', names(obj)))
-  dev.off()
   
   
 ### plot ALL models
-  graph2 = "all_models.png"
                                         # Write graph to a file
-   bitmap(units="px",file.path(directory, graph2), width = width, height = height)
-  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = TRUE, title = "All Predictors")
+  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = TRUE, title = "All Predictors" ,filename=file.path(directory, "all_models.png"),width = width, height = height)
                                         #plot.ts(data, main = paste(project.path, ':', names(obj)))
-  dev.off()
-  
-  
+    
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=\"http://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
 
@@ -882,8 +881,8 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
  }
 
 
-BuildOneRowSummary <- function(keys, model, manual.model){
-	stats=rep(NA,16)
+BuildOneRowSummary <- function(keys, model, manual.model,param){
+	stats=rep(NA,17)
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues",
 	"MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues",
 	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
@@ -917,5 +916,6 @@ BuildOneRowSummary <- function(keys, model, manual.model){
 	}
 	stats["Timestamp"] = as.character(Sys.time())
 	stats["ManualModel"] = manual.model
+	stats["Parameters"] = paste(names(param),param ,sep="=",collapse=";")
 	summ=data.frame( t(keys), t(stats))
 }
