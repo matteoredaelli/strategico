@@ -70,6 +70,10 @@ GetItemData <- function(project.path, keys) {
 
 
 GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
+  
+  param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
+  param <- param[names(param)!=""]
+  
   paste(
         "<h3>Run the engine</h3>
                 <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 

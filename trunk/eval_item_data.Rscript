@@ -33,7 +33,6 @@ item.params <- args[11]
 item.data <- cbind(ts.values)
 
 rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
-#  sapply (1:length(ts.values), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 period.end.string <- rownames(item.data)[ length(rownames(item.data))]
 period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
 colnames(item.data) <- c("VALUE1")

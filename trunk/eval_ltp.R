@@ -49,7 +49,8 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
                                         #names(keydf) = names(CONFIG$keys)
     
     ## write report
-    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param,output.path)
+    html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
+    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param, directory=output.path, html.form.eval=html.form.eval)
   }
   else {
     print("No data")
