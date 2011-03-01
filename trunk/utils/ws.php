@@ -4,10 +4,13 @@
 </head>
 <body>
 <?php
+	$KEY="UID-" . hash('md5', $_GET['ts']);
+	$project_path = "/var/www/strategico/projects/web-" . $_GET['eval_function'];
+
 	if (isset($_GET['submit'])) {
 	$command = "cd /apps/strategico && /apps/R/bin/Rscript eval_item_data.Rscript " 
-		. " " . $_GET['project_path']
-		. " " . $_GET['key']
+		. " " . $project_path
+		. " " . $KEY
 		. " " . $_GET['ts']
 		. " " . $_GET['period_start']
 		. " " . $_GET['period_freq']
@@ -18,7 +21,7 @@
 	echo $result;
 	echo "<br />";
 	echo "<br />";
-	echo "<script type='text/javascript'> window.location = 'projects/web/" . $_GET['key'] . "/report-NA/summary.html' </script>";
+	echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
 	} else
 		echo "no post submit";
 ?>
