@@ -395,6 +395,10 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
 
 ############## best.es()
 mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.es, stepwise,negToZero=negToZero,predictInteger=predictInteger) {
+	
+	#occhio qui:
+	product[product==0]=1
+	
   y = as.vector(product)
   n = max(length(y), dim(y)[1])
   y = ts(y, start = period.start, frequency = period.freq)
