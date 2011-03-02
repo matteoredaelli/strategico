@@ -882,7 +882,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
 
 
 BuildOneRowSummary <- function(keys, model, manual.model,param){
-	stats=rep(NA,17)
+	stats=rep(NA,16)
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues",
 	"MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues",
 	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
@@ -916,6 +916,6 @@ BuildOneRowSummary <- function(keys, model, manual.model,param){
 	}
 	stats["Timestamp"] = as.character(Sys.time())
 	stats["ManualModel"] = manual.model
-	stats["Parameters"] = paste(names(param),param ,sep="=",collapse=";")
+	stats["Parameters"] = BuildParamString(param)
 	summ=data.frame( t(keys), t(stats))
 }
