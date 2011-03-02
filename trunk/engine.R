@@ -69,16 +69,20 @@ GetItemData <- function(project.path, keys) {
 }
 
 
-GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
-  
+BuildParamString <- function(param) {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
+  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=",")))
+}
+
+GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
   
+  param.string <- BuildParamString(param)
   paste(
         "<h3>Run the engine</h3>
                 <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
             Params:
-                          <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=","))),"\" />
+                          <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",param.string,"\" />
               <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
               <input type=\"hidden\" name=\"item_folder\" value=\"",item.path,"\" /> 
               <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
