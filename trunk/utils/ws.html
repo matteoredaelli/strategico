@@ -5,16 +5,16 @@
 <body>
 <center>
 <h1>Strategico - Online Service</h1>
-<img src="/images/Rlogo.jpg" />
-
-<p>BETA release: nell'output generato non funzionera' fa form per rilanciare il motore</p>
+<p>BETA release: nell'output generato non funziona la form per rilanciare il motore</p>
 <form name="input" action="ws.php" method="get">
 <input type="hidden" name="eval_function" value="ltp" />
-TS (comma separated): <input type="text" name="ts" size="60"/>
-Period Start: <input type="text" name="period_start" />
-Period Freq: <input type="text" name="period_freq" />
+Time Serie<br /><textarea name="ts" cols="5" rows="15"></textarea><br />
+Period Start (like 2001-1): <input type="text" name="period_start" />
+Period Freq (like 2): <input type="text" name="period_freq" />
 <input type="submit" name="submit" value="Submit" />
 </form>
+
+<img src="/images/Rlogo.jpg" />
 
 <script type="text/javascript">
 

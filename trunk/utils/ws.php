@@ -3,28 +3,29 @@
 <title>Strategico - Online Service</title>
 </head>
 <body>
-<?php
-	$KEY="UID-" . hash('md5', $_GET['ts']);
-	$project_path = "/var/www/strategico/projects/web-" . $_GET['eval_function'];
+  <?php
+     $KEY="UID-" . hash('md5', $_GET['ts']);
+     $ts = str_replace( array("\r\n","\r","\n"), ",", $_GET['ts']);
 
-	if (isset($_GET['submit'])) {
-	$command = "cd /apps/strategico && /apps/R/bin/Rscript eval_item_data.Rscript " 
-		. " " . $project_path
-		. " " . $KEY
-		. " " . $_GET['ts']
-		. " " . $_GET['period_start']
-		. " " . $_GET['period_freq']
-#		. " " . '"' . str_replace(" ", "", $_GET['params']) . '"'
-		;
-	echo $command;
-	$result = system($command);
-	echo $result;
-	echo "<br />";
-	echo "<br />";
-	#echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
-	} else
-		echo "no post submit";
-?>
+     $project_path = "/var/www/strategico/projects/web-" . $_GET['eval_function'];
+     if (isset($_GET['submit'])) {
+     $command = "cd /apps/strategico && /apps/R/bin/Rscript eval_item_data.Rscript " 
+     . " " . $project_path
+     . " " . $KEY
+     . " " . $ts
+     . " " . $_GET['period_start']
+     . " " . $_GET['period_freq']
+     //		. " " . '"' . str_replace(" ", "", $_GET['params']) . '"'
+     ;
+     echo $command;
+     $result = system($command);
+     echo $result;
+     echo "<br />";
+     echo "<br />";
+     echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
+     } else
+     echo "no post submit";
+     ?>
 
 
 <script type="text/javascript">
