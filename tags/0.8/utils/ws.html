@@ -1,0 +1,33 @@
+<html>
+<head>
+<title>Strategico OnLine Service Web form</title>
+</head>
+<body>
+<center>
+<h1>Strategico - Online Service</h1>
+<p>BETA release: nell'output generato non funziona la form per rilanciare il motore</p>
+<form name="input" action="ws.php" method="get">
+<input type="hidden" name="eval_function" value="ltp" />
+Time Serie<br /><textarea name="ts" cols="5" rows="15"></textarea><br />
+Period Start (like 2001-1): <input type="text" name="period_start" />
+Period Freq (like 2): <input type="text" name="period_freq" />
+<input type="submit" name="submit" value="Submit" />
+</form>
+
+<img src="/images/Rlogo.jpg" />
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20402785-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
