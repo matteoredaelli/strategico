@@ -54,6 +54,8 @@ msg <- paste("period.start=", period.start, sep="")
 print(msg)
 msg <- paste("period.end=", period.end, sep="")
 print(msg)
+msg <- paste("period.freq=", period.freq, sep="")
+print(msg)
 eval(parse(text=paste("param=list(",item.params,")")))
 
 

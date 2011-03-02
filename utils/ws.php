@@ -21,7 +21,7 @@
 	echo $result;
 	echo "<br />";
 	echo "<br />";
-	echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
+	#echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
 	} else
 		echo "no post submit";
 ?>
