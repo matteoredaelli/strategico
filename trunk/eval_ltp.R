@@ -47,12 +47,13 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
     rownames(prediction)=sapply (0:(length(model[[model$BestModel]]$prediction)-1),function(i) paste(.incSampleTime(now=start(model[[model$BestModel]]$prediction), period.freq = frequency(model[[model$BestModel]]$prediction), increment = i),collapse="-"))
     #keydf = data.frame(t(keys)) 
                                         #names(keydf) = names(CONFIG$keys)
-    
+    return.code <- 0 
     ## write report
     html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
     if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param, directory=output.path, html.form.eval=html.form.eval)
   }
   else {
+    return.code <- 1 
     print("No data")
     prediction=data.frame(rep(0, param$n.ahead))
         rownames(prediction)=
@@ -91,7 +92,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
     manual.model <- ifelse(length(param$try.models) > 1, FALSE, TRUE)
-    onerow.summ = BuildOneRowSummary(fullkeys, model, manual.model,param)
+    onerow.summ = BuildOneRowSummary(fullkeys, model, manual.model, param, return.code)
   }
   if("summary_csv"%in%CONFIG$save) {
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
