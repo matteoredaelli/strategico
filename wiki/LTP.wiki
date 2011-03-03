@@ -58,4 +58,6 @@ I principali indicatori per valutare la qualità di un modello lineare sono R2, 
 di una unità del predittore; il P-value per la verifica che questo effetto sia significativo (cioè non diverso da 0 solo per caso) è riportato nella colonna "Pr(>|t|)" 
 (basso è meglio)
 
-== References ==
+== Riferimenti ==
+
+TODO: aggiungere qui' link a documentazioni utilizzate/inerenti al long term prediction
