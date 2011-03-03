@@ -58,7 +58,7 @@ GetProjectConfig <- function(project.config.fileName="project.config") { #cerca 
 }
 
 GetItemsList <- function(project.path) {
-  items.rdata <- paste( project.path, "items.Rdata", sep="/")
+  items.rdata <- paste( project.path, "items-list.Rdata", sep="/")
   load(items.rdata)
   Items
 }
@@ -234,7 +234,9 @@ BuildPeriodRange <- function(period.start, period.freq, n) {
 ###########################aggiornamento dati - crea items.Rdata e item.RData
 UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 
-  ## estrai/filtra la lista degli item e li salva nel file items.Rdata
+  outfile <- paste(project.path, "/items.Rdata", sep="") 
+  save( projectData, file=outfile)
+  ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
   key_fields <- .GetFields( colnames(projectData) ,"key" )
   
@@ -245,7 +247,7 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
   }
   
   leaves <- unique(subset(projectData, select=key_fields) )
-  outfile <- paste(project.path, "/items.Rdata", sep="") 
+  outfile <- paste(project.path, "/items-list.Rdata", sep="") 
   
   Items=leaves
   for (i in (ncol(leaves)):2){
