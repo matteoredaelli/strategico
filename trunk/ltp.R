@@ -890,12 +890,18 @@ BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","MaxPredRatio","Points","NotZeroPoints","LastNotEqualValues",
 	"MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues",
 	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
+
+	#mean values (ie observed data)
+	stats["MeanValues"]=mean(model$values,na.rm=TRUE)
+	#nunb of points (observations)
+	stats["Points"]=nrow(model$values)
+	#non zero values
+	stats["NotZeroPoints"]=sum(model$values!=0)
+
 	if(!is.null(model$BestModel)){
 		stats[c("R2","AIC","maxJump","MaxPredRatio")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","MaxPredRatio")]),4)
 		stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
-		stats["Points"]=nrow(model$values)
-		#non zero values
-		stats["NotZeroPoints"]=sum(model$values!=0)
+
 		#find (che cum sum of) not equal (ie constant) consecutive values
 		temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
 		#length of last not-constant consecutives serie of values
@@ -903,8 +909,6 @@ BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 		
 		#mean predicted
 		stats["MeanPedicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
-		#mean values (ie observed data)
-		stats["MeanValues"]=mean(model$values,na.rm=TRUE)
 		#mean predicted over mean values (ie observed data)
 		stats["MeanPedictedRatioMeanValues"]=stats["MeanPedicted"]/stats["MeanValues"]
 		#and rounding
@@ -918,6 +922,10 @@ BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 		#note: stat is changed from numeric to string
 		stats["BestModel"] = model$BestModel
 	}
+
+
+
+
 	stats["Timestamp"] = as.character(Sys.time())
 	stats["ManualModel"] = manual.model
 	stats["Parameters"] = BuildParamString(param)
