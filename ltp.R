@@ -917,8 +917,8 @@ BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 		stats["SdPedictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
 		#Best Model if not exclusion criterion were performed
-		stats["BestAICNoOutRangeExclude"]=names(which.min(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC)))
-		stats["BestICNoOutRangeExclude"]=names(which.min(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width)))
+		stats["BestAICNoOutRangeExclude"]=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC))))
+		stats["BestICNoOutRangeExclude"]=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width))))
 		#note: stat is changed from numeric to string
 		stats["BestModel"] = model$BestModel
 	}
