@@ -196,7 +196,7 @@ BuildPeriodRange <- function(period.start, period.freq, n) {
 
   ##print( paste("Folder=", folder, "Key=", key) )
   vals.names <- .GetFields(names(data),"value")
-  temp=by(data[,vals.names],data$PERIOD, function(x) apply(x,2, sum, na.rm=TRUE))
+  temp=by(data[,vals.names,drop=FALSE],data$PERIOD, function(x) apply(x,2, sum, na.rm=TRUE))
   item_data <- as.data.frame(t(matrix(unlist(temp),nrow=length(vals.names))))
   rownames(item_data) <- names(temp)[!sapply(temp,is.null)]
   colnames(item_data) <- vals.names
