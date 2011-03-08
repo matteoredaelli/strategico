@@ -38,6 +38,30 @@ Esempio:
  ** semestre 2: |19/20 - 1|= -.05 (cioè -5%) 
  ** MaxJump: masimo tra |+.10| e |-.05| = .10 
 
+== MaxPredRatio ==
+Max among predicted values over max of values (ie observed data)
+		
+== MeanPedicted == 
+Mean of predicted values
+
+== MeanValues ==
+Mean of observed values (i.e. the data)
+
+== MeanPedictedRatioMeanValues ==
+Mean of predicted over mean of values (ie observed data)
+
+== SdPedictedRatioSdValues ==
+Standard deviation of predicted values over Standard deviation of observed ones.
+
+== BestAICNoOutRangeExclude ==
+Model with minimum AIC  (exclusion criterion not used) 
+
+== BestICNoOutRangeExclude ==
+Model with minimum I.C. width  (exclusion criterion not used) 
+
+== LastNotEqualValues ==
+Length of last not-constant consecutives serie of values (e.g. not constant 0 values, it gives a row idea of most recent informative serie)
+
 == Residui == 
 Buoni residui presentano un grafico con una nuvola di punti distribuiti casualmente intorno allo 0; non devono essere presenti evidenti relazioni lineari, paraboliche o 
 "pattern" riconoscibili in generale, la nuvola di punti deve cioè apparire "casuale".
