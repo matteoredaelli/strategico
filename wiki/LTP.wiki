@@ -38,10 +38,10 @@ Esempio:
  ** semestre 2: |19/20 - 1|= -.05 (cioè -5%) 
  ** MaxJump: masimo tra |+.10| e |-.05| = .10 
 
-== MaxPredRatio ==
+= MaxPredRatio =
 Max among predicted values over max of values (ie observed data)
 		
-== MeanPedicted == 
+= MeanPedicted = 
 Mean of predicted values
 
 == MeanValues ==
