@@ -412,7 +412,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     pred = try(predict(modle, n.ahead, method = "resample"),TRUE)
     
     if( is(pred,"try-error") ) { 
-      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, Residuals = NA))
+      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, MaxPredRatio =NA, Residuals = NA))
     } else {
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
@@ -432,7 +432,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     modle = esFit(y, mod$drift, mod$sea, mod$inn)  
     pred = try(predict(modle, n.ahead, method = "resample"),TRUE)
     if( is(pred,"try-error") ) { 
-      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, Residuals = NA))
+      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, MaxPredRatio =NA,Residuals = NA))
     } else {
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
