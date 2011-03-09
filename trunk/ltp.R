@@ -412,7 +412,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     pred = try(predict(modle, n.ahead, method = "resample"),TRUE)
     
     if( is(pred,"try-error") ) { 
-      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, MaxPredRatio =NA, Residuals = NA))
+      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA,  maxJump=NA, MaxPredRatio =NA, Residuals = NA))
     } else {
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
@@ -432,7 +432,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     modle = esFit(y, mod$drift, mod$sea, mod$inn)  
     pred = try(predict(modle, n.ahead, method = "resample"),TRUE)
     if( is(pred,"try-error") ) { 
-      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, MaxPredRatio =NA,Residuals = NA))
+      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA,  maxJump=NA, MaxPredRatio =NA,Residuals = NA))
     } else {
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
@@ -680,6 +680,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
               ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
               ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
               ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
+  browser()
   temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","MaxPredRatio")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","MaxPredRatio")]), 
   unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]))
   colnames(temp)= c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")
