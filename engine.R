@@ -312,14 +312,16 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
   if (is.null(filename)) filename=file.choose()
   data=read.csv(filename,sep=",") 
 
-  names.data <- names(data)
-  names(names.data) <- names(data)
+  # names.data <- names(data)
+  # names(names.data) <- names(data)
 
-  names.data[KEY]=paste(KEY,1:length(KEY),sep="")
-  names.data[VALUE]=paste(VALUE,1:length(VALUE),sep="")
+  # names.data[KEY]=paste(KEY,1:length(KEY),sep="")
+  # names.data[VALUE]=paste(VALUE,1:length(VALUE),sep="")
 
-  names(data) = names.data
-  data$PERIOD=.GetItemName(data[,timesKeys])
+  #names(data) = names.data
+  
+  if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
+  else data$PERIOD=data[,timesKeys]
 
   UpdateItemsData(project.path, data[,c(KEY,"PERIOD",VALUE)])
 }
