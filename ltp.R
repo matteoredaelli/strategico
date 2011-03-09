@@ -680,7 +680,6 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
               ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
               ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
               ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
-  browser()
   temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","MaxPredRatio")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","MaxPredRatio")]), 
   unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")]))
   colnames(temp)= c("R2", "AIC", "IC.width","maxJump","MaxPredRatio")
