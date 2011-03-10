@@ -114,11 +114,27 @@ EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, para
   }
 }
 
+EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
+  tablename = GetSummaryDBTable(project.name, value)
+  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
+
+  statement <- paste("select * from ", tablename, " where Run=1", sep="")
+  items <- sqlQuery(channel, statement)
+  odbcClose(channel)
+  ## occorre ciclare su tulle le righe di items, 
+  ##   estratte  valori delle chiavi, es c('IT','101',NA),
+  ##   estrarre il campo params
+  ##   lanciare EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL
+}
+
 ImportItemsData <- function(project.path) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
   connector.importItemsData(project.path)
 }
 
+GetSummaryDBTable <- function(project.name, value) {
+  paste(project.name, value, sep="_")
+}
 
 ##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
 ##restituisce la stringa

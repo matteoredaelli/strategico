@@ -86,7 +86,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
       data = cbind(keydf, data)
       data$PERIOD = rownames(data)
 
-      tablename = paste(CONFIG$project.name, value, sep="_")
+      tablename = GetSummaryDBTable(CONFIG$project.name, value)
       ExportDataToDB(data, tablename, fullkeys)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
