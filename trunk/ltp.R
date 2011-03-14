@@ -382,7 +382,7 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.arima$upr - IC.pred.arima$lwr)
   maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
-  VarCoeff=sd(c(as.vector(pred.arima),as.vector(product)),na.rm=TRUE)/mean(c(as.vector(pred.arima),as.vector(product)),na.rm=TRUE)
+  VarCoeff=sd(c(as.vector(pred.arima),t(as.vector(product))),na.rm=TRUE)/mean(c(as.vector(pred.arima),t(as.vector(product))),na.rm=TRUE)
   # m=matrix(NA,period.freq, ceiling((length(pred.arima))/period.freq)+1)
   # m[1:(length(pred.arima)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.arima)
   # m=apply(m,2,mean,na.rm=TRUE)
@@ -463,7 +463,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.modle$upr - IC.pred.modle$lwr)
   maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
-  VarCoeff=sd(c(as.vector(pred.modle),as.vector(product)),na.rm=TRUE)/mean(c(as.vector(pred.modle),as.vector(product)),na.rm=TRUE)
+  VarCoeff=sd(c(as.vector(pred.modle),t(as.vector(product))),na.rm=TRUE)/mean(c(as.vector(pred.modle),t(as.vector(product))),na.rm=TRUE)
   # # m=matrix(NA,period.freq, ceiling((length(pred.modle))/period.freq)+1)
   # # m[1:(length(pred.modle)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.modle)
   # # m=apply(m,2,mean,na.rm=TRUE)
@@ -930,7 +930,7 @@ BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 	stats["Run"] = 0
 	
 	#clean out the (possible) Inf values
-	stats[is.numeric(stats)][!is.finite(stats[is.numeric(stats)])]=NA
+	stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
 	
 	summ=data.frame( t(keys), as.data.frame(stats))
 }
