@@ -17,12 +17,18 @@
      . " " . $_GET['period_freq']
      //		. " " . '"' . str_replace(" ", "", $_GET['params']) . '"'
      ;
-     echo $command;
+     echo "Running command:<br /> " . $command;
+     echo "<br />";
+     echo "<br />Result:";
+     echo "<br />";
      $result = system($command);
      echo $result;
      echo "<br />";
      echo "<br />";
-     echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
+     $link = "projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html";
+     #echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
+     #echo "<script type='text/javascript'> window.location = '" . $link . "'</script>";
+     echo "Goto <a href=\"" . $link . "\">Result</a> page";
      } else
      echo "no post submit";
      ?>
