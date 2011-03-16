@@ -119,8 +119,10 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
   statement <- paste("select * from ", tablename, " where Run=1", sep="")
+  print(statement)
   items <- sqlQuery(channel, statement)
   odbcClose(channel)
+  summary(items)
   ## occorre ciclare su tulle le righe di items, 
   ##   estratte  valori delle chiavi, es c('IT','101',NA),
   ##   estrarre il campo params
@@ -133,7 +135,7 @@ ImportItemsData <- function(project.path) {
 }
 
 GetSummaryDBTable <- function(project.name, value) {
-  paste(project.name, value, sep="_")
+  paste(project.name, value, "summary", sep="_")
 }
 
 ##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
