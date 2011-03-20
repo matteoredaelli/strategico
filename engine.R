@@ -123,10 +123,13 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
   items <- sqlQuery(channel, statement)
   odbcClose(channel)
   summary(items)
-  ## occorre ciclare su tulle le righe di items, 
-  ##   estratte  valori delle chiavi, es c('IT','101',NA),
-  ##   estrarre il campo params
-  ##   lanciare EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL
+  for( i in 1:dim(items)[2]) {
+	print(items[i,idKEYs]); 
+	if( (all(is.na(items[i,idKEYs]))) | (!all(sapply( items[i,idKEYs][!is.na(items[i,idKEYs])], is.character )) )) 
+		return(NA) 
+	else EvalItem(project.path, keys=items[i,idKEYs][!is.na(items[i,idKEYs])], values = value, param=eval(parse(text=paste("list(", items[i,idparam],")",sep="")))  )
+  }
+}
 }
 
 ImportItemsData <- function(project.path) {
