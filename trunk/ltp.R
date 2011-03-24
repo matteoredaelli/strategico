@@ -174,7 +174,7 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
   colnames(productnew)=colnames(product)
   productnew[rownames(product),]=product
   
-  id.start=grep(paste(period.start.fix,collapse="-"),rownames(product))
+  id.start=which(paste(period.start.fix,collapse="-")==rownames(product))
   if( length(id.start)>0 ) {
 	productnew=productnew[id.start:dim(productnew)[1],,drop=FALSE]
 	period.start=period.start.fix
