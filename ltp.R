@@ -167,7 +167,8 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
 	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
 	if(period.start[2]>1) temp = c(temp[period.start[2]:period.freq], temp[1:(period.start[2]-1)])
   } 
-  temp = rep(NA2value, period.freq)
+  #temp = rep(NA2value, period.freq)
+temp=NA2value
   
   productnew=data.frame( rep(temp, len = length(times) ))
   rownames(productnew)=times
@@ -198,7 +199,7 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
     i = 1
     start = period.start
     while ((i<=n)&flag) {
-      if (productnew[1,] == 0) {
+      if (is.na(productnew[1,])) {
         productnew = productnew[-1,,drop=FALSE]
         start = .incSampleTime(start, period.freq = period.freq, increment=increment) 
       }
