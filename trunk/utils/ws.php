@@ -9,7 +9,7 @@
 
      $project_path = "/var/www/strategico/projects/web-" . $_GET['eval_function'];
      if (isset($_GET['submit'])) {
-     $command = "cd /apps/strategico && /apps/R/bin/Rscript eval_item_data.Rscript " 
+     $command = "cd /apps/strategico && /apps/R/bin/Rscript eval_ts.Rscript " 
      . " " . $project_path
      . " " . $KEY
      . " " . $ts
