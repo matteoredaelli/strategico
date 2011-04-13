@@ -13,14 +13,13 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-library('RUnit')
+source("eval_ltp.R")
 
-test.suite <- defineTestSuite("StrategicoTestSuite",
-                              dirs = "tests",
-                              testFileRegexp = 'test_.+\\.R$',
-                              testFuncRegexp = '^test\\.+'
-                              )
- 
-test.result <- runTestSuite(test.suite)
- 
-printTextProtocol(test.result)
+test.EvalItemValue <- function() {
+  e1 <- EvalItemValue("projects/sample", keys=c("IT"), value="VALUE1")
+  
+  checkEquals(
+              c(5278, 1378, 5996, 2096, 6714, 2814, 7432, 3532),
+              as.vector(e1[1,])
+              )
+}
