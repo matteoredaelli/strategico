@@ -16,10 +16,17 @@
 source("eval_ltp.R")
 
 test.EvalItemValue <- function() {
-  e1 <- EvalItemValue("projects/sample", keys=c("IT"), value="VALUE1")
   
+  e1 <- EvalItemValue("projects/sample", keys=c("IT"), value="VALUE1")
   checkEquals(
               c(5278, 1378, 5996, 2096, 6714, 2814, 7432, 3532),
               as.vector(e1[1,])
               )
+
+  e2 <- EvalItemValue("projects/sample", keys=c("IT", "CAR"), value="VALUE2")
+  checkEquals(
+              c(6847, 7388, 6895, 7436, 6942, 7483, 6990, 7531),
+              as.vector(e2[1,])
+              )
+
 }
