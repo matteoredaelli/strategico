@@ -291,15 +291,18 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
   
 } # end function
 
+BuildFilterWithKeys <- function(key_names, key_values, sep="=", collapse=",") {
+  quoted_keys <- gsub("^(.*)$", "'\\1'", key_values)
+  paste(key_names, quoted_keys, sep=sep, collapse=collapse)
+}
 
 BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) {
-  quoted_keys <- gsub("^(.*)$", "'\\1'", key_values)
-  where_opt <- paste(key_names, quoted_keys, sep="=", collapse=" and ")
+  where_opt <- BuildFilterWithKeys(key_names, key_values, sep="=", collapse=" and ")
 
   delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
   delete_sql <- gsub("__TABLE__", tablename, delete_sql)
-  delete_sql <- gsub("__WHERE_OPT__", where_opt, delete_sql)
-
+  
+  gsub("__WHERE_OPT__", where_opt, delete_sql)
 }
 
 ExportDataToDB <- function(data, tablename, key_values, verbose=FALSE) {
