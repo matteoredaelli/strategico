@@ -91,11 +91,17 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
 }
 
 EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL) {
+  for (i in 1:length(values)) {
+    value <- values[i]
+    EvalItemValue(project.path, keys=keys, item.path=item.path, value = value, param=param)
+  }
+}
 
+EvalItemValue <- function(project.path, keys=NULL, item.path=NULL, value = NULL, param=NULL) {
   if(!is.null(item.path)) keys=strsplit(item.path,"/")[[1]]
 
   item.data <- GetItemData(project.path, keys)
-  EvalItemData(project.path, keys=keys, item.data=item.data, values = values, param=param)
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param)
 }
 
 EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, param=NULL) {
@@ -103,15 +109,15 @@ EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, para
 
   if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
   print( paste("  Time series: length=", nrow(item.data)))
-  for (i in 1:length(values)) {
-    value <- values[i]
-    print( paste(" Evaluating ", value,": ", CONFIG$values[value], sep=""))  
-    directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
-    dir.create(directory, showWarnings = FALSE, recursive = TRUE)
 
-    prediction = EvalItemDataByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
-    print(t(prediction))
-  }
+  value = values
+  print( paste(" Evaluating ", value,": ", CONFIG$values[value], sep=""))  
+  directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
+  dir.create(directory, showWarnings = FALSE, recursive = TRUE)
+  
+  prediction = EvalItemDataByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
+  print(t(prediction))
+  t(prediction)
 }
 
 EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {

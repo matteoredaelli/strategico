@@ -13,6 +13,8 @@
 
 ## Authors: L. Finos, M. Redaelli
 
+source("engine.R")
+
 test.GetFields <- function() {
   checkEquals(
               c("KEY1", "KEY2"),
