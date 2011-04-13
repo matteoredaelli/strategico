@@ -258,7 +258,7 @@ BuildPeriodRange <- function(period.start, period.freq, n) {
 ###########################aggiornamento dati - crea items.Rdata e item.RData
 UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
 
-  outfile <- paste(project.path, "/items.Rdata", sep="") 
+  outfile <- paste(project.path, "/projectData.Rdata", sep="") 
   save( projectData, file=outfile)
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
