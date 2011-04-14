@@ -15,7 +15,7 @@
      . " " . $ts
      . " " . $_GET['period_start']
      . " " . $_GET['period_freq']
-     //		. " " . '"' . str_replace(" ", "", $_GET['params']) . '"'
+     . " " . '"' . str_replace(" ", "", $_GET['params']) . '"'
      ;
      echo "Running command:<br /> " . $command;
      echo "<br />";
