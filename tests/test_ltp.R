@@ -28,5 +28,13 @@ test.EvalItemValue <- function() {
               c(6847, 7388, 6895, 7436, 6942, 7483, 6990, 7531),
               as.vector(e2[1,])
               )
+  checkEquals(
+              c("2011-1", "2011-2", "2012-1", "2012-2", "2013-1", "2013-2", "2014-1", "2014-2"),
+              colnames(e2)
+              )
 
+  ## aggiungere qui' delle chiamate dirette alla funzione ltp()
+  ## item.data = ...
+  ## model = ltp(...)
+  ## e fare qualche checkEquals tra i valori di model
 }
