@@ -60,7 +60,7 @@ test.BuildSQLstmtDeleteRecordsWithKeys <- function() {
               )
 
   checkEquals(
-              "delete from europool_VALUE1  where KEY1='IT' and KEY2='' and KEY2='101'",
+              "delete from europool_VALUE1  where KEY1='IT' and KEY2='' and KEY3='101'",
               BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("IT", "", "101"))
               )
 }
