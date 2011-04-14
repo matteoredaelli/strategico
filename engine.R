@@ -17,6 +17,11 @@
 library(RODBC)
 source("strategico.config")
 
+GetProjectData <- function(project.path) {
+  load( paste(project.path, "projectData.Rdata", sep="/"))
+  projectData
+}
+
 GetProjectConfig <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
   conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
                                         #e assegnazione dei valori indicati dal file ai parametri
