@@ -17,6 +17,36 @@
 library(RODBC)
 source("strategico.config")
 
+ExtractItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
+  key.names <- GetKeyNames( length(key.values) )
+  filter <- BuildFilterWithKeys( key.names, key.values, sep="==", collapse=" & ")
+  cmd <- "subset(projectData, __FILTER__, select=c('PERIOD','__VALUE__'))"
+  cmd <- gsub("__FILTER__", filter, cmd)
+  cmd <- gsub("__VALUE__", value, cmd)
+  eval(parse(text = cmd))
+}
+
+ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
+  d1 <- ExtractItemDataFromProjectData(projectData, key.values, value)
+  options(na.action="na.omit")
+  cmd <- "d2 <- aggregate(d1$__VALUE__, by=list(d1$PERIOD), FUN=sum, na.rm=TRUE)"
+  cmd <- gsub("__VALUE__", value, cmd)
+  eval(parse(text = cmd))
+
+  ## change names
+  cmd <- "names(d2) <- c('PERIOD', '__VALUE__')"
+  cmd <- gsub("__VALUE__", value, cmd)
+  eval(parse(text = cmd))
+  rownames(d2) <- d2$PERIOD
+  d2$PERIOD <- NULL
+  d2
+}
+  
+  
+GetKeyNames <- function(num.keys) {
+  paste("KEY", seq(1,num.keys), sep="")
+}
+
 GetProjectData <- function(project.path) {
   load( paste(project.path, "projectData.Rdata", sep="/"))
   projectData
