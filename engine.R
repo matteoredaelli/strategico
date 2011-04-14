@@ -61,10 +61,16 @@ EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, par
   }
 }
 
-EvalItemValue <- function(project.path, keys=NULL, item.path=NULL, value = NULL, param=NULL) {
+EvalItemValue <- function(project.path, keys=NULL, item.path=NULL, value = "VALUE1", param=NULL) {
   if(!is.null(item.path)) keys=strsplit(item.path,"/")[[1]]
 
   item.data <- GetItemData(project.path, keys)
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param)
+}
+
+EvalItemFromProjectData <- function(project.path, keys, value = "VALUE1", param=NULL) {
+  p <- GetProjectData(project.path)
+  item.data <- ExtractAndAggregateItemDataFromProjectData(p, keys, value)
   EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param)
 }
 
