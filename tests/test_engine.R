@@ -21,21 +21,28 @@ test.BuildFilterWithKeys <- function() {
                "KEY1=='IT' & KEY2=='101'", 
                BuildFilterWithKeys( c("IT", "101"), sep="==", collapse=" & ", na.rm=TRUE)
                )
-
    checkEquals(
                "KEY1=='IT' & KEY2=='101'", 
                BuildFilterWithKeys( c("IT", "101"), sep="==", collapse=" & ", na.rm=FALSE)
                )
-
    checkEquals(
                "KEY1=='IT' & KEY2=='' & KEY3=='101'", 
                BuildFilterWithKeys( c("IT", "", "101"), sep="==", collapse=" & ", na.rm=FALSE)
                )
-
+   checkEquals(
+               "KEY1=='IT' & KEY2=='' & KEY3=='101'", 
+               BuildFilterWithKeys( c("IT", NA, "101"), sep="==", collapse=" & ", na.rm=FALSE)
+               )
+   
    checkEquals(
                "KEY1=='IT' & KEY3=='101'", 
                BuildFilterWithKeys( c("IT", "", "101"), sep="==", collapse=" & ", na.rm=TRUE)
                )
+   checkEquals(
+               "KEY1=='IT' & KEY3=='101'", 
+               BuildFilterWithKeys( c("IT", NA, "101"), sep="==", collapse=" & ", na.rm=TRUE)
+               )
+   
 }
 
 test.BuildPeriodRange <- function() {
@@ -50,6 +57,11 @@ test.BuildSQLstmtDeleteRecordsWithKeys <- function() {
   checkEquals(
               "delete from europool_VALUE1  where KEY1='IT' and KEY2='101'",
               BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("IT", "101"))
+              )
+
+  checkEquals(
+              "delete from europool_VALUE1  where KEY1='IT' and KEY2='' and KEY2='101'",
+              BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("IT", "", "101"))
               )
 }
 
