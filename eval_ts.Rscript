@@ -58,6 +58,5 @@ msg <- paste("period.freq=", period.freq, sep="")
 print(msg)
 eval(parse(text=paste("param=list(",item.params,")")))
 
-
 summary(item.data)
-EvalItemData(project.path=project.path, keys=keys, item.data=item.data, values="VALUE1", param=item.params)
+EvalItemData(project.path=project.path, keys=keys, item.data=item.data, values="VALUE1", param=param)
