@@ -29,6 +29,44 @@ test.GetFieldsId <- function() {
               )
 }
 
+test.GetProjectConfig <- function() {
+  c <- GetProjectConfig("projects/sample/project.config")
+
+  checkEquals(
+              11,
+              length(c)
+              )
+
+  checkEquals(
+              12,
+              length(c$param)
+              )
+  checkEquals(
+              "sample",
+              c$project.name
+              )
+  
+  checkEquals(
+              c("KEY1", "KEY2", "KEY3"),
+              names(c$keys)
+              )
+
+  checkEquals(
+              c("VendutoPirelli", "VendutoMercato"),
+              as.vector(c$values)
+              )
+  
+  checkEquals(
+              8,
+              c$param$n.ahead
+              )
+
+  checkEquals(
+              c("mean", "trend", "lm", "es", "arima"),
+              c$param$try.models
+              )
+}
+
 test.GetProjectData <- function() {
   p <- GetProjectData("projects/sample")
   
@@ -37,6 +75,7 @@ test.GetProjectData <- function() {
               colnames(p)
               )
 }
+
 test.incSampleTime <- function() {
   checkEquals(
               c(2002,1),
