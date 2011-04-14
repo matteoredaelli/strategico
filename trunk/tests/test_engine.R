@@ -28,6 +28,15 @@ test.GetFieldsId <- function() {
               .GetFieldsId(c("KEY1", "KEY2", "VALUE1", "PERIOD"), "KEY")
               )
 }
+
+test.GetProjectData <- function() {
+  p <- GetProjectData("projects/sample")
+  
+  checkEquals(
+              c("KEY1", "KEY2", "KEY3", "PERIOD", "VALUE1", "VALUE2"),
+              colnames(p)
+              )
+}
 test.incSampleTime <- function() {
   checkEquals(
               c(2002,1),
