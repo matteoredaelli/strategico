@@ -16,31 +16,6 @@
 
 library(RODBC)
 source("strategico.config")
-
-ExtractItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
-  filter <- BuildFilterWithKeys( key.values, sep="==", collapse=" & ", na.rm=TRUE)
-  cmd <- "subset(projectData, __FILTER__, select=c('PERIOD','__VALUE__'))"
-  cmd <- gsub("__FILTER__", filter, cmd)
-  cmd <- gsub("__VALUE__", value, cmd)
-  eval(parse(text = cmd))
-}
-
-ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
-  d1 <- ExtractItemDataFromProjectData(projectData, key.values, value)
-  options(na.action="na.omit")
-  cmd <- "d2 <- aggregate(d1$__VALUE__, by=list(d1$PERIOD), FUN=sum, na.rm=TRUE)"
-  cmd <- gsub("__VALUE__", value, cmd)
-  eval(parse(text = cmd))
-
-  ## change names
-  cmd <- "names(d2) <- c('PERIOD', '__VALUE__')"
-  cmd <- gsub("__VALUE__", value, cmd)
-  eval(parse(text = cmd))
-  rownames(d2) <- d2$PERIOD
-  d2$PERIOD <- NULL
-  d2
-}
-  
   
 BuildKeyNames <- function(key.values, na.rm=FALSE) {
   idx = if (na.rm)
@@ -51,60 +26,12 @@ BuildKeyNames <- function(key.values, na.rm=FALSE) {
   paste("KEY", idx, sep="")
 }
 
-GetProjectData <- function(project.path) {
-  load( paste(project.path, "projectData.Rdata", sep="/"))
-  projectData
-}
-
-GetProjectConfig <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
-  conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
-                                        #e assegnazione dei valori indicati dal file ai parametri
-  project.name <- conf$V2[conf$V1=="project.name"]
-  connector.package <- conf$V2[conf$V1=="connector.package"]
-  eval.package <- conf$V2[conf$V1=="eval.package"]
-  eval(parse(text=paste("save=c(",conf$V2[conf$V1=="save"],")"),))
-  
-  keys <- conf$V2[.GetFieldsId(conf$V1,"key")]
-  names(keys) <- .GetFields(conf$V1,"key")
-  
-  values <- conf$V2[.GetFieldsId(conf$V1,"value")]
-  names(values) <- .GetFields(conf$V1,"value")
-  connector.package <- conf$V2[conf$V1=="connector.package"]
-  
-  period.freq <- as.numeric(conf$V2[.GetFieldsId(conf$V1,"period.freq")])
-  period.start <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.start")],"-")[[1]] )
-  period.end <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.end")],"-")[[1]] )
-  
-  conf = conf[ .GetFieldsId(conf$V1,"eval.param"),"V2",drop=FALSE] 
-  
-  CONFIG=list(project.name = project.name,
-    connector.package=connector.package,
-    eval.package=eval.package,
-    keys = keys, 
-    values = values ,
-    connector.package = connector.package,
-    period.freq = period.freq,
-    period.start = period.start,
-    period.end = period.end,
-    save=save)
-  for (i in 1:nrow(conf))
-    eval(parse(text=paste("CONFIG$param$",conf[i,]),))
-  
-  source(CONFIG$connector.package)		
-  source(CONFIG$eval.package)
-  
-  CONFIG
-}
-
-GetItemsList <- function(project.path) {
-  items.rdata <- paste( project.path, "items-list.Rdata", sep="/")
-  load(items.rdata)
-  Items
-}
-
-GetItemData <- function(project.path, keys) {
-  load( paste(.GetItemPath(keys,project.path), "item.Rdata", sep="/"))
-  item_data
+BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) {
+  key.names <- BuildKeyNames(key.values, na.rm=na.rm)
+  if (na.rm)
+    key.values <- key.values[ key.values != "" ]
+  quoted.keys <- gsub("^(.*)$", "'\\1'", key.values)
+  paste(key.names, quoted.keys, sep=sep, collapse=collapse)
 }
 
 
@@ -114,19 +41,17 @@ BuildParamString <- function(param) {
   gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=",")))
 }
 
-GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
+BuildPeriodRange <- function(period.start, period.freq, n) {
+  sapply (0:(n-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+}
   
-  param.string <- BuildParamString(param)
-  paste(
-        "<h3>Run the engine</h3>
-                <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
-            Params:
-                          <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",param.string,"\" />
-              <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
-              <input type=\"hidden\" name=\"item_folder\" value=\"",item.path,"\" /> 
-              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
-              <input type=\"submit\" name=\"submit\" value=\"Run\" />                     
-         </form>",sep="")
+BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_values, na.rm=FALSE) {
+  where_opt <- BuildFilterWithKeys(key_values, sep="=", collapse=" and ", na.rm)
+
+  delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
+  delete_sql <- gsub("__TABLE__", tablename, delete_sql)
+  
+  gsub("__WHERE_OPT__", where_opt, delete_sql)
 }
 
 EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL) {
@@ -179,16 +104,42 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
 }  }
 }
 
+ExportDataToDB <- function(data, tablename, key_values, verbose=FALSE) {
+  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
-ImportItemsData <- function(project.path) {
-  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
-  connector.importItemsData(project.path)
+  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
+  if(!is.null(delete_sql)) {
+    #print(delete_sql)
+    sqlQuery(channel, delete_sql)
+  }
+  sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=verbose)
+  odbcClose(channel)
 }
 
-GetSummaryDBTable <- function(project.name, value) {
-  paste(project.name, value, "summary", sep="_")
+ExtractItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
+  filter <- BuildFilterWithKeys( key.values, sep="==", collapse=" & ", na.rm=TRUE)
+  cmd <- "subset(projectData, __FILTER__, select=c('PERIOD','__VALUE__'))"
+  cmd <- gsub("__FILTER__", filter, cmd)
+  cmd <- gsub("__VALUE__", value, cmd)
+  eval(parse(text = cmd))
 }
 
+ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
+  d1 <- ExtractItemDataFromProjectData(projectData, key.values, value)
+  options(na.action="na.omit")
+  cmd <- "d2 <- aggregate(d1$__VALUE__, by=list(d1$PERIOD), FUN=sum, na.rm=TRUE)"
+  cmd <- gsub("__VALUE__", value, cmd)
+  eval(parse(text = cmd))
+
+  ## change names
+  cmd <- "names(d2) <- c('PERIOD', '__VALUE__')"
+  cmd <- gsub("__VALUE__", value, cmd)
+  eval(parse(text = cmd))
+  rownames(d2) <- d2$PERIOD
+  d2$PERIOD <- NULL
+  d2
+}
+  
 ##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
 ##restituisce la stringa
 .GetFields <- function(fields,pattern) {
@@ -198,11 +149,6 @@ GetSummaryDBTable <- function(project.name, value) {
 ##restituisce l'id
 .GetFieldsId <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
-}
-
-
-.SafeName <- function(String) {
-  gsub("[ '/\"\\:-<>]+", "_", String)
 }
 
 .GetItemName <- function( keys ) { 
@@ -216,6 +162,134 @@ GetSummaryDBTable <- function(project.name, value) {
   if (!is.null(project.path)) subpath <- paste(project.path, subpath, sep="/")
   if (!is.null(extra))  subpath <- paste(subpath,.SafeName(extra), sep="/")
   subpath
+}
+
+GetItemsList <- function(project.path) {
+  items.rdata <- paste( project.path, "items-list.Rdata", sep="/")
+  load(items.rdata)
+  Items
+}
+
+GetItemData <- function(project.path, keys) {
+  load( paste(.GetItemPath(keys,project.path), "item.Rdata", sep="/"))
+  item_data
+}
+
+GetProjectData <- function(project.path) {
+  load( paste(project.path, "projectData.Rdata", sep="/"))
+  projectData
+}
+
+GetProjectConfig <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
+  conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
+                                        #e assegnazione dei valori indicati dal file ai parametri
+  project.name <- conf$V2[conf$V1=="project.name"]
+  connector.package <- conf$V2[conf$V1=="connector.package"]
+  eval.package <- conf$V2[conf$V1=="eval.package"]
+  eval(parse(text=paste("save=c(",conf$V2[conf$V1=="save"],")"),))
+  
+  keys <- conf$V2[.GetFieldsId(conf$V1,"key")]
+  names(keys) <- .GetFields(conf$V1,"key")
+  
+  values <- conf$V2[.GetFieldsId(conf$V1,"value")]
+  names(values) <- .GetFields(conf$V1,"value")
+  connector.package <- conf$V2[conf$V1=="connector.package"]
+  
+  period.freq <- as.numeric(conf$V2[.GetFieldsId(conf$V1,"period.freq")])
+  period.start <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.start")],"-")[[1]] )
+  period.end <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.end")],"-")[[1]] )
+  
+  conf = conf[ .GetFieldsId(conf$V1,"eval.param"),"V2",drop=FALSE] 
+  
+  CONFIG=list(project.name = project.name,
+    connector.package=connector.package,
+    eval.package=eval.package,
+    keys = keys, 
+    values = values ,
+    connector.package = connector.package,
+    period.freq = period.freq,
+    period.start = period.start,
+    period.end = period.end,
+    save=save)
+  for (i in 1:nrow(conf))
+    eval(parse(text=paste("CONFIG$param$",conf[i,]),))
+  
+  source(CONFIG$connector.package)		
+  source(CONFIG$eval.package)
+  
+  CONFIG
+}
+
+GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
+  
+  param.string <- BuildParamString(param)
+  paste(
+        "<h3>Run the engine</h3>
+                <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
+            Params:
+                          <input type=\"text\" name=\"params\" id=\"params\" size=\"160\" value=\"",param.string,"\" />
+              <input type=\"hidden\" name=\"project_path\" value=\"",project.path,"\" />  
+              <input type=\"hidden\" name=\"item_folder\" value=\"",item.path,"\" /> 
+              <input type=\"hidden\" name=\"values\" value=\"",value,"\" /> <br />
+              <input type=\"submit\" name=\"submit\" value=\"Run\" />                     
+         </form>",sep="")
+}
+GetSummaryDBTable <- function(project.name, value) {
+  paste(project.name, value, "summary", sep="_")
+}
+
+ImportItemsData <- function(project.path) {
+  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+  connector.importItemsData(project.path)
+}
+
+##input  da db. 
+ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
+  
+  channel <- odbcConnect(DB, DBUSER, DBPWD)
+  result <- sqlQuery(channel, sql_statement)
+  odbcClose(channel)
+
+  UpdateItemsData(project.path, result)
+}
+
+##input da da csv. 
+ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KEY2"), timesKeys=c("YEAR","SEMESTER"), VALUE=c("CORP")){ 
+
+  ##restituisce una list (itemList) con una ts per ogni elemento. 
+  ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
+  ##torna utile in seguito, nelle creazioni degli output dell'analisi
+  
+  if (is.null(filename)) filename=file.choose()
+  data=read.csv(filename,sep=",") 
+
+  # names.data <- names(data)
+  # names(names.data) <- names(data)
+
+  # names.data[KEY]=paste(KEY,1:length(KEY),sep="")
+  # names.data[VALUE]=paste(VALUE,1:length(VALUE),sep="")
+
+  #names(data) = names.data
+  
+  if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
+  else data$PERIOD=data[,timesKeys]
+
+  UpdateItemsData(project.path, data[,c(KEY,"PERIOD",VALUE)])
+}
+
+
+###non sono riuscito a trovare .incSampleTime(
+## immagino dovrebbe fare ciÃ² che segue
+.incSampleTime <- function(now, period.freq = 2, increment = 1) {
+  if (now[2] + increment - 1 <= period.freq - 1) 
+    now[2] = now[2] + increment
+  else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
+         ((now[2] + increment - 1)%%period.freq) + 1)
+  now
+}
+ 
+.SafeName <- function(String) {
+  gsub("[ '/\"\\:-<>]+", "_", String)
 }
 
 .StatsRecords <- function(filename, records, key, title="item records", top=25) {
@@ -237,23 +311,7 @@ GetSummaryDBTable <- function(project.name, value) {
   print(img)
   dev.off()
 }
-
-
-
-###non sono riuscito a trovare .incSampleTime(
-## immagino dovrebbe fare ciÃ² che segue
-.incSampleTime <- function(now, period.freq = 2, increment = 1) {
-  if (now[2] + increment - 1 <= period.freq - 1) 
-    now[2] = now[2] + increment
-  else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
-         ((now[2] + increment - 1)%%period.freq) + 1)
-  now
-}
-
-BuildPeriodRange <- function(period.start, period.freq, n) {
-  sapply (0:(n-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
-}
-                            
+                         
 .UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
   if (is.null(values))
     folder <- project.path
@@ -335,67 +393,3 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
   .UpdateItemsDataRecursively(project.path, projectData, keys=key_fields, values=NULL )
   
 } # end function
-
-BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) {
-  key.names <- BuildKeyNames(key.values, na.rm=na.rm)
-  if (na.rm)
-    key.values <- key.values[ key.values != "" ]
-  quoted.keys <- gsub("^(.*)$", "'\\1'", key.values)
-  paste(key.names, quoted.keys, sep=sep, collapse=collapse)
-}
-
-BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_values, na.rm=FALSE) {
-  where_opt <- BuildFilterWithKeys(key_values, sep="=", collapse=" and ", na.rm)
-
-  delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
-  delete_sql <- gsub("__TABLE__", tablename, delete_sql)
-  
-  gsub("__WHERE_OPT__", where_opt, delete_sql)
-}
-
-ExportDataToDB <- function(data, tablename, key_values, verbose=FALSE) {
-  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
-
-  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
-  if(!is.null(delete_sql)) {
-    #print(delete_sql)
-    sqlQuery(channel, delete_sql)
-  }
-  sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=verbose)
-  odbcClose(channel)
-}
-
-##input  da db. 
-ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
-  
-  channel <- odbcConnect(DB, DBUSER, DBPWD)
-  result <- sqlQuery(channel, sql_statement)
-  odbcClose(channel)
-
-  UpdateItemsData(project.path, result)
-}
-
-##input da da csv. 
-ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KEY2"), timesKeys=c("YEAR","SEMESTER"), VALUE=c("CORP")){ 
-
-  ##restituisce una list (itemList) con una ts per ogni elemento. 
-  ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
-  ##torna utile in seguito, nelle creazioni degli output dell'analisi
-  
-  if (is.null(filename)) filename=file.choose()
-  data=read.csv(filename,sep=",") 
-
-  # names.data <- names(data)
-  # names(names.data) <- names(data)
-
-  # names.data[KEY]=paste(KEY,1:length(KEY),sep="")
-  # names.data[VALUE]=paste(VALUE,1:length(VALUE),sep="")
-
-  #names(data) = names.data
-  
-  if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
-  else data$PERIOD=data[,timesKeys]
-
-  UpdateItemsData(project.path, data[,c(KEY,"PERIOD",VALUE)])
-}
-
