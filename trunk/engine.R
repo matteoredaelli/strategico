@@ -27,6 +27,7 @@ BuildKeyNames <- function(key.values, na.rm=FALSE) {
 }
 
 BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) {
+  key.values[is.na( key.values)] = ""
   key.names <- BuildKeyNames(key.values, na.rm=na.rm)
   if (na.rm)
     key.values <- key.values[ key.values != "" ]
