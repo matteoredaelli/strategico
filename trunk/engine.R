@@ -18,8 +18,7 @@ library(RODBC)
 source("strategico.config")
 
 ExtractItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
-  key.names <- GetKeyNames( length(key.values) )
-  filter <- BuildFilterWithKeys( key.names, key.values, sep="==", collapse=" & ")
+  filter <- BuildFilterWithKeys( key.values, sep="==", collapse=" & ", na.rm=TRUE)
   cmd <- "subset(projectData, __FILTER__, select=c('PERIOD','__VALUE__'))"
   cmd <- gsub("__FILTER__", filter, cmd)
   cmd <- gsub("__VALUE__", value, cmd)
@@ -43,8 +42,13 @@ ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, 
 }
   
   
-GetKeyNames <- function(num.keys) {
-  paste("KEY", seq(1,num.keys), sep="")
+BuildKeyNames <- function(key.values, na.rm=FALSE) {
+  idx = if (na.rm)
+    grep('^$', key.values, invert=TRUE)
+  else
+    seq(1,length(key.values))
+  
+  paste("KEY", idx, sep="")
 }
 
 GetProjectData <- function(project.path) {
@@ -332,13 +336,16 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
   
 } # end function
 
-BuildFilterWithKeys <- function(key_names, key_values, sep="=", collapse=",") {
-  quoted_keys <- gsub("^(.*)$", "'\\1'", key_values)
-  paste(key_names, quoted_keys, sep=sep, collapse=collapse)
+BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) {
+  key.names <- BuildKeyNames(key.values, na.rm=na.rm)
+  if (na.rm)
+    key.values <- key.values[ key.values != "" ]
+  quoted.keys <- gsub("^(.*)$", "'\\1'", key.values)
+  paste(key.names, quoted.keys, sep=sep, collapse=collapse)
 }
 
-BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) {
-  where_opt <- BuildFilterWithKeys(key_names, key_values, sep="=", collapse=" and ")
+BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_values, na.rm=FALSE) {
+  where_opt <- BuildFilterWithKeys(key_values, sep="=", collapse=" and ", na.rm)
 
   delete_sql <- "delete from __TABLE__  where __WHERE_OPT__"
   delete_sql <- gsub("__TABLE__", tablename, delete_sql)
@@ -349,9 +356,7 @@ BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_names, key_values) 
 ExportDataToDB <- function(data, tablename, key_values, verbose=FALSE) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
-  #key_values <- unlist(data[1,1:length(CONFIG$keys)])
-  key_names <- names(CONFIG$keys)
-  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_names, key_values)
+  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
   if(!is.null(delete_sql)) {
     #print(delete_sql)
     sqlQuery(channel, delete_sql)
