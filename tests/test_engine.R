@@ -19,7 +19,22 @@ source("engine.R")
 test.BuildFilterWithKeys <- function() {
    checkEquals(
                "KEY1=='IT' & KEY2=='101'", 
-               BuildFilterWithKeys( c("KEY1", "KEY2"), c("IT", "101"), sep="==", collapse=" & ")
+               BuildFilterWithKeys( c("IT", "101"), sep="==", collapse=" & ", na.rm=TRUE)
+               )
+
+   checkEquals(
+               "KEY1=='IT' & KEY2=='101'", 
+               BuildFilterWithKeys( c("IT", "101"), sep="==", collapse=" & ", na.rm=FALSE)
+               )
+
+   checkEquals(
+               "KEY1=='IT' & KEY2=='' & KEY3=='101'", 
+               BuildFilterWithKeys( c("IT", "", "101"), sep="==", collapse=" & ", na.rm=FALSE)
+               )
+
+   checkEquals(
+               "KEY1=='IT' & KEY3=='101'", 
+               BuildFilterWithKeys( c("IT", "", "101"), sep="==", collapse=" & ", na.rm=TRUE)
                )
 }
 
@@ -34,14 +49,46 @@ test.BuildPeriodRange <- function() {
 test.BuildSQLstmtDeleteRecordsWithKeys <- function() {
   checkEquals(
               "delete from europool_VALUE1  where KEY1='IT' and KEY2='101'",
-              BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("KEY1", "KEY2"), c("IT", "101"))
+              BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("IT", "101"))
               )
 }
 
-test.GetKeyNames <- function() {
+test.BuildKeyNames <- function() {
     checkEquals(
                 c("KEY1", "KEY2"),
-                GetKeyNames(2)
+                BuildKeyNames( c("IT","CAR") )
+                )
+    checkEquals(
+                c("KEY1", "KEY2"),
+                BuildKeyNames( c("IT","CAR",""), na.rm=TRUE )
+                )
+    checkEquals(
+                c("KEY1", "KEY2"),
+                BuildKeyNames( c("IT","CAR",""), na.rm=FALSE )
+                )
+    checkEquals(
+                c("KEY1", "KEY2"),
+                BuildKeyNames( c("IT","CAR","",''), na.rm=TRUE )
+                )
+    checkEquals(
+                c("KEY1", "KEY2", "KEY3", "KEY4"),
+                BuildKeyNames( c("IT","CAR","",''), na.rm=FALSE )
+                )
+    checkEquals(
+                c("KEY1", "KEY3"),
+                BuildKeyNames( c("IT","","CAR"), na.rm=TRUE )
+                )
+    checkEquals(
+                c("KEY1", "KEY2", "KEY3"),
+                BuildKeyNames( c("IT","","CAR"), na.rm=FALSE )
+                )
+    checkEquals(
+                c("KEY2", "KEY3"),
+                BuildKeyNames( c("","CAR","FIAT"), na.rm=TRUE )
+                )
+    checkEquals(
+                c("KEY1", "KEY2", "KEY3"),
+                BuildKeyNames( c("","CAR","FIAT"), na.rm=FALSE )
                 )
 }
 
