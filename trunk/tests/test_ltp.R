@@ -19,7 +19,7 @@ test.EvalItemValue <- function() {
   
   e1 <- EvalItemValue("projects/sample", keys=c("IT"), value="VALUE1")
   checkEquals(
-              c(5278, 1378, 5996, 2096, 6714, 2814, 7432, 3532),
+              c(5192, 1345, 5824, 1977, 6456, 2609, 7088, 3241),
               as.vector(e1[1,])
               )
 
