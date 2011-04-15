@@ -640,6 +640,15 @@ plot.ltp = function(model, plot.try.models = c("best",
   }
 }
 
+PlotLtpResults <- function(obj, directory=NULL, width=1000, height=600) {
+  plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = obj$BestModel ,filename=file.path(directory, "best_model.png"),width = width, height = height)
+        
+  ## plot ALL models
+  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = "All Predictors" ,filename=file.path(directory, "all_models.png"),width = width, height = height)
+}
+
+
+  
 ###################################################
 ## # crea report
 
@@ -649,11 +658,8 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
   
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
-
-
   
   html.filename = file.path(directory, "summary.html")
-
   
   title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", value.description, sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
@@ -696,15 +702,6 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
   levels(ReporTable$selected)=c("","BEST")
   ReporTable[obj$BestModel,"selected"]="BEST"
   
-### plot SELECTED model
-                                        # Write graph to a file
-  plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = obj$BestModel ,filename=file.path(directory, "best_model.png"),width = width, height = height)
-                                        #plot.ts(data, main = paste(project.path, ':', names(obj)))
-  
-  
-### plot ALL models
-                                        # Write graph to a file
-  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = "All Predictors" ,filename=file.path(directory, "all_models.png"),width = width, height = height)
     
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=\"http://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
