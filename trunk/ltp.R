@@ -887,7 +887,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
 BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 	stats=as.list(rep(NA,16))
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
-	"MeanPedicted","MeanValues","MeanPedictedRatioMeanValues","SdPedictedRatioSdValues",
+	"MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
 	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
 
 	#mean values (ie observed data)
@@ -907,13 +907,13 @@ BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
 		stats["LastNotEqualValues"]=sum(temp==max(temp))-1
 		
 		#mean predicted
-		stats["MeanPedicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
+		stats["MeanPredicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
 		#mean predicted over mean values (ie observed data)
-		stats["MeanPedictedRatioMeanValues"]=stats[["MeanPedicted"]]/stats[["MeanValues"]]
+		stats["MeanPredictedRatioMeanValues"]=stats[["MeanPredicted"]]/stats[["MeanValues"]]
 		#and rounding
-		stats[c("MeanPedicted","MeanValues","MeanPedictedRatioMeanValues")]=lapply(stats[c("MeanPedicted","MeanValues","MeanPedictedRatioMeanValues")],round,3)
+		stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")]=lapply(stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")],round,3)
 		#sd predicted over sd values (ie observed data)
-		stats["SdPedictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
+		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
 		#Best Model if not exclusion criterion were performed
 		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC))))
