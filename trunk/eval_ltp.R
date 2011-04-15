@@ -49,8 +49,14 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
                                         #names(keydf) = names(CONFIG$keys)
     return.code <- 0 
     ## write report
-    html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
-    if("report"%in%CONFIG$save) ltp.HTMLreport(model, keys, value, CONFIG$values[value], param, directory=output.path, html.form.eval=html.form.eval)
+    if("images"%in%CONFIG$save) {
+      PlotLtpResults(model, directory=output.path)
+    }
+    
+    if("report"%in%CONFIG$save) {
+      html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
+      ltp.HTMLreport(model, keys, value, CONFIG$values[value], param, directory=output.path, html.form.eval=html.form.eval)
+    }
   }
   else {
     return.code <- 1 
