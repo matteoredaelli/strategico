@@ -298,28 +298,8 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
 .SafeName <- function(String) {
   gsub("[ '/\"\\:-<>]+", "_", String)
 }
-
-.StatsRecords <- function(filename, records, key, title="item records", top=25) {
-  library(lattice)
-  bitmap(filename)
-  ## retriving top values
-  ##data <- rev(sort(table(records[key])))
-  data <-table(records[key])
-  ##limit <- min(top, length(data))
-  ##data <- data[1:limit]
-  ## sorting by names
-  ## data <- data[order(names(data))],
-  img <- barchart(data,
-                  scales = list(x=list(rot=90)),
-                  horizontal=FALSE,
-                  main=title,
-                  col="green"
-                  )
-  print(img)
-  dev.off()
-}
                          
-.UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, csv=FALSE, stats=FALSE) {
+.UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, stats=FALSE) {
   if (is.null(values))
     folder <- project.path
   else
@@ -336,16 +316,11 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
   colnames(item_data) <- vals.names
   save(item_data, file= paste(folder, "item.Rdata", sep="/"))
   
-  if (csv)
+  if("item_csv"%in%CONFIG$save)
     write.csv(item_data,
               file= paste(folder, "item.csv", sep="/"),
               row.names = FALSE
               )
-  if (stats)
-    .StatsRecords(
-                   paste(folder, "item.png", sep="/"),
-                   item_data,
-                   key)
   
   if (length(keys) > 0) {
     key <- keys[1]
@@ -366,8 +341,7 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
 
 
 ###########################aggiornamento dati - crea items.Rdata e item.RData
-UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
-
+UpdateItemsData <- function(project.path, projectData) {
   outfile <- paste(project.path, "/projectData.Rdata", sep="") 
   save( projectData, file=outfile)
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
@@ -389,11 +363,12 @@ UpdateItemsData <- function(project.path, projectData, csv=FALSE) {
     leaves= unique(leaves)
     Items=rbind(Items,unique(leaves))
   }
+ 
   save( Items, file=outfile)
 
-  if (csv)
+  if("item_csv"%in%CONFIG$save)
     write.csv(Items,
-              file= paste(project.path, "/items.csv", sep=""),
+              file= paste(project.path, "/items-list.csv", sep=""),
               row.names = FALSE
               )	
   print(key_fields)			
