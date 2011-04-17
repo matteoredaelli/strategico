@@ -40,7 +40,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
                                         # NA2value=LTPCONFIG$NA2value, range=LTPCONFIG$range)
   
   ## write results in .RData
-  if("Rdata"%in%CONFIG$save) save(file =  paste(output.path, "/item-results.RData", sep = ""), model)
+  if("model"%in%CONFIG$save) save(file =  paste(output.path, "/model.RData", sep = ""), model)
   if (!is.null(model$BestModel)) {
     ## write data and prediction in .csv
     prediction= data.frame(model[[model$BestModel]]$prediction)
