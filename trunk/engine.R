@@ -111,15 +111,18 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
 }  }
 }
 
-ExportDataToDB <- function(data, tablename, key_values, verbose=FALSE) {
+ExportDataToDB <- function(data, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=TRUE) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
-
-  delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
-  if(!is.null(delete_sql)) {
-    #print(delete_sql)
-    sqlQuery(channel, delete_sql)
+  if(!is.null(key_values)) {
+    
+    delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
+    if(!is.null(delete_sql)) {
+      ## print(delete_sql)
+      sqlQuery(channel, delete_sql)
+    }
   }
-  sqlSave(channel, data, tablename=tablename, rownames=FALSE, append=TRUE, verbose=verbose)
+  
+  sqlSave(channel, data, tablename=tablename, rownames=rownames, append=append, verbose=verbose)
   odbcClose(channel)
 }
 
@@ -316,7 +319,7 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
   colnames(item_data) <- vals.names
   save(item_data, file= paste(folder, "item.Rdata", sep="/"))
   
-  if("item_csv"%in%CONFIG$save)
+  if("items_csv"%in%CONFIG$save)
     write.csv(item_data,
               file= paste(folder, "item.csv", sep="/"),
               row.names = FALSE
@@ -366,11 +369,15 @@ UpdateItemsData <- function(project.path, projectData) {
  
   save( Items, file=outfile)
 
-  if("item_csv"%in%CONFIG$save)
+  if("items_csv"%in%CONFIG$save)
     write.csv(Items,
               file= paste(project.path, "/items-list.csv", sep=""),
               row.names = FALSE
-              )	
+              )
+  if("items_db"%in%CONFIG$save) {
+    tablename = paste(CONFIG$project.name, "items", sep="_")
+    ExportDataToDB(Items, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=FALSE)
+  }
   print(key_fields)			
   .UpdateItemsDataRecursively(project.path, projectData, keys=key_fields, values=NULL )
   
