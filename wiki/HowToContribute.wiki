@@ -6,7 +6,7 @@ If you want to contribute to improve this software, you are welcome! You can con
  
  * *using and distributing this software* and let us know where/how 
  * *advertising*: link and share this project to other web sites, blogs and forums
- * submitting *feedbacks* and *statistical suggestions* in the Issue tab
+ * submitting *feedbacks* and *statistical suggestions* in the Issue tab or [https://spreadsheets.google.com/viewform?formkey=dFF1Z1NTN1FpeW1pSi1HRlNueFp1Q0E6MQ here]
  * submitting *patches* (bugs and features) and then *becoming a committer* of this project
 
 Regards
