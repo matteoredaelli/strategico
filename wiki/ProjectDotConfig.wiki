@@ -18,8 +18,11 @@
 
 == save ==
 
+ * images: generates charts, html page, ...
  * report: generates charts, html page, ...
- * csv: save only predicted data in cols
+ * csv: save imported item data to csv, save only predicted data in cols
+ * db: save historical and predicted data to DB 
  * t_csv: save only predicted data in cols
  * fullcsv: save historical and predicted data in rows
- * summary
+ * summary_db
+ * summary_csv
