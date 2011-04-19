@@ -28,5 +28,6 @@ print(msg)
 
 project.path <- paste(STRATEGICO$projects.home, project.name, sep="/")
 
-if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
-EvalItemsFromDB(project.name=project.name, value=item.value, verbose=TRUE)
+CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
+
+EvalItemsFromDB(project.name=project.name, value=item.value, verbose=TRUE, CONFIG)

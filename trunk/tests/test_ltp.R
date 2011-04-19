@@ -15,12 +15,13 @@
 
 source("eval_ltp.R")
 
-test.EvalItemValue <- function() {
-  project.path <- "projects/sample"
-  c <- GetProjectConfig("projects/sample/project.config")
+project.path <- "projects/sample"
+CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
 
-  e1     <- EvalItemValue(project.path, keys=c("IT"), value="VALUE1")
-  e1.bis <- EvalItemFromProjectData(project.path, keys=c("IT"), value="VALUE1")
+test.EvalItemValue <- function() {
+
+  e1     <- EvalItemValue(project.path, keys=c("IT"), value="VALUE1", CONFIG=CONFIG)
+  e1.bis <- EvalItemFromProjectData(project.path, keys=c("IT"), value="VALUE1", CONFIG=CONFIG)
   checkEquals(
               e1,
               e1.bis
@@ -31,15 +32,15 @@ test.EvalItemValue <- function() {
               )
   checkEquals(
               length( colnames(e1)),
-              c$param$n.ahead
+              CONFIG$param$n.ahead
               )
   checkEquals(
               c("2011-1", "2011-2", "2012-1", "2012-2", "2013-1", "2013-2", "2014-1", "2014-2"),
               colnames(e1)
               )
   
-  e11     <- EvalItemValue(project.path, keys=c("IT"), value="VALUE2")
-  e11.bis <- EvalItemFromProjectData(project.path, keys=c("IT"), value="VALUE2")
+  e11     <- EvalItemValue(project.path, keys=c("IT"), value="VALUE2", CONFIG=CONFIG)
+  e11.bis <- EvalItemFromProjectData(project.path, keys=c("IT"), value="VALUE2", CONFIG=CONFIG)
   checkEquals(
               e11,
               e11.bis
@@ -49,8 +50,8 @@ test.EvalItemValue <- function() {
               as.vector(e11[1,])
               )
 
-  e2     <- EvalItemValue(project.path, keys=c("IT", "CAR"), value="VALUE1")
-  e2.bis <- EvalItemFromProjectData(project.path, c("IT", "CAR"), value="VALUE1")
+  e2     <- EvalItemValue(project.path, keys=c("IT", "CAR"), value="VALUE1", CONFIG=CONFIG)
+  e2.bis <- EvalItemFromProjectData(project.path, c("IT", "CAR"), value="VALUE1", CONFIG=CONFIG)
   checkEquals(
               e2,
               e2.bis
@@ -64,8 +65,8 @@ test.EvalItemValue <- function() {
               colnames(e2)
               )
 
-  e22     <- EvalItemValue(project.path, keys=c("IT", "CAR"), value="VALUE2")
-  e22.bis <- EvalItemFromProjectData(project.path, c("IT", "CAR"), value="VALUE2")
+  e22     <- EvalItemValue(project.path, keys=c("IT", "CAR"), value="VALUE2", CONFIG=CONFIG)
+  e22.bis <- EvalItemFromProjectData(project.path, c("IT", "CAR"), value="VALUE2", CONFIG=CONFIG)
   checkEquals(
               e22,
               e22.bis
@@ -86,12 +87,26 @@ test.EvalItemValue <- function() {
 }
 
 test.EvalItemFromProjectData <- function() {
-  project.path <- "projects/sample"
-  
-  e1 <- EvalItemFromProjectData(project.path, keys=c("","CAR"), value="VALUE1")
+
+  e1 <- EvalItemFromProjectData(project.path, keys=c("","CAR"), value="VALUE1", CONFIG=CONFIG)
   checkEquals(
               c(4054, 1915, 3882, 2437, 3949, 2802, 4118, 3100),
               as.vector(e1[1,])
               )
 }
   
+test.EvalTSString <- function() {
+
+  e1 <- EvalTSString(project.path, keys="TEST-1",
+                     ts.string="10,7.6,9.2,8.67,9,3.6,9.0,5.9,6.9,6.5,8.1,9,8,7,6,7,8,6",
+                     period.start="2001-1", period.freq=3, CONFIG=CONFIG)
+  checkEquals(
+              c(8, 7, 6, 7, 7, 6, 7, 6),
+              as.vector(e1[1,])
+              )
+
+  checkEquals(
+              c("2007-1", "2007-2", "2007-3", "2008-1", "2008-2", "2008-3", "2009-1", "2009-2"),
+              colnames(e1)
+              )
+}
