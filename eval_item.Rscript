@@ -29,5 +29,6 @@ print(msg)
 
 CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
 
-eval(parse(text=paste("param=list(",item.params,")")))
+param <- EvalParamString(item.params)
+
 EvalItem(project.path=project.path, item.path=item.path, values=item.values, param=param, CONFIG=CONFIG)

@@ -104,6 +104,20 @@ test.BuildKeyNames <- function() {
                 )
 }
 
+test.EvalParamString <- function() {
+  param <- EvalParamString("n.ahead=8,range=c(-Inf,Inf),NA2value=0,n.min=10,try.models=c('mean','trend','lm','es','arima'),logtransform=FALSE,stepwise=TRUE,formula.right.lm='S*trend+S*trend2',criterion='BestAIC',criterionExcludeMaxGreaterThan=2,negToZero=TRUE,predictInteger=TRUE")
+
+  checkEquals( 12, length(param))
+
+  checkEquals(8, param$n.ahead)
+  
+  checkEquals(
+              c("mean", "trend", "lm", "es", "arima"),
+              param$try.models
+              )
+}            
+              
+
 test.GetFields <- function() {
   checkEquals(
               c("KEY1", "KEY2"),
