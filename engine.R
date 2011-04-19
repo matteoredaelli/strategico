@@ -55,28 +55,28 @@ BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_values, na.rm=FALSE
   gsub("__WHERE_OPT__", where_opt, delete_sql)
 }
 
-EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL) {
+EvalItem <- function(project.path, keys=NULL, item.path=NULL, values = NULL, param=NULL, CONFIG) {
   for (i in 1:length(values)) {
     value <- values[i]
-    EvalItemValue(project.path, keys=keys, item.path=item.path, value = value, param=param)
+    EvalItemValue(project.path, keys=keys, item.path=item.path, value = value, param=param, CONFIG=CONFIG)
   }
 }
 
-EvalItemValue <- function(project.path, keys=NULL, item.path=NULL, value = "VALUE1", param=NULL) {
+EvalItemValue <- function(project.path, keys=NULL, item.path=NULL, value = "VALUE1", param=NULL, CONFIG) {
   if(!is.null(item.path)) keys=strsplit(item.path,"/")[[1]]
 
   item.data <- GetItemData(project.path, keys)
-  EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param)
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param, CONFIG=CONFIG)
 }
 
-EvalItemFromProjectData <- function(project.path, keys, value = "VALUE1", param=NULL) {
+EvalItemFromProjectData <- function(project.path, keys, value = "VALUE1", param=NULL, CONFIG) {
   p <- GetProjectData(project.path)
   item.data <- ExtractAndAggregateItemDataFromProjectData(p, keys, value)
-  EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param)
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = value, param=param, CONFIG=CONFIG)
 }
 
-EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, param=NULL) {
-  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, param=NULL, CONFIG) {
+  #if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
 
   if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
   print( paste("  Time series: length=", nrow(item.data)))
@@ -86,12 +86,12 @@ EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, para
   directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
-  prediction = EvalItemDataByValue(project.path, keys, item.data, value=value, output.path=directory, param=param)
+  prediction = EvalItemDataByValue(project.path, keys, item.data, value=value, output.path=directory, param=param, CONFIG=CONFIG)
   print(t(prediction))
   t(prediction)
 }
 
-EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
+EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
   tablename = GetSummaryDBTable(project.name, value)
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
@@ -107,26 +107,34 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
         print(items[i,idKEYs]);
         if( (all(is.na(items[i,idKEYs]))) | (!all(sapply( items[i,idKEYs][!is.na(items[i,idKEYs])], is.character )) ))
                 return(NA)
-        else { print(items[i,idparam]);EvalItem(project.path, keys=items[i,idKEYs][!is.na(items[i,idKEYs])], values = value, param=eval(parse(text=paste("list(", gsub("Parameters='","", items[i,idparam]),")",sep="")))  )
+        else { print(items[i,idparam]);EvalItem(project.path, keys=items[i,idKEYs][!is.na(items[i,idKEYs])], CONFIG=CONFIG, values = value, param=eval(parse(text=paste("list(", gsub("Parameters='","", items[i,idparam]),")",sep="")))  )
 }  }
 }
 
-EvalTS <- function(project.path, keys=NULL, ts.values, period.start, period.freq, param=NULL) {
+EvalTS <- function(project.path, keys=NULL, ts.values, period.start, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
   item.data <- cbind(ts.values)
   rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
-  period.end.string <- rownames(item.data)[ length(rownames(item.data))]
-  period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
   colnames(item.data) <- c("VALUE1")
 
-  EvalItemData(project.path, keys=keys, item.data=item.data, values = "VALUE1", param=param)
+  CONFIG$period.start = period.start
+  CONFIG$period.freq = period.freq
+  
+  if (calculate.period.end) {  
+    period.end.string <- rownames(item.data)[ length(rownames(item.data))]
+    period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
+    CONFIG$period.end = period.end
+  } # otherwise the project config value will be used
+  
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = "VALUE1", param=param, CONFIG=CONFIG)
 }
 
-EvalTSString <- function(project.path, keys=NULL, ts.string, period.start.string, period.freq, param=NULL) {
+EvalTSString <- function(project.path, keys=NULL, ts.string, period.start.string, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
   period.start <- unlist(lapply(strsplit(period.start.string, "-"), as.numeric))
   period.freq <- as.integer(period.freq)
 
-  EvalTS(project.path, keys=keys, ts.values=ts.values, period.start=period.start, period.freq=period.freq, param=param)
+  EvalTS(project.path, keys=keys, ts.values=ts.values, period.start=period.start,
+         period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, CONFIG=CONFIG)
 }
 
 ExportDataToDB <- function(data, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=TRUE) {
