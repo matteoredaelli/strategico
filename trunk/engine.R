@@ -111,6 +111,24 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE) {
 }  }
 }
 
+EvalTS <- function(project.path, keys=NULL, ts.values, period.start, period.freq, param=NULL) {
+  item.data <- cbind(ts.values)
+  rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+  period.end.string <- rownames(item.data)[ length(rownames(item.data))]
+  period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
+  colnames(item.data) <- c("VALUE1")
+
+  EvalItemData(project.path, keys=keys, item.data=item.data, values = "VALUE1", param=param)
+}
+
+EvalTSString <- function(project.path, keys=NULL, ts.string, period.start.string, period.freq, param=NULL) {
+  ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
+  period.start <- unlist(lapply(strsplit(period.start.string, "-"), as.numeric))
+  period.freq <- as.integer(period.freq)
+
+  EvalTS(project.path, keys=keys, ts.values=ts.values, period.start=period.start, period.freq=period.freq, param=param)
+}
+
 ExportDataToDB <- function(data, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=TRUE) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
   if(!is.null(key_values)) {
