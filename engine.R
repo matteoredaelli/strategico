@@ -42,8 +42,8 @@ BuildParamString <- function(param) {
   gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=",")))
 }
 
-BuildPeriodRange <- function(period.start, period.freq, n) {
-  sapply (0:(n-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
+  sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 }
   
 BuildSQLstmtDeleteRecordsWithKeys <- function(tablename, key_values, na.rm=FALSE) {
