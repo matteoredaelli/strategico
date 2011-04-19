@@ -79,7 +79,30 @@ test.EvalItemValue <- function() {
               c("2011-1", "2011-2", "2012-1", "2012-2", "2013-1", "2013-2", "2014-1", "2014-2"),
               colnames(e22)
               )
+}
+
+test.EvalItemValue.param <- function() {
+
+  param.string <- "n.ahead=3"
+  param <- EvalParamString(param.string)
   
+  ## check passing parameters
+  
+  e3     <- EvalItemValue(project.path, keys=c("DE", "CAR", "ALFA"),
+                          value="VALUE2", CONFIG=CONFIG, param=param)
+  checkEquals(
+              c(3998, 3766, 4094),
+              as.vector(e3[1,])
+              )
+
+  param.string <- "n.ahead=3,try.models=c('mean','trend','lm')"
+  param <- EvalParamString(param.string)
+  e4     <- EvalItemValue(project.path, keys=c("DE", "CAR", "BMW"),
+                          value="VALUE2", CONFIG=CONFIG, param=param)
+  checkEquals(
+              c(2026, 9098, 2328),
+              as.vector(e4[1,])
+              )
   ## aggiungere qui' delle chiamate dirette alla funzione ltp()
   ## item.data = ...
   ## model = ltp(...)

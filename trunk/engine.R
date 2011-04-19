@@ -111,6 +111,11 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
 }  }
 }
 
+EvalParamString <- function(param.string) {
+  eval(parse(text=paste("param=list(",param.string,")")))
+  param
+}
+
 EvalTS <- function(project.path, keys=NULL, ts.values, period.start, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
   item.data <- cbind(ts.values)
   rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
