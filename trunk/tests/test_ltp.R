@@ -19,7 +19,27 @@ project.path <- "projects/sample"
 CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
 
 test.EvalItemValue <- function() {
-
+  ## NO DATA time series
+  e0     <- EvalItemValue(project.path, keys=c("ES","MOTO","DUCATI"), value="VALUE1", CONFIG=CONFIG)
+  e0.bis <- EvalItemFromProjectData(project.path, keys=c("ES","MOTO","DUCATI"), value="VALUE1", CONFIG=CONFIG)
+  checkEquals(
+              e0,
+              e0.bis
+              )
+  checkEquals(
+              c(0, 0, 0, 0, 0, 0, 0, 0),
+              as.vector(e0[1,])
+              )
+  checkEquals(
+              length( colnames(e0)),
+              CONFIG$param$n.ahead
+              )
+  
+  checkEquals(
+              c("2011-1", "2011-2", "2012-1", "2012-2", "2013-1", "2013-2", "2014-1", "2014-2"),
+              colnames(e0)
+              )
+  
   e1     <- EvalItemValue(project.path, keys=c("IT"), value="VALUE1", CONFIG=CONFIG)
   e1.bis <- EvalItemFromProjectData(project.path, keys=c("IT"), value="VALUE1", CONFIG=CONFIG)
   checkEquals(

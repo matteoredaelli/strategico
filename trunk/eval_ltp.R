@@ -44,9 +44,12 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
   if (!is.null(model$BestModel)) {
     ## write data and prediction in .csv
     prediction= data.frame(model[[model$BestModel]]$prediction)
-    rownames(prediction)=sapply (0:(length(model[[model$BestModel]]$prediction)-1),function(i) paste(.incSampleTime(now=start(model[[model$BestModel]]$prediction), period.freq = frequency(model[[model$BestModel]]$prediction), increment = i),collapse="-"))
-    #keydf = data.frame(t(keys)) 
-                                        #names(keydf) = names(CONFIG$keys)
+    
+    #n <-length(model[[model$BestModel]]$prediction)
+    #now <- start(model[[model$BestModel]]$prediction)
+    #freq <- frequency(model[[model$BestModel]]$prediction)
+    #rownames(prediction)=BuildPeriodRange(period.start=now, period.freq=freq, n=n, shift=0) 
+    rownames(prediction)=BuildPeriodRange(period.start=CONFIG$period.end, period.freq=CONFIG$period.freq, n=param$n.ahead, shift=1)
     return.code <- 0 
     ## write report
     if("images"%in%CONFIG$save) {
@@ -62,8 +65,10 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
     return.code <- 1 
     print("No data")
     prediction=data.frame(rep(0, param$n.ahead))
-        rownames(prediction)=
-        sapply (1:CONFIG$param$n.ahead, function(i) paste(.incSampleTime(now=CONFIG$period.end, period.freq = CONFIG$period.freq, increment = i),collapse="-"))
+
+    rownames(prediction)=BuildPeriodRange(period.start=CONFIG$period.end, period.freq=CONFIG$period.freq, n=param$n.ahead, shift=1) 
+    #rownames(prediction)=
+    #    sapply (1:CONFIG$param$n.ahead, function(i) paste(.incSampleTime(now=CONFIG$period.end, period.freq = CONFIG$period.freq, increment = i),collapse="-"))
 
   }
     #colnames(prediction)=colnames(model$values)

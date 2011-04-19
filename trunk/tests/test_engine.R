@@ -50,7 +50,10 @@ test.BuildPeriodRange <- function() {
               c("2001-2","2001-3","2002-1","2002-2","2002-3"),
               BuildPeriodRange(c(2001,2), 3, 5)
               )
-  
+  checkEquals(
+              c("2001-3","2002-1","2002-2","2002-3","2003-1"),
+              BuildPeriodRange(c(2001,2), 3, 5, shift=1)
+              )
 }
 
 test.BuildSQLstmtDeleteRecordsWithKeys <- function() {
