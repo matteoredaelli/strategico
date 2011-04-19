@@ -25,19 +25,20 @@ keys <- args[7]
 ts.string <- args[8]
 ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 period.start.string <- args[9]
+
+assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+
 period.start <- unlist(lapply(strsplit(period.start.string, "-"), as.numeric))
 period.freq <- as.integer(args[10])
 item.params <- args[11]
 
-
 item.data <- cbind(ts.values)
-
 rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
-period.end.string <- rownames(item.data)[ length(rownames(item.data))]
-period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
+
 colnames(item.data) <- c("VALUE1")
 
-assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
+period.end.string <- rownames(item.data)[ length(rownames(item.data))]
+period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
 
 CONFIG$period.start = period.start
 CONFIG$period.end = period.end
@@ -58,5 +59,4 @@ msg <- paste("period.freq=", period.freq, sep="")
 print(msg)
 eval(parse(text=paste("param=list(",item.params,")")))
 
-summary(item.data)
-EvalItemData(project.path=project.path, keys=keys, item.data=item.data, values="VALUE1", param=param)
+EvalTSString(project.path=project.path, keys=keys, ts.string=ts.string, period.start.string=period.start.string, period.freq=period.freq, param=param)
