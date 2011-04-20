@@ -15,6 +15,7 @@
 
 source("engine.R")
 
+project.path <- "projects/sample"
 
 test.BuildFilterWithKeys <- function() {
    checkEquals(
@@ -173,8 +174,33 @@ test.GetProjectConfig <- function() {
               )
 }
 
+test.ImportItemsData <- function() {
+  ImportItemsData(project.path=project.path)
+}
+
+
+test.incSampleTime <- function() {
+  checkEquals(
+              c(2002,1),
+              .incSampleTime(c(2001,2), period.freq = 3, increment = 2)
+              )
+  checkEquals(
+              c(2014,1),
+              .incSampleTime(c(2012,2), period.freq = 2, increment = 3)
+              )
+}
+
+test.PeriodStringToVector <- function() {
+  checkEquals(c(2001, 1),
+              PeriodStringToVector("2001-1")
+              )
+  checkEquals(c(1987, 12),
+              PeriodStringToVector("1987-12")
+              )
+}
+
 test.ProjectData <- function() {
-  p <- GetProjectData("projects/sample")
+  p <- GetProjectData(project.path)
   
   checkEquals(
               c("KEY1", "KEY2", "KEY3", "PERIOD", "VALUE1", "VALUE2"),
@@ -199,25 +225,5 @@ test.ProjectData <- function() {
   checkEquals(
               c("2001-2", "2002-2", "2003-1", "2003-2", "2004-1"),
               rownames(item.data)[1:5]
-              )
-}
-
-test.incSampleTime <- function() {
-  checkEquals(
-              c(2002,1),
-              .incSampleTime(c(2001,2), period.freq = 3, increment = 2)
-              )
-  checkEquals(
-              c(2014,1),
-              .incSampleTime(c(2012,2), period.freq = 2, increment = 3)
-              )
-}
-
-test.PeriodStringToVector <- function() {
-  checkEquals(c(2001, 1),
-              PeriodStringToVector("2001-1")
-              )
-  checkEquals(c(1987, 12),
-              PeriodStringToVector("1987-12")
               )
 }
