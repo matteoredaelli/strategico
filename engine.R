@@ -116,12 +116,14 @@ EvalParamString <- function(param.string) {
   param
 }
 
-EvalTS <- function(project.path, keys=NULL, ts.values, period.start, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
+EvalTS <- function(project.path, keys=NULL, ts.values, ts.periods, period.start, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
   item.data <- cbind(ts.values)
-  rownames(item.data) <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+  
+  rownames(item.data) <-ts.periods
   colnames(item.data) <- c("VALUE1")
 
-  CONFIG$period.start = period.start
+  CONFIG$period.start <-  period.start
+  
   CONFIG$period.freq = period.freq
   
   if (calculate.period.end) {  
@@ -134,11 +136,36 @@ EvalTS <- function(project.path, keys=NULL, ts.values, period.start, period.freq
 }
 
 EvalTSString <- function(project.path, keys=NULL, ts.string, period.start.string, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
-  ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
-  period.start <- unlist(lapply(strsplit(period.start.string, "-"), as.numeric))
-  period.freq <- as.integer(period.freq)
 
-  EvalTS(project.path, keys=keys, ts.values=ts.values, period.start=period.start,
+  ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
+
+  period.start <- PeriodStringToVector(period.start.string)
+  period.freq <- as.integer(period.freq)
+  
+  ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+  
+  EvalTS(project.path, keys=keys, ts.values=ts.values, ts.periods=ts.periods, period.start=period.start,
+         period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, CONFIG=CONFIG)
+}
+
+EvalTSStringWithPeriod <- function(project.path, keys=NULL, ts.string, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
+
+  ## convert a string like "2001-1:10,2002-2:11.5" into a data frame with rownames 2001-1, 2002-2 and a column VALUE1 with 10, 11.5
+  ts.list <- sapply(strsplit(ts.string, ','), function(x) strsplit(x, ':'))
+  ts.periods <- sapply(ts.list, function(x) x[1])
+  
+  ts.values <- sapply(ts.list, function(x) as.numeric(x[2]))
+
+  print("periods:")
+  print(ts.periods)
+
+  print("values:")
+  print(ts.values)
+
+  period.start <- ts.periods[1]
+  period.freq <- as.integer(period.freq)
+  
+  EvalTS(project.path, keys=keys, ts.values=ts.values, ts.periods=ts.periods, period.start=period.start,
          period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, CONFIG=CONFIG)
 }
 
@@ -328,11 +355,15 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
          ((now[2] + increment - 1)%%period.freq) + 1)
   now
 }
- 
+
+PeriodStringToVector <- function (period.string) {
+  unlist(lapply(strsplit(period.string, "-"), as.numeric))
+}
+
 .SafeName <- function(String) {
   gsub("[ '/\"\\:-<>]+", "_", String)
 }
-                         
+
 .UpdateItemsDataRecursively <- function(project.path, data, keys, values=NULL, stats=FALSE) {
   if (is.null(values))
     folder <- project.path
