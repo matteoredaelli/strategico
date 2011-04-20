@@ -76,13 +76,15 @@ EvalItemFromProjectData <- function(project.path, keys, value = "VALUE1", param=
 }
 
 EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, param=NULL, CONFIG) {
-  #if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
-
-  if(!is.null(keys)) print( paste(" Loading item: ", .GetItemName(keys) , sep=""))
-  print( paste("  Time series: length=", nrow(item.data)))
-
   value = values
-  print( paste(" Evaluating ", value,": ", CONFIG$values[value], sep=""))  
+  if(!is.null(keys)) print( paste("Loading item=", .GetItemName(keys) , sep=""))
+  
+  print( paste("Evaluating ", value, "=", CONFIG$values[value], sep=""))
+  print( paste("TS length=", nrow(item.data)))
+  print(t(item.data))
+  print( paste("period.start=", CONFIG$period.start,
+               " period.freq=", CONFIG$period.freq,
+               " period.end=", CONFIG$period.end))
   directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
@@ -100,7 +102,7 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
   items <- sqlQuery(channel, statement)
   odbcClose(channel)
   summary(items)
-   idparam = which(names(items)=="Parameters")
+  idparam = which(names(items)=="Parameters")
   idKEYs = grep("KEY",names(items))
 
   for( i in 1:dim(items)[2]) {
@@ -127,7 +129,7 @@ EvalTS <- function(project.path, keys=NULL, ts.values, ts.periods, period.start,
   CONFIG$period.freq = period.freq
   
   if (calculate.period.end) {  
-    period.end.string <- rownames(item.data)[ length(rownames(item.data))]
+    period.end.string <- rownames(item.data)[ length(ts.periods)]
     period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
     CONFIG$period.end = period.end
   } # otherwise the project config value will be used
@@ -135,14 +137,15 @@ EvalTS <- function(project.path, keys=NULL, ts.values, ts.periods, period.start,
   EvalItemData(project.path, keys=keys, item.data=item.data, values = "VALUE1", param=param, CONFIG=CONFIG)
 }
 
-EvalTSString <- function(project.path, keys=NULL, ts.string, period.start.string, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
+EvalTSString <- function(project.path, keys=NULL, ts.string, ts.periods=NULL, period.start.string, period.freq, calculate.period.end=TRUE, param=NULL, CONFIG) {
 
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
   period.start <- PeriodStringToVector(period.start.string)
   period.freq <- as.integer(period.freq)
   
-  ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+  if(is.null(ts.periods))
+     ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
   
   EvalTS(project.path, keys=keys, ts.values=ts.values, ts.periods=ts.periods, period.start=period.start,
          period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, CONFIG=CONFIG)
@@ -152,15 +155,9 @@ EvalTSStringWithPeriod <- function(project.path, keys=NULL, ts.string, period.fr
 
   ## convert a string like "2001-1:10,2002-2:11.5" into a data frame with rownames 2001-1, 2002-2 and a column VALUE1 with 10, 11.5
   ts.list <- sapply(strsplit(ts.string, ','), function(x) strsplit(x, ':'))
-  ts.periods <- sapply(ts.list, function(x) x[1])
+  ts.periods <- unlist(sapply(ts.list, function(x) x[1]))
   
-  ts.values <- sapply(ts.list, function(x) as.numeric(x[2]))
-
-  print("periods:")
-  print(ts.periods)
-
-  print("values:")
-  print(ts.values)
+  ts.values <- unlist(sapply(ts.list, function(x) as.numeric(x[2])))
 
   period.start <- ts.periods[1]
   period.freq <- as.integer(period.freq)
