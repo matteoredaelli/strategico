@@ -33,7 +33,12 @@
 ## seasonality = c("none","additive", "c/additive", "multiplicative", "c/multiplicative"),
 ## innovation = c("additive", "multiplicative"))
 
-
+library(R2HTML)
+library(hwriter)
+  
+library(forecast)
+library(ast)
+  
 ############## ltp()
 
 ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC", criterionExcludeMaxGreaterThan = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
@@ -58,10 +63,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
   
   if (is.null(try.models)) 
     try.models = c("mean","trend","lm", "arima", "es")
-  
-  library(forecast)
-  library(ast)
-  
+
   AIC <- rep(NA,5)
   names(AIC) <- c("Mean","Trend","ExponentialSmooth","LinearModel","Arima")
   IC.width <- R2 <- VarCoeff <- AIC
@@ -653,8 +655,6 @@ PlotLtpResults <- function(obj, directory=NULL, width=1000, height=600) {
 ## # crea report
 
 ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form.eval="", directory=NULL, width=1000, height=600) {
-  library(R2HTML)
-  library(hwriter)
   
   if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
