@@ -61,7 +61,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
   }
     #colnames(prediction)=colnames(model$values)
     colnames(prediction)=value
-    fullkeys <- append(keys, rep("", length(CONFIG$keys) - length(keys)))
+    fullkeys <- BuildFullKey(keys, CONFIG$keys)
     names(fullkeys) <- names(CONFIG$keys)
     if("fullcsv"%in%CONFIG$save) {
       #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
