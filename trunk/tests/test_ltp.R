@@ -139,8 +139,8 @@ test.EvalItemFromProjectData <- function() {
 }
   
 test.EvalTSString <- function() {
-
-  ts.string <- "10,7.6,9.2,8.67,9,3.6,9.0,5.9,6.9,6.5,8.1,9,8,7,6,7,8,6"
+  ts.string="10.00, 7.60, 9.20, 8.67, 9.00, 3.60, 9.00, 5.90, 6.90, 6.50, 8.10, 9.00, 8.00, 7.00, 6.00, 7.00, 8.00, 6.00"
+  #ts.string <- "10,7.6,9.2,8.67,9,3.6,9.0,5.9,6.9,6.5,8.1,9,8,7,6,7,8,6"
   e1 <- EvalTSString(project.path, keys="TEST-TS1",
                      ts.string=ts.string,
                      period.start="2001-1", period.freq=3, CONFIG=CONFIG)
@@ -165,8 +165,19 @@ test.EvalTSString <- function() {
               colnames(e1)
               )
 
+  ## testing a TS with some missing periods
+  
   e2 <- EvalTSString(project.path, keys="TEST-TS2  ",
-                     ts.string="10.00, 7.60, 9.20, 8.67, 9.00, 3.60, 9.00, 5.90, 6.90, 6.50, 8.10, 9.00, 8.00, 7.00, 6.00, 7.00, 8.00, 6.00",
+                     ts.string=ts.string,
+                     ts.periods.string="2001-1,2001-2,2002-1,2002-2,2002-3,2003-1,2003-3,2004-1,2004-2,2005-1,2005-2,2005-3,2006-1,2006-3,2007-1,2007-2,2007-3,2008-1",
                      period.start="2001-1", period.freq=3, CONFIG=CONFIG)
+  checkEquals(
+              c("2008-2", "2008-3", "2009-1", "2009-2", "2009-3", "2010-1", "2010-2", "2010-3"),
+              colnames(e2)
+              )
+  checkEquals(
+              c(5, 6, 7, 5, 6, 7, 5, 6),
+              as.vector(e2[1,])
+              )
 }
 
