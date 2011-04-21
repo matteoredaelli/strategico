@@ -27,6 +27,9 @@ BuildKeyNames <- function(key.values, na.rm=FALSE) {
 }
 
 BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) {
+  ## a filter can be like "KEY1=='IT' & KEY2=='101
+  ## see runit test file for more samples
+  
   key.values[is.na( key.values)] = ""
   key.names <- BuildKeyNames(key.values, na.rm=na.rm)
   if (na.rm)
@@ -34,7 +37,6 @@ BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) 
   quoted.keys <- gsub("^(.*)$", "'\\1'", key.values)
   paste(key.names, quoted.keys, sep=sep, collapse=collapse)
 }
-
 
 BuildParamString <- function(param) {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
@@ -192,13 +194,14 @@ ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, 
   d2
 }
   
-##trova un pattern in una lista di stringhe. utile per es per individuare le key e i value
-##restituisce la stringa
+## trova un pattern in una lista di stringhe.
+## utile per es per individuare le key e i value
+## restituisce la stringa
 .GetFields <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields),value=TRUE)
 }
 
-##restituisce l'id
+## restituisce l'id
 .GetFieldsId <- function(fields,pattern) {
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
 }
@@ -232,9 +235,10 @@ GetProjectData <- function(project.path) {
   projectData
 }
 
-GetProjectConfig <- function(project.config.fileName="project.config") { #cerca il file nella cartella : getwd()
+GetProjectConfig <- function(project.config.fileName="project.config") {
+  ## cerca il file nella cartella : getwd()
   conf=read.table(project.config.fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
-                                        #e assegnazione dei valori indicati dal file ai parametri
+  ## e assegnazione dei valori indicati dal file ai parametri
   project.name <- conf$V2[conf$V1=="project.name"]
   connector.package <- conf$V2[conf$V1=="connector.package"]
   eval.package <- conf$V2[conf$V1=="eval.package"]
@@ -329,9 +333,6 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
   UpdateItemsData(project.path, data[,c(KEY,"PERIOD",VALUE)])
 }
 
-
-###non sono riuscito a trovare .incSampleTime(
-## immagino dovrebbe fare ciÃ² che segue
 .incSampleTime <- function(now, period.freq = 2, increment = 1) {
   if (now[2] + increment - 1 <= period.freq - 1) 
     now[2] = now[2] + increment
@@ -357,7 +358,6 @@ PeriodStringToVector <- function (period.string) {
   print(folder)
   dir.create(folder, recursive = TRUE, showWarnings = FALSE)
 
-  ##print( paste("Folder=", folder, "Key=", key) )
   vals.names <- .GetFields(names(data),"value")
   temp=by(data[,vals.names,drop=FALSE],data$PERIOD, function(x) apply(x,2, sum, na.rm=TRUE))
   item_data <- as.data.frame(t(matrix(unlist(temp),nrow=length(vals.names))))
@@ -389,7 +389,7 @@ PeriodStringToVector <- function (period.string) {
 }
 
 
-###########################aggiornamento dati - crea items.Rdata e item.RData
+## creates item.Rdata e item-list
 UpdateItemsData <- function(project.path, projectData) {
   outfile <- paste(project.path, "/projectData.Rdata", sep="") 
   save( projectData, file=outfile)
