@@ -147,9 +147,7 @@ test.EvalTSString <- function() {
   
   e1.bis <- EvalTSString(project.path, keys="TEST-TS1-BIS",
                          ts.string=ts.string,
-                         ts.periods=c("2001-1", "2001-2", "2001-3", "2002-1", "2002-2", "2002-3",
-                           "2003-1", "2003-2", "2003-3", "2004-1", "2004-2", "2004-3", "2005-1",
-                           "2005-2", "2005-3", "2006-1", "2006-2", "2006-3"),
+                         ts.periods.string="2001-1,2001-2,2001-3,2002-1,2002-2,2002-3,2003-1,2003-2,2003-3,2004-1,2004-2,2004-3,2005-1,2005-2,2005-3,2006-1,2006-2,2006-3",
                          period.start="2001-1", period.freq=3, CONFIG=CONFIG)
   
   checkEquals(
@@ -172,9 +170,3 @@ test.EvalTSString <- function() {
                      period.start="2001-1", period.freq=3, CONFIG=CONFIG)
 }
 
-test.EvalTSStringWithPeriod <- function() {
-
-  e1 <- EvalTSStringWithPeriod(project.path, keys="TEST-TSP-",
-                               ts.string="2001-1:10,2001-2:7.6,2002-2:9.2,2002-3:8.67,2003-1:9,2003-2:3.6,2003-3:9.0,2004-1:5.9,2004-3:6.9,2005-1:6.5,2005-2:8.1,2006-1:9,2006-2:8,2006-3:7,2007-1:6,2007-2:7,2007-3:8,2008-1:6",
-                               period.freq=2, CONFIG=CONFIG)
-}
