@@ -15,8 +15,13 @@
 ## Authors: L. Finos, M. Redaelli
 
 library(RODBC)
+library("futile.logger")
+
 source("strategico.config")
 
+config_logger(threshold = STRATEGICO$logger.threshold)
+logger <- getLogger()
+              
 BuildFullKey <- function(keys, config.keys, fill.with="") {
   append(keys, rep(fill.with, length(config.keys) - length(keys)))
 }
@@ -83,14 +88,14 @@ EvalItemFromProjectData <- function(project.path, keys, value = "VALUE1", param=
 
 EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, param=NULL, CONFIG) {
   value = values
-  if(!is.null(keys)) print( paste("Loading item=", .GetItemName(keys) , sep=""))
+  if(!is.null(keys)) logger(INFO, paste("Loading item=", .GetItemName(keys) , sep=""))
   
-  print( paste("Evaluating ", value, "=", CONFIG$values[value], sep=""))
-  print( paste("TS length=", nrow(item.data)))
-  print(t(item.data))
-  print( paste("period.start=", CONFIG$period.start,
+  logger(INFO, paste("Evaluating ", value, "=", CONFIG$values[value], sep=""))
+  logger(INFO, paste("TS length=", nrow(item.data)))
+  logger(INFO, paste("period.start=", paste(CONFIG$period.start, collapse="-"),
                " period.freq=", CONFIG$period.freq,
-               " period.end=", CONFIG$period.end))
+               " period.end=", paste(CONFIG$period.end, collapse="-")))
+  print( t(item.data))
   directory = .GetItemPath(keys,project.path,paste("report-",CONFIG$values[value], sep = ""))
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
@@ -104,7 +109,7 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
 
   statement <- paste("select * from ", tablename, " where Run=1", sep="")
-  print(statement)
+  logger(WARN, statement)
   items <- sqlQuery(channel, statement)
   odbcClose(channel)
   summary(items)
@@ -112,11 +117,15 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
   idKEYs = grep("KEY",names(items))
 
   for( i in 1:dim(items)[2]) {
-        print(items[i,idKEYs]);
-        if( (all(is.na(items[i,idKEYs]))) | (!all(sapply( items[i,idKEYs][!is.na(items[i,idKEYs])], is.character )) ))
-                return(NA)
-        else { print(items[i,idparam]);EvalItem(project.path, keys=items[i,idKEYs][!is.na(items[i,idKEYs])], CONFIG=CONFIG, values = value, param=eval(parse(text=paste("list(", gsub("Parameters='","", items[i,idparam]),")",sep="")))  )
-}  }
+    logger(WARN, items[i,idKEYs]);
+    if( (all(is.na(items[i,idKEYs]))) | (!all(sapply( items[i,idKEYs][!is.na(items[i,idKEYs])], is.character )) ))
+      return(NA)
+    else {
+      logger(WARN, items[i,idparam])
+      EvalItem(project.path, keys=items[i,idKEYs][!is.na(items[i,idKEYs])], CONFIG=CONFIG, values = value,
+               param=eval(parse(text=paste("list(", gsub("Parameters='","", items[i,idparam]),")",sep="")))  )
+    }
+  }
 }
 
 EvalParamString <- function(param.string) {
@@ -165,7 +174,7 @@ ExportDataToDB <- function(data, tablename, key_values=NULL, verbose=FALSE, rown
     
     delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
     if(!is.null(delete_sql)) {
-      ## print(delete_sql)
+      logger(DEBUG, delete_sql)
       sqlQuery(channel, delete_sql)
     }
   }
@@ -322,14 +331,6 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
   
   if (is.null(filename)) filename=file.choose()
   data=read.csv(filename,sep=",") 
-
-  # names.data <- names(data)
-  # names(names.data) <- names(data)
-
-  # names.data[KEY]=paste(KEY,1:length(KEY),sep="")
-  # names.data[VALUE]=paste(VALUE,1:length(VALUE),sep="")
-
-  #names(data) = names.data
   
   if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
   else data$PERIOD=data[,timesKeys]
@@ -359,7 +360,7 @@ PeriodStringToVector <- function (period.string) {
   else
     folder <- paste(project.path, paste(values,collapse="/"), sep="/")
 
-  print(folder)
+  logger(WARN, folder)
   dir.create(folder, recursive = TRUE, showWarnings = FALSE)
 
   vals.names <- .GetFields(names(data),"value")

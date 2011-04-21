@@ -51,7 +51,7 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
   }
   else {
     return.code <- 1 
-    print("No data")
+    logger(INFO, "No data")
     prediction=data.frame(rep(0, param$n.ahead))
 
     rownames(prediction)=BuildPeriodRange(period.start=CONFIG$period.end, period.freq=CONFIG$period.freq, n=param$n.ahead, shift=1) 
