@@ -16,7 +16,11 @@
 
 library(RODBC)
 source("strategico.config")
-  
+
+BuildFullKey <- function(keys, config.keys, fill.with="") {
+  append(keys, rep(fill.with, length(config.keys) - length(keys)))
+}
+
 BuildKeyNames <- function(key.values, na.rm=FALSE) {
   idx = if (na.rm)
     grep('^$', key.values, invert=TRUE)
