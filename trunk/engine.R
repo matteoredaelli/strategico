@@ -248,16 +248,16 @@ GetItemData <- function(project.path, keys) {
   item_data
 }
 
-GetItemsDB <- function(project.name, value, keys) {
+GetItemsListDB <- function(project.name, value, keys) {
   filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
   sql_statement <- paste("select * from", GetDBTable(project.name, "items", value=NULL), "where", filter, sep=" ")
   logger(WARN, sql_statement)
   RunSQLQueryDB(sql_statement)
 }
 
-GetItemDB <- function(project.name, value, keys) {
+GetItemDataDB <- function(project.name, value, keys) {
   filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
-  sql_statement <- paste("select * from", GetDBTable(project.name, name="items", value=NULL), "where", filter, sep=" ")
+  sql_statement <- paste("select * from", GetDBTable(project.name, value=value), "where", filter, sep=" ")
   logger(WARN, sql_statement)
   RunSQLQueryDB(sql_statement)
 }
