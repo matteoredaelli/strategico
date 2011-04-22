@@ -183,16 +183,16 @@ ExportDataToDB <- function(data, tablename, key_values=NULL, verbose=FALSE, rown
   odbcClose(channel)
 }
 
-ExtractItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
+ExtractItemDataFromProjectData <- function(project.data, key.values, value="VALUE1") {
   filter <- BuildFilterWithKeys( key.values, sep="==", collapse=" & ", na.rm=TRUE)
-  cmd <- "subset(projectData, __FILTER__, select=c('PERIOD','__VALUE__'))"
+  cmd <- "subset(project.data, __FILTER__, select=c('PERIOD','__VALUE__'))"
   cmd <- gsub("__FILTER__", filter, cmd)
   cmd <- gsub("__VALUE__", value, cmd)
   eval(parse(text = cmd))
 }
 
-ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, value="VALUE1") {
-  d1 <- ExtractItemDataFromProjectData(projectData, key.values, value)
+ExtractAndAggregateItemDataFromProjectData <- function(project.data, key.values, value="VALUE1") {
+  d1 <- ExtractItemDataFromProjectData(project.data, key.values, value)
   options(na.action="na.omit")
   cmd <- "d2 <- aggregate(d1$__VALUE__, by=list(d1$PERIOD), FUN=sum, na.rm=TRUE)"
   cmd <- gsub("__VALUE__", value, cmd)
@@ -240,7 +240,7 @@ GetDBTable <- function(project.name, value=NULL, name=NULL) {
 GetItemsList <- function(project.path) {
   items.rdata <- paste( project.path, "items-list.Rdata", sep="/")
   load(items.rdata)
-  Items
+  project.items
 }
 
 GetItemData <- function(project.path, keys) {
@@ -269,8 +269,8 @@ GetItemDBSummary <- function(project.name, value, keys) {
 }
 
 GetProjectData <- function(project.path) {
-  load( paste(project.path, "projectData.Rdata", sep="/"))
-  projectData
+  load( paste(project.path, "project.data.Rdata", sep="/"))
+  project.data
 }
 
 GetProjectConfig <- function(project.config.fileName="project.config") {
@@ -422,43 +422,43 @@ RunSQLQueryDB <- function(sql_statement ) {
 
 
 ## creates item.Rdata e item-list
-UpdateItemsData <- function(project.path, projectData) {
-  outfile <- paste(project.path, "/projectData.Rdata", sep="") 
-  save( projectData, file=outfile)
+UpdateItemsData <- function(project.path, project.data) {
+  outfile <- paste(project.path, "/project.data.Rdata", sep="") 
+  save( project.data, file=outfile)
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
-  key_fields <- .GetFields( colnames(projectData) ,"key" )
+  key_fields <- .GetFields( colnames(project.data) ,"key" )
   
-  projectData$PERIOD <- factor(projectData$PERIOD)
+  project.data$PERIOD <- factor(project.data$PERIOD)
   for (i in key_fields){
-    projectData[,i] <- factor(projectData[,i])
-    levels(projectData[,i]) <- .SafeName(levels(projectData[,i]))
+    project.data[,i] <- factor(project.data[,i])
+    levels(project.data[,i]) <- .SafeName(levels(project.data[,i]))
   }
   
-  leaves <- unique(subset(projectData, select=key_fields) )
+  leaves <- unique(subset(project.data, select=key_fields) )
   outfile <- paste(project.path, "/items.Rdata", sep="") 
   
-  Items=leaves
+  project.items=leaves
   for (i in (ncol(leaves)):2){
     leaves[,i]=NA
     leaves= unique(leaves)
-    Items=rbind(Items,unique(leaves))
+    project.items=rbind(project.items,unique(leaves))
   }
 
   # adding ID column
-  Items <- cbind(id=1:nrow(Items),Items)
-  save( Items, file=outfile)
+  project.items <- cbind(id=1:nrow(project.items), project.items)
+  save( project.items, file=outfile)
 
   if("items_csv"%in%CONFIG$save)
-    write.csv(Items,
+    write.csv(project.items,
               file= paste(project.path, "/items.csv", sep=""),
               row.names = FALSE
               )
   if("items_db"%in%CONFIG$save) {
     tablename = GetDBTable(CONFIG$project.name, value=NULL, name="items")
-    ExportDataToDB(Items, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=FALSE)
+    ExportDataToDB(project.items, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=FALSE)
   }
   print(key_fields)			
-  .UpdateItemsDataRecursively(project.path, projectData, keys=key_fields, values=NULL )
+  .UpdateItemsDataRecursively(project.path, project.data, keys=key_fields, values=NULL )
   
 } # end function
