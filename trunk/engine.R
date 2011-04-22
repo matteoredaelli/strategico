@@ -247,7 +247,7 @@ GetItemDBSummary <- function(project.name, value, keys) {
   filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
   sql_statement <- paste("select * from", GetSummaryDBTable(project.name, value), "where", filter, sep=" ")
   logger(WARN, sql_statement)
-  RunSQLQueryDB(DB, DBUSER, DBPWD, sql_statement)
+  RunSQLQueryDB(STRATEGICO, sql_statement)
 }
 
 GetProjectData <- function(project.path) {
@@ -321,7 +321,7 @@ ImportItemsData <- function(project.path) {
 
 ##input  da db. 
 ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
-  result <- RunSQLQueryDB(DB, DBUSER, DBPWD, sql_statement)
+  result <- RunSQLQueryDB(STRATEGICO, sql_statement)
   UpdateItemsData(project.path, result)
 }
 
@@ -353,8 +353,8 @@ PeriodStringToVector <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
 
-RunSQLQueryDB <- function(DB, DBUSER, DBPWD, sql_statement ) {
-  channel <- odbcConnect(DB, DBUSER, DBPWD)
+RunSQLQueryDB <- function(STRATEGICO, sql_statement ) {
+  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
   result <- sqlQuery(channel, sql_statement)
   odbcClose(channel)
 
