@@ -436,7 +436,7 @@ UpdateItemsData <- function(project.path, projectData) {
   }
   
   leaves <- unique(subset(projectData, select=key_fields) )
-  outfile <- paste(project.path, "/items-list.Rdata", sep="") 
+  outfile <- paste(project.path, "/items.Rdata", sep="") 
   
   Items=leaves
   for (i in (ncol(leaves)):2){
@@ -444,16 +444,18 @@ UpdateItemsData <- function(project.path, projectData) {
     leaves= unique(leaves)
     Items=rbind(Items,unique(leaves))
   }
- 
+
+  # adding ID column
+  Items <- cbind(id=1:nrow(Items),Items)
   save( Items, file=outfile)
 
   if("items_csv"%in%CONFIG$save)
     write.csv(Items,
-              file= paste(project.path, "/items-list.csv", sep=""),
+              file= paste(project.path, "/items.csv", sep=""),
               row.names = FALSE
               )
   if("items_db"%in%CONFIG$save) {
-    tablename = paste(CONFIG$project.name, "items", sep="_")
+    tablename = GetDBTable(CONFIG$project.name, value=NULL, name="items")
     ExportDataToDB(Items, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=FALSE)
   }
   print(key_fields)			
