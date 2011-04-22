@@ -43,6 +43,11 @@ test.BuildFilterWithKeys <- function() {
   checkEquals(
               "KEY1=='IT' & KEY3=='101'", 
                BuildFilterWithKeys( c("IT", NA, "101"), sep="==", collapse=" & ", na.rm=TRUE)
+              )
+  ## sql filter
+  checkEquals(
+              "KEY1='IT' and KEY2='' and KEY3='101'", 
+               BuildFilterWithKeys( c("IT", NA, "101"), sep="=", collapse=" and ", na.rm=FALSE)
               ) 
 }
 
