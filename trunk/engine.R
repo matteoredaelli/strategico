@@ -194,14 +194,17 @@ ExtractItemDataFromProjectData <- function(project.data, key.values, value="VALU
 ExtractAndAggregateItemDataFromProjectData <- function(project.data, key.values, value="VALUE1") {
   d1 <- ExtractItemDataFromProjectData(project.data, key.values, value)
   options(na.action="na.omit")
-  cmd <- "d2 <- aggregate(d1$__VALUE__, by=list(d1$PERIOD), FUN=sum, na.rm=TRUE)"
-  cmd <- gsub("__VALUE__", value, cmd)
-  eval(parse(text = cmd))
+  #cmd <- "d2 <- aggregate(d1$__VALUE__, by=list(d1$PERIOD), FUN=sum, na.rm=TRUE)"
+  #cmd <- gsub("__VALUE__", value, cmd)
+  #eval(parse(text = cmd))
 
+  d2 <- aggregate(d1[[value]],  by=list(d1[["PERIOD"]]),  FUN=sum, na.rm=TRUE)
+  names(d2) <- c('PERIOD', value)
+  
   ## change names
-  cmd <- "names(d2) <- c('PERIOD', '__VALUE__')"
-  cmd <- gsub("__VALUE__", value, cmd)
-  eval(parse(text = cmd))
+  #cmd <- "names(d2) <- c('PERIOD', '__VALUE__')"
+  #cmd <- gsub("__VALUE__", value, cmd)
+  #eval(parse(text = cmd))
   rownames(d2) <- d2$PERIOD
   d2$PERIOD <- NULL
   d2
