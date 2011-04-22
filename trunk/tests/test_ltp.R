@@ -167,7 +167,7 @@ test.EvalTSString <- function() {
 
   ## testing a TS with some missing periods
   
-  e2 <- EvalTSString(project.path, keys="TEST-TS2  ",
+  e2 <- EvalTSString(project.path, keys="TEST-TS2",
                      ts.string=ts.string,
                      ts.periods.string="2001-1,2001-2,2002-1,2002-2,2002-3,2003-1,2003-3,2004-1,2004-2,2005-1,2005-2,2005-3,2006-1,2006-3,2007-1,2007-2,2007-3,2008-1",
                      period.start="2001-1", period.freq=3, CONFIG=CONFIG)
@@ -180,10 +180,13 @@ test.EvalTSString <- function() {
               as.vector(e2[1,])
               )
 
-  e3 <- EvalTSString(project.path, keys="TEST-TS3  ",
+  e3 <- EvalTSString(project.path, keys="TEST-TS3 ",
                      ts.string="33,244,225,201,101,103,51,40,24,44,73,120,106",
 #                     ts.periods.string="2001-1,2001-2,2002-1,2002-2,2002-3,2003-1,2003-3,2004-1,2004-2,2005-1,2005-2,2005-3,2006-1,2006-3,2007-1,2007-2,2007-3,2008-1",
                      period.start="2010-4", period.freq=12, CONFIG=CONFIG)
-  
+  checkEquals(
+              c(5, 6, 7, 5, 6, 7, 5, 6),  # RANDOM... IT FAILS.....
+              as.vector(e3[1,])
+              )
 
 }
