@@ -243,6 +243,13 @@ GetItemData <- function(project.path, keys) {
   item_data
 }
 
+GetItemDBSummary <- function(project.name, value, keys) {
+  filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
+  sql_statement <- paste("select * from", project_name, "where", filter, sep=" ")
+  logger(WARN, sql_statement)
+  RunSQLQueryDB(DB, DBUSER, DBPWD, sql_statement)
+}
+
 GetProjectData <- function(project.path) {
   load( paste(project.path, "projectData.Rdata", sep="/"))
   projectData
@@ -314,11 +321,7 @@ ImportItemsData <- function(project.path) {
 
 ##input  da db. 
 ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
-  
-  channel <- odbcConnect(DB, DBUSER, DBPWD)
-  result <- sqlQuery(channel, sql_statement)
-  odbcClose(channel)
-
+  result <- RunSQLQueryDB(DB, DBUSER, DBPWD, sql_statement)
   UpdateItemsData(project.path, result)
 }
 
@@ -348,6 +351,14 @@ ImportItemsDataFromCSV <- function(project.path, filename=NULL, KEY=c("KEY1","KE
 
 PeriodStringToVector <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
+}
+
+RunSQLQueryDB <- function(DB, DBUSER, DBPWD, sql_statement ) {
+  channel <- odbcConnect(DB, DBUSER, DBPWD)
+  result <- sqlQuery(channel, sql_statement)
+  odbcClose(channel)
+
+  result
 }
 
 .SafeName <- function(String) {
