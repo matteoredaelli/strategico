@@ -245,7 +245,7 @@ GetItemData <- function(project.path, keys) {
 
 GetItemDBSummary <- function(project.name, value, keys) {
   filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
-  sql_statement <- paste("select * from", GetSummaryDBTable(project_name, value), "where", filter, sep=" ")
+  sql_statement <- paste("select * from", GetSummaryDBTable(project.name, value), "where", filter, sep=" ")
   logger(WARN, sql_statement)
   RunSQLQueryDB(DB, DBUSER, DBPWD, sql_statement)
 }
