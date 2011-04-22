@@ -206,7 +206,12 @@ ExtractAndAggregateItemDataFromProjectData <- function(projectData, key.values, 
   d2$PERIOD <- NULL
   d2
 }
-  
+
+GetDBTable <- function(project.name, value=NULL, name=NULL) {
+  ext <- paste(c(value, name), collapse="_")
+  paste(project.name, ext, sep="_")
+}
+
 ## trova un pattern in una lista di stringhe.
 ## utile per es per individuare le key e i value
 ## restituisce la stringa
@@ -243,11 +248,24 @@ GetItemData <- function(project.path, keys) {
   item_data
 }
 
+GetItemsDB <- function(project.name, value, keys) {
+  filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
+  sql_statement <- paste("select * from", GetDBTable(project.name, "items", value=NULL), "where", filter, sep=" ")
+  logger(WARN, sql_statement)
+  RunSQLQueryDB(sql_statement)
+}
+
+GetItemDB <- function(project.name, value, keys) {
+  filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
+  sql_statement <- paste("select * from", GetDBTable(project.name, name="items", value=NULL), "where", filter, sep=" ")
+  logger(WARN, sql_statement)
+  RunSQLQueryDB(sql_statement)
+}
 GetItemDBSummary <- function(project.name, value, keys) {
   filter <- BuildFilterWithKeys( keys, sep="=", collapse=" and ", na.rm=FALSE)
-  sql_statement <- paste("select * from", GetSummaryDBTable(project.name, value), "where", filter, sep=" ")
+  sql_statement <- paste("select * from", GetDBTable(project.name, name="summary", value=value), "where", filter, sep=" ")
   logger(WARN, sql_statement)
-  RunSQLQueryDB(STRATEGICO, sql_statement)
+  RunSQLQueryDB(sql_statement)
 }
 
 GetProjectData <- function(project.path) {
@@ -310,9 +328,7 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
               <input type=\"submit\" name=\"submit\" value=\"Run\" />                     
          </form>",sep="")
 }
-GetSummaryDBTable <- function(project.name, value) {
-  paste(project.name, value, "summary", sep="_")
-}
+
 
 ImportItemsData <- function(project.path) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
@@ -321,7 +337,7 @@ ImportItemsData <- function(project.path) {
 
 ##input  da db. 
 ImportItemsDataFromDB <- function(project.path, DB, DBUSER, DBPWD, sql_statement ) {
-  result <- RunSQLQueryDB(STRATEGICO, sql_statement)
+  result <- RunSQLQueryDB(sql_statement)
   UpdateItemsData(project.path, result)
 }
 
@@ -353,7 +369,7 @@ PeriodStringToVector <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
 
-RunSQLQueryDB <- function(STRATEGICO, sql_statement ) {
+RunSQLQueryDB <- function(sql_statement ) {
   channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
   result <- sqlQuery(channel, sql_statement)
   odbcClose(channel)
