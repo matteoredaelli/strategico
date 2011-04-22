@@ -150,7 +150,18 @@ test.EvalParamString <- function() {
               )
 }            
               
-
+test.GetDBTable <- function() {
+  checkEquals("sample_VALUE1_summary",
+              GetDBTable("sample", value="VALUE1", "summary")
+              )
+  checkEquals("sample_VALUE1",
+              GetDBTable("sample", value="VALUE1")
+              )
+  checkEquals("sample_items",
+              GetDBTable("sample", value=NULL, name="items")
+              )
+}
+  
 test.GetFields <- function() {
   checkEquals(
               c("KEY1", "KEY2"),
