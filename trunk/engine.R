@@ -106,7 +106,7 @@ EvalItemData <- function(project.path, keys=NULL, item.data, values = NULL, para
 
 EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
   tablename = GetSummaryDBTable(project.name, value)
-  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
+  channel <- odbcConnect(STRATEGICO$db.name, STRATEGICO$db.user, STRATEGICO$db.pass, believeNRows=FALSE)
 
   statement <- paste("select * from ", tablename, " where Run=1", sep="")
   logger(WARN, statement)
@@ -169,7 +169,7 @@ EvalTSString <- function(project.path, keys=NULL, ts.string, ts.periods.string=N
 }
 
 ExportDataToDB <- function(data, tablename, key_values=NULL, verbose=FALSE, rownames=FALSE, append=TRUE) {
-  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
+  channel <- odbcConnect(STRATEGICO$db.name, STRATEGICO$db.user, STRATEGICO$db.pass, believeNRows=FALSE)
   if(!is.null(key_values)) {
     
     delete_sql <- BuildSQLstmtDeleteRecordsWithKeys(tablename, key_values)
@@ -373,7 +373,7 @@ PeriodStringToVector <- function (period.string) {
 }
 
 RunSQLQueryDB <- function(sql_statement ) {
-  channel <- odbcConnect(STRATEGICO$db.out.name, STRATEGICO$db.out.user, STRATEGICO$db.out.pass, believeNRows=FALSE)
+  channel <- odbcConnect(STRATEGICO$db.name, STRATEGICO$db.user, STRATEGICO$db.pass, believeNRows=FALSE)
   result <- sqlQuery(channel, sql_statement)
   odbcClose(channel)
 
