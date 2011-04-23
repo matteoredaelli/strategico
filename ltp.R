@@ -654,14 +654,13 @@ PlotLtpResults <- function(obj, directory=NULL, width=1000, height=600) {
 ###################################################
 ## # crea report
 
-ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form.eval="", directory=NULL, width=1000, height=600) {
+ltp.HTMLreport <- function(obj, id, value, value.description, param, directory=".", width=1000, height=600) {
   
-  if(is.null(directory)) directory =  paste(.GetItemPath(keys,project.path), "/",paste("report-", value.description, sep = "") , sep = "")
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
-  html.filename = file.path(directory, "summary.html")
+  html.filename = file.path(directory, "report.html")
   
-  title = paste("Strategico: Long Term Prediction for ", .GetItemName(keys), " - ", value.description, sep = " ")
+  title = paste("Strategico: Long Term Prediction for ID=", id, " - ", value.description, sep = " ")
                                         #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
   ReporTable = cbind(matrix("--",5,6),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
@@ -715,7 +714,7 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
   
 
   #html.form.eval = GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
-  cat(html.form.eval, append = TRUE, file = html.filename)  
+  #cat(html.form.eval, append = TRUE, file = html.filename)  
 
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
@@ -879,56 +878,3 @@ ltp.HTMLreport <- function(obj, keys, value, value.description, param, html.form
      eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) / (level(t-1) - drift(t-1)) )",sep="") }
  c(eq1,eq2,eq3)
  }
-
-
-BuildOneRowSummary <- function(keys, model, manual.model, param, return.code) {
-	stats=as.list(rep(NA,16))
-	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump","VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
-	"MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
-	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
-
-	#mean values (ie observed data)
-	stats["MeanValues"]=mean(model$values,na.rm=TRUE)
-	#nunb of points (observations)
-	stats["Points"]=nrow(model$values)
-	#non zero values
-	stats["NotZeroPoints"]=ifelse(dim(model$values)[1]==0,0, sum(model$values!=0))
-
-	if(!is.null(model$BestModel)){
-		stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
-		stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
-
-		#find (che cum sum of) not equal (ie constant) consecutive values
-		temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
-		#length of last not-constant consecutives serie of values
-		stats["LastNotEqualValues"]=sum(temp==max(temp))-1
-		
-		#mean predicted
-		stats["MeanPredicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
-		#mean predicted over mean values (ie observed data)
-		stats["MeanPredictedRatioMeanValues"]=stats[["MeanPredicted"]]/stats[["MeanValues"]]
-		#and rounding
-		stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")]=lapply(stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")],round,3)
-		#sd predicted over sd values (ie observed data)
-		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
-		
-		#Best Model if not exclusion criterion were performed
-		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC))))
-		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width))))
-		stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		#note: stat is changed from numeric to string
-		stats["BestModel"] = model$BestModel
-	}
-
-	stats["Timestamp"] = as.character(Sys.time())
-	stats["ManualModel"] = manual.model
-	stats["Parameters"] = BuildParamString(param)
-	stats["ReturnCode"] = return.code
-	stats["Run"] = 0
-	
-	#clean out the (possible) Inf values
-	stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
-	
-	summ=data.frame( t(keys), as.data.frame(stats))
-}

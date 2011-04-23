@@ -9,12 +9,11 @@ fi
 project_name=$1
 value=$2
 
-script_path=/apps/strategico
-
-cd $script_path
+script_path=$(dirname $0)
+cd ${script_path}
 	
 command="${script_path}/eval_items_from_db.Rscript ${project_name} ${value}"
 echo "Running ${command}"
 
-/apps/R/bin/Rscript $command
+Rscript $command
 

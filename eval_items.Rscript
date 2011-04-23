@@ -1,3 +1,6 @@
+#!/usr/bin/env Rscript
+## -*- mode: R -*-
+
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
@@ -17,18 +20,22 @@ source("engine.R")
 
 args <- commandArgs()
 
-project.path <- args[6]
-item.path <- args[7]
-item.values <- args[8]
-item.params <- args[9]
+project.name <- args[6]
+id.min <- args[7]
+id.max <- args[8]
+item.values.string <- args[9]
+item.params <- args[10]
 
-msg <- paste("Project=", project.path, ", Item=", item.path, sep="")
+item.values <- unlist(strsplit(item.values.string, ","))
+
+msg <- paste("Project=", project.name, ", ID min=", id.min, ", ID max=", id.max, sep="")
 print(msg)
-msg <- paste("item.values=", item.values, ", item.params=", item.params, sep="")
+msg <- paste("item.values=", item.values.string, ", item.params=", item.params, sep="")
 print(msg)
 
-CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
-
+CONFIG <- GetProjectConfig(project.name)
 param <- EvalParamString(item.params)
 
-EvalItem(project.path=project.path, item.path=item.path, values=item.values, param=param, CONFIG=CONFIG)
+EvalItems(project.name=project.name, 
+          id.min=id.min, id.max=id.max,
+          values=item.values, param=param, CONFIG=CONFIG)
