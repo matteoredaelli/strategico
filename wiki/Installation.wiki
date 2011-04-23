@@ -18,3 +18,40 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
 = Installation =
 
 Download strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab] and unzip it into a folder like /apps/strategico (Linux) or C:\strategico
+
+If you want to use a database, you have to 
+ * (only linux) install unixodbc
+ * mysql odbc driver
+
+= Configuration =
+
+To configure a database, for linux users, you should have something like
+
+{{{
+
+  File  /etc/odbcinst.ini 
+
+[MySQL]
+Description     = MySQL driver
+Driver          = /usr/lib/odbc/libmyodbc.so
+Setup           = /usr/lib/odbc/libodbcmyS.so
+
+
+ /etc/odbc.ini
+
+[STRATEGICO]
+Driver       = MySQL
+Description  = MySQL ODBC 3.51 Driver DSN
+Server       = localhost
+Port         =
+User         = r
+Password     = r
+Database     = strategico
+Option       = 3   
+Socket
+
+}}}
+
+
+
+ 
