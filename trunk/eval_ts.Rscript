@@ -1,4 +1,6 @@
+#!/usr/bin/env Rscript
 ## -*- mode: R -*-
+
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
@@ -13,39 +15,34 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## sample usage
-## Rscript eval_item_data.Rscript /path/to/projects/web UUID "1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90" 2001-1  2
+## Rscript eval_ts.Rscript sample 323232 "1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90" 2001-1  2
 
 library(methods)
 source("engine.R")
 
 args <- commandArgs()
 
-project.path <- args[6]
-keys.string <- args[7]
+project.name <- args[6]
+id <- as.integer(args[7])
 ts.string <- args[8]
 period.start.string <- args[9]
 period.freq <- as.integer(args[10])
 item.params <- args[11]
 
-keys <- unlist(strsplit(keys.string,","), as.vector)
-
-assign("CONFIG", GetProjectConfig(paste(project.path, "project.config", sep="/")), envir = .GlobalEnv)
-
-
-#CONFIG$values = c("VALUE1")
+CONFIG <- GetProjectConfig(project.name)
 
 source(CONFIG$eval.package)
 
-msg <- paste("Project=", project.path, ", TS=", ts.string, sep="")
+msg <- paste("Project=", project.name, ", TS=", ts.string, sep="")
 print(msg)
 msg <- paste("item.params=", item.params, sep="")
 print(msg)
 msg <- paste("period.start=", period.start.string, sep="")
 print(msg)
-msg <- paste("keys=", keys, sep=" ")
+msg <- paste("id=", id, sep=" ")
 print(msg)
 msg <- paste("period.freq=", period.freq, sep="")
 print(msg)
 eval(parse(text=paste("param=list(",item.params,")")))
 
-EvalTSString(project.path=project.path, keys=keys, ts.string=ts.string, period.start.string=period.start.string, period.freq=period.freq, param=param, CONFIG=CONFIG)
+EvalTSString(project.name=project.name, id=id, ts.string=ts.string, period.start.string=period.start.string, period.freq=period.freq, param=param, CONFIG=CONFIG)

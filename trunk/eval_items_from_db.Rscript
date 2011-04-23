@@ -1,3 +1,6 @@
+#!/usr/bin/env Rscript
+## -*- mode: R -*-
+
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
@@ -26,8 +29,7 @@ print(msg)
 msg <- paste("item.value=", item.value, sep="")
 print(msg)
 
-project.path <- paste(STRATEGICO$projects.home, project.name, sep="/")
 
-CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
+CONFIG <- GetProjectConfig(project.name)
 
 EvalItemsFromDB(project.name=project.name, value=item.value, verbose=TRUE, CONFIG)

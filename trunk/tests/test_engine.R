@@ -15,10 +15,162 @@
 
 source("engine.R")
 
-project.path <- "projects/sample"
-CONFIG <- GetProjectConfig(paste(project.path, "project.config", sep="/"))
+project.name <- "sample"
+  
+test.010.GetProjectConfig <- function() {
+  c <- GetProjectConfig(project.name)
 
-test.BuildFilterWithKeys <- function() {
+  checkEquals(
+              11,
+              length(c)
+              )
+
+  checkEquals(
+              12,
+              length(c$param)
+              )
+  checkEquals(
+              "sample",
+              c$project.name
+              )
+  
+  checkEquals(
+              c("KEY1", "KEY2", "KEY3"),
+              names(c$keys)
+              )
+
+  checkEquals(
+              c("VendutoPirelli", "VendutoMercato"),
+              as.vector(c$values)
+              )
+  
+  checkEquals(
+              8,
+              c$param$n.ahead
+              )
+
+  checkEquals(
+              c("mean", "trend", "lm", "es", "arima"),
+              c$param$try.models
+              )
+}
+
+test.020.ImportProjectData <- function() {
+  ImportProjectData(project.name=project.name)
+  ## TODO Check if the new files have been created successfully 
+}
+
+test.030.GetProjectItems <- function() {
+  project.items <- GetProjectItems(project.name)
+  checkEquals(20,
+              nrow(project.items)
+              )
+  checkEquals(4,
+              ncol(project.items)
+              )
+}
+
+test.035.GetItemsKeys <- function() {
+  project.items <- GetProjectItems(project.name)
+  k1 <-     GetItemKeys(project.name=project.name, id=5)
+  k1.bis <- GetItemKeys(project.items=project.items, id=5)
+  
+  checkEquals(
+              k1,
+              k1.bis
+              )
+  ## checkEquals(
+  ##            c("ES", "MOTO", "DUCATI")
+  ##            k1[1,]
+  ##            ) 
+}
+
+test.035.GetItemID <- function() {
+  project.items <- GetProjectItems(project.name)
+  
+  checkEquals(
+              2,
+              GetItemID(keys=c("IT","CAR","ALFA"), project.items=project.items)
+              )
+  checkEquals(
+              10,
+              GetItemID(keys=c("IT","CAR",""), project.items=project.items)
+              )
+  checkEquals(
+              17,
+              GetItemID(keys=c("DE","",""), project.items=project.items)
+              )
+}
+
+test.040.GetProjectData <- function() {
+  project.data <- GetProjectData(project.name)
+  
+  checkEquals(
+              c("KEY1", "KEY2", "KEY3", "id", "PERIOD", "VALUE1", "VALUE2"),
+              colnames(project.data)
+              )
+  checkEquals(113,
+              nrow(project.data)
+              )
+  checkEquals(7,
+              ncol(project.data)
+              )
+}
+
+test.050.Subset <- function() {
+  project.data <- GetProjectData(project.name)
+  s1 = SubsetByID(project.data, id=5)
+  s2 = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
+
+  checkEquals(s1,
+              s2,
+              )
+ # checkEquals(c("ES", "MOTO", "DUCATI"),
+ #             s1[1,][1:3]
+ #             )
+}
+
+test.GetItemData <- function() {
+  project.data <- GetProjectData(project.name)
+
+  i0 <-     GetItemData(project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="VALUE1")
+  i0.bis <- GetItemData(project.data=project.data, id=5, value="VALUE1")
+
+  checkEquals(
+              i0,
+              i0.bis
+              )
+  checkEquals(
+              "2010-2",
+              rownames(i0)
+              )
+  checkEquals(
+              c(0),
+              i0[1,]
+              )
+  
+  i1 <- GetItemData(project.data=project.data, keys=c("IT","CAR",""), value="VALUE1")
+  checkEquals(
+              c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
+              i1$VALUE1
+              )
+  checkEquals(
+              c("2003-1","2003-2","2004-1","2004-2","2005-1","2005-2","2006-1","2006-2","2007-1","2007-2","2008-1","2008-2","2009-1","2009-2","2010-1","2010-2"),
+              rownames(i1)
+              )
+
+  i2 <- GetItemData(project.data=project.data, keys=c("", "MOTO","DUCATI"), value="VALUE1")
+  checkEquals(
+              c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
+              i2$VALUE1
+              )
+  checkEquals(
+              c("2001-2", "2002-2", "2003-1", "2003-2", "2004-1"),
+              rownames(i2)[1:5]
+              )
+}
+
+test.00.BuildFilterWithKeys <- function() {
   checkEquals(
               "KEY1=='IT' & KEY2=='101'", 
               BuildFilterWithKeys( c("IT", "101"), sep="==", collapse=" & ", na.rm=TRUE)
@@ -52,7 +204,9 @@ test.BuildFilterWithKeys <- function() {
 }
 
 
-test.BuildFullKey <- function() {
+test.00.BuildFullKey <- function() {
+  CONFIG <- GetProjectConfig(project.name)
+  
   checkEquals(
               c("IT","",""),
               BuildFullKey(c("IT"), CONFIG$keys)
@@ -92,7 +246,7 @@ test.BuildKeyNames <- function() {
               c("KEY1", "KEY2"),
               BuildKeyNames( c("IT","CAR","",''), na.rm=TRUE )
               )
-    checkEquals(
+  checkEquals(
                 c("KEY1", "KEY2", "KEY3", "KEY4"),
                 BuildKeyNames( c("IT","CAR","",''), na.rm=FALSE )
                 )
@@ -114,7 +268,7 @@ test.BuildKeyNames <- function() {
               )
 }
 
-test.BuildPeriodRange <- function() {
+test.00.BuildPeriodRange <- function() {
   checkEquals(
               c("2001-2","2001-3","2002-1","2002-2","2002-3"),
               BuildPeriodRange(c(2001,2), 3, 5)
@@ -125,19 +279,7 @@ test.BuildPeriodRange <- function() {
               )
 }
 
-test.BuildSQLstmtDeleteRecordsWithKeys <- function() {
-  checkEquals(
-              "delete from europool_VALUE1  where KEY1='IT' and KEY2='101'",
-              BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("IT", "101"))
-              )
-
-  checkEquals(
-              "delete from europool_VALUE1  where KEY1='IT' and KEY2='' and KEY3='101'",
-              BuildSQLstmtDeleteRecordsWithKeys( "europool_VALUE1", c("IT", "", "101"))
-              )
-}
-
-test.EvalParamString <- function() {
+test.0.EvalParamString <- function() {
   param <- EvalParamString("n.ahead=8,range=c(-Inf,Inf),NA2value=0,n.min=10,try.models=c('mean','trend','lm','es','arima'),logtransform=FALSE,stepwise=TRUE,formula.right.lm='S*trend+S*trend2',criterion='BestAIC',criterionExcludeMaxGreaterThan=2,negToZero=TRUE,predictInteger=TRUE")
 
   checkEquals( 12, length(param))
@@ -150,72 +292,30 @@ test.EvalParamString <- function() {
               )
 }            
               
-test.GetDBTable <- function() {
+test.00.GetDBTableName <- function() {
   checkEquals("sample_VALUE1_summary",
-              GetDBTable("sample", value="VALUE1", "summary")
+              GetDBTableNameItemSummary("sample", value="VALUE1")
               )
-  checkEquals("sample_VALUE1",
-              GetDBTable("sample", value="VALUE1")
+  checkEquals("sample_VALUE1_results",
+              GetDBTableNameItemResults("sample", value="VALUE1")
               )
   checkEquals("sample_items",
-              GetDBTable("sample", value=NULL, name="items")
+              GetDBTableNameProjectItems("sample")
               )
 }
   
-test.GetFields <- function() {
+test.00.GetFields <- function() {
   checkEquals(
               c("KEY1", "KEY2"),
               .GetFields(c("KEY1", "KEY2", "VALUE1", "PERIOD"), "KEY")
               )
 }
 
-test.GetFieldsId <- function() {
+test.00.GetFieldsId <- function() {
   checkEquals(
               c(1,2),
               .GetFieldsId(c("KEY1", "KEY2", "VALUE1", "PERIOD"), "KEY")
               )
-}
-
-test.GetProjectConfig <- function() {
-  c <- GetProjectConfig("projects/sample/project.config")
-
-  checkEquals(
-              11,
-              length(c)
-              )
-
-  checkEquals(
-              12,
-              length(c$param)
-              )
-  checkEquals(
-              "sample",
-              c$project.name
-              )
-  
-  checkEquals(
-              c("KEY1", "KEY2", "KEY3"),
-              names(c$keys)
-              )
-
-  checkEquals(
-              c("VendutoPirelli", "VendutoMercato"),
-              as.vector(c$values)
-              )
-  
-  checkEquals(
-              8,
-              c$param$n.ahead
-              )
-
-  checkEquals(
-              c("mean", "trend", "lm", "es", "arima"),
-              c$param$try.models
-              )
-}
-
-test.ImportItemsData <- function() {
-  ImportItemsData(project.path=project.path)
 }
 
 
@@ -230,40 +330,11 @@ test.incSampleTime <- function() {
               )
 }
 
-test.PeriodStringToVector <- function() {
+test.00.PeriodStringToVector <- function() {
   checkEquals(c(2001, 1),
               PeriodStringToVector("2001-1")
               )
   checkEquals(c(1987, 12),
               PeriodStringToVector("1987-12")
-              )
-}
-
-test.ProjectData <- function() {
-  p <- GetProjectData(project.path)
-  
-  checkEquals(
-              c("KEY1", "KEY2", "KEY3", "PERIOD", "VALUE1", "VALUE2"),
-              colnames(p)
-              )
-
-  item.data <- ExtractAndAggregateItemDataFromProjectData(p, c("IT","CAR"))
-  checkEquals(
-              c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
-              item.data$VALUE1
-              )
-  checkEquals(
-              c("2003-1","2003-2","2004-1","2004-2","2005-1","2005-2","2006-1","2006-2","2007-1","2007-2","2008-1","2008-2","2009-1","2009-2","2010-1","2010-2"),
-              rownames(item.data)
-              )
-
-  item.data <- ExtractAndAggregateItemDataFromProjectData(p, c("", "MOTO","DUCATI"))
-  checkEquals(
-              c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
-              item.data$VALUE1
-              )
-  checkEquals(
-              c("2001-2", "2002-2", "2003-1", "2003-2", "2004-1"),
-              rownames(item.data)[1:5]
               )
 }

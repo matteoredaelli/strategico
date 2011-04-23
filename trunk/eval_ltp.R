@@ -17,7 +17,60 @@
 
 source("ltp.R")
 
-EvalItemDataByValue <- function(project.path, keys, item.data, value, output.path=".", param=NULL, CONFIG) {
+
+BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
+	stats=as.list(rep(NA,17))
+	names(stats)=c("id", "BestModel","R2","AIC","ICwidth","maxJump","VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
+	"MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
+	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
+        stats["item_id"] <- id
+	#mean values (ie observed data)
+	stats["MeanValues"]=mean(model$values,na.rm=TRUE)
+	#nunb of points (observations)
+	stats["Points"]=nrow(model$values)
+	#non zero values
+	stats["NotZeroPoints"]=ifelse(dim(model$values)[1]==0,0, sum(model$values!=0))
+
+	if(!is.null(model$BestModel)){
+		stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
+		stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
+
+		#find (che cum sum of) not equal (ie constant) consecutive values
+		temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
+		#length of last not-constant consecutives serie of values
+		stats["LastNotEqualValues"]=sum(temp==max(temp))-1
+		
+		#mean predicted
+		stats["MeanPredicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
+		#mean predicted over mean values (ie observed data)
+		stats["MeanPredictedRatioMeanValues"]=stats[["MeanPredicted"]]/stats[["MeanValues"]]
+		#and rounding
+		stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")]=lapply(stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")],round,3)
+		#sd predicted over sd values (ie observed data)
+		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
+		
+		#Best Model if not exclusion criterion were performed
+		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC))))
+		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
+		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width))))
+		stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
+		#note: stat is changed from numeric to string
+		stats["BestModel"] = model$BestModel
+	}
+
+	stats["Timestamp"] = as.character(Sys.time())
+	stats["ManualModel"] = manual.model
+	stats["Parameters"] = BuildParamString(param)
+	stats["ReturnCode"] = return.code
+	stats["Run"] = 0
+	
+	#clean out the (possible) Inf values
+	stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
+	
+	summ=as.data.frame(stats)
+}
+
+EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, CONFIG) {
   
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
 
@@ -45,8 +98,8 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
     }
     
     if("report"%in%CONFIG$save) {
-      html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
-      ltp.HTMLreport(model, keys, value, CONFIG$values[value], param, directory=output.path, html.form.eval=html.form.eval)
+      ##html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
+      ltp.HTMLreport(model, id, value, CONFIG$values[value], param, directory=output.path)
     }
   }
   else {
@@ -54,15 +107,12 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
     logger(INFO, "No data")
     prediction=data.frame(rep(0, param$n.ahead))
 
-    rownames(prediction)=BuildPeriodRange(period.start=CONFIG$period.end, period.freq=CONFIG$period.freq, n=param$n.ahead, shift=1) 
-    #rownames(prediction)=
-    #    sapply (1:CONFIG$param$n.ahead, function(i) paste(.incSampleTime(now=CONFIG$period.end, period.freq = CONFIG$period.freq, increment = i),collapse="-"))
-
+    rownames(prediction) = BuildPeriodRange(period.start=CONFIG$period.end,
+              period.freq=CONFIG$period.freq, n=param$n.ahead, shift=1) 
   }
-    #colnames(prediction)=colnames(model$values)
-    colnames(prediction)=value
-    fullkeys <- BuildFullKey(keys, CONFIG$keys)
-    names(fullkeys) <- names(CONFIG$keys)
+                                   
+  colnames(prediction)=value
+  
     if("fullcsv"%in%CONFIG$save) {
       #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
       #data = rbind(model$values[, , drop = FALSE], prediction)
@@ -78,27 +128,25 @@ EvalItemDataByValue <- function(project.path, keys, item.data, value, output.pat
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
     }
     if("db"%in%CONFIG$save) {
-      keydf = data.frame(t(fullkeys)) 
-      names(keydf) = names(CONFIG$keys)
       data = rbind(item.data[, value, drop = FALSE], prediction)
-      #data = cbind(keydf, prediction)
-      data = cbind(keydf, data)
+      data = cbind(item_id=id, data)
       data$PERIOD = rownames(data)
 
-      tablename = paste(CONFIG$project.name, value, sep="_")
-      ExportDataToDB(data, tablename, fullkeys)
+      tablename = GetDBTableNameItemResults(project.name, value)
+      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id")
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
     manual.model <- ifelse(length(param$try.models) > 1, FALSE, TRUE)
-    onerow.summ = BuildOneRowSummary(fullkeys, model, manual.model, param, return.code)
+    onerow.summ = BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
   }
   if("summary_csv"%in%CONFIG$save) {
-    write.table(file = paste(output.path, "/item-summary.csv", sep = ""), onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
+    write.table(file = paste(output.path, "/item-summary.csv", sep = ""),
+                onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
   }
   if("summary_db"%in%CONFIG$save) {
-      tablename = GetSummaryDBTable(CONFIG$project.name, value)
-      ExportDataToDB(onerow.summ, tablename, fullkeys)
+      tablename = GetDBTableNameItemSummary(project.name, value)
+      ExportDataToDB(onerow.summ, tablename=tablename, id=id, id.name="item_id")
   }
   prediction
 }

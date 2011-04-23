@@ -1,4 +1,6 @@
 #!/usr/bin/env Rscript
+## -*- mode: R -*-
+
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
@@ -17,9 +19,9 @@ source("engine.R")
 
 args <- commandArgs()
 
-project.path <- args[6]
+project.name <- args[6]
 
-msg <- paste("Project=", project.path, ": importing data", sep="")
+msg <- paste("Project=", project.name, ": importing data", sep="")
 print(msg)
 
-ImportItemsData(project.path=project.path)                                          
+ImportProjectData(project.name=project.name)                                          
