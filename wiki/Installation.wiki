@@ -25,6 +25,8 @@ If you want to use a database, you have to
 
 = Configuration =
 
+== ODBC ==
+
 To configure a database, for linux users, you should have something like
 
 {{{
@@ -53,5 +55,17 @@ Socket
 }}}
 
 
+== Database ==
 
+Enter in mysql console with
+
+  mysql -u root
+
+{{{
+ CREATE DATABASE strategico CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+ grant all on strategico.* to r identified by 'r';
+ grant all on strategico.* to r%'%' identified by 'r';
+ flush privileges;
+}}}
  
