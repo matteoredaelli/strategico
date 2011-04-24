@@ -280,7 +280,7 @@ test.00.BuildPeriodRange <- function() {
 }
 
 test.0.EvalParamString <- function() {
-  param <- EvalParamString("n.ahead=8,range=c(-Inf,Inf),NA2value=0,n.min=10,try.models=c('mean','trend','lm','es','arima'),logtransform=FALSE,stepwise=TRUE,formula.right.lm='S*trend+S*trend2',criterion='BestAIC',criterionExcludeMaxGreaterThan=2,negToZero=TRUE,predictInteger=TRUE")
+  param <- EvalParamString("n.ahead=8,range=c(-Inf,Inf),NA2value=0,n.min=10,try.models=c('mean','trend','lm','es','arima'),logtransform=FALSE,stepwise=TRUE,formula.right.lm='S*trend+S*trend2',criterion='BestAIC',criterion.noMaxOver=2,negTo0=TRUE,predictInteger=TRUE")
 
   checkEquals( 12, length(param))
 
