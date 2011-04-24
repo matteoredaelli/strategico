@@ -661,46 +661,9 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   html.filename = file.path(directory, "report.html")
   
   title = paste("Strategico: Long Term Prediction for ID=", id, " - ", value.description, sep = " ")
-                                        #ReporTable = data.frame(model = as.character(rep("--", 5)),AIC = as.character(rep("--", 5)),R2 = as.character(rep("--", 5)),IC.whidth = as.character(rep("--", 5)),maxJump = as.character(rep("--", 5)), selected=as.character(rep("", 5)))
-  ReporTable = cbind(matrix("--",5,6),"")
-  colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
-  rownames(ReporTable) = c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean")
-                                        #ReporTable[, 1] <- as.character(ReporTable$model)
-                                        #as.character(obj$LinearModel$model$call[2])
-                                        #as.character(attributes(obj$LinearModel$model$call[[2]])$variables[2])
-                                        #	gsub("~","=",gsub("stima$qta","Y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))
-  
-  if(!is.null(obj$ExponentialSmooth)) {
-    terms=sapply(c("drift","seasonality"),
-      function(compon){ if(obj$ExponentialSmooth$model[compon]=="none") return() 
-                        compon})
-    terms=terms[!sapply(terms,is.null)] 
-    
-    es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
-  }
-  
-  
-  ReporTable[, 1] = c(ifelse(is.null(obj$LinearModel),"--",	gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),#paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
-              ifelse(is.null(obj$Arima),"--",ifelse(length(obj$Arima$model$coef)==0,"-constant-",paste(obj$Arima$model$series,"=",paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
-              ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
-              ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
-              ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
-  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","VarCoeff")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","VarCoeff")]), 
-  unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]))
-  colnames(temp)= c("R2", "AIC", "IC.width","maxJump","VarCoeff")
-  
 
-  temp[,"R2"]=round(temp[,"R2"],4)	
-  temp[,"AIC"]=round(temp[,"AIC"],2)
-  temp[,"IC.width"]=round(temp[,"IC.width"],0)
-  temp[,"maxJump"]=round(temp[,"maxJump"],3)
-  temp[,"VarCoeff"]=round(temp[,"VarCoeff"],3)
-
-  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump","VarCoeff")] = as.matrix(temp)
-  ReporTable=as.data.frame(ReporTable)
-  levels(ReporTable$selected)=c("","BEST")
-  ReporTable[obj$BestModel,"selected"]="BEST"
-  
+  ReporTable <- GetModelsComparisonTable(obj)
+ 
     
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=\"http://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
