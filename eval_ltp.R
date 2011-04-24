@@ -20,7 +20,7 @@ source("ltp.R")
 
 BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 	stats=as.list(rep(NA,17))
-	names(stats)=c("id", "BestModel","R2","AIC","ICwidth","maxJump","VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
+	names(stats)=c("item_id", "BestModel","R2","AIC","ICwidth","maxJump","VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
 	"MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
 	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
         stats["item_id"] <- id
