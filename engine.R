@@ -179,17 +179,22 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
          period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, CONFIG=CONFIG)
 }
 
-ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE, rownames=FALSE, append=TRUE) {
+ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
+                           rownames=FALSE, append=TRUE, addPK=FALSE) {
+  
   channel <- odbcConnect(STRATEGICO$db.name, STRATEGICO$db.user, STRATEGICO$db.pass, believeNRows=FALSE)
-  delete_sql <- paste("delete from", tablename)
 
-  if(!is.null(id))
+  delete_sql <- paste("delete from", tablename)
+  
+  if(!is.null(id)) 
     delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
 
   logger(DEBUG, delete_sql)
   sqlQuery(channel, delete_sql)
  
-  sqlSave(channel, data, tablename=tablename, rownames=rownames, append=append, verbose=verbose)
+
+  sqlSave(channel, data, tablename=tablename, rownames=rownames,
+          append=append, verbose=verbose, addPK=addPK)
   odbcClose(channel)
 }
 
@@ -512,7 +517,12 @@ UpdateItemsData <- function(project.name, project.data) {
               )
   if("items_db"%in%CONFIG$save) {
     tablename = GetDBTableNameProjectItems(CONFIG$project.name)
-    ExportDataToDB(project.items, tablename, id=NULL, verbose=FALSE, rownames=FALSE, append=TRUE)
+    ## preparing data for prymary key in DB  (id must be the rownames)
+    project.items.orig <- project.items
+    rownames(project.items) <- project.items$id
+    project.items$id <- NULL
+    ExportDataToDB(project.items, tablename, id=NULL, rownames="id", addPK=TRUE)
+    project.items <- project.items.orig
   }
 
   ## Putting item ID inside project.data

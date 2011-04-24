@@ -19,12 +19,12 @@ source("ltp.R")
 
 
 BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
-	stats=as.list(rep(NA,17))
-	names(stats)=c("item_id", "BestModel","R2","AIC","ICwidth","maxJump","VarCoeff",
-               "Points","NotZeroPoints","LastNotEqualValues",
+	stats=as.list(rep(NA,16))
+	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump",
+               "VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
                "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
                "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
-        stats["item_id"] <- id
+        #stats["id"] <- id
 	#mean values (ie observed data)
 	stats["MeanValues"]=mean(model$values,na.rm=TRUE)
 	#nunb of points (observations)
@@ -69,6 +69,8 @@ BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 	stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
 	
 	summ=as.data.frame(stats)
+        rownames(summ) <- c(id)
+        summ
 }
 
 EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, CONFIG) {
@@ -134,7 +136,7 @@ EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=
       data$PERIOD = rownames(data)
 
       tablename = GetDBTableNameItemResults(project.name, value)
-      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id")
+      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
@@ -147,7 +149,7 @@ EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=
   }
   if("summary_db"%in%CONFIG$save) {
       tablename = GetDBTableNameItemSummary(project.name, value)
-      ExportDataToDB(onerow.summ, tablename=tablename, id=id, id.name="item_id")
+      ExportDataToDB(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE)
   }
   prediction
 }
