@@ -20,9 +20,10 @@ source("ltp.R")
 
 BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 	stats=as.list(rep(NA,17))
-	names(stats)=c("item_id", "BestModel","R2","AIC","ICwidth","maxJump","VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
-	"MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
-	"BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
+	names(stats)=c("item_id", "BestModel","R2","AIC","ICwidth","maxJump","VarCoeff",
+               "Points","NotZeroPoints","LastNotEqualValues",
+               "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
+               "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
         stats["item_id"] <- id
 	#mean values (ie observed data)
 	stats["MeanValues"]=mean(model$values,na.rm=TRUE)
@@ -50,9 +51,9 @@ BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
 		#Best Model if not exclusion rule were performed
-		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC))))
+		st=names(which.min(unlist(lapply(model[GetAllModels()],function(x) x$AIC))))
 		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width))))
+		st=names(which.min(unlist(lapply(model[GetAllModels()],function(x) x$IC.width))))
 		stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
 		#note: stat is changed from numeric to string
 		stats["BestModel"] = model$BestModel
@@ -150,3 +151,49 @@ EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=
   }
   prediction
 }
+
+GetAllModels <- function() {
+  c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")
+}
+
+GetModelsComparisonTable <-  function(obj) {
+  
+  ReporTable = cbind(matrix("--",5,6),"")
+  colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
+  rownames(ReporTable) = c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean")
+  
+  if(!is.null(obj$ExponentialSmooth)) {
+    terms=sapply(c("drift","seasonality"),
+      function(compon){ if(obj$ExponentialSmooth$model[compon]=="none") return() 
+                        compon})
+    terms=terms[!sapply(terms,is.null)] 
+    
+    es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
+  }
+  
+  
+  ReporTable[, 1] = c(ifelse(is.null(obj$LinearModel),"--",	gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),#paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
+              ifelse(is.null(obj$Arima),"--",ifelse(length(obj$Arima$model$coef)==0,"-constant-",paste(obj$Arima$model$series,"=",paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
+              ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
+              ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
+              ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
+  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","VarCoeff")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","VarCoeff")]), 
+  unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]))
+  colnames(temp)= c("R2", "AIC", "IC.width","maxJump","VarCoeff")
+  
+
+  temp[,"R2"]=round(temp[,"R2"],4)	
+  temp[,"AIC"]=round(temp[,"AIC"],2)
+  temp[,"IC.width"]=round(temp[,"IC.width"],0)
+  temp[,"maxJump"]=round(temp[,"maxJump"],3)
+  temp[,"VarCoeff"]=round(temp[,"VarCoeff"],3)
+
+  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump","VarCoeff")] = as.matrix(temp)
+  ReporTable=as.data.frame(ReporTable)
+  levels(ReporTable$selected)=c("","BEST")
+  ReporTable[obj$BestModel,"selected"]="BEST"
+
+  ReporTable
+}
+
+  
