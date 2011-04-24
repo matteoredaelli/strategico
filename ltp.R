@@ -41,7 +41,7 @@ library(ast)
   
 ############## ltp()
 
-ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC", criterion.noMaxOver = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
+ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", rule.noMaxOver = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
                 period.freq = 2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
                 xreg.arima = NULL,idDiff=FALSE,idLog=FALSE, stationary.arima = FALSE, period.start = c(1997, 1),
                 period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negTo0 = TRUE, toInteger = TRUE) {
@@ -119,10 +119,10 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
 	VarCoeff["Arima"] = Arima$VarCoeff
   }
  
-  ID.model <- switch(criterion, BestIC = which.min(IC.width*(ifelse(VarCoeff<criterion.noMaxOver,1,NA))), 
-                                BestAIC = which.min(AIC*(ifelse(VarCoeff<criterion.noMaxOver,1,NA))) )		
+  ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff<rule.noMaxOver,1,NA))), 
+                                BestAIC = which.min(AIC*(ifelse(VarCoeff<rule.noMaxOver,1,NA))) )		
   results = list(values = product, Mean = Mean, Trend = Trend, LinearModel = LinearModel, 
-    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), criterion=criterion, criterion.noMaxOver=criterion.noMaxOver)
+    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), rule=rule, rule.noMaxOver=rule.noMaxOver)
   results
 }
 
@@ -705,7 +705,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=\"http://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
 
-    "<h2>Best Model</h2>Criterion:",obj$criterion,", and MaxPredRatioNOTGreaterThan < ",obj$criterion.noMaxOver,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
+    "<h2>Best Model</h2>Criterion:",obj$rule,", and MaxPredRatioNOTGreaterThan < ",obj$rule.noMaxOver,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
 
   
  hwrite(ReporTable), sep = "")
