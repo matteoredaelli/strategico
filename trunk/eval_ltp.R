@@ -49,7 +49,7 @@ BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 		#sd predicted over sd values (ie observed data)
 		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
-		#Best Model if not exclusion criterion were performed
+		#Best Model if not exclusion rule were performed
 		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$AIC))))
 		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
 		st=names(which.min(unlist(lapply(model[c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")],function(x) x$IC.width))))
@@ -74,7 +74,7 @@ EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=
   
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
 
-  model <- ltp(product = item.data[, value, drop = FALSE], criterion=param$criterion, criterion.noMaxOver=param$criterion.noMaxOver,
+  model <- ltp(product = item.data[, value, drop = FALSE], rule=param$rule, rule.noMaxOver=param$rule.noMaxOver,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = CONFIG$period.freq, 
                period.start = CONFIG$period.start, period.end = CONFIG$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
