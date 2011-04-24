@@ -41,10 +41,10 @@ library(ast)
   
 ############## ltp()
 
-ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC", criterionExcludeMaxGreaterThan = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
+ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC", criterion.noMaxOver = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
                 period.freq = 2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
                 xreg.arima = NULL,idDiff=FALSE,idLog=FALSE, stationary.arima = FALSE, period.start = c(1997, 1),
-                period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negToZero = TRUE, predictInteger = TRUE) {
+                period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negTo0 = TRUE, predictInteger = TRUE) {
   
 #####################################
   ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
@@ -73,7 +73,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
     Mean = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = NA, logtransform = FALSE, 
-      stepwise = FALSE, formula.right.lm = 'S', negToZero=negToZero,predictInteger=predictInteger)
+      stepwise = FALSE, formula.right.lm = 'S', negTo0=negTo0,predictInteger=predictInteger)
     AIC["Mean"] = Mean$AIC
     IC.width["Mean"] = Mean$IC.width
     R2["Mean"] = Mean$R2
@@ -83,7 +83,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
     Trend = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = NA, logtransform = FALSE, 
-      stepwise = FALSE, formula.right.lm = 'S+trend', negToZero=negToZero,predictInteger=predictInteger)
+      stepwise = FALSE, formula.right.lm = 'S+trend', negTo0=negTo0,predictInteger=predictInteger)
     AIC["Trend"] = Trend$AIC
     IC.width["Trend"] = Trend$IC.width
     R2["Trend"] = Trend$R2
@@ -93,7 +93,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
     LinearModel = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = xreg.lm, logtransform = logtransform, 
-      stepwise = stepwise, formula.right.lm = formula.right.lm, negToZero=negToZero,predictInteger=predictInteger)
+      stepwise = stepwise, formula.right.lm = formula.right.lm, negTo0=negTo0,predictInteger=predictInteger)
     AIC["LinearModel"] = LinearModel$AIC
     IC.width["LinearModel"] = LinearModel$IC.width
     R2["LinearModel"] = LinearModel$R2
@@ -102,7 +102,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
   if (("es" %in% try.models)&(n >= n.min )) {
     ExponentialSmooth = mod.es(product = product, n.ahead = n.ahead, 
       period.freq = period.freq, period.start = period.start, 
-      logtransform.es = logtransform.es, stepwise = stepwise, negToZero=negToZero,predictInteger=predictInteger)
+      logtransform.es = logtransform.es, stepwise = stepwise, negTo0=negTo0,predictInteger=predictInteger)
     AIC["ExponentialSmooth"] = ExponentialSmooth$AIC
     IC.width["ExponentialSmooth"] = ExponentialSmooth$IC.width
     R2["ExponentialSmooth"] = ExponentialSmooth$R2
@@ -112,17 +112,17 @@ ltp <- function(product, try.models = c("lm", "arima","es"), criterion = "BestIC
     Arima = mod.arima(product=product,logtransform=logtransform,
       diff.sea=diff.sea,diff.trend=diff.trend,idDiff=idDiff,max.p=max.p,max.q=max.q,
       max.P=max.P,max.Q=max.Q,stationary.arima=stationary.arima,n.ahead=n.ahead,
-      period.freq=period.freq,xreg.arima=xreg.arima,period.start=period.start,stepwise=stepwise, negToZero=negToZero,predictInteger=predictInteger)
+      period.freq=period.freq,xreg.arima=xreg.arima,period.start=period.start,stepwise=stepwise, negTo0=negTo0,predictInteger=predictInteger)
     AIC["Arima"] = Arima$AIC
     IC.width["Arima"] = Arima$IC.width
     R2["Arima"] = Arima$R2
 	VarCoeff["Arima"] = Arima$VarCoeff
   }
  
-  ID.model <- switch(criterion, BestIC = which.min(IC.width*(ifelse(VarCoeff<criterionExcludeMaxGreaterThan,1,NA))), 
-                                BestAIC = which.min(AIC*(ifelse(VarCoeff<criterionExcludeMaxGreaterThan,1,NA))) )		
+  ID.model <- switch(criterion, BestIC = which.min(IC.width*(ifelse(VarCoeff<criterion.noMaxOver,1,NA))), 
+                                BestAIC = which.min(AIC*(ifelse(VarCoeff<criterion.noMaxOver,1,NA))) )		
   results = list(values = product, Mean = Mean, Trend = Trend, LinearModel = LinearModel, 
-    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), criterion=criterion, criterionExcludeMaxGreaterThan=criterionExcludeMaxGreaterThan)
+    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), criterion=criterion, criterion.noMaxOver=criterion.noMaxOver)
   results
 }
 
@@ -233,7 +233,7 @@ temp=NA2value
 ## oltre ai data product con la forma originaes.
 
 ############## best.lm()
-mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, logtransform, stepwise, formula.right.lm = NULL,negToZero=negToZero,predictInteger=predictInteger) {
+mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, logtransform, stepwise, formula.right.lm = NULL,negTo0=negTo0,predictInteger=predictInteger) {
   
   if(is.null(formula.right.lm)) formula.right.lm = match.arg(formula.right.lm, " S * trend + S * trend2")
   
@@ -275,7 +275,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
     pred.modlm = (pred[, "fit",drop=FALSE])
     IC.pred.modlm = list(upr = pred[, "upr"], lwr = pred[, "lwr"])
   }
-  if(negToZero) {
+  if(negTo0) {
 	pred.modlm[pred.modlm<0]=0
 	IC.pred.modlm$upr[IC.pred.modlm$upr<0]=0
 	IC.pred.modlm$lwr[IC.pred.modlm$lwr<0]=0
@@ -303,7 +303,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
 }
 ############## best.arima()
 mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.q,max.P,
-                      max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima,negToZero=negToZero,predictInteger=predictInteger) {
+                      max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima,negTo0=negTo0,predictInteger=predictInteger) {
   y = as.vector(product)
   n = max(length(y), dim(y)[1])
                                         # vettore errori
@@ -366,7 +366,7 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
     tss = var(y) * (n - 1)
     res = residuals(mod.arima)
   }
-   if(negToZero) {
+   if(negTo0) {
 	pred.arima[pred.arima<0]=0
 	IC.pred.arima$upr[IC.pred.arima$upr<0]=0
 	IC.pred.arima$lwr[IC.pred.arima$lwr<0]=0
@@ -396,7 +396,7 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
 }
 
 ############## best.es()
-mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.es, stepwise,negToZero=negToZero,predictInteger=predictInteger) {
+mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.es, stepwise,negTo0=negTo0,predictInteger=predictInteger) {
 	
 	#occhio qui:
 	product[product==0]=1
@@ -449,7 +449,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
                                         #media_errori = mean(errori_le)
     }
   }
-  if(negToZero) {
+  if(negTo0) {
 	pred.modle[pred.modle<0]=0
 	IC.pred.modle$upr[IC.pred.modle$upr<0]=0
 	IC.pred.modle$lwr[IC.pred.modle$lwr<0]=0
@@ -705,7 +705,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 
     title, "</h1><a href=\"http://code.google.com/p/strategico/wiki/LTP\"/>Quick Help</a>",
 
-    "<h2>Best Model</h2>Criterion:",obj$criterion,", and MaxPredRatioNOTGreaterThan < ",obj$criterionExcludeMaxGreaterThan,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
+    "<h2>Best Model</h2>Criterion:",obj$criterion,", and MaxPredRatioNOTGreaterThan < ",obj$criterion.noMaxOver,",<br><img src=\"best_model.png\" />\n<h2>All Models </h2>\n<img src=\"all_models.png\" />\n",
 
   
  hwrite(ReporTable), sep = "")

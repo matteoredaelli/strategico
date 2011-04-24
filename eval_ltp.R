@@ -74,11 +74,11 @@ EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=
   
   param=c(param,CONFIG$param[setdiff(names(CONFIG$param),names(param))])
 
-  model <- ltp(product = item.data[, value, drop = FALSE], criterion=param$criterion, criterionExcludeMaxGreaterThan=param$criterionExcludeMaxGreaterThan,
+  model <- ltp(product = item.data[, value, drop = FALSE], criterion=param$criterion, criterion.noMaxOver=param$criterion.noMaxOver,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = CONFIG$period.freq, 
                period.start = CONFIG$period.start, period.end = CONFIG$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
-               formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negToZero=param$negToZero)
+               formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0)
   
   ## write results in .RData
   if("model"%in%CONFIG$save) save(file =  paste(output.path, "/model.RData", sep = ""), model)
