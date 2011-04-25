@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-## This program is free software: you can redistribute it and/or modify
+## This program is fre esoftware: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
 ## any later version.
@@ -85,8 +85,8 @@ EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL, CONFI
 EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value, param=NULL, CONFIG) {
   logger(INFO, "++++++++++++++++++++++++EvalItemData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
-                     " KEYS=", paste(keys,collapse=","),
-                     " VALUE=", value, "=(", CONFIG$values[value], ")",
+                     " KEYS=", paste(keys,collapse=","), " ",
+                     value, "=", CONFIG$values[value],
                      sep=""))
   
   if (is.null(item.data)) {
@@ -194,8 +194,19 @@ ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE
  
 
   sqlSave(channel, data, tablename=tablename, rownames=rownames,
-          append=append, verbose=verbose, addPK=addPK)
+          append=append, verbose=verbose, addPK=addPK, fast=FALSE)
   odbcClose(channel)
+}
+
+FixDBProjectTablesStructure <- function(project.name, values) {
+  ## TODO: generalize tablenames..
+  sql <- c("alter table sample_items MODIFY id integer",
+            "alter table sample_VALUE1_results MODIFY item_id integer",
+            "alter table sample_VALUE2_results MODIFY item_id integer",
+            "alter table sample_VALUE1_summary MODIFY id integer",
+            "alter table sample_VALUE2_summary MODIFY id integer"
+            )
+  RunSQLQueryDB(sql)         
 }
 
 GetDBTableNameItemResults <- function(project.name, value) {
@@ -419,9 +430,10 @@ PeriodStringToVector <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
 
-RunSQLQueryDB <- function(sql_statement, db=STRATEGICO$db.name, user=STRATEGICO$db.user, pass=STRATEGICO$db.pass) {
+RunSQLQueryDB <- function(sql_statements, db=STRATEGICO$db.name, user=STRATEGICO$db.user, pass=STRATEGICO$db.pass) {
   channel <- odbcConnect(db, user, pass, believeNRows=FALSE)
-  result <- sqlQuery(channel, sql_statement)
+  for (statement in sql_statements)
+    result <- sqlQuery(channel, statement)
   odbcClose(channel)
 
   result
