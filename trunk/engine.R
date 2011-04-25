@@ -69,24 +69,28 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 }
 
-EvalItems <- function(project.name, id.min, id.max, keys=NULL, values, param=NULL, CONFIG) {
+EvalItems <- function(project.name, id.min, id.max, keys=NULL, values, param=NULL, project.config=NULL) {
+  if (is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name=project.name)
+  }
+  
   for (id in as.integer(id.min):as.integer(id.max)) {
-    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param, CONFIG=CONFIG)
+    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param, project.config=project.config)
   }
 }
 
-EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL, CONFIG) {
+EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL, project.config) {
   for (i in 1:length(values)) {
     value <- values[i]
-    EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param, CONFIG=CONFIG)
+    EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param, project.config=project.config)
   }
 }
 
-EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value, param=NULL, CONFIG) {
+EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value, param=NULL, project.config) {
   logger(INFO, "++++++++++++++++++++++++EvalItemData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
-                     value, "=", CONFIG$values[value],
+                     value, "=", project.config$values[value],
                      sep=""))
   
   if (is.null(item.data)) {
@@ -96,9 +100,9 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   logger(INFO, paste("TS length=", nrow(item.data)))
   print( t(item.data))
   
-  logger(INFO, paste("period.start=", paste(CONFIG$period.start, collapse="-"),
-                     " period.freq=", CONFIG$period.freq,
-                     " period.end=", paste(CONFIG$period.end, collapse="-"),
+  logger(INFO, paste("period.start=", paste(project.config$period.start, collapse="-"),
+                     " period.freq=", project.config$period.freq,
+                     " period.end=", paste(project.config$period.end, collapse="-"),
                      sep=""))
   
   if (is.null(id)) {
@@ -110,14 +114,14 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
   prediction = EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
-    value=value, output.path=directory, param=param, CONFIG=CONFIG
+    value=value, output.path=directory, param=param, project.config=project.config
     )
   logger(INFO, "RESULTS:")
   print(t(prediction))
   t(prediction)
 }
 
-EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
+EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config) {
   tablename = GetDBTableNameItemSummary(project.name, value)
   sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
   items <-RunSQLQueryDB(sql_statement)
@@ -131,7 +135,7 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
       return(NA)
     else {
       logger(WARN, items[i,idparam])
-      EvalItem(project.name, id=items[i,idKEYs], CONFIG=CONFIG, value=value,
+      EvalItem(project.name, id=items[i,idKEYs], project.config=project.config, value=value,
                param=eval(parse(text=paste("list(", gsub("Parameters='","", items[i,idparam]),")",sep="")))  )
     }
   }
@@ -148,27 +152,27 @@ EvalParamString <- function(param.string) {
 }
 
 EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, period.freq,
-                   calculate.period.end=TRUE, param=NULL, CONFIG, value="VALUE1" ) {
+                   calculate.period.end=TRUE, param=NULL, project.config, value="VALUE1" ) {
   item.data <- cbind(ts.values)
   rownames(item.data) <-ts.periods
   colnames(item.data) <- c(value)
 
-  CONFIG$period.start <-  period.start
+  project.config$period.start <-  period.start
   
-  CONFIG$period.freq = period.freq
+  project.config$period.freq = period.freq
   
   if (calculate.period.end) {  
     period.end.string <- rownames(item.data)[ length(ts.periods)]
     period.end <- unlist(lapply(strsplit(period.end.string, "-"), as.numeric))
-    CONFIG$period.end = period.end
+    project.config$period.end = period.end
   } # otherwise the project config value will be used
   
-  EvalItemData(project.name=project.name, id=id, item.data=item.data, value=value, param=param, CONFIG=CONFIG)
+  EvalItemData(project.name=project.name, id=id, item.data=item.data, value=value, param=param, project.config=project.config)
 }
 
 EvalTSString <- function(project.name, id=NULL, ts.string,
                          ts.periods.string=NULL, period.start.string, period.freq,
-                         calculate.period.end=TRUE, param=NULL, CONFIG) {
+                         calculate.period.end=TRUE, param=NULL, project.config) {
 
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
@@ -188,7 +192,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 
   
   EvalTS(project.name, id=id, ts.values=ts.values, ts.periods=ts.periods, period.start=period.start,
-         period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, CONFIG=CONFIG)
+         period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, project.config=project.config)
 }
 
 ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
@@ -386,7 +390,7 @@ GetProjectConfig <- function(project.name) {
   
   conf = conf[ .GetFieldsId(conf$V1,"eval.param"),"V2",drop=FALSE] 
   
-  CONFIG=list(project.name = project.name,
+  project.config=list(project.name = project.name,
     connector.package=connector.package,
     eval.package=eval.package,
     keys = keys, 
@@ -397,13 +401,13 @@ GetProjectConfig <- function(project.name) {
     period.end = period.end,
     save=save)
   for (i in 1:nrow(conf))
-    eval(parse(text=paste("CONFIG$param$",conf[i,]),))
+    eval(parse(text=paste("project.config$param$",conf[i,]),))
   
-  source(CONFIG$connector.package)		
-  source(CONFIG$eval.package)
+  source(project.config$connector.package)		
+  source(project.config$eval.package)
   
-  ##append(CONFIG, STRATEGICO)
-  CONFIG
+  ##append(project.config, STRATEGICO)
+  project.config
 }
 
 GetProjectPath <- function(project.name, projects.home = STRATEGICO$projects.home) {
@@ -424,16 +428,16 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
          </form>",sep="")
 }
 
-GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, CONFIG) {
+GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.config) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
 
-  keys <- names(CONFIG$keys)
+  keys <- names(project.config$keys)
   sapply(keys, function(x) unique(project.items[[x]]))
 }
   
 ImportProjectData <- function(project.name) {
-  if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.name)), envir = .GlobalEnv)
+  if(!exists("project.config")) assign("project.config", GetProjectConfig(paste(project.name)), envir = .GlobalEnv)
   connector.importItemsData(project.name)
 }
 
@@ -514,7 +518,7 @@ SubsetByID <- function(data, id) {
   colnames(item_data) <- vals.names
   save(item_data, file= paste(folder, "item.Rdata", sep="/"))
   
-  if("items_csv"%in%CONFIG$save)
+  if("items_csv"%in%project.config$save)
     write.csv(item_data,
               file= paste(folder, "item.csv", sep="/"),
               row.names = FALSE
@@ -566,13 +570,13 @@ UpdateItemsData <- function(project.name, project.data) {
   project.items <- cbind(id=1:nrow(project.items), project.items)
   save( project.items, file=outfile)
 
-  if("items_csv"%in%CONFIG$save)
+  if("items_csv"%in%project.config$save)
     write.csv(project.items,
               file= paste(project.path, "/project_items.csv", sep=""),
               row.names = FALSE
               )
-  if("items_db"%in%CONFIG$save) {
-    tablename = GetDBTableNameProjectItems(CONFIG$project.name)
+  if("items_db"%in%project.config$save) {
+    tablename = GetDBTableNameProjectItems(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
     rownames(project.items) <- project.items$id
