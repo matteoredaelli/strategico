@@ -93,9 +93,8 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
                      value, "=", project.config$values[value],
                      sep=""))
   
-  if (is.null(item.data)) {
+  if (is.null(item.data))
     item.data <- GetItemData(project.name=project.name, id=id, keys=keys, value=value)
-  }
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   print( t(item.data))
@@ -109,7 +108,11 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
     logger(INFO, "ID is null, assigning a new value")
     id <- GetNewID()
   }
+  
+  param <- MergeParamWithDefault(project.config=project.config, param=param)
 
+  logger(DEBUG, paste("Param= ",BuildParamString(param)))
+  
   directory = GetItemPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
@@ -121,30 +124,36 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   t(prediction)
 }
 
-EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config) {
+EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config=NULL) {
+  
+  if (is.null(project.config))
+    project.config <- GetProjectConfig(project.name=project.name)
+
   tablename = GetDBTableNameItemSummary(project.name, value)
   sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
   items <-RunSQLQueryDB(sql_statement)
-  summary(items)
-  idparam = which(names(items)=="Parameters")
-  idKEYs = grep("id",names(items))
 
-  for( i in 1:dim(items)[2]) {
-    logger(WARN, items[i,idKEYs]);
-    if( (all(is.na(items[i,idKEYs]))) | (!all(sapply( items[i,idKEYs][!is.na(items[i,idKEYs])], is.character )) ))
-      return(NA)
-    else {
-      logger(WARN, items[i,idparam])
-      EvalItem(project.name, id=items[i,idKEYs], project.config=project.config, value=value,
-               param=eval(parse(text=paste("list(", gsub("Parameters='","", items[i,idparam]),")",sep="")))  )
-    }
-  }
+  tot <- nrow(items)
+  if (tot == 0 )
+    logger(WARN, "NO items found to be updated!")
+  else {
+    for( i in 1:tot) {
+      item <- items[i,]
+      logger(INFO, paste("Found ID=", items$id))
+      logger(INFO, paste("Param String:", item$Parameters))
+      
+      param <- EvalParamString(as.character(item$Parameters))
+      EvalItem(project.name=project.name, id=item$id, project.config=project.config,
+             value=value, param=param
+               )
+    } #end for
+  } #end if
 }
 
 EvalParamString <- function(param.string) {
   if (is.character(param.string)) {
     param.string <- gsub(";",",", param.string)
-    eval(parse(text=paste("param=list(",param.string,")")))
+    param <- eval(parse(text=paste("list(",param.string,")")))
   } else {
     param <- list()
   }
@@ -470,6 +479,13 @@ ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
   else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
          ((now[2] + increment - 1)%%period.freq) + 1)
   now
+}
+
+MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param) {
+  if (is.null(project.config))
+    project.config <- GetProjectConfig(project.name=project.name)
+  
+  c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 }
 
 PeriodStringToVector <- function (period.string) {

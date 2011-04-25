@@ -74,8 +74,6 @@ BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 }
 
 EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config) {
-  
-  param=c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 
   model <- ltp(product = item.data[, value, drop = FALSE], rule=param$rule, rule.noMaxOver=param$rule.noMaxOver,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 

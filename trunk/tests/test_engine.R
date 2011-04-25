@@ -280,7 +280,7 @@ test.00.BuildPeriodRange <- function() {
               )
 }
 
-test.0.BuildParamString_EvalParamString <- function() {
+test.0.ParamFunctions <- function() {
   
   param.string <- "n.ahead=8;range=c(-Inf,Inf);NA2value=0;n.min=10;try.models=c('mean','trend','lm','es','arima');logtransform=FALSE;stepwise=TRUE;formula.right.lm='S*trend+S*trend2';rule='BestAIC';rule.noMaxOver=2;negTo0=TRUE;toInteger=TRUE"
   
@@ -299,6 +299,19 @@ test.0.BuildParamString_EvalParamString <- function() {
               param.string,
               BuildParamString(project.config$param)
               )
+
+  param1 <- EvalParamString("try.models=c('es','mean')")
+  param2 <- MergeParamWithDefault(project.config=project.config, param=param1)
+
+  checkEquals(
+              length(param2),
+              length(project.config$param)
+              )
+  checkEquals(
+              c("es", "mean"),
+              param2$try.models
+              )
+
 }            
               
 test.00.GetDBTableName <- function() {
