@@ -16,6 +16,8 @@
 
 ## sample usage
 ## Rscript eval_ts.Rscript sample 323232 "1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90" 2001-1  2
+## Rscript eval_ts.Rscript sample 323232 "1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90" 2001-1  2 "n.ahead=3"
+## Rscript eval_ts.Rscript sample 323232 "1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90" 2001-1  2 "" "2001-1 ...."
 
 library(methods)
 source("engine.R")
@@ -28,6 +30,7 @@ ts.string <- args[8]
 period.start.string <- args[9]
 period.freq <- as.integer(args[10])
 item.params <- args[11]
+ts.periods.string <- args[12]
 
 CONFIG <- GetProjectConfig(project.name)
 
@@ -45,4 +48,9 @@ msg <- paste("period.freq=", period.freq, sep="")
 print(msg)
 eval(parse(text=paste("param=list(",item.params,")")))
 
-EvalTSString(project.name=project.name, id=id, ts.string=ts.string, period.start.string=period.start.string, period.freq=period.freq, param=param, CONFIG=CONFIG)
+EvalTSString(project.name=project.name, id=id, ts.string=ts.string,
+             ts.periods.string=ts.periods.string,
+             ##ts.periods.string = NULL,
+             period.start.string=period.start.string,
+             period.freq=period.freq, param=param, CONFIG=CONFIG
+             )
