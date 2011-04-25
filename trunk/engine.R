@@ -411,7 +411,6 @@ GetProjectPath <- function(project.name, projects.home = STRATEGICO$projects.hom
 }
 
 GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
-  
   param.string <- BuildParamString(param)
   paste(
         "<h3>Run the engine</h3>
@@ -425,7 +424,14 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
          </form>",sep="")
 }
 
+GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, CONFIG) {
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
 
+  keys <- names(CONFIG$keys)
+  sapply(keys, function(x) unique(project.items[[x]]))
+}
+  
 ImportProjectData <- function(project.name) {
   if(!exists("CONFIG")) assign("CONFIG", GetProjectConfig(paste(project.name)), envir = .GlobalEnv)
   connector.importItemsData(project.name)

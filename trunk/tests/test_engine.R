@@ -16,7 +16,8 @@
 source("engine.R")
 
 project.name <- "sample"
-  
+CONFIG <- GetProjectConfig(project.name)
+
 test.010.GetProjectConfig <- function() {
   c <- GetProjectConfig(project.name)
 
@@ -280,7 +281,6 @@ test.00.BuildPeriodRange <- function() {
 }
 
 test.0.BuildParamString_EvalParamString <- function() {
-  CONFIG <- GetProjectConfig(project.name)
   
   param.string <- "n.ahead=8;range=c(-Inf,Inf);NA2value=0;n.min=10;try.models=c('mean','trend','lm','es','arima');logtransform=FALSE;stepwise=TRUE;formula.right.lm='S*trend+S*trend2';rule='BestAIC';rule.noMaxOver=2;negTo0=TRUE;toInteger=TRUE"
   
@@ -334,6 +334,17 @@ test.00.GetFieldsId <- function() {
               )
 }
 
+test.GetUniqueKeyValues <- function() {
+  uk <- GetUniqueKeyValues(project.name=project.name, CONFIG=CONFIG)
+  checkEquals(
+              length(CONFIG$keys),
+              length(uk)
+              )
+  checkEquals(
+              c("IT", "DE", "ES", "FR", "UK"),
+              as.vector(uk$KEY1)
+              )
+}
 
 test.incSampleTime <- function() {
   checkEquals(
