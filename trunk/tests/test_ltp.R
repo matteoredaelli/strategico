@@ -35,11 +35,27 @@ test.EvalItemData.e0 <- function() {
               length( colnames(e0)),
               CONFIG$param$n.ahead
               )
+
+  checkEquals(
+              8,
+              CONFIG$param$n.ahead
+              )
   
   checkEquals(
               c("2011-1", "2011-2", "2012-1", "2012-2", "2013-1", "2013-2", "2014-1", "2014-2"),
               colnames(e0)
               )
+
+  ## Check predictions with the one saved to DB
+  records <- GetDBItemResults(project.name, 5, "VALUE1")
+  checkEquals(
+              as.vector(e0[1,]),
+              sort(sort(records$VALUE1, decreasing=TRUE)[1:CONFIG$param$n.ahead])
+              )
+##  checkEquals(
+##              colnames(e0),
+##              sort(sort(records$PERIOD, decreasing=TRUE)[1:CONFIG$param$n.ahead])
+##              )
 }
 
 test.EvalItemData.e01 <- function() {
@@ -195,3 +211,16 @@ test.EvalTSString <- function() {
               )
 
 }
+
+test.GetDBItemResults <- function() { 
+  records <- GetDBItemResults(project.name, 1, "VALUE1")
+  
+  checkEquals(24,
+              nrow(records)
+              )
+  checkEquals(1,
+              records[1,"item_id"]
+              )
+  
+}
+                                  
