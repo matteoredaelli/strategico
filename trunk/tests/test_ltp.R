@@ -220,7 +220,17 @@ test.GetDBItemResults <- function() {
               )
   checkEquals(1,
               records[1,"item_id"]
-              )
-  
+              )  
 }
-                                  
+
+test.GetDBItemSummary <- function() { 
+  records <- GetDBItemSummary(project.name, 1, "VALUE1")
+  
+  checkEquals(1,
+              nrow(records)
+              )
+  checkEquals(1,
+              records[1,"id"]
+              )
+}
+
