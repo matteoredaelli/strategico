@@ -223,6 +223,22 @@ FixDBProjectTablesStructure <- function(project.name, values) {
   RunSQLQueryDB(sql)         
 }
 
+GetDBItemResults <- function(project.name, id, value) {
+  tablename <- GetDBTableNameItemResults(project.name, value)
+  sql_statement <- "select * from _TABLENAME_ where item_id=_ID_"
+  sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
+  sql_statement <- gsub("_ID_", id, sql_statement)
+  RunSQLQueryDB(sql_statement)
+}
+
+GetDBItemSummary <- function(project.name, id, value) {
+  tablename <- GetDBTableNameItemSummary(project.name, value)
+  sql_statement <- "select * from _TABLENAME_ where id=_ID_"
+  sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
+  sql_statement <- gsub("_ID_", id, sql_statement)
+  RunSQLQueryDB(sql_statement)
+}
+
 GetDBTableNameItemResults <- function(project.name, value) {
   paste(project.name, value, "results", sep="_")
 }
@@ -446,8 +462,10 @@ PeriodStringToVector <- function (period.string) {
 
 RunSQLQueryDB <- function(sql_statements, db=STRATEGICO$db.name, user=STRATEGICO$db.user, pass=STRATEGICO$db.pass) {
   channel <- odbcConnect(db, user, pass, believeNRows=FALSE)
-  for (statement in sql_statements)
+  for (statement in sql_statements) {
+    logger(DEBUG, paste("Running", statement))
     result <- sqlQuery(channel, statement)
+  }
   odbcClose(channel)
 
   result
