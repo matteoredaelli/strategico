@@ -279,8 +279,12 @@ test.00.BuildPeriodRange <- function() {
               )
 }
 
-test.0.EvalParamString <- function() {
-  param <- EvalParamString("n.ahead=8,range=c(-Inf,Inf),NA2value=0,n.min=10,try.models=c('mean','trend','lm','es','arima'),logtransform=FALSE,stepwise=TRUE,formula.right.lm='S*trend+S*trend2',rule='BestAIC',rule.noMaxOver=2,negTo0=TRUE,toInteger=TRUE")
+test.0.BuildParamString_EvalParamString <- function() {
+  CONFIG <- GetProjectConfig(project.name)
+  
+  param.string <- "n.ahead=8;range=c(-Inf,Inf);NA2value=0;n.min=10;try.models=c('mean','trend','lm','es','arima');logtransform=FALSE;stepwise=TRUE;formula.right.lm='S*trend+S*trend2';rule='BestAIC';rule.noMaxOver=2;negTo0=TRUE;toInteger=TRUE"
+  
+  param <- EvalParamString(param.string)
 
   checkEquals( 12, length(param))
 
@@ -289,6 +293,11 @@ test.0.EvalParamString <- function() {
   checkEquals(
               c("mean", "trend", "lm", "es", "arima"),
               param$try.models
+              )
+
+  checkEquals(
+              param.string,
+              BuildParamString(CONFIG$param)
               )
 }            
               

@@ -62,7 +62,7 @@ BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) 
 BuildParamString <- function(param) {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
-  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=",")))
+  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=";")))
 }
 
 BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
@@ -138,6 +138,7 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
 }
 
 EvalParamString <- function(param.string) {
+  param.string <- gsub(";",",", param.string)
   eval(parse(text=paste("param=list(",param.string,")")))
   param
 }
