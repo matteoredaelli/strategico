@@ -16,7 +16,7 @@
 source("engine.R")
 
 project.name <- "sample"
-CONFIG <- GetProjectConfig(project.name)
+project.config <- GetProjectConfig(project.name)
 
 test.010.GetProjectConfig <- function() {
   c <- GetProjectConfig(project.name)
@@ -206,26 +206,26 @@ test.00.BuildFilterWithKeys <- function() {
 
 
 test.00.BuildFullKey <- function() {
-  CONFIG <- GetProjectConfig(project.name)
+  project.config <- GetProjectConfig(project.name)
   
   checkEquals(
               c("IT","",""),
-              BuildFullKey(c("IT"), CONFIG$keys)
+              BuildFullKey(c("IT"), project.config$keys)
               )
 
   checkEquals(
               c("IT","101",""),
-              BuildFullKey(c("IT","101"), CONFIG$keys)
+              BuildFullKey(c("IT","101"), project.config$keys)
               )
 
   checkEquals(
               c("IT","101","AAA"),
-              BuildFullKey(c("IT","101", "AAA"), CONFIG$keys, fill.with="")
+              BuildFullKey(c("IT","101", "AAA"), project.config$keys, fill.with="")
               )
 
   checkEquals(
               c(NA,NA,NA),
-              BuildFullKey(NULL, CONFIG$keys, fill.with=NA)
+              BuildFullKey(NULL, project.config$keys, fill.with=NA)
               )
 }
 
@@ -297,7 +297,7 @@ test.0.BuildParamString_EvalParamString <- function() {
 
   checkEquals(
               param.string,
-              BuildParamString(CONFIG$param)
+              BuildParamString(project.config$param)
               )
 }            
               
@@ -335,9 +335,9 @@ test.00.GetFieldsId <- function() {
 }
 
 test.GetUniqueKeyValues <- function() {
-  uk <- GetUniqueKeyValues(project.name=project.name, CONFIG=CONFIG)
+  uk <- GetUniqueKeyValues(project.name=project.name, project.config=project.config)
   checkEquals(
-              length(CONFIG$keys),
+              length(project.config$keys),
               length(uk)
               )
   checkEquals(

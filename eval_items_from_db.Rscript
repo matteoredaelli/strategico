@@ -30,6 +30,6 @@ msg <- paste("item.value=", item.value, sep="")
 print(msg)
 
 
-CONFIG <- GetProjectConfig(project.name)
+project.config <- GetProjectConfig(project.name)
 
-EvalItemsFromDB(project.name=project.name, value=item.value, verbose=TRUE, CONFIG)
+EvalItemsFromDB(project.name=project.name, value=item.value, verbose=TRUE, project.config)

@@ -33,9 +33,9 @@ print(msg)
 msg <- paste("item.values=", item.values.string, ", item.params=", item.params, sep="")
 print(msg)
 
-CONFIG <- GetProjectConfig(project.name)
+project.config <- GetProjectConfig(project.name)
 param <- EvalParamString(item.params)
 
 EvalItems(project.name=project.name, 
           id.min=id.min, id.max=id.max,
-          values=item.values, param=param, CONFIG=CONFIG)
+          values=item.values, param=param, project.config=project.config)

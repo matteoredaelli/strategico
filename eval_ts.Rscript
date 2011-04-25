@@ -35,9 +35,9 @@ ts.periods.string <-args[12]
 if (is.na(ts.periods.string))
   ts.periods.string <- NULL
 
-CONFIG <- GetProjectConfig(project.name)
+project.config <- GetProjectConfig(project.name)
 
-source(CONFIG$eval.package)
+source(project.config$eval.package)
 param <- EvalParamString(item.params)
 
 msg <- paste("Project=", project.name, ", TS=", ts.string, sep="")
@@ -55,5 +55,5 @@ EvalTSString(project.name=project.name, id=id, ts.string=ts.string,
              ts.periods.string=ts.periods.string,
              ##ts.periods.string = NULL,
              period.start.string=period.start.string,
-             period.freq=period.freq, param=param, CONFIG=CONFIG
+             period.freq=period.freq, param=param, project.config=project.config
              )
