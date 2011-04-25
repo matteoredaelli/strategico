@@ -163,7 +163,8 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
 ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.freq,increment,period.end) {
   period.start.fix = period.start
   period.start = apply(matrix(as.numeric(unlist(strsplit(rownames(product),"-"))),nrow=2),1,min)
-  
+
+  ## TODO: Using BuildPeriodRange(period.start, period.freq, n, shift=0) 
   times=sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
   if (is.na(NA2value)){
 	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
@@ -709,6 +710,8 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
     pred = as.data.frame(obj[[obj$BestModel]]$prediction,ncol=1)
     period.freq = frequency(obj[[obj$BestModel]]$ts.product)
     end_serie = end(obj[[obj$BestModel]]$ts.product)
+    
+    ## TODO: Using BuildPeriodRange(period.start, period.freq, n, shift=0) 
     pred.names = sapply(1:dim(pred)[1],function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
