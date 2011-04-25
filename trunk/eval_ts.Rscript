@@ -30,11 +30,15 @@ ts.string <- args[8]
 period.start.string <- args[9]
 period.freq <- as.integer(args[10])
 item.params <- args[11]
-ts.periods.string <- args[12]
+ts.periods.string <-args[12]
+
+if (is.na(ts.periods.string))
+  ts.periods.string <- NULL
 
 CONFIG <- GetProjectConfig(project.name)
 
 source(CONFIG$eval.package)
+param <- EvalParamString(item.params)
 
 msg <- paste("Project=", project.name, ", TS=", ts.string, sep="")
 print(msg)
@@ -46,7 +50,6 @@ msg <- paste("id=", id, sep=" ")
 print(msg)
 msg <- paste("period.freq=", period.freq, sep="")
 print(msg)
-eval(parse(text=paste("param=list(",item.params,")")))
 
 EvalTSString(project.name=project.name, id=id, ts.string=ts.string,
              ts.periods.string=ts.periods.string,

@@ -138,8 +138,12 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, CONFIG) {
 }
 
 EvalParamString <- function(param.string) {
-  param.string <- gsub(";",",", param.string)
-  eval(parse(text=paste("param=list(",param.string,")")))
+  if (is.character(param.string)) {
+    param.string <- gsub(";",",", param.string)
+    eval(parse(text=paste("param=list(",param.string,")")))
+  } else {
+    param <- list()
+  }
   param
 }
 
@@ -171,14 +175,14 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
   period.start <- PeriodStringToVector(period.start.string)
   period.freq <- as.integer(period.freq)
 
+  ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+  
   if(is.character(ts.periods.string)) {
     ts.periods.tmp <- unlist(lapply(strsplit(ts.periods.string, ","), as.character))
-    if (length(ts.periods.tmp == length(ts.values)))
+    if (length(ts.periods.tmp) == length(ts.values))
       ts.periods = ts.periods.tmp
     else
-      logger(INFO, "Skipping ts.periods string, not matching length with ts string")
-  } else {
-    ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+      logger(WARN, "Skipping ts.periods string, not matching length with ts string")
   }
   
 
