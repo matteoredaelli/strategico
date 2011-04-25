@@ -201,10 +201,12 @@ ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE
 FixDBProjectTablesStructure <- function(project.name, values) {
   ## TODO: generalize tablenames..
   sql <- c("alter table sample_items MODIFY id integer",
-            "alter table sample_VALUE1_results MODIFY item_id integer",
-            "alter table sample_VALUE2_results MODIFY item_id integer",
-            "alter table sample_VALUE1_summary MODIFY id integer",
-            "alter table sample_VALUE2_summary MODIFY id integer"
+           "alter table sample_VALUE1_results MODIFY item_id integer",
+           "alter table sample_VALUE2_results MODIFY item_id integer",
+           "alter table sample_VALUE1_results MODIFY item_id varchar(50)",
+           "alter table sample_VALUE2_results MODIFY item_id varchar(50)",
+           "alter table sample_VALUE1_summary MODIFY id integer",
+           "alter table sample_VALUE2_summary MODIFY id integer"
             )
   RunSQLQueryDB(sql)         
 }
