@@ -313,6 +313,13 @@ test.00.GetDBTableName <- function() {
               )
 }
   
+test.GetDBTableSize <- function() {
+  tablename <- GetDBTableNameProjectItems("sample")
+  checkEquals(20,
+              GetDBTableSize(tablename)
+              )
+}
+
 test.00.GetFields <- function() {
   checkEquals(
               c("KEY1", "KEY2"),

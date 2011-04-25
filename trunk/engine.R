@@ -255,6 +255,12 @@ GetDBTableNameProjectItems <- function(project.name) {
   paste(project.name, "items", sep="_")
 }
 
+GetDBTableSize <- function(tablename) {
+  sql_statement <- paste("select count(*) from", tablename)
+  records <- RunSQLQueryDB(sql_statement)
+  as.integer(records[1][1])
+}
+
 ## trova un pattern in una lista di stringhe.
 ## utile per es per individuare le key e i value
 ## restituisce la stringa
@@ -463,7 +469,7 @@ PeriodStringToVector <- function (period.string) {
 RunSQLQueryDB <- function(sql_statements, db=STRATEGICO$db.name, user=STRATEGICO$db.user, pass=STRATEGICO$db.pass) {
   channel <- odbcConnect(db, user, pass, believeNRows=FALSE)
   for (statement in sql_statements) {
-    logger(DEBUG, paste("Running", statement))
+    logger(DEBUG, paste("Running SQL:", statement))
     result <- sqlQuery(channel, statement)
   }
   odbcClose(channel)
