@@ -134,9 +134,10 @@ EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=
       data = rbind(item.data[, value, drop = FALSE], prediction)
       data = cbind(item_id=id, data)
       data$PERIOD = rownames(data)
-
+      ## primary KEY
+      rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
       tablename = GetDBTableNameItemResults(project.name, value)
-      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE)
+      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE, rownames="id", addPK=TRUE)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%CONFIG$save) | ("summary_csv"%in%CONFIG$save)) {
