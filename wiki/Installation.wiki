@@ -25,6 +25,18 @@ If you want to use a database, you have to
 
 = Configuration =
 
+== Environment ==
+
+Set a variable STRATEGICO_HOME in your environment
+
+Under Linux you could add
+
+{{{
+ export STRATEGICO_HOME=/opt/strategico
+}}}
+
+in your /etc/profile or $HOME/.bashrc
+
 == ODBC ==
 
 To configure a database, for linux users, you should have something like
