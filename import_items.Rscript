@@ -15,7 +15,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 library(methods)
-source("engine.R")
+source("strategico_util.R")
 
 args <- commandArgs()
 

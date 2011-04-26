@@ -13,8 +13,6 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-source("engine.R")
-
 project.name <- "sample"
 project.config <- GetProjectConfig(project.name)
 

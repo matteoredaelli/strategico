@@ -16,7 +16,7 @@
 
 
 library(methods)
-source("engine.R")
+source("strategico_util.R")
 
 args <- commandArgs()
 

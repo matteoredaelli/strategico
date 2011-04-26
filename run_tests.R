@@ -14,6 +14,7 @@
 ## Authors: L. Finos, M. Redaelli
 
 library('RUnit')
+source("strategico_util.R")
 
 test.suite <- defineTestSuite("StrategicoTestSuite",
                               dirs = "tests",
