@@ -116,9 +116,10 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   directory = GetItemPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
-  prediction = EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
-    value=value, output.path=directory, param=param, project.config=project.config
-    )
+  EvalFunction <- paste("ltp.","EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
+    value=value, output.path=directory, param=param, project.config=project.config)", sep="")
+
+  prediction <- eval(parse(text=EvalFunction))
   logger(INFO, "RESULTS:")
   print(t(prediction))
   t(prediction)
