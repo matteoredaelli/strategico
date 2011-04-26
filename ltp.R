@@ -663,7 +663,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   
   title = paste("Strategico: Long Term Prediction for ID=", id, " - ", value.description, sep = " ")
 
-  ReporTable <- GetModelsComparisonTable(obj)
+  ReporTable <- ltp.GetModelsComparisonTable(obj)
  
     
   text = paste("<html>\n<head>\n<title>", title, "</title>\n</html>\n<body>\n<h1>", 

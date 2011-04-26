@@ -19,7 +19,7 @@ library("futile.logger")
 
 source("strategico.config")
 
-config_logger(threshold = STRATEGICO$logger.threshold)
+config_logger(threshold = strategico.config$logger.threshold)
 logger <- getLogger()
 
 
@@ -116,7 +116,7 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   directory = GetItemPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
-  EvalFunction <- paste("ltp.","EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
+  EvalFunction <- paste(project.config$eval.function,".EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
     value=value, output.path=directory, param=param, project.config=project.config)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
@@ -208,7 +208,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
                            rownames=FALSE, append=TRUE, addPK=FALSE) {
   
-  channel <- odbcConnect(STRATEGICO$db.name, STRATEGICO$db.user, STRATEGICO$db.pass, believeNRows=FALSE)
+  channel <- odbcConnect(strategico.config$db.name, strategico.config$db.user, strategico.config$db.pass, believeNRows=FALSE)
 
   delete_sql <- paste("delete from", tablename)
   
@@ -383,8 +383,7 @@ GetProjectConfig <- function(project.name) {
   conf=read.table(fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
   ## e assegnazione dei valori indicati dal file ai parametri
   project.name <- conf$V2[conf$V1=="project.name"]
-  connector.package <- conf$V2[conf$V1=="connector.package"]
-  eval.package <- conf$V2[conf$V1=="eval.package"]
+  eval.function <- conf$V2[conf$V1=="eval.function"]
   eval(parse(text=paste("save=c(",conf$V2[conf$V1=="save"],")"),))
   
   keys <- conf$V2[.GetFieldsId(conf$V1,"key")]
@@ -392,7 +391,6 @@ GetProjectConfig <- function(project.name) {
   
   values <- conf$V2[.GetFieldsId(conf$V1,"value")]
   names(values) <- .GetFields(conf$V1,"value")
-  connector.package <- conf$V2[conf$V1=="connector.package"]
   
   period.freq <- as.numeric(conf$V2[.GetFieldsId(conf$V1,"period.freq")])
   period.start <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.start")],"-")[[1]] )
@@ -401,26 +399,29 @@ GetProjectConfig <- function(project.name) {
   conf = conf[ .GetFieldsId(conf$V1,"eval.param"),"V2",drop=FALSE] 
   
   project.config=list(project.name = project.name,
-    connector.package=connector.package,
-    eval.package=eval.package,
+    eval.function=eval.function,
     keys = keys, 
-    values = values ,
-    connector.package = connector.package,
+    values = values,
     period.freq = period.freq,
     period.start = period.start,
     period.end = period.end,
     save=save)
   for (i in 1:nrow(conf))
     eval(parse(text=paste("project.config$param$",conf[i,]),))
+
+  project.R <- paste(project.name, ".R", sep="")
+  eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
+
+  for (source.file in c(project.R, eval.file)) {
+    logger(INFO, paste("Sourcing file", project.R))
+    source(source.file)
+  }
   
-  source(project.config$connector.package)		
-  source(project.config$eval.package)
-  
-  ##append(project.config, STRATEGICO)
+  ##append(project.config, strategico.config)
   project.config
 }
 
-GetProjectPath <- function(project.name, projects.home = STRATEGICO$projects.home) {
+GetProjectPath <- function(project.name, projects.home = strategico.config$projects.home) {
   paste(projects.home, project.name, sep="/")
 }
 
@@ -446,9 +447,12 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
   sapply(keys, function(x) unique(project.items[[x]]))
 }
   
-ImportProjectData <- function(project.name) {
-  if(!exists("project.config")) assign("project.config", GetProjectConfig(paste(project.name)), envir = .GlobalEnv)
-  connector.importItemsData(project.name)
+ImportProjectData <- function(project.name, project.config=NULL) {
+  if (is.null(project.config))
+    project.config <- GetProjectConfig(project.name=project.name)
+
+  cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
+  eval(parse(text = cmd))
 }
 
 ##input  da db. 
@@ -493,7 +497,7 @@ PeriodStringToVector <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
 
-RunSQLQueryDB <- function(sql_statements, db=STRATEGICO$db.name, user=STRATEGICO$db.user, pass=STRATEGICO$db.pass) {
+RunSQLQueryDB <- function(sql_statements, db=strategico.config$db.name, user=strategico.config$db.user, pass=strategico.config$db.pass) {
   channel <- odbcConnect(db, user, pass, believeNRows=FALSE)
   for (statement in sql_statements) {
     logger(DEBUG, paste("Running SQL:", statement))
@@ -562,6 +566,7 @@ SubsetByID <- function(data, id) {
 ## creates item.Rdata e item-list
 UpdateItemsData <- function(project.name, project.data) {
   project.path <- GetProjectPath(project.name)
+  project.config <- GetProjectConfig(project.name=project.name)
   
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
