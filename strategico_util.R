@@ -409,7 +409,7 @@ GetProjectConfig <- function(project.name) {
   for (i in 1:nrow(conf))
     eval(parse(text=paste("project.config$param$",conf[i,]),))
 
-  project.R <- paste(project.name, ".R", sep="")
+  project.R <- paste("project_", project.name, ".R", sep="")
   eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
 
   for (source.file in c(project.R, eval.file)) {
