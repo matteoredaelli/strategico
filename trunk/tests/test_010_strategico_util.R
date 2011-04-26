@@ -20,7 +20,7 @@ test.010.GetProjectConfig <- function() {
   c <- GetProjectConfig(project.name)
 
   checkEquals(
-              11,
+              9,
               length(c)
               )
 

@@ -37,7 +37,6 @@ if (is.na(ts.periods.string))
 
 project.config <- GetProjectConfig(project.name)
 
-source(project.config$eval.package)
 param <- EvalParamString(item.params)
 
 msg <- paste("Project=", project.name, ", TS=", ts.string, sep="")

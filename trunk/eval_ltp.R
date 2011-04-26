@@ -17,8 +17,7 @@
 
 source("ltp.R")
 
-
-BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
+ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 	stats=as.list(rep(NA,16))
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump",
                "VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
@@ -51,9 +50,9 @@ BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
 		#Best Model if not exclusion rule were performed
-		st=names(which.min(unlist(lapply(model[GetAllModels()],function(x) x$AIC))))
+		st=names(which.min(unlist(lapply(model[ltp.GetAllModels()],function(x) x$AIC))))
 		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		st=names(which.min(unlist(lapply(model[GetAllModels()],function(x) x$IC.width))))
+		st=names(which.min(unlist(lapply(model[ltp.GetAllModels()],function(x) x$IC.width))))
 		stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
 		#note: stat is changed from numeric to string
 		stats["BestModel"] = model$BestModel
@@ -140,7 +139,7 @@ ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.p
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%project.config$save) | ("summary_csv"%in%project.config$save)) {
     manual.model <- ifelse(length(param$try.models) > 1, FALSE, TRUE)
-    onerow.summ = BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
+    onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
   }
   if("summary_csv"%in%project.config$save) {
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""),
@@ -153,11 +152,11 @@ ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.p
   prediction
 }
 
-GetAllModels <- function() {
+ltp.GetAllModels <- function() {
   c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")
 }
 
-GetModelsComparisonTable <-  function(obj) {
+ltp.GetModelsComparisonTable <-  function(obj) {
   
   ReporTable = cbind(matrix("--",5,6),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
@@ -171,7 +170,6 @@ GetModelsComparisonTable <-  function(obj) {
     
     es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
   }
-  
   
   ReporTable[, 1] = c(ifelse(is.null(obj$LinearModel),"--",	gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),#paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
               ifelse(is.null(obj$Arima),"--",ifelse(length(obj$Arima$model$coef)==0,"-constant-",paste(obj$Arima$model$series,"=",paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
