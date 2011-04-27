@@ -15,7 +15,7 @@
 ####################### prediction
 ## fa tutto: richiama ltp o chi per essa, scrive il report e salva i dati.
 
-source("ltp.R")
+MySource("ltp.R")
 
 ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
 	stats=as.list(rep(NA,16))
