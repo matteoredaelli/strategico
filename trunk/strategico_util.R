@@ -17,7 +17,31 @@
 library(RODBC)
 library("futile.logger")
 
-source("strategico.config")
+FileExistsOrQuit <- function (filename, msg="", status=10){
+  if (!file.exists(filename)) {
+    logger(WARN, msg)
+    logger(WARN, paste("\nFile", filename, "not found! Bye"))
+    q(status=status)   
+  }
+}
+
+GetStrategicoHome <- function() {
+  strategico.path <-as.character(Sys.getenv("STRATEGICO_HOME"))
+  if (strategico.path == "") {
+    print("Environment STRATEGICO_HOME not set, Bye!")
+    q(status=2)
+  }
+  strategico.path
+}
+
+MySource <- function(filename) {
+  strategico.path <- GetStrategicoHome()
+  fullname = file.path(strategico.path, filename)
+  FileExistsOrQuit(fullname)
+  source(fullname)
+}
+
+MySource("strategico.config")
 
 config_logger(threshold = strategico.config$logger.threshold)
 logger <- getLogger()
@@ -364,23 +388,28 @@ GetNewID <- function(min=500000, max=502000) {
 
 GetProjectItems <- function(project.name) {
   project.path <- GetProjectPath(project.name)
-  filename <- paste( project.path, "project_items.Rdata", sep="/")
+  filename <- file.path(project.path, "project_items.Rdata")
+  FileExistsOrQuit(filename)
   load(filename)
   project.items
 }
 
 GetProjectData <- function(project.name) {
   project.path <- GetProjectPath(project.name)
-  load( paste(project.path, "project_data.Rdata", sep="/"))
+  filename <- file.path(project.path, "project_data.Rdata")
+  FileExistsOrQuit(filename)
+  load(filename)
   project.data
 }
 
 GetProjectConfig <- function(project.name) {
   project.path <- GetProjectPath(project.name)
-  fileName <- paste(project.path, "project.config", sep="/")
+  filename <- file.path(project.path, "project.config")
+  
+  FileExistsOrQuit(filename)
   
   ## cerca il file nella cartella : getwd()
-  conf=read.table(fileName, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
+  conf=read.table(filename, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
   ## e assegnazione dei valori indicati dal file ai parametri
   project.name <- conf$V2[conf$V1=="project.name"]
   eval.function <- conf$V2[conf$V1=="eval.function"]
@@ -413,8 +442,8 @@ GetProjectConfig <- function(project.name) {
   eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
 
   for (source.file in c(project.R, eval.file)) {
-    logger(INFO, paste("Sourcing file", project.R))
-    source(source.file)
+    FileExistsOrQuit(source.file)
+    MySource(source.file)
   }
   
   ##append(project.config, strategico.config)
