@@ -19,8 +19,8 @@ library("futile.logger")
 
 FileExistsOrQuit <- function (filename, msg="", status=10){
   if (!file.exists(filename)) {
-    logger(WARN, msg)
-    logger(WARN, paste("\nFile", filename, "not found! Bye"))
+    print(msg)
+    print( paste("File", filename, "not found! Bye"))
     q(status=status)   
   }
 }
