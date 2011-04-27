@@ -20,3 +20,9 @@
 {{{
 ./strategico.R --project.name=sample --cmd=eval_ts --ts.string=1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90 --ts.start=2001-1 --ts.freq=2 -i 4343 -p "try.models=c('mean')"
 }}}
+
+== RUNIT ==
+
+{{{
+./strategico.R --cmd=runit
+}}}
