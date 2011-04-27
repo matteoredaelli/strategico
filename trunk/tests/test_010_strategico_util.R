@@ -257,6 +257,15 @@ test.BuildKeyNames <- function() {
               c("KEY1", "KEY2", "KEY3"),
               BuildKeyNames( c("IT","","CAR"), na.rm=FALSE )
               )
+  
+#  checkEquals(
+#              c("KEY2", "KEY3"),
+#              BuildKeyNames( c(NA,"CAR","FIAT"), na.rm=TRUE )
+#              )
+#  checkEquals(
+#              c("KEY2", "KEY3"),
+#              BuildKeyNames( c(NULL,"CAR","FIAT"), na.rm=TRUE )
+#              )
   checkEquals(
               c("KEY2", "KEY3"),
               BuildKeyNames( c("","CAR","FIAT"), na.rm=TRUE )
@@ -265,6 +274,7 @@ test.BuildKeyNames <- function() {
               c("KEY1", "KEY2", "KEY3"),
               BuildKeyNames( c("","CAR","FIAT"), na.rm=FALSE )
               )
+  
 }
 
 test.00.BuildPeriodRange <- function() {
