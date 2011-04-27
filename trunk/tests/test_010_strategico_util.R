@@ -367,6 +367,37 @@ test.GetUniqueKeyValues <- function() {
               )
 }
 
+test.GetItemRelativePath <- function() {
+  checkEquals("0/1",
+              GetItemRelativePath(1)
+              )
+  checkEquals("0/1/VALUE1",
+              GetItemRelativePath(1, "VALUE1")
+              )
+}
+
+test.GetItemPath <- function() {
+  checkEquals(
+              paste(GetProjectPath(project.name), GetItemRelativePath(1, "VALUE1"), sep="/"),
+              GetItemPath(project.name, 1, "VALUE1")
+              )
+  checkEquals(
+              "/var/www/strategico/projects/sample/0/1/VALUE1",
+              GetItemPath(project.name, 1, "VALUE1")
+              )
+}
+
+test.GetItemUrl <- function() {
+  checkEquals(
+              paste(GetProjectUrl(project.name), GetItemRelativePath(1, "VALUE1"), sep="/"),
+              GetItemUrl(project.name, 1, "VALUE1")
+              )
+  checkEquals(
+              "http://localhost/strategico/projects/sample/0/1/VALUE1",
+              GetItemUrl(project.name, 1, "VALUE1")
+              )
+}
+
 test.incSampleTime <- function() {
   checkEquals(
               c(2002,1),
