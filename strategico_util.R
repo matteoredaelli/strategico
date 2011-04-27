@@ -262,12 +262,23 @@ GetItemKeys <- function(id, project.name=NULL, project.items=NULL) {
   result
 }
 
-GetItemPath <- function(project.name, id, value="") {
-  project.path <- GetProjectPath(project.name) 
-  path <- paste(project.path, as.integer(id / 500), "/", id, sep="/")
-  if( !is.null(value) )
-    path <- paste(path, value, sep="/")
+GetItemRelativePath <- function(id, value=NULL) { 
+  path <- file.path(as.integer(id / 500), id)
+  if( !is.null(value))
+    path <- file.path(path, value)
   path
+}
+
+GetItemPath <- function(project.name, id, value=NULL) {
+  project.path <- GetProjectPath(project.name)
+  relative.path <- GetItemRelativePath(id, value)
+  paste(project.path, relative.path, sep="/")
+}
+
+GetItemUrl <- function(project.name, id, value=NULL) {
+  project.url <- GetProjectUrl(project.name)
+  relative.path <- GetItemRelativePath(id, value)
+  paste(project.url, relative.path, sep="/")
 }
 
 GetItemResultsDB <- function(project.name, value, id) {
@@ -344,7 +355,11 @@ GetProjectConfig <- function(project.name) {
 }
 
 GetProjectPath <- function(project.name, projects.home = strategico.config$projects.home) {
-  paste(projects.home, project.name, sep="/")
+  file.path(projects.home, project.name)
+}
+
+GetProjectUrl <- function(project.name, projects.url = strategico.config$projects.url) {
+  paste(projects.url, project.name, sep="/")
 }
 
 GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
