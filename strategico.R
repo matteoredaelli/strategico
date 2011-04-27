@@ -18,7 +18,7 @@
 library(methods)
 library('getopt');
 
-UsageAndExit <- function(msg.err="\n") {
+UsageAndQuit <- function(msg.err="\n") {
   self = commandArgs()[1];
 
   cat(msg.err)
@@ -56,17 +56,17 @@ strategico.path <-as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.path, "strategico_util.R"))
 
 if (strategico.path == "")
-  UsageAndExit("Environment STRATEGICO_HOME is nor set!")
+  UsageAndQuit("Environment STRATEGICO_HOME is nor set!")
 
 #########################################################################
 ## check missing options
 #########################################################################
 
 if ( is.null(opt$project.name) )
-  UsageAndExit("Missing project name!")
+  UsageAndQuit("Missing project name!")
 
 if ( is.null(opt$cmd) ) 
-  UsageAndExit("Missing command!")
+  UsageAndQuit("Missing command!")
 
 if (is.null(opt$id.max) )
   opt$id.max = opt$id.min
@@ -80,7 +80,7 @@ param <- EvalParamString(opt$eval.param)
 #########################################################################
 
 if (!is.null(opt$help) ) {
-  UsageAndExit("You asked for a help...")
+  UsageAndQuit("You asked for a help...")
 }
     
 #########################################################################
@@ -90,9 +90,9 @@ if (!is.null(opt$help) ) {
 if (opt$cmd == "eval_items") {
 
   if (is.null(opt$id.min))
-    UsageAndExit("Missing parameter id!")
+    UsageAndQuit("Missing parameter id!")
   if (is.null(opt$item.values))
-    UsageAndExit("Missing parameter item.values!")
+    UsageAndQuit("Missing parameter item.values!")
 
   ## item.values could be could be VALUE1 or VALUE1,VALUE2
   values <- unlist(strsplit(opt$item.values, ","))
@@ -110,7 +110,7 @@ if (opt$cmd == "eval_items") {
 if (opt$cmd == "eval_items_from_db") {
 
   if (is.null(opt$item.values))
-    UsageAndExit("Missing parameter item.values!")
+    UsageAndQuit("Missing parameter item.values!")
   
   EvalItemsFromDB(project.name=opt$project.name, value=opt$item.value,
                   verbose=TRUE, project.config)
@@ -125,16 +125,16 @@ if (opt$cmd == "eval_items_from_db") {
 if (opt$cmd == "eval_ts") {
 
   if (is.null(opt$id.min))
-    UsageAndExit("Missing parameter id.min!")
+    UsageAndQuit("Missing parameter id.min!")
   
   if (is.null(opt$ts.string))
-    UsageAndExit("Missing parameter ts.string!")
+    UsageAndQuit("Missing parameter ts.string!")
   
   if (is.null(opt$ts.start))
-    UsageAndExit("Missing parameter ts.start!")
+    UsageAndQuit("Missing parameter ts.start!")
   
   if (is.null(opt$ts.freq))
-    UsageAndExit("Missing parameter ts.freq!")
+    UsageAndQuit("Missing parameter ts.freq!")
 
   EvalTSString(project.name=opt$project.name, id=opt$id.min, ts.string=opt$ts.string,
                ts.periods.string=opt$ts.periods,
