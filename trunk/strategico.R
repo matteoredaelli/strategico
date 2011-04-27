@@ -39,6 +39,7 @@ spec <- c(
           'id.max', 'M', 1, "double",
           'eval.param', 'p', 1, "character",
           'item.values', 'v', 1, "character",
+          'runit', 'u', 0, "logical",
           'ts.freq', 'f', 1, "double",
           'ts.string', 't', 1, "character",
           'ts.periods', 'P', 1, "character",
@@ -57,6 +58,26 @@ source(file.path(strategico.path, "strategico_util.R"))
 
 if (strategico.path == "")
   UsageAndQuit("Environment STRATEGICO_HOME is nor set!")
+
+
+#########################################################################
+## runit
+#########################################################################
+
+if (opt$cmd == "runit") {
+  library('RUnit')
+ 
+  test.suite <- defineTestSuite("StrategicoTestSuite",
+                              dirs = paste(GetStrategicoHome(), "tests", sep="/"),
+                              testFileRegexp = 'test_.+\\.R$',
+                              testFuncRegexp = '^test\\.+'
+                              )
+ 
+  test.result <- runTestSuite(test.suite)
+
+  printTextProtocol(test.result)
+  q(status=0);
+}
 
 #########################################################################
 ## check missing options
@@ -153,6 +174,8 @@ if (opt$cmd == "import") {
   ImportProjectData(project.name=opt$project.name)
   q(status=0);
 }
+
+
 ## signal success and exit.
 q(status=0);
 
