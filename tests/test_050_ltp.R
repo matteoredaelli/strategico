@@ -19,6 +19,19 @@ project.name <- "sample"
 project.config <- GetProjectConfig(project.name)
 
 test.EvalItemData.e0 <- function() {
+  ## TODO: remove the WARNING
+  ## Warning message:
+  ##In sqrt(diag(model$var.coef)) : NaNs produced
+
+  e0     <- EvalItemData(project.name=project.name, id=1, value="VALUE2", project.config=project.config)
+  
+  checkEquals(
+              c(3756, 5250, 4984, 5985, 6470, 7097, 7389, 8487),
+              as.vector(e0[1,])
+              )
+}
+
+test.EvalItemData.e00 <- function() {
   ## NO DATA time series
   e0     <- EvalItemData(project.name=project.name, id=5, value="VALUE1", project.config=project.config)
   e0.bis <- EvalItemData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="VALUE1", project.config=project.config)
@@ -56,19 +69,6 @@ test.EvalItemData.e0 <- function() {
 ##              colnames(e0),
 ##              sort(sort(records$PERIOD, decreasing=TRUE)[1:project.config$param$n.ahead])
 ##              )
-}
-
-test.EvalItemData.e01 <- function() {
-  ## TODI: remove the WARNING
-  ## Warning message:
-  ##In sqrt(diag(model$var.coef)) : NaNs produced
-
-  e0     <- EvalItemData(project.name=project.name, id=1, value="VALUE2", project.config=project.config)
-  
-  checkEquals(
-              c(3756, 5250, 4984, 5985, 6470, 7097, 7389, 8487),
-              as.vector(e0[1,])
-              )
 }
 
 test.EvalItemData.e1 <- function() {
