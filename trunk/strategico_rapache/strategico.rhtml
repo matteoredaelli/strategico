@@ -1,0 +1,59 @@
+<%
+  setContentType("text/html")
+  RApacheOutputErrors(TRUE)
+  setCookie("project","pippo")
+  library("xtable")
+  project.name <- ifelse(is.null(GET$project),'sample',GET$project)
+  nkeys <- ifelse(is.null(GET$nkeys),3,as.integer(GET$nkeys))
+  mycookie <- ifelse(is.null(COOKIES$project),'Unset',COOKIES$project)
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+%>
+<html>
+<head><title>A Simple Example</title></head>
+<body>
+<%
+  source(file.path(strategico.home, "strategico_util.R"))
+  project.path <- GetProjectPath(project.name)
+  project.items <- GetProjectItems(project.name)
+  #project.config <- GetProjectConfig(project.name)
+%>
+<%
+  KEY1 <- ifelse(is.null(GET$KEY1),"",GET$KEY1)
+  KEY2 <- ifelse(is.null(GET$KEY2),"",GET$KEY2)
+  KEY3 <- ifelse(is.null(GET$KEY3),"",GET$KEY3)
+  value <- ifelse(is.null(GET$value),"VALUE1", paste("VALUE",GET$value,sep=""))
+
+  size <- GetDBTableSize("sample_VALUE1_summary")
+%>
+<h1>Project <%=project.name%></h1>
+<form method="GET">Select Item:
+  <input name="project" type="hidden" value="<%=GET$project%>"><br ->
+  <input name="nkeys" type="hidden"   value="<%=GET$nkeys%>"><br ->
+  KEY1 <input name="KEY1" type="text"    value="<%=GET$KEY1%>">
+  KEY2 <input name="KEY2" type="text"    value="<%=GET$KEY2%>">
+  KEY3 <input name="KEY3" type="text"    value="<%=GET$KEY3%>"><br ->
+  VALUE <input name="value" type="text" value="<%=GET$value%>"">
+  <input type="submit" name="run" value="Run">
+</form>
+
+  
+<%
+  item.keys <- c(KEY1, KEY2, KEY3)
+  item.id <- GetItemID(item.keys, project.items=project.items)
+  item.url <- GetItemUrl(project.name, item.id, GET$value)
+%>
+
+  <%if (item.id > 0) {%>
+    <img src="<%=item.url%>/best_model.png" />
+    <img src="<%=item.url%>/all_models.png" />
+  <%}%>
+
+<%
+  item.summary <- GetItemSummaryDB(project.name, value, item.id)
+  item.results <- GetItemResultsDB(project.name, value, item.id)
+  print(xtable(t(item.summary)), type="html")
+  print(xtable(item.results), type="html")
+%>
+Today is: <%=format(Sys.time())%><br>
+<a href="/brew/simple.rhtml">Click me!</a>
+</body></html>
