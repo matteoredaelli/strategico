@@ -16,14 +16,27 @@
 
 library(RODBC)
 
-EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config=NULL) {
+DBConnect <- function(db.name=strategico.config$db.name
+                      ,db.user=strategico.config$db.user
+                      ,db.pass=strategico.config$db.pass
+                      #,db.case=strategico.config$db.case
+                      ) {
+  db.channel <- odbcConnect(db.name, db.user, db.pass, believeNRows=FALSE) #, case=db.case) 
+  db.channel
+}
+
+DBClose <- function(db.channel) {
+  odbcClose(db.channel)
+}
+
+EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
   
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
 
   tablename = GetDBTableNameItemSummary(project.name, value)
   sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
-  items <-RunSQLQueryDB(sql_statement)
+  items <-RunSQLQueryDB(sql_statement, db.channel=db.channel)
 
   tot <- nrow(items)
   if (tot == 0 )
@@ -36,33 +49,29 @@ EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config=N
       
       param <- EvalParamString(as.character(item$Parameters))
       EvalItem(project.name=project.name, id=item$id, project.config=project.config,
-             value=value, param=param
+               value=value, param=param, db.channel=db.channel
                )
     } #end for
   } #end if
 }
 
 ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
-                           rownames=FALSE, append=TRUE, addPK=FALSE) {
-  
-  channel <- odbcConnect(strategico.config$db.name, strategico.config$db.user, strategico.config$db.pass, believeNRows=FALSE)
-
+                           rownames=FALSE, append=TRUE, addPK=FALSE, db.channel) {
   delete_sql <- paste("delete from", tablename)
   
   if(!is.null(id)) 
     delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
 
   logger(DEBUG, delete_sql)
-  sqlQuery(channel, delete_sql)
- 
+  RunSQLQueryDB(delete_sql, db.channel)
 
-  sqlSave(channel, data, tablename=tablename, rownames=rownames,
+  sqlSave(db.channel, data, tablename=tablename, rownames=rownames,
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
-  odbcClose(channel)
 }
 
-FixDBProjectTablesStructure <- function(project.name, values) {
+FixDBProjectTablesStructure <- function(project.name, values, db.channel) {
   ## TODO: generalize tablenames..
+  ## Add unique index on keys in project_items table: needed for speed and consistency
   sql <- c("alter table sample_items MODIFY id integer",
            "alter table sample_VALUE1_results MODIFY item_id integer",
            "alter table sample_VALUE2_results MODIFY item_id integer",
@@ -71,23 +80,23 @@ FixDBProjectTablesStructure <- function(project.name, values) {
            "alter table sample_VALUE1_summary MODIFY id integer",
            "alter table sample_VALUE2_summary MODIFY id integer"
             )
-  RunSQLQueryDB(sql)         
+  RunSQLQueryDB(sql, db.channel)         
 }
 
-GetDBItemResults <- function(project.name, id, value) {
+GetDBItemResults <- function(project.name, id, value, db.channel) {
   tablename <- GetDBTableNameItemResults(project.name, value)
   sql_statement <- "select * from _TABLENAME_ where item_id=_ID_"
   sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
   sql_statement <- gsub("_ID_", id, sql_statement)
-  RunSQLQueryDB(sql_statement)
+  RunSQLQueryDB(sql_statement, db.channel)
 }
 
-GetDBItemSummary <- function(project.name, id, value) {
+GetDBItemSummary <- function(project.name, id, value, db.channel) {
   tablename <- GetDBTableNameItemSummary(project.name, value)
   sql_statement <- "select * from _TABLENAME_ where id=_ID_"
   sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
   sql_statement <- gsub("_ID_", id, sql_statement)
-  RunSQLQueryDB(sql_statement)
+  RunSQLQueryDB(sql_statement, db.channel)
 }
 
 GetDBTableNameItemResults <- function(project.name, value) {
@@ -106,27 +115,27 @@ GetDBTableNameProjectItems <- function(project.name) {
   paste(project.name, "items", sep="_")
 }
 
-GetDBTableSize <- function(tablename) {
+GetDBTableSize <- function(tablename, db.channel) {
   sql_statement <- paste("select count(*) from", tablename)
-  records <- RunSQLQueryDB(sql_statement)
+  records <- RunSQLQueryDB(sql_statement, db.channel)
   as.integer(records[1][1])
 }
 
-GetItemResultsDB <- function(project.name, value, id) {
+GetItemResultsDB <- function(project.name, value, id, db.channel) {
   tablename <- GetDBTableNameItemResults(project.name, value=value)
-  GetItemRecordsFromDB(project.name, id, tablename)
+  GetItemRecordsFromDB(project.name, id, tablename=tablename, db.channel=db.channel)
 }
   
-GetItemRecordsFromDB <- function(project.name, id, tablename) {
+GetItemRecordsFromDB <- function(project.name, id, tablename, db.channel) {
   filter <- paste("id=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
   logger(WARN, sql_statement)
-  RunSQLQueryDB(sql_statement)
+  RunSQLQueryDB(sql_statement, db.channel)
 }
   
-GetItemSummaryDB <- function(project.name, value, id) {
+GetItemSummaryDB <- function(project.name, value, id, db.channel) {
   tablename <- GetDBTableNameItemSummary(project.name, value=value)
-  GetItemRecordsFromDB(project.name, id, tablename)
+  GetItemRecordsFromDB(project.name, id, tablename, db.channel=db.channel)
 }
 
 ##input  da db. 
@@ -135,13 +144,11 @@ ImportProjectDataFromDB <- function(project.name, DB, DBUSER, DBPWD, sql_stateme
   UpdateItemsData(project.name, result)
 }
 
-RunSQLQueryDB <- function(sql_statements, db=strategico.config$db.name, user=strategico.config$db.user, pass=strategico.config$db.pass) {
-  channel <- odbcConnect(db, user, pass, believeNRows=FALSE)
+RunSQLQueryDB <- function(sql_statements, db.channel) {
   for (statement in sql_statements) {
     logger(DEBUG, paste("Running SQL:", statement))
-    result <- sqlQuery(channel, statement)
+    result <- sqlQuery(db.channel, statement)
   }
-  odbcClose(channel)
-
+  
   result
 }

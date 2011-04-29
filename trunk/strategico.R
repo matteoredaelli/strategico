@@ -54,11 +54,11 @@ opt = getopt( matrix(spec,ncol=4,byrow=TRUE))
 #########################################################################
 
 strategico.path <-as.character(Sys.getenv("STRATEGICO_HOME"))
-source(file.path(strategico.path, "strategico_util.R"))
 
 if (strategico.path == "")
   UsageAndQuit("Environment STRATEGICO_HOME is nor set!")
 
+source(file.path(strategico.path, "strategico_util.R"))	
 
 #########################################################################
 ## runit
@@ -66,7 +66,7 @@ if (strategico.path == "")
 
 if (opt$cmd == "runit") {
   library('RUnit')
- 
+  
   test.suite <- defineTestSuite("StrategicoTestSuite",
                               dirs = paste(GetStrategicoHome(), "tests", sep="/"),
                               testFileRegexp = 'test_.+\\.R$',
@@ -104,7 +104,15 @@ param <- EvalParamString(opt$eval.param)
 if (!is.null(opt$help) ) {
   UsageAndQuit("You asked for a help...")
 }
-    
+
+      
+#########################################################################
+## Opening DB connection
+#########################################################################
+
+# TODO: check if connection fails
+db.channel <- DBConnect()
+
 #########################################################################
 ## eval_items
 #########################################################################
@@ -125,7 +133,7 @@ if (opt$cmd == "eval_items") {
 
   EvalItems(project.name=opt$project.name, 
             id=opt$id.min, id.max=opt$id.max,
-            values=values, param=param, project.config=project.config)
+            values=values, param=param, project.config=project.config, db.channel=db.channel)
   q(status=0);
 }
 
@@ -139,7 +147,7 @@ if (opt$cmd == "eval_items_from_db") {
     UsageAndQuit("Missing parameter item.values!")
   
   EvalItemsFromDB(project.name=opt$project.name, value=opt$item.value,
-                  verbose=TRUE, project.config)
+                  verbose=TRUE, project.config, db.channel=db.channel)
   
   q(status=0);
 }
@@ -168,7 +176,7 @@ if (opt$cmd == "eval_ts") {
   EvalTSString(project.name=opt$project.name, id=opt$id.min, ts.string=opt$ts.string,
                ts.periods.string=opt$ts.periods,
                period.start.string=opt$ts.start,
-               period.freq=opt$ts.freq, param=param, project.config=project.config
+               period.freq=opt$ts.freq, param=param, project.config=project.config, db.channel=db.channel
              )
   
   q(status=0);

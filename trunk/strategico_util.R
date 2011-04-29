@@ -95,24 +95,26 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 }
 
-EvalItems <- function(project.name, id.min, id.max, keys=NULL, values, param=NULL, project.config=NULL) {
+EvalItems <- function(project.name, id.min, id.max, keys=NULL, values, param=NULL, project.config=NULL, db.channel) {
   if (is.null(project.config)) {
     project.config <- GetProjectConfig(project.name=project.name)
   }
   
   for (id in as.integer(id.min):as.integer(id.max)) {
-    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param, project.config=project.config)
+    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param, project.config=project.config, db.channel=db.channel)
   }
 }
 
-EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL, project.config) {
+EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL, project.config, db.channel) {
   for (i in 1:length(values)) {
     value <- values[i]
-    EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param, project.config=project.config)
+    EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param,
+                 project.config=project.config,db.channel=db.channel)
   }
 }
 
-EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value, param=NULL, project.config) {
+EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
+                         param=NULL, project.config, db.channel) {
   logger(INFO, "++++++++++++++++++++++++EvalItemData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
@@ -143,7 +145,7 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
   EvalFunction <- paste(project.config$eval.function,".EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
-    value=value, output.path=directory, param=param, project.config=project.config)", sep="")
+    value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
   logger(INFO, "RESULTS:")
@@ -162,7 +164,7 @@ EvalParamString <- function(param.string) {
 }
 
 EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, period.freq,
-                   calculate.period.end=TRUE, param=NULL, project.config, value="VALUE1" ) {
+                   calculate.period.end=TRUE, param=NULL, project.config, value="VALUE1", db.channel ) {
   item.data <- cbind(ts.values)
   rownames(item.data) <-ts.periods
   colnames(item.data) <- c(value)
@@ -177,12 +179,13 @@ EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, p
     project.config$period.end = period.end
   } # otherwise the project config value will be used
   
-  EvalItemData(project.name=project.name, id=id, item.data=item.data, value=value, param=param, project.config=project.config)
+  EvalItemData(project.name=project.name, id=id, item.data=item.data, value=value,
+               param=param, project.config=project.config, db.channel=db.channel)
 }
 
 EvalTSString <- function(project.name, id=NULL, ts.string,
                          ts.periods.string=NULL, period.start.string, period.freq,
-                         calculate.period.end=TRUE, param=NULL, project.config) {
+                         calculate.period.end=TRUE, param=NULL, project.config, db.channel) {
 
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
@@ -202,7 +205,8 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 
   
   EvalTS(project.name, id=id, ts.values=ts.values, ts.periods=ts.periods, period.start=period.start,
-         period.freq=period.freq, calculate.period.end=calculate.period.end, param=param, project.config=project.config)
+         period.freq=period.freq, calculate.period.end=calculate.period.end, param=param,
+         project.config=project.config, db.channel=db.channel)
 }
 
 ## trova un pattern in una lista di stringhe.
@@ -495,7 +499,7 @@ SubsetByID <- function(data, id) {
 
 
 ## creates item.Rdata e item-list
-UpdateItemsData <- function(project.name, project.data) {
+UpdateItemsData <- function(project.name, project.data, db.channel=NULL) {
   project.path <- GetProjectPath(project.name)
   project.config <- GetProjectConfig(project.name=project.name)
   
@@ -529,12 +533,19 @@ UpdateItemsData <- function(project.name, project.data) {
               row.names = FALSE
               )
   if("items_db"%in%project.config$save) {
+    if (is.null(db.channel))
+      channel <- DBConnect()
+    
     tablename = GetDBTableNameProjectItems(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
     rownames(project.items) <- project.items$id
     project.items$id <- NULL
-    ExportDataToDB(project.items, tablename, id=NULL, rownames="id", addPK=TRUE)
+    
+    ExportDataToDB(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=channel)
+    if (is.null(db.channel))
+      DBClose(channel)
+    
     project.items <- project.items.orig
   }
 
@@ -547,3 +558,4 @@ UpdateItemsData <- function(project.name, project.data) {
   #.UpdateItemsDataRecursively(project.path, project.data, keys=key_fields, values=NULL )
   
 } # end function
+
