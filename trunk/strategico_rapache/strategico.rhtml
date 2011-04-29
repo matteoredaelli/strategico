@@ -1,21 +1,22 @@
 <%
   setContentType("text/html")
   RApacheOutputErrors(TRUE)
-  setCookie("project","pippo")
-  library("xtable")
-  project.name <- ifelse(is.null(GET$project),'sample',GET$project)
-  nkeys <- ifelse(is.null(GET$nkeys),3,as.integer(GET$nkeys))
-  mycookie <- ifelse(is.null(COOKIES$project),'Unset',COOKIES$project)
-  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+
 %>
 <html>
-<head><title>A Simple Example</title></head>
+<head><title>Strategico</title></head>
 <body>
 <%
+  #setCookie("project","pippo")
+  #mycookie <- ifelse(is.null(COOKIES$project),'Unset',COOKIES$project)
+  project.name <- ifelse(is.null(GET$project),'sample',GET$project)
+  nkeys <- ifelse(is.null(GET$nkeys),3,as.integer(GET$nkeys))
+ 
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   project.path <- GetProjectPath(project.name)
   project.items <- GetProjectItems(project.name)
-  #project.config <- GetProjectConfig(project.name)
+  project.config <- GetProjectConfig(project.name)
 %>
 <%
   KEY1 <- ifelse(is.null(GET$KEY1),"",GET$KEY1)

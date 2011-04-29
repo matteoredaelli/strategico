@@ -128,7 +128,7 @@ if (opt$cmd == "eval_items") {
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
 
-  ## item.values could be could be VALUE1 or VALUE1,VALUE2
+  ## item.values could be could be V1 or V1,V2
   values <- unlist(strsplit(opt$item.values, ","))
 
   EvalItems(project.name=opt$project.name, 

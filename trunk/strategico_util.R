@@ -169,7 +169,7 @@ EvalParamString <- function(param.string) {
 }
 
 EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, period.freq,
-                   calculate.period.end=TRUE, param=NULL, project.config, value="VALUE1", db.channel ) {
+                   calculate.period.end=TRUE, param=NULL, project.config, value="V1", db.channel ) {
   item.data <- cbind(ts.values)
   rownames(item.data) <-ts.periods
   colnames(item.data) <- c(value)
@@ -228,7 +228,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 
 GetItemData <- function(project.name=NULL, project.data=NULL, id=NULL, keys=NULL, value, keys.na.rm=TRUE) {
   if (is.null(value)) {
-    logger(INFO, "Missing VALUE parameter in GetItemData")
+    logger(INFO, "Missing V parameter in GetItemData")
   }
   if (is.null(project.data))
     project.data <- GetProjectData(project.name=project.name)
@@ -415,7 +415,7 @@ ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
 
 ##input da da csv. 
 ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","KEY2"),
-                                     timesKeys=c("YEAR","SEMESTER"), VALUE=c("CORP")){ 
+                                     timesKeys=c("YEAR","SEMESTER"), V=c("CORP")){ 
 
   ##restituisce una list (itemList) con una ts per ogni elemento. 
   ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
@@ -427,7 +427,7 @@ ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
   if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
   else data$PERIOD=data[,timesKeys]
 
-  result <- data[,c(KEY,"PERIOD",VALUE)]
+  result <- data[,c(KEY,"PERIOD",V)]
 }
 
 .incSampleTime <- function(now, period.freq = 2, increment = 1) {
