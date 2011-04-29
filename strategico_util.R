@@ -306,8 +306,8 @@ GetItemResultsDB <- function(project.name, value, id) {
   GetItemRecordsFromDB(project.name, id, tablename)
 }
 
-GetNewID <- function(min=500000, max=502000) {
-  sample(min:max,1)
+GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.config$id.dummies.to) {
+  sample(from:to,1)
 }
 
 GetProjectItems <- function(project.name) {
