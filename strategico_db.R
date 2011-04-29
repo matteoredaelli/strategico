@@ -93,7 +93,7 @@ GetDBItemResults <- function(project.name, id, value, db.channel) {
   sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
   sql_statement <- gsub("_ID_", id, sql_statement)
   records <- RunSQLQueryDB(sql_statement, db.channel)
-  records$id <- records$item_id <- NULL
+  ##records$id <- records$item_id <- NULL
   records
 }
 
