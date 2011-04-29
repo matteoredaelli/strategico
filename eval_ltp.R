@@ -72,7 +72,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
         summ
 }
 
-ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config) {
+ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
 
   model <- ltp(product = item.data[, value, drop = FALSE], rule=param$rule, rule.noMaxOver=param$rule.noMaxOver,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
@@ -134,7 +134,8 @@ ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.p
       ## primary KEY
       rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
       tablename = GetDBTableNameItemResults(project.name, value)
-      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE, rownames="id", addPK=TRUE)
+      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                     rownames="id", addPK=TRUE, db.channel=db.channel)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if(("summary_db"%in%project.config$save) | ("summary_csv"%in%project.config$save)) {
@@ -147,7 +148,7 @@ ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.p
   }
   if("summary_db"%in%project.config$save) {
       tablename = GetDBTableNameItemSummary(project.name, value)
-      ExportDataToDB(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE)
+      ExportDataToDB(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
   prediction
 }

@@ -15,6 +15,7 @@
 
 project.name <- "sample"
 project.config <- GetProjectConfig(project.name)
+db.channel <- DBConnect()
 
 test.010.GetProjectConfig <- function() {
   c <- GetProjectConfig(project.name)
@@ -337,7 +338,7 @@ test.00.GetDBTableName <- function() {
 test.GetDBTableSize <- function() {
   tablename <- GetDBTableNameProjectItems("sample")
   checkEquals(20,
-              GetDBTableSize(tablename)
+              GetDBTableSize(tablename, db.channel=db.channel)
               )
 }
 
