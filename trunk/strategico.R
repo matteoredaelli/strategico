@@ -89,6 +89,7 @@ if ( is.null(opt$project.name) )
 if ( is.null(opt$cmd) ) 
   UsageAndQuit("Missing command!")
 
+
 if (is.null(opt$id.max) )
   opt$id.max = opt$id.min
 
@@ -112,6 +113,10 @@ if (opt$cmd == "eval_items") {
 
   if (is.null(opt$id.min))
     UsageAndQuit("Missing parameter id!")
+
+  if (!is.integer(opt$id.min))
+    UsageAndQuit("Id parameter id.min is not an integer!")
+  
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
 
@@ -147,6 +152,9 @@ if (opt$cmd == "eval_ts") {
 
   if (is.null(opt$id.min))
     UsageAndQuit("Missing parameter id.min!")
+
+  if (!is.integer(opt$id.min))
+    UsageAndQuit("Id parameter id.min is not an integer!")
   
   if (is.null(opt$ts.string))
     UsageAndQuit("Missing parameter ts.string!")
