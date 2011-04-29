@@ -15,6 +15,7 @@
 ## Authors: L. Finos, M. Redaelli
 
 library("futile.logger")
+library("xtable")
 
 FileExistsOrQuit <- function (filename, msg="", status=10){
   if (!file.exists(filename)) {
