@@ -156,3 +156,22 @@ RunSQLQueryDB <- function(sql_statements, db.channel) {
   }
   result
 }
+
+StatsProjectDB <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name)
+  }
+  
+  tables <- c(GetDBTableNameProjectData(project.name),
+              GetDBTableNameProjectItems(project.name))
+  
+  for (value in GetValueNames(project.config$values)) {
+    tables <- append(tables, c(GetDBTableNameItemResults(project.name, value),
+                               GetDBTableNameItemSummary(project.name, value)
+                               )
+                     )
+  }
+  
+  lapply(tables, function(t) c(t, GetDBTableSize(t, db.channel)))
+}
+    

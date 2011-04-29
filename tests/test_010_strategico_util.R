@@ -357,6 +357,36 @@ test.00.GetFieldsId <- function() {
               )
 }
 
+test.GetKeyNames <- function() {
+  checkEquals(
+              c("KEY1", "KEY2", "KEY3"),
+              GetKeyNames(keys=project.config$keys)
+              )
+  checkEquals(
+              GetKeyNames(project.config=project.config),
+              GetKeyNames(keys=project.config$keys)
+              )
+  checkEquals(
+              GetKeyNames(project.name=project.name),
+              GetKeyNames(keys=project.config$keys)
+              )
+}
+
+test.GetValueNames <- function() {
+  checkEquals(
+              c("V1", "V2"),
+              GetValueNames(values=project.config$values)
+              )
+  checkEquals(
+              GetValueNames(project.config=project.config),
+              GetValueNames(values=project.config$values)
+              )
+  checkEquals(
+              GetValueNames(project.name=project.name),
+              GetValueNames(values=project.config$values)
+              )
+}
+
 test.GetUniqueKeyValues <- function() {
   uk <- GetUniqueKeyValues(project.name=project.name, project.config=project.config)
   checkEquals(
