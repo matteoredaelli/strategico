@@ -306,6 +306,16 @@ GetItemResultsDB <- function(project.name, value, id) {
   GetItemRecordsFromDB(project.name, id, tablename)
 }
 
+GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
+  if (is.null(keys)) {
+    if (is.null(project.config))
+      project.config <- GetProjectConfig(project.name)
+   
+    keys <- project.config$keys
+  }
+  paste("KEY", 1:length(keys), sep="")
+}
+
 GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.config$id.dummies.to) {
   sample(from:to,1)
 }
@@ -374,7 +384,16 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
   sapply(keys, function(x) unique(project.items[[x]]))
 }
-  
+
+GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
+  if (is.null(values)) {
+    if (is.null(project.config))
+      project.config <- GetProjectConfig(project.name)
+    values <- project.config$values
+  }
+  paste("V", 1:length(values), sep="")
+}
+
 ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
