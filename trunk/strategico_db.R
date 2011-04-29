@@ -140,8 +140,7 @@ GetItemSummaryDB <- function(project.name, value, id, db.channel) {
 
 ##input  da db. 
 ImportProjectDataFromDB <- function(project.name, DB, DBUSER, DBPWD, sql_statement ) {
-  result <- RunSQLQueryDB(sql_statement, DB, DBUSER, DBPWD)
-  UpdateItemsData(project.name, result)
+  RunSQLQueryDB(sql_statement, DB, DBUSER, DBPWD)
 }
 
 RunSQLQueryDB <- function(sql_statements, db.channel) {

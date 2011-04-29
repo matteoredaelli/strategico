@@ -56,7 +56,7 @@ test.010.GetProjectConfig <- function() {
 }
 
 test.020.ImportProjectData <- function() {
-  ImportProjectData(project.name=project.name)
+  ImportProjectData(project.name=project.name, db.channel=db.channel)
   ## TODO Check if the new files have been created successfully 
 }
 
