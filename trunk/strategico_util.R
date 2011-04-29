@@ -19,12 +19,13 @@ library("xtable")
 
 Quit <- function (msg="", status=-1) {
   print(msg)
+  print("Bye!")
   q(status=status)
 }
 
 FileExistsOrQuit <- function (filename, msg="", status=10){
   if (!file.exists(filename)) {
-    print( paste("File", filename, "not found! Bye"))
+    print( paste("File", filename, "not found!"))
     Quit(msg=msg, status=status)   
   }
 }

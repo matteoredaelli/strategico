@@ -21,7 +21,11 @@ DBConnect <- function(db.name=strategico.config$db.name
                       ,db.pass=strategico.config$db.pass
                       #,db.case=strategico.config$db.case
                       ) {
-  db.channel <- odbcConnect(db.name, db.user, db.pass, believeNRows=FALSE) #, case=db.case) 
+  db.channel <- odbcConnect(db.name, db.user, db.pass, believeNRows=FALSE) #, case=db.case)
+
+  if( db.channel == -1)
+    Quit("Cannot connect to DB")
+  
   db.channel
 }
 
