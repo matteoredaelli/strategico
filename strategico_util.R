@@ -17,11 +17,15 @@
 library("futile.logger")
 library("xtable")
 
+Quit <- function (msg="", status=-1) {
+  print(msg)
+  q(status=status)
+}
+
 FileExistsOrQuit <- function (filename, msg="", status=10){
   if (!file.exists(filename)) {
-    print(msg)
     print( paste("File", filename, "not found! Bye"))
-    q(status=status)   
+    Quit(msg=msg, status=status)   
   }
 }
 
@@ -399,12 +403,13 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
   sapply(keys, function(x) unique(project.items[[x]]))
 }
   
-ImportProjectData <- function(project.name, project.config=NULL) {
+ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
 
   cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
-  eval(parse(text = cmd))
+  result <- eval(parse(text = cmd))
+  UpdateItemsData(project.name, result, db.channel)
 }
 
 ##input da da csv. 
@@ -421,7 +426,7 @@ ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
   if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
   else data$PERIOD=data[,timesKeys]
 
-  UpdateItemsData(project.name, data[,c(KEY,"PERIOD",VALUE)])
+  result <- data[,c(KEY,"PERIOD",VALUE)]
 }
 
 .incSampleTime <- function(now, period.freq = 2, increment = 1) {
@@ -499,7 +504,7 @@ SubsetByID <- function(data, id) {
 
 
 ## creates item.Rdata e item-list
-UpdateItemsData <- function(project.name, project.data, db.channel=NULL) {
+UpdateItemsData <- function(project.name, project.data, db.channel) {
   project.path <- GetProjectPath(project.name)
   project.config <- GetProjectConfig(project.name=project.name)
   
@@ -533,18 +538,14 @@ UpdateItemsData <- function(project.name, project.data, db.channel=NULL) {
               row.names = FALSE
               )
   if("items_db"%in%project.config$save) {
-    if (is.null(db.channel))
-      channel <- DBConnect()
-    
+
     tablename = GetDBTableNameProjectItems(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
     rownames(project.items) <- project.items$id
     project.items$id <- NULL
     
-    ExportDataToDB(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=channel)
-    if (is.null(db.channel))
-      DBClose(channel)
+    ExportDataToDB(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
     
     project.items <- project.items.orig
   }

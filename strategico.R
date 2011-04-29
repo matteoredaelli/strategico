@@ -187,7 +187,7 @@ if (opt$cmd == "eval_ts") {
 #########################################################################
 
 if (opt$cmd == "import") {
-  ImportProjectData(project.name=opt$project.name)
+  ImportProjectData(project.name=opt$project.name, db.channel=db.channel)
   q(status=0);
 }
 
