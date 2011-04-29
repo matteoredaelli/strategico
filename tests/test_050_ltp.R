@@ -24,7 +24,7 @@ test.EvalItemData.e0 <- function() {
   ## Warning message:
   ##In sqrt(diag(model$var.coef)) : NaNs produced
 
-  e0     <- EvalItemData(project.name=project.name, id=1, value="VALUE2", project.config=project.config, db.channel=db.channel)
+  e0     <- EvalItemData(project.name=project.name, id=1, value="V2", project.config=project.config, db.channel=db.channel)
   
   checkEquals(
               c(3756, 5250, 4984, 5985, 6470, 7097, 7389, 8487),
@@ -34,8 +34,8 @@ test.EvalItemData.e0 <- function() {
 
 test.EvalItemData.e00 <- function() {
   ## NO DATA time series
-  e0     <- EvalItemData(project.name=project.name, id=5, value="VALUE1", project.config=project.config, db.channel=db.channel)
-  e0.bis <- EvalItemData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="VALUE1",
+  e0     <- EvalItemData(project.name=project.name, id=5, value="V1", project.config=project.config, db.channel=db.channel)
+  e0.bis <- EvalItemData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="V1",
                          project.config=project.config, db.channel=db.channel)
   checkEquals(
               e0,
@@ -62,10 +62,10 @@ test.EvalItemData.e00 <- function() {
               )
 
   ## Check predictions with the one saved to DB
-  records <- GetDBItemResults(project.name, 5, "VALUE1", db.channel=db.channel)
+  records <- GetDBItemResults(project.name, 5, "V1", db.channel=db.channel)
   checkEquals(
               as.vector(e0[1,]),
-              sort(sort(records$VALUE1, decreasing=TRUE)[1:project.config$param$n.ahead])
+              sort(sort(records$V1, decreasing=TRUE)[1:project.config$param$n.ahead])
               )
 ##  checkEquals(
 ##              colnames(e0),
@@ -74,7 +74,7 @@ test.EvalItemData.e00 <- function() {
 }
 
 test.EvalItemData.e1 <- function() {
-  e1     <- EvalItemData(project.name=project.name, keys=c("IT"), value="VALUE1",
+  e1     <- EvalItemData(project.name=project.name, keys=c("IT"), value="V1",
                          project.config=project.config, db.channel=db.channel)
 
   checkEquals(
@@ -90,7 +90,7 @@ test.EvalItemData.e1 <- function() {
               colnames(e1)
               )
   
-  e11     <- EvalItemData(project.name=project.name, keys=c("IT"), value="VALUE2",
+  e11     <- EvalItemData(project.name=project.name, keys=c("IT"), value="V2",
                           project.config=project.config, db.channel=db.channel)
 
   checkEquals(
@@ -100,7 +100,7 @@ test.EvalItemData.e1 <- function() {
 }
 
 test.EvalItemData.e2 <- function() {
-  e2     <- EvalItemData(project.name=project.name, keys=c("IT", "CAR"), value="VALUE1",
+  e2     <- EvalItemData(project.name=project.name, keys=c("IT", "CAR"), value="V1",
                          project.config=project.config, db.channel=db.channel)
   checkEquals(
               c(5278, 1378, 5996, 2096, 6714, 2814, 7432, 3532),
@@ -111,7 +111,7 @@ test.EvalItemData.e2 <- function() {
               colnames(e2)
               )
 
-  e22     <- EvalItemData(project.name=project.name, keys=c("IT", "CAR"), value="VALUE2",
+  e22     <- EvalItemData(project.name=project.name, keys=c("IT", "CAR"), value="V2",
                           project.config=project.config, db.channel=db.channel)
   checkEquals(
               c(6847, 7388, 6895, 7436, 6942, 7483, 6990, 7531),
@@ -124,8 +124,8 @@ test.EvalItemData.e2 <- function() {
 }
 
 test.EvalItemData.e3 <- function() {
-  item.data <- GetItemData(project.name, keys=c("","CAR"), value="VALUE1")
-  e3 <- EvalItemData(project.name=project.name, keys=c("","CAR"), value="VALUE1",
+  item.data <- GetItemData(project.name, keys=c("","CAR"), value="V1")
+  e3 <- EvalItemData(project.name=project.name, keys=c("","CAR"), value="V1",
                      project.config=project.config, db.channel=db.channel)
 
   checkEquals(
@@ -142,7 +142,7 @@ test.EvalItemData.param <- function() {
   ## check passing parameters
   
   e3     <- EvalItemData(project.name, keys=c("DE", "CAR", "ALFA"),
-                          value="VALUE2", project.config=project.config, param=param, db.channel=db.channel)
+                          value="V2", project.config=project.config, param=param, db.channel=db.channel)
   checkEquals(
               c(3998, 3766, 4094),
               as.vector(e3[1,])
@@ -151,7 +151,7 @@ test.EvalItemData.param <- function() {
   param.string <- "n.ahead=3,try.models=c('mean','trend','lm')"
   param <- EvalParamString(param.string)
   e4    <- EvalItemData(project.name=project.name, keys=c("DE", "CAR", "BMW"),
-                          value="VALUE2", project.config=project.config, param=param, db.channel=db.channel)
+                          value="V2", project.config=project.config, param=param, db.channel=db.channel)
   checkEquals(
               c(2026, 9098, 2328),
               as.vector(e4[1,])
@@ -220,7 +220,7 @@ test.EvalTSString <- function() {
 }
 
 test.GetDBItemResults <- function() { 
-  records <- GetDBItemResults(project.name, 1, "VALUE2", db.channel=db.channel)
+  records <- GetDBItemResults(project.name, 1, "V2", db.channel=db.channel)
   
   checkEquals(24,
               nrow(records)
@@ -231,7 +231,7 @@ test.GetDBItemResults <- function() {
 }
 
 test.GetDBItemSummary <- function() { 
-  records <- GetDBItemSummary(project.name, 1, "VALUE2", db.channel=db.channel)
+  records <- GetDBItemSummary(project.name, 1, "V2", db.channel=db.channel)
   
   checkEquals(1,
               nrow(records)

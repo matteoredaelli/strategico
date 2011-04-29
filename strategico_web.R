@@ -16,16 +16,16 @@
 ## Authors:  M. Redaelli
 
 BuildHtmlElement_input <- function(name, value) {
-    str <- '<input name="_NAME_" type="text" value="_VALUE_" />'
+    str <- '<input name="_NAME_" type="text" value="_V_" />'
     str <- gsub("_NAME_", name, str)
-    str <- gsub("_VALUE_", value, str)
+    str <- gsub("_V_", value, str)
     str
 }
 
 BuildHtmlElement_select <- function(name, value, list.values) {
     str <- 'select name="_NAME_" >_OPTIONS_</select>'
     str <- str.gsub("_name_", name, str)
-    str <- str.gsub("_VALUE_", value, str)
+    str <- str.gsub("_V_", value, str)
     ##TODO
 }
 

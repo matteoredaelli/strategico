@@ -106,7 +106,7 @@ test.040.GetProjectData <- function() {
   project.data <- GetProjectData(project.name)
   
   checkEquals(
-              c("KEY1", "KEY2", "KEY3", "id", "PERIOD", "VALUE1", "VALUE2"),
+              c("KEY1", "KEY2", "KEY3", "id", "PERIOD", "V1", "V2"),
               colnames(project.data)
               )
   checkEquals(113,
@@ -133,8 +133,8 @@ test.050.Subset <- function() {
 test.GetItemData <- function() {
   project.data <- GetProjectData(project.name)
 
-  i0 <-     GetItemData(project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="VALUE1")
-  i0.bis <- GetItemData(project.data=project.data, id=5, value="VALUE1")
+  i0 <-     GetItemData(project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
+  i0.bis <- GetItemData(project.data=project.data, id=5, value="V1")
 
   checkEquals(
               i0,
@@ -149,20 +149,20 @@ test.GetItemData <- function() {
               i0[1,]
               )
   
-  i1 <- GetItemData(project.data=project.data, keys=c("IT","CAR",""), value="VALUE1")
+  i1 <- GetItemData(project.data=project.data, keys=c("IT","CAR",""), value="V1")
   checkEquals(
               c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
-              i1$VALUE1
+              i1$V1
               )
   checkEquals(
               c("2003-1","2003-2","2004-1","2004-2","2005-1","2005-2","2006-1","2006-2","2007-1","2007-2","2008-1","2008-2","2009-1","2009-2","2010-1","2010-2"),
               rownames(i1)
               )
 
-  i2 <- GetItemData(project.data=project.data, keys=c("", "MOTO","DUCATI"), value="VALUE1")
+  i2 <- GetItemData(project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
   checkEquals(
               c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
-              i2$VALUE1
+              i2$V1
               )
   checkEquals(
               c("2001-2", "2002-2", "2003-1", "2003-2", "2004-1"),
@@ -324,11 +324,11 @@ test.0.ParamFunctions <- function() {
 }            
               
 test.00.GetDBTableName <- function() {
-  checkEquals("sample_VALUE1_summary",
-              GetDBTableNameItemSummary("sample", value="VALUE1")
+  checkEquals("sample_V1_summary",
+              GetDBTableNameItemSummary("sample", value="V1")
               )
-  checkEquals("sample_VALUE1_results",
-              GetDBTableNameItemResults("sample", value="VALUE1")
+  checkEquals("sample_V1_results",
+              GetDBTableNameItemResults("sample", value="V1")
               )
   checkEquals("sample_items",
               GetDBTableNameProjectItems("sample")
@@ -345,14 +345,14 @@ test.GetDBTableSize <- function() {
 test.00.GetFields <- function() {
   checkEquals(
               c("KEY1", "KEY2"),
-              .GetFields(c("KEY1", "KEY2", "VALUE1", "PERIOD"), "KEY")
+              .GetFields(c("KEY1", "KEY2", "V1", "PERIOD"), "KEY")
               )
 }
 
 test.00.GetFieldsId <- function() {
   checkEquals(
               c(1,2),
-              .GetFieldsId(c("KEY1", "KEY2", "VALUE1", "PERIOD"), "KEY")
+              .GetFieldsId(c("KEY1", "KEY2", "V1", "PERIOD"), "KEY")
               )
 }
 
@@ -372,30 +372,30 @@ test.GetItemRelativePath <- function() {
   checkEquals("0/1",
               GetItemRelativePath(1)
               )
-  checkEquals("0/1/VALUE1",
-              GetItemRelativePath(1, "VALUE1")
+  checkEquals("0/1/V1",
+              GetItemRelativePath(1, "V1")
               )
 }
 
 test.GetItemPath <- function() {
   checkEquals(
-              paste(GetProjectPath(project.name), GetItemRelativePath(1, "VALUE1"), sep="/"),
-              GetItemPath(project.name, 1, "VALUE1")
+              paste(GetProjectPath(project.name), GetItemRelativePath(1, "V1"), sep="/"),
+              GetItemPath(project.name, 1, "V1")
               )
   checkEquals(
-              "/var/www/strategico/projects/sample/0/1/VALUE1",
-              GetItemPath(project.name, 1, "VALUE1")
+              "/var/www/strategico/projects/sample/0/1/V1",
+              GetItemPath(project.name, 1, "V1")
               )
 }
 
 test.GetItemUrl <- function() {
   checkEquals(
-              paste(GetProjectUrl(project.name), GetItemRelativePath(1, "VALUE1"), sep="/"),
-              GetItemUrl(project.name, 1, "VALUE1")
+              paste(GetProjectUrl(project.name), GetItemRelativePath(1, "V1"), sep="/"),
+              GetItemUrl(project.name, 1, "V1")
               )
   checkEquals(
-              "http://localhost/strategico/projects/sample/0/1/VALUE1",
-              GetItemUrl(project.name, 1, "VALUE1")
+              "http://localhost/strategico/projects/sample/0/1/V1",
+              GetItemUrl(project.name, 1, "V1")
               )
 }
 

@@ -4,5 +4,5 @@ sample.importItemsData <- function(project.name) {
   ImportProjectDataFromCSV(project.name, filename=fullname,
                            KEY=c("KEY1","KEY2","KEY3"),
                            timesKeys=c("PERIOD"),
-                           VALUE=c("VALUE1","VALUE2"))
+                           V=c("V1","V2"))
 }

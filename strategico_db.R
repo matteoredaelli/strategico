@@ -77,12 +77,12 @@ FixDBProjectTablesStructure <- function(project.name, values, db.channel) {
   ## TODO: generalize tablenames..
   ## Add unique index on keys in project_items table: needed for speed and consistency
   sql <- c("alter table sample_items MODIFY id integer",
-           "alter table sample_VALUE1_results MODIFY item_id integer",
-           "alter table sample_VALUE2_results MODIFY item_id integer",
-           "alter table sample_VALUE1_results MODIFY id varchar(50)",
-           "alter table sample_VALUE2_results MODIFY id varchar(50)",
-           "alter table sample_VALUE1_summary MODIFY id integer",
-           "alter table sample_VALUE2_summary MODIFY id integer"
+           "alter table sample_V1_results MODIFY item_id integer",
+           "alter table sample_V2_results MODIFY item_id integer",
+           "alter table sample_V1_results MODIFY id varchar(50)",
+           "alter table sample_V2_results MODIFY id varchar(50)",
+           "alter table sample_V1_summary MODIFY id integer",
+           "alter table sample_V2_summary MODIFY id integer"
             )
   RunSQLQueryDB(sql, db.channel)         
 }
