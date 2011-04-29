@@ -1,3 +1,5 @@
+<!-- -*- mode: R -*- -->
+  
 <%
   setContentType("text/html")
   RApacheOutputErrors(TRUE)
@@ -14,26 +16,28 @@
  
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
-  project.path <- GetProjectPath(project.name)
-  project.items <- GetProjectItems(project.name)
-  project.config <- GetProjectConfig(project.name)
+  project.path   <- GetProjectPath(project.name)
+  project.items  <- GetProjectItems(project.name)
+  project.config <- GetProjectConfig(project.name) ## doen't work inside rapache :-(
 %>
 <%
   KEY1 <- ifelse(is.null(GET$KEY1),"",GET$KEY1)
   KEY2 <- ifelse(is.null(GET$KEY2),"",GET$KEY2)
   KEY3 <- ifelse(is.null(GET$KEY3),"",GET$KEY3)
-  value <- ifelse(is.null(GET$value),"VALUE1", paste("VALUE",GET$value,sep=""))
+  value <- ifelse(is.null(GET$value),"V1", GET$value)
 
-  size <- GetDBTableSize("sample_VALUE1_summary")
+  db.channel <- DBConnect()
+  size <- GetDBTableSize("sample_V1_summary", db.channel=db.channel)
+ 
 %>
 <h1>Project <%=project.name%></h1>
 <form method="GET">Select Item:
-  <input name="project" type="hidden" value="<%=GET$project%>"><br ->
-  <input name="nkeys" type="hidden"   value="<%=GET$nkeys%>"><br ->
-  KEY1 <input name="KEY1" type="text"    value="<%=GET$KEY1%>">
-  KEY2 <input name="KEY2" type="text"    value="<%=GET$KEY2%>">
-  KEY3 <input name="KEY3" type="text"    value="<%=GET$KEY3%>"><br ->
-  VALUE <input name="value" type="text" value="<%=GET$value%>"">
+  <input name="project" type="hidden" value="<%=project.name%>" /><br />
+  <input name="nkeys" type="hidden"   value="<%=nkeys%>" /><br />
+  KEY1 <input name="KEY1" type="text"    value="<%=KEY1%>" />
+  KEY2 <input name="KEY2" type="text"    value="<%=KEY2%>" />
+  KEY3 <input name="KEY3" type="text"    value="<%=KEY3%>" /><br />
+  VALUE <input name="value" type="text" value="<%=value%>" />
   <input type="submit" name="run" value="Run">
 </form>
 
@@ -44,16 +48,19 @@
   item.url <- GetItemUrl(project.name, item.id, GET$value)
 %>
 
-  <%if (item.id > 0) {%>
+  <%if (item.id > 0) {
+ item.summary <- GetDBItemSummary(project.name, value=value, id=item.id, db.channel=db.channel)
+  item.results <- GetDBItemResults(project.name, value=value, id=item.id, db.channel=db.channel)
+  print(xtable(t(item.summary)), type="html")
+  print(xtable(item.results), type="html")
+
+    %>
     <img src="<%=item.url%>/best_model.png" />
     <img src="<%=item.url%>/all_models.png" />
   <%}%>
 
 <%
-  item.summary <- GetItemSummaryDB(project.name, value, item.id)
-  item.results <- GetItemResultsDB(project.name, value, item.id)
-  print(xtable(t(item.summary)), type="html")
-  print(xtable(item.results), type="html")
+ 
 %>
 Today is: <%=format(Sys.time())%><br>
 <a href="/brew/simple.rhtml">Click me!</a>

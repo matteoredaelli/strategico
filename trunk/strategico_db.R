@@ -92,7 +92,9 @@ GetDBItemResults <- function(project.name, id, value, db.channel) {
   sql_statement <- "select * from _TABLENAME_ where item_id=_ID_"
   sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
   sql_statement <- gsub("_ID_", id, sql_statement)
-  RunSQLQueryDB(sql_statement, db.channel)
+  records <- RunSQLQueryDB(sql_statement, db.channel)
+  records$id <- records$item_id <- NULL
+  records
 }
 
 GetDBItemSummary <- function(project.name, id, value, db.channel) {
@@ -152,6 +154,5 @@ RunSQLQueryDB <- function(sql_statements, db.channel) {
     logger(DEBUG, paste("Running SQL:", statement))
     result <- sqlQuery(db.channel, statement)
   }
-  
   result
 }

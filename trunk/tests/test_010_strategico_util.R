@@ -29,16 +29,17 @@ test.010.GetProjectConfig <- function() {
               12,
               length(c$param)
               )
+
   checkEquals(
               "sample",
               c$project.name
               )
-  
-  checkEquals(
-              c("KEY1", "KEY2", "KEY3"),
-              names(c$keys)
-              )
 
+  checkEquals(
+              3,
+              length(c$keys)
+              )
+  
   checkEquals(
               c("VendutoPirelli", "VendutoMercato"),
               as.vector(c$values)

@@ -331,42 +331,13 @@ GetProjectConfig <- function(project.name) {
   filename <- file.path(project.path, "project.config")
   
   FileExistsOrQuit(filename)
-  
-  ## cerca il file nella cartella : getwd()
-  conf=read.table(filename, head=FALSE,sep=":",stringsAsFactors =FALSE,quote="\"")
-  ## e assegnazione dei valori indicati dal file ai parametri
-  project.name <- conf$V2[conf$V1=="project.name"]
-  eval.function <- conf$V2[conf$V1=="eval.function"]
-  eval(parse(text=paste("save=c(",conf$V2[conf$V1=="save"],")"),))
-  
-  keys <- conf$V2[.GetFieldsId(conf$V1,"key")]
-  names(keys) <- .GetFields(conf$V1,"key")
-  
-  values <- conf$V2[.GetFieldsId(conf$V1,"value")]
-  names(values) <- .GetFields(conf$V1,"value")
-  
-  period.freq <- as.numeric(conf$V2[.GetFieldsId(conf$V1,"period.freq")])
-  period.start <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.start")],"-")[[1]] )
-  period.end <- as.numeric(strsplit(conf$V2[.GetFieldsId(conf$V1,"period.end")],"-")[[1]] )
-  
-  conf = conf[ .GetFieldsId(conf$V1,"eval.param"),"V2",drop=FALSE] 
-  
-  project.config=list(project.name = project.name,
-    eval.function=eval.function,
-    keys = keys, 
-    values = values,
-    period.freq = period.freq,
-    period.start = period.start,
-    period.end = period.end,
-    save=save)
-  for (i in 1:nrow(conf))
-    eval(parse(text=paste("project.config$param$",conf[i,]),))
 
+  source(filename)
+ 
   project.R <- paste("project_", project.name, ".R", sep="")
   eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
 
   for (source.file in c(project.R, eval.file)) {
-    FileExistsOrQuit(source.file)
     MySource(source.file)
   }
   
@@ -400,7 +371,7 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
 
-  keys <- names(project.config$keys)
+  keys <- paste("KEY", 1:length(project.config$keys), sep="")
   sapply(keys, function(x) unique(project.items[[x]]))
 }
   
