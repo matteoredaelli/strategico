@@ -13,6 +13,13 @@ You have to install a web server with php support. For linux (Debian and Ubuntu)
 The document root is the directory that corresponds to the url http://localhost
 For Linux it is /var/www
 
+You have to set teh right paths in the file "strategico.config" (http://code.google.com/p/strategico/source/browse/trunk/strategico.config)
+
+{{{
+  projects.home="/var/www/strategico/projects",
+  projects.url="http://localhost/strategico/projects",
+}}}
+
 In your document root (), you should have the folders) you should have the follwing directories and files (taken by strategico sources)
 
 {{{
