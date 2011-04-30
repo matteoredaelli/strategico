@@ -553,3 +553,15 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
   
 } # end function
 
+Version <- function() {"
+Strategico - Copyright(c) 2010, 2011
+Release 1.0.0
+License: GPL V3*
+
+Contributors:
+  Livio Finos
+  Matteo Redaelli
+  Marco Rinaldo
+"
+}
+

@@ -20,7 +20,6 @@ library('getopt');
 
 UsageAndQuit <- function(msg.err="\n") {
   self = commandArgs()[1];
-
   cat(msg.err)
   
   options <- "
@@ -43,12 +42,12 @@ spec <- c(
           'ts.freq', 'f', 1, "double",
           'ts.string', 't', 1, "character",
           'ts.periods', 'P', 1, "character",
-          'ts.start', 'S', 1, "character"
+          'ts.start', 'S', 1, "character",
+          'version', 'V', 0, "logical"
           )
 
 opt = getopt( matrix(spec,ncol=4,byrow=TRUE))
-
-       
+   
 #########################################################################
 ## check Environment & source startegico_util.R
 #########################################################################
@@ -59,6 +58,29 @@ if (strategico.path == "")
   UsageAndQuit("Environment STRATEGICO_HOME is nor set!")
 
 source(file.path(strategico.path, "strategico_util.R"))	
+
+#########################################################################
+## version
+#########################################################################
+
+if (!is.null(opt$version)) {
+  UsageAndQuit(Version())
+}
+
+#########################################################################
+## help
+#########################################################################
+
+if (!is.null(opt$help) ) {
+  UsageAndQuit("You asked for a help...")
+}
+
+#########################################################################
+## cmd commands: runit, eval_items, eval_ts, eval_items_from_db
+#########################################################################
+
+if ( is.null(opt$cmd) ) 
+  UsageAndQuit("Missing command!")
 
 #########################################################################
 ## runit
@@ -86,24 +108,12 @@ if (opt$cmd == "runit") {
 if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
-if ( is.null(opt$cmd) ) 
-  UsageAndQuit("Missing command!")
-
-
 if (is.null(opt$id.max) )
   opt$id.max = opt$id.min
 
 project.config <- GetProjectConfig(opt$project.name)
   
 param <- EvalParamString(opt$eval.param)
-
-#########################################################################
-## help
-#########################################################################
-
-if (!is.null(opt$help) ) {
-  UsageAndQuit("You asked for a help...")
-}
 
       
 #########################################################################
