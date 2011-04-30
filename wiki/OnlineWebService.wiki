@@ -16,10 +16,10 @@ For Linux it is /var/www
 In your document root (), you should have the folders) you should have the follwing directories and files (taken by strategico sources)
 
 {{{
-   projects/sample
-   projects/web-ltp
-   ws/ws.html
-   ws/ws.php
+   strategico/projects/sample
+   strategico/projects/web-ltp
+   strategico/ws/ws.html
+   strategico/ws/ws.php
  }}}
 
 Change in ws.php the path of strategico sources (by default /apps/strategico)
