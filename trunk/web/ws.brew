@@ -22,53 +22,71 @@ setContentType("text/html")
   
 <html>
 <head>
-<title>Strategico - Online Service</title>
+<title>Strategico Online Web Service (Run)</title>
 </head>
 <body>
+  <center>
+<h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico - Online Service</h1>
+  </center>
+  
   <%
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.home, "strategico_util.R"))
-project.name <- paste("web", GET$eval, sep="-")
-id=GetNewID()
 
-ts <-  GET$ts
-if (!GET['decimals']=="."& !is.null(GET['decimals']))
-  ts = gsub(GET['decimals'], ".", GET$ts)
+decimals       <- ifelse(is.null(GET$decimals    ), ".", GET$decimals)
+ts             <- ifelse(is.null(GET$ts          ), "0", GET$ts)
+period.start   <- ifelse(is.null(GET$period_start), "2000-1", GET$period_start)
+period.freq    <- ifelse(is.null(GET$period_freq), "2", GET$period_freq)
+eval           <- ifelse(is.null(GET$eval), "ltp", GET$eval)
+
+if (!decimals==".")
+  ts = gsub(decimals, ".", ts)
 
 ts = gsub("\r\n", ",", ts)
 ts = gsub("\r", ",", ts)
 ts = gsub("\n", ",", ts)
 ts = gsub(" ", ",", ts)
-   
+
+project.name <- paste("web", eval, sep="-")
+id=GetNewID()
+
 output_path = GetItemUrl(project.name, id=id, value="V1")
-db.channel <- DBConnect()
+db.channel <- NULL
 link = file.path(output_path, "report.html")
 %>
   INPUT DATA:<br /><br />  
   ts.string=<%=ts%><br />
-  period.start=<%=GET$period_start%><br />
-  period.freq=<%=GET$period_freq%><br />
+  period.start=<%=period.start%><br />
+  period.freq=<%=period.freq%><br />
   params=<%=GET$params%><br />
 
   <br /><br /> 
   RUN:<br /><br />  
   <%
 if (!is.null(GET$submit)) {
+  param <- EvalParamString(GET$params)
   EvalTSString(project.name=project.name,
                id=id,
                ts.string=ts,
-               period.start.string=GET$period_start,
-               period.freq=GET$period_freq,
-               param=GET$params,
+               period.start.string=period.start,
+               period.freq=period.freq,
+               param=param,
                db.channel=db.channel)
      
-  cat(paste("<br /><br />Goto <a href=\"", link, "\">Report</a> page", sep=""))
+  cat(paste("<br /><br />Goto report <a href=\"",
+            link,
+            "\">page</a> ",
+            "(if generated) or <a href=\"",
+            output_path,
+            "\">folder</a>.",
+            sep=""))
 } else
 cat("no post submit")
 %>
   
-<hr />
-<a href="http://code.google.com/p/strategico/">Strategico</a> GPL v3+ license
+<hr /><center>
+Powered by <a href="http://code.google.com/p/strategico/">Strategico</a>
+</center>
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
