@@ -20,7 +20,7 @@ You have to set the right paths in the file "strategico.config" (http://code.goo
   projects.url="http://localhost/strategico/projects",
 }}}
 
-In your document root (), you should have at least the following directories and files (taken by strategico sources)
+In your document root, you should have at least the following directories and files (taken by strategico sources)
 
 {{{
    strategico/projects/web-ltp
