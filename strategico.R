@@ -123,7 +123,6 @@ db.channel <- DBConnect()
 
 if (is.null(opt$id.max) )
   opt$id.max = opt$id.min
-
   
 param <- EvalParamString(opt$eval.param)
 

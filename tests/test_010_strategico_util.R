@@ -134,8 +134,8 @@ test.050.Subset <- function() {
 test.GetItemData <- function() {
   project.data <- GetProjectData(project.name)
 
-  i0 <-     GetItemData(project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
-  i0.bis <- GetItemData(project.data=project.data, id=5, value="V1")
+  i0 <-     GetItemData(project.name=project.name, project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
+  i0.bis <- GetItemData(project.name=project.name, project.data=project.data, id=5, value="V1")
 
   checkEquals(
               i0,
@@ -150,7 +150,7 @@ test.GetItemData <- function() {
               i0[1,]
               )
   
-  i1 <- GetItemData(project.data=project.data, keys=c("IT","CAR",""), value="V1")
+  i1 <- GetItemData(project.name=project.name, project.data=project.data, keys=c("IT","CAR",""), value="V1")
   checkEquals(
               c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
               i1$V1
@@ -160,7 +160,7 @@ test.GetItemData <- function() {
               rownames(i1)
               )
 
-  i2 <- GetItemData(project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
+  i2 <- GetItemData(project.name=project.name, project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
   checkEquals(
               c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
               i2$V1
