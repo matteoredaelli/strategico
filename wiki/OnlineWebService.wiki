@@ -1,0 +1,32 @@
+#summary Quick start on strategico OnlineService
+
+= Setup =
+
+I suppose you are installing the OnLine service on your PC Linux
+ 
+You have to install a web server with php support. For linux (Debian and Ubuntu), for instance you simply run 
+
+{{{
+  sudo apt-get install apache2-mpm-prefork libapache2-mod-php5
+}}}
+
+The document root is the directory that corresponds to the url http://localhost
+For Linux it is /var/www
+
+In your document root (), you should have the folders) you should have the follwing directories and files (taken by strategico sources)
+
+{{{
+   projects/sample
+   projects/web-ltp
+   ws/ws.html
+   ws/ws.php
+ }}}
+
+Change in ws.php the path of strategico sources (by default /apps/strategico)
+
+Be sure that the folder projects/web-ltp/1200 will be WRITABLE by the user that runs Apache. You can do
+
+{{{
+  cd /var/www
+  sudo chmod 777 projects/web-ltp/1200
+}}}
