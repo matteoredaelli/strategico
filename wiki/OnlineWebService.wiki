@@ -28,5 +28,6 @@ Be sure that the folder projects/web-ltp/1200 will be WRITABLE by the user that 
 
 {{{
   cd /var/www/strategico
+  mkdir projects/web-ltp/1200
   sudo chmod 777 projects/web-ltp/1200
 }}}
