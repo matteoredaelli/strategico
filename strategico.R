@@ -122,7 +122,8 @@ if (opt$cmd == "eval_items") {
   if (is.null(opt$id.min))
     UsageAndQuit("Missing parameter id!")
 
-  if (!is.integer(opt$id.min))
+  opt$id.min <- trunc(as.numeric(opt$id.min))
+  if (is.na(opt$id.min))
     UsageAndQuit("Id parameter id.min is not an integer!")
   
   if (is.null(opt$item.values))
@@ -160,8 +161,9 @@ if (opt$cmd == "eval_ts") {
 
   if (is.null(opt$id.min))
     UsageAndQuit("Missing parameter id.min!")
-
-  if (!is.integer(opt$id.min))
+  
+  opt$id.min <- trunc(as.numeric(opt$id.min))
+  if (is.na(opt$id.min))
     UsageAndQuit("Id parameter id.min is not an integer!")
   
   if (is.null(opt$ts.string))
