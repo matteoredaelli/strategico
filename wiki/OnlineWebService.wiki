@@ -30,7 +30,9 @@ In your document root, you should have at least the following directories and fi
    strategico/web/ws.php
  }}}
 
-Change in ws.php the path of strategico sources (by default /apps/strategico)
+Change:
+  * in ws.html the string ws.brew with ws.php
+  * in ws.php the path of strategico sources (by default /apps/strategico)
 
 Be sure that the folder projects/web-ltp/1200 will be WRITABLE by the user that runs Apache. You can do
 
