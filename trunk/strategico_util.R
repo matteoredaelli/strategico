@@ -341,16 +341,12 @@ GetProjectConfig <- function(project.name) {
   filename <- file.path(project.path, "project.config")
   
   FileExistsOrQuit(filename)
-
+  ## sourcing priect.config file
   source(filename)
- 
-  project.R <- paste("project_", project.name, ".R", sep="")
-  eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
 
-  for (source.file in c(project.R, eval.file)) {
-    MySource(source.file)
-  }
-  
+  eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
+  MySource(eval.file)
+ 
   ##append(project.config, strategico.config)
   project.config
 }
@@ -398,6 +394,10 @@ ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
 
+   
+  project.R <- paste("project_", project.name, ".R", sep="")
+  MySource(project.R)
+  
   cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
   result <- eval(parse(text = cmd))
   UpdateItemsData(project.name, result, db.channel)

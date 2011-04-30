@@ -4,18 +4,23 @@
 </head>
 <body>
   <?php
-     $KEY="UID-" . hash('md5', $_GET['ts']);
-     $ts = str_replace( array("\r\n","\r","\n"), ",", $_GET['ts']);
+     // TODO: remove FIXED path for strategico scripts (now /apps/strategico)
+     //       remove FIXED relative web path for projects path (../projects/
+     $id=rand(600001,600199);
+     $ts = str_replace($_GET['decimals'], ".", $_GET['ts']);
+     $ts = str_replace(array("\r\n","\r","\n"), ",", $ts);
+     $project_name = "web-" .  $_GET['eval'];
+     $output_path = "../projects/" . $project_name . "/1200/". $id . "/V1";
 
-     $project_path = "/var/www/strategico/projects/web-" . $_GET['eval_function'];
      if (isset($_GET['submit'])) {
-     $command = "cd /apps/strategico && /apps/R/bin/Rscript eval_ts.Rscript " 
-     . " " . $project_path
-     . " " . $KEY
-     . " " . $ts
-     . " " . $_GET['period_start']
-     . " " . $_GET['period_freq']
-     . " " . '"' . str_replace(" ", "", $_GET['params']) . '"'
+     $command = "/apps/strategico/strategico.R"
+     . " --cmd eval_ts" 
+     . " --project.name " . $project_name
+     . " --id.min " . $id
+     . " --ts.string " . $ts
+     . " --ts.start " . $_GET['period_start']
+     . " --ts.freq " . $_GET['period_freq']
+     . " --eval.param " . '"' . str_replace(" ", "", $_GET['params']) . '"'
      ;
      echo "Running command:<br /> " . $command;
      echo "<br />";
@@ -25,7 +30,7 @@
      echo $result;
      echo "<br />";
      echo "<br />";
-     $link = "projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html";
+     $link = $output_path . "/report.html";
      #echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
      #echo "<script type='text/javascript'> window.location = '" . $link . "'</script>";
      echo "Goto <a href=\"" . $link . "\">Result</a> page";
