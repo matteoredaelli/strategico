@@ -150,7 +150,7 @@ if (opt$cmd == "eval_items") {
   EvalItems(project.name=opt$project.name, 
             id=opt$id.min, id.max=opt$id.max,
             values=values, param=param, project.config=project.config, db.channel=db.channel)
-  q(status=0);
+  q(status=0)
 }
 
 #########################################################################
@@ -165,7 +165,7 @@ if (opt$cmd == "eval_items_from_db") {
   EvalItemsFromDB(project.name=opt$project.name, value=opt$item.value,
                   verbose=TRUE, project.config, db.channel=db.channel)
   
-  q(status=0);
+  q(status=0)
 }
 
 #########################################################################
@@ -195,8 +195,7 @@ if (opt$cmd == "eval_ts") {
                period.start.string=opt$ts.start,
                period.freq=opt$ts.freq, param=param, project.config=project.config, db.channel=db.channel
              )
-  
-  q(status=0);
+  q(status=0)
 }
 
 #########################################################################
@@ -206,7 +205,7 @@ if (opt$cmd == "eval_ts") {
 if (opt$cmd == "statistics") {
   stats <- GetProjectStatistics(project.name=opt$project.name, db.channel=db.channel)
   print(stats)
-  q(status=0);
+  q(status=0)
 }
 
 #########################################################################
@@ -215,12 +214,11 @@ if (opt$cmd == "statistics") {
 
 if (opt$cmd == "import") {
   ImportProjectData(project.name=opt$project.name, db.channel=db.channel)
-  q(status=0);
+  q(status=0)
+  
+} else {
+  UsageAndQuit(paste("Unknown command", opt$cmd))
 }
-
-
-## signal success and exit.
-q(status=0);
 
 
 
