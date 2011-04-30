@@ -27,6 +27,6 @@ Change in ws.php the path of strategico sources (by default /apps/strategico)
 Be sure that the folder projects/web-ltp/1200 will be WRITABLE by the user that runs Apache. You can do
 
 {{{
-  cd /var/www
+  cd /var/www/strategico
   sudo chmod 777 projects/web-ltp/1200
 }}}
