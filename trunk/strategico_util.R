@@ -100,26 +100,35 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 }
 
-EvalItems <- function(project.name, id.min, id.max, keys=NULL, values, param=NULL, project.config=NULL, db.channel) {
-  if (is.null(project.config)) {
+EvalItems <- function(project.name, id.min, id.max, keys=NULL, values=NULL, param=NULL,
+                      project.config=NULL, project.items=NULL,  db.channel) {
+  if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
-  }
+ 
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
+
+  if (is.null(values))
+    values <- GetValueNames(project.config=project.config)
   
   for (id in as.integer(id.min):as.integer(id.max)) {
-    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param, project.config=project.config, db.channel=db.channel)
+    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param,
+             project.config=project.config, project.items=project.items, db.channel=db.channel)
   }
 }
 
-EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL, project.config, db.channel) {
+EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
+                     project.config, project.items=NULL, db.channel) {
   for (i in 1:length(values)) {
     value <- values[i]
     EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param,
-                 project.config=project.config,db.channel=db.channel)
+                 project.config=project.config, project.items=project.items,
+                 db.channel=db.channel)
   }
 }
 
 EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
-                         param=NULL, project.config, db.channel) {
+                         param=NULL, project.config, project.items=NULL, db.channel) {
   logger(INFO, "++++++++++++++++++++++++EvalItemData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
@@ -127,7 +136,7 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
                      sep=""))
   
   if (is.null(item.data))
-    item.data <- GetItemData(project.name=project.name, id=id, keys=keys, value=value)
+    item.data <- GetItemData(project.name=project.name, project.items=project.items, id=id, keys=keys, value=value)
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   print( t(item.data))
@@ -228,17 +237,19 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
 }
 
-GetItemData <- function(project.name=NULL, project.data=NULL, id=NULL, keys=NULL, value, keys.na.rm=TRUE) {
-  if (is.null(value)) {
-    logger(INFO, "Missing V parameter in GetItemData")
-  }
+GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1", keys.na.rm=TRUE) {
+ 
   if (is.null(project.data))
     project.data <- GetProjectData(project.name=project.name)
 
-  if (is.null(keys)) 
-    filtered.data <- SubsetByID(data=project.data, id=id)
-  else
-    filtered.data <- SubsetByKeys(data=project.data, keys=keys, keys.na.rm=keys.na.rm)
+  if (is.null(keys)) {
+    if (is.null(project.items))
+      project.items <- GetProjectItems(project.name=project.name)
+    keys <- GetItemKeys(id=id, project.name=project.name, project.items=project.items)
+  }
+#    filtered.data <- SubsetByID(data=project.data, id=id)
+#  else
+  filtered.data <- SubsetByKeys(data=project.data, keys=keys, keys.na.rm=keys.na.rm)
 
   if (nrow(filtered.data) > 0)
     result <- AggregateItemData(filtered.data, value=value)
