@@ -124,7 +124,13 @@ GetDBTableNameProjectItems <- function(project.name) {
 GetDBTableSize <- function(tablename, db.channel) {
   sql_statement <- paste("select count(*) from", tablename)
   records <- RunSQLQueryDB(sql_statement, db.channel)
-  as.integer(records[1][1])
+  if (nrow(records) > 0) 
+    result <- as.integer(records[1][1])
+  else {
+    logger(WARN, paste("cannot count rows of table", tablename))
+    result <- 0
+  }
+  result
 }
 
 GetItemResultsDB <- function(project.name, value, id, db.channel) {
@@ -144,6 +150,23 @@ GetItemSummaryDB <- function(project.name, value, id, db.channel) {
   GetItemRecordsFromDB(project.name, id, tablename, db.channel=db.channel)
 }
 
+GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name)
+  }
+
+  stats <- list(
+                #project.data=GetDBTableSize(GetDBTableNameProjectData(project.name), db.channel),
+                project.items=GetDBTableSize(GetDBTableNameProjectItems(project.name), db.channel)
+                )
+  
+  for (value in GetValueNames(project.config$values)) {
+    stats$item.results = paste(stats$item.results, GetDBTableSize(GetDBTableNameItemResults(project.name, value), db.channel))
+    stats$item.summary = paste(stats$item.summary, GetDBTableSize(GetDBTableNameItemSummary(project.name, value), db.channel))
+  }
+  stats
+}
+    
 ##input  da db. 
 ImportProjectDataFromDB <- function(project.name, DB, DBUSER, DBPWD, sql_statement ) {
   RunSQLQueryDB(sql_statement, DB, DBUSER, DBPWD)
@@ -156,22 +179,3 @@ RunSQLQueryDB <- function(sql_statements, db.channel) {
   }
   result
 }
-
-StatsProjectDB <- function(project.name, project.config=NULL, db.channel) {
-  if(is.null(project.config)) {
-    project.config <- GetProjectConfig(project.name)
-  }
-  
-  tables <- c(GetDBTableNameProjectData(project.name),
-              GetDBTableNameProjectItems(project.name))
-  
-  for (value in GetValueNames(project.config$values)) {
-    tables <- append(tables, c(GetDBTableNameItemResults(project.name, value),
-                               GetDBTableNameItemSummary(project.name, value)
-                               )
-                     )
-  }
-  
-  lapply(tables, function(t) c(t, GetDBTableSize(t, db.channel)))
-}
-    

@@ -102,26 +102,31 @@ if (opt$cmd == "runit") {
 }
 
 #########################################################################
-## check missing options
+## Reading project.config
 #########################################################################
 
 if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
-if (is.null(opt$id.max) )
-  opt$id.max = opt$id.min
-
 project.config <- GetProjectConfig(opt$project.name)
-  
-param <- EvalParamString(opt$eval.param)
 
-      
 #########################################################################
 ## Opening DB connection
 #########################################################################
 
 # TODO: check if connection fails
 db.channel <- DBConnect()
+
+#########################################################################
+## check missing options
+#########################################################################
+
+if (is.null(opt$id.max) )
+  opt$id.max = opt$id.min
+
+  
+param <- EvalParamString(opt$eval.param)
+
 
 #########################################################################
 ## eval_items
@@ -191,6 +196,16 @@ if (opt$cmd == "eval_ts") {
                period.freq=opt$ts.freq, param=param, project.config=project.config, db.channel=db.channel
              )
   
+  q(status=0);
+}
+
+#########################################################################
+## statistics
+#########################################################################
+
+if (opt$cmd == "statistics") {
+  stats <- GetProjectStatistics(project.name=opt$project.name, db.channel=db.channel)
+  print(stats)
   q(status=0);
 }
 

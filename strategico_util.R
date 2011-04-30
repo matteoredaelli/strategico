@@ -357,6 +357,49 @@ GetProjectPath <- function(project.name, projects.home = strategico.config$proje
   file.path(projects.home, project.name)
 }
 
+GetProjectStatistics <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
+  
+  stats.rdata <- GetProjectStatisticsRdata(project.name=project.name, project.config=project.config,
+                                           project.items=project.items, project.data=project.data)
+  
+  stats.db <- GetProjectStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
+
+  stats <- t(as.data.frame(append(stats.rdata,stats.db)))
+  colnames(stats) = "VALUE"
+  stats
+}
+  
+GetProjectStatisticsRdata <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL) {
+  if (is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name=project.name)
+  }
+  if (is.null(project.items)) {
+    project.items <- GetProjectItems(project.name=project.name)
+  }
+  if (is.null(project.data)) {
+    project.data <- GetProjectData(project.name=project.name)
+  }
+  n.items    <- nrow(project.items)
+  n.data     <- nrow(project.data)
+  n.values   <- length(project.config$values)
+  levels     <- levels(project.data$PERIOD)
+  period.min <- min(levels)
+  period.max <- max(levels)
+  
+  stats <- list(
+                keys=paste(project.config$keys, collapse=","),
+                values=paste(project.config$values, collapse=","),
+                n.data=n.data,
+                n.items=n.items,
+                n.ts=n.items * n.values,
+                ts.length=n.data/n.items,
+                period.min=period.min,
+                period.max=period.max
+                )
+  stats
+}
+
+
 GetProjectUrl <- function(project.name, projects.url = strategico.config$projects.url) {
   paste(projects.url, project.name, sep="/")
 }
@@ -556,7 +599,7 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
 Version <- function() {"
 Strategico - Copyright(c) 2010, 2011
 Release 1.0.0
-License: GPL V3*
+License: GPL V3+
 
 Contributors:
   Livio Finos
