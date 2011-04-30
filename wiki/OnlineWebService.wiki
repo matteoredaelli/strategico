@@ -1,10 +1,10 @@
 #summary Quick start on strategico OnlineService
 
-= Setup =
+= Setup (php) =
 
 I suppose you are installing the OnLine service on your PC Linux
  
-You have to install a web server with php support. For linux (Debian and Ubuntu), for instance you simply run 
+You have to install a web server with php support. For php and linux (Debian and Ubuntu), for instance you simply run 
 
 {{{
   sudo apt-get install apache2-mpm-prefork libapache2-mod-php5
@@ -25,8 +25,9 @@ In your document root, you should have at least the following directories and fi
 {{{
    strategico/projects/web-ltp
    strategico/projects/web-ltp/project.config
-   strategico/ws/ws.html
-   strategico/ws/ws.php
+   strategico/web/ws.html
+   strategico/web/ws.brew
+   strategico/web/ws.php
  }}}
 
 Change in ws.php the path of strategico sources (by default /apps/strategico)
@@ -38,3 +39,17 @@ Be sure that the folder projects/web-ltp/1200 will be WRITABLE by the user that 
   mkdir projects/web-ltp/1200
   sudo chmod 777 projects/web-ltp/1200
 }}}
+
+= Setup (rapache/brew) =
+
+You need to download, install and configure [http://rapache.net/ rapache].
+
+After that, add in your apache web server configuration, inside your virtualhost
+{{{
+   <Files *.brew>
+        SetHandler r-script
+        RHandler brew::brew
+   </Files>
+}}}
+
+In this case all files with extension .brew will be run with R & brew
