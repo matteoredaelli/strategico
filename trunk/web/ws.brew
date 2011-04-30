@@ -1,0 +1,87 @@
+<!-- -*- mode: R -*- -->
+  <!--
+  ## This program is fre esoftware: you can redistribute it and/or modify
+  ## it under the terms of the GNU General Public License as published by
+  ## the Free Software Foundation, either version 3 of the License, or
+  ## any later version.
+  ##
+  ## This program is distributed in the hope that it will be useful,
+  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ## GNU General Public License for more details.
+  ##
+  ## You should have received a copy of the GNU General Public License
+  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+  
+  <%
+setContentType("text/html")
+#RApacheOutputErrors(TRUE)
+#options(hverbose=FALSE,verbose=FALSE)
+%>
+  
+<html>
+<head>
+<title>Strategico - Online Service</title>
+</head>
+<body>
+  <%
+strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+source(file.path(strategico.home, "strategico_util.R"))
+project.name <- paste("web", GET$eval, sep="-")
+id=GetNewID()
+
+ts <-  GET$ts
+if (!GET['decimals']=="."& !is.null(GET['decimals']))
+  ts = gsub(GET['decimals'], ".", GET$ts)
+
+ts = gsub("\r\n", ",", ts)
+ts = gsub("\r", ",", ts)
+ts = gsub("\n", ",", ts)
+ts = gsub(" ", ",", ts)
+   
+output_path = GetItemUrl(project.name, id=id, value="V1")
+db.channel <- DBConnect()
+link = file.path(output_path, "report.html")
+%>
+  INPUT DATA:<br /><br />  
+  ts.string=<%=ts%><br />
+  period.start=<%=GET$period_start%><br />
+  period.freq=<%=GET$period_freq%><br />
+  params=<%=GET$params%><br />
+
+  <br /><br /> 
+  RUN:<br /><br />  
+  <%
+if (!is.null(GET$submit)) {
+  EvalTSString(project.name=project.name,
+               id=id,
+               ts.string=ts,
+               period.start.string=GET$period_start,
+               period.freq=GET$period_freq,
+               param=GET$params,
+               db.channel=db.channel)
+     
+  cat(paste("<br /><br />Goto <a href=\"", link, "\">Report</a> page", sep=""))
+} else
+cat("no post submit")
+%>
+  
+<hr />
+<a href="http://code.google.com/p/strategico/">Strategico</a> GPL v3+ license
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20402785-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>
