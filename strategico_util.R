@@ -190,8 +190,10 @@ EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, p
 
 EvalTSString <- function(project.name, id=NULL, ts.string,
                          ts.periods.string=NULL, period.start.string, period.freq,
-                         calculate.period.end=TRUE, param=NULL, project.config, db.channel) {
-
+                         calculate.period.end=TRUE, param=NULL, project.config=NULL, db.channel) {
+  if (is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name=project.name)
+  }
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
   period.start <- PeriodStringToVector(period.start.string)
