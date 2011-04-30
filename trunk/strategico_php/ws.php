@@ -24,16 +24,14 @@
      ;
      echo "Running command:<br /> " . $command;
      echo "<br />";
-     echo "<br />Result:";
+     echo "<br />";
      echo "<br />";
      $result = system($command);
      echo $result;
      echo "<br />";
      echo "<br />";
      $link = $output_path . "/report.html";
-     #echo "<script type='text/javascript'> window.location = 'projects/web-" . $_GET['eval_function'] . "/" . $KEY . "/report-NA/summary.html' </script>";
-     #echo "<script type='text/javascript'> window.location = '" . $link . "'</script>";
-     echo "Goto <a href=\"" . $link . "\">Result</a> page";
+     echo "Goto <a href=\"" . $link . "\">Report</a> page";
      } else
      echo "no post submit";
      ?>
