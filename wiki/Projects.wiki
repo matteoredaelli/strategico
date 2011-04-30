@@ -4,7 +4,7 @@
 
 == PROJECT ==
 
-A project is a collection of time series with f=teh following format
+A project is a collection of time series with the following format
 
  * KEY1
  * KEY2
