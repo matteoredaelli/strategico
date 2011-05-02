@@ -251,7 +251,10 @@ GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=
 #  else
   filtered.data <- SubsetByKeys(data=project.data, keys=keys, keys.na.rm=keys.na.rm)
 
-  if (nrow(filtered.data) > 0)
+  if (is.null(filtered.data)) {
+    logger(INFO, "filtered data is NULL")
+    result = filtered.data
+  } else if (nrow(filtered.data) > 0)
     result <- AggregateItemData(filtered.data, value=value)
   else {
     logger(INFO, "No rows: cannot aggregate data")
