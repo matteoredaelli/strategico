@@ -52,6 +52,7 @@ config_logger(threshold = strategico.config$logger.threshold)
 logger <- getLogger()
 
 MySource("strategico_db.R")
+MySource("strategico_web.R")
 
 AggregateItemData <- function(data, value) {
   options(na.action="na.omit")
