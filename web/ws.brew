@@ -22,11 +22,11 @@ setContentType("text/html")
   
 <html>
 <head>
-<title>Strategico Online Web Service (Run)</title>
+<title>Strategico Online Web Service (Run) on <%=SERVER$hostname%></title>
 </head>
 <body>
   <center>
-<h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico - Online Service</h1>
+<h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico - Online Service on <%=SERVER$hostname%></h1>
   </center>
   
   <%
