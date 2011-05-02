@@ -569,11 +569,14 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
   outfile <- paste(project.path, "project_items.Rdata", sep="/") 
   
   project.items=leaves
-  for (i in (ncol(leaves)):2){
-    leaves[,i]=""
-    leaves= unique(leaves)
-    project.items=rbind(project.items,unique(leaves))
-  }
+  if ("gitems" %in% project.config$save) {
+    ## save also gitems (only key1 values, key1+key2 values, ...
+    for (i in (ncol(leaves)):2){
+      leaves[,i]=""
+      leaves= unique(leaves)
+      project.items=rbind(project.items,unique(leaves))
+    }
+  }  
 
   # adding ID column
   project.items <- cbind(id=1:nrow(project.items), project.items)

@@ -168,11 +168,14 @@ GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel
 }
     
 ##input  da db. 
-ImportProjectDataFromDB <- function(project.name, DB, DBUSER, DBPWD, sql_statement ) {
-  RunSQLQueryDB(sql_statement, DB, DBUSER, DBPWD)
+ImportProjectDataFromDB <- function(project.name, db.name, db.user, db.pass, sql_statement) {
+  RunSQLQueryDB(sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
 }
 
-RunSQLQueryDB <- function(sql_statements, db.channel) {
+RunSQLQueryDB <- function(sql_statements, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
+  if(is.null(db.channel))
+    db.channel <- DBConnect(db.name, db.user, db.pass)
+
   for (statement in sql_statements) {
     logger(DEBUG, paste("Running SQL:", statement))
     result <- sqlQuery(db.channel, statement)
