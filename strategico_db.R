@@ -67,7 +67,8 @@ ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE
     delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
 
   logger(DEBUG, delete_sql)
-  RunSQLQueryDB(delete_sql, db.channel)
+  RunSQLQueryDB(sql_statement=delete_sql, db.channel=db.channel)
+
 
   sqlSave(db.channel, data, tablename=tablename, rownames=rownames,
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
@@ -84,7 +85,7 @@ FixDBProjectTablesStructure <- function(project.name, values, db.channel) {
            "alter table sample_V1_summary MODIFY id integer",
            "alter table sample_V2_summary MODIFY id integer"
             )
-  RunSQLQueryDB(sql, db.channel)         
+  RunSQLQueryDB(sql_statement=sql, db.channel=db.channel)         
 }
 
 GetDBItemResults <- function(project.name, id, value, db.channel) {
@@ -92,7 +93,7 @@ GetDBItemResults <- function(project.name, id, value, db.channel) {
   sql_statement <- "select * from _TABLENAME_ where item_id=_ID_"
   sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
   sql_statement <- gsub("_ID_", id, sql_statement)
-  records <- RunSQLQueryDB(sql_statement, db.channel)
+  records <- RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
   ##records$id <- records$item_id <- NULL
   records
 }
@@ -102,7 +103,7 @@ GetDBItemSummary <- function(project.name, id, value, db.channel) {
   sql_statement <- "select * from _TABLENAME_ where id=_ID_"
   sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
   sql_statement <- gsub("_ID_", id, sql_statement)
-  RunSQLQueryDB(sql_statement, db.channel)
+  RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
 }
 
 GetDBTableNameItemResults <- function(project.name, value) {
@@ -123,8 +124,9 @@ GetDBTableNameProjectItems <- function(project.name) {
 
 GetDBTableSize <- function(tablename, db.channel) {
   sql_statement <- paste("select count(*) from", tablename)
-  records <- RunSQLQueryDB(sql_statement, db.channel)
-  if (nrow(records) > 0) 
+  records <- RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
+  ## TODO: check if the table doen't exist
+  if (!is.null(records) & !is.numeric(records) & !is.na(records) & is.data.frame(records) & nrow(records) > 0) 
     result <- as.integer(records[1][1])
   else {
     logger(WARN, paste("cannot count rows of table", tablename))
@@ -142,7 +144,7 @@ GetItemRecordsFromDB <- function(project.name, id, tablename, db.channel) {
   filter <- paste("id=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
   logger(WARN, sql_statement)
-  RunSQLQueryDB(sql_statement, db.channel)
+  RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
 }
   
 GetItemSummaryDB <- function(project.name, value, id, db.channel) {
@@ -169,16 +171,30 @@ GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel
     
 ##input  da db. 
 ImportProjectDataFromDB <- function(project.name, db.name, db.user, db.pass, sql_statement) {
-  RunSQLQueryDB(sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
+  RunSQLQueryDB(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
 }
 
-RunSQLQueryDB <- function(sql_statements, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
-  if(is.null(db.channel))
-    db.channel <- DBConnect(db.name, db.user, db.pass)
+RunSQLQueryDB <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
+  db.channel.old <- db.channel
+  if(is.null(db.channel)| db.channel==-1) {
+    if(is.null(db.name))
+      db.channel <- DBConnect()
+    else
+      db.channel <- DBConnect(db.name=db.name, db.user=db.user, db.pass=db.pass)
+  }
 
-  for (statement in sql_statements) {
+  for (statement in sql_statement) {
     logger(DEBUG, paste("Running SQL:", statement))
     result <- sqlQuery(db.channel, statement)
+    ## checking return code
+    ##if (is.numeric(result) & result == -1) {
+    ##  logget(INFO, odbcGetErrMsg(db.channel))
+    ##  odbcClearError(db.channel)
+    ##}
+
+  }
+  if(is.null(db.channel.old)) {
+    odbcClose(db.channel)
   }
   result
 }

@@ -15,15 +15,17 @@
 
 ## Authors:  M. Redaelli
 
-BuildHtmlElement_input <- function(name, value) {
-    str <- '<input name="_NAME_" type="text" value="_V_" />'
+BuildHtmlElement_input <- function(label, name, value) {
+    str <- '_LABEL_ <input name="_NAME_" type="text" value="_V_" />'
+    str <- gsub("_LABEL_", label, str)
     str <- gsub("_NAME_", name, str)
     str <- gsub("_V_", value, str)
     str
 }
 
 BuildHtmlElement_select <- function(name, value, list.values) {
-    str <- 'select name="_NAME_" >_OPTIONS_</select>'
+    str <- '_LABEL_ <select name="_NAME_" >_OPTIONS_</select>'
+    str <- gsub("_LABEL_", label, str)
     str <- str.gsub("_name_", name, str)
     str <- str.gsub("_V_", value, str)
     ##TODO
@@ -31,10 +33,18 @@ BuildHtmlElement_select <- function(name, value, list.values) {
 
 BuildHtmlKeyElement <- function(name, value, list.values=NULL) {
   if (is.null(list.values)) {
-    str <- BuildHtmlElement_inputn(name, value)
+    str <- BuildHtmlElement_input(name, value)
   } else {
     str <- BuildHtmlElement_select(name, value, list.values)
   }
   str
 }
 
+GetTemplatesHome <- function() {
+  file.path(GetStrategicoHome(), "web_templates")
+}
+
+ShowTemplate <- function(template.name) {
+  template.file <- paste(template.name, '.brew', sep='')
+  brew(file.path(GetTemplatesHome(), template.file))
+}
