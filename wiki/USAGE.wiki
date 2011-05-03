@@ -8,7 +8,10 @@
 
 == Eval/Run Engine ==
 {{{
-./strategico.R --project.name=sample --cmd=eval_items --id.min=1 --id.max=3 --item.values=V1,V2 -p "try.models=c('mean')"
+./strategico.R --project.name=sample --cmd=eval_items --id.list 2,3,4 --item.values=V1,V2 -p "try.models=c('mean')"
+
+./strategico.R --project.name=sample --cmd=eval_items --id.range 1:4 --item.values=V1,V2 -p "try.models=c('mean')"
+
 }}}
 
 == Eval/Run engine (dbsummary records/items with Run=1) ==
