@@ -102,34 +102,42 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
 }
 
 EvalItems <- function(project.name, id.min, id.max, keys=NULL, values=NULL, param=NULL,
-                      project.config=NULL, project.items=NULL,  db.channel) {
+                      project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
  
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
 
+  if (is.null(project.data))
+    project.data <- GetProjectData(project.name=project.name)
+
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
   
   for (id in as.integer(id.min):as.integer(id.max)) {
     EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param,
-             project.config=project.config, project.items=project.items, db.channel=db.channel)
+             project.config=project.config, project.items=project.items,
+             project.data=project.data, db.channel=db.channel)
   }
 }
 
 EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
-                     project.config, project.items=NULL, db.channel) {
+                     project.config, project.items=NULL, project.data=NULL, db.channel) {
+
+  if (is.null(project.data))
+    project.data <- GetProjectData(project.name=project.name)
+
   for (i in 1:length(values)) {
     value <- values[i]
     EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param,
                  project.config=project.config, project.items=project.items,
-                 db.channel=db.channel)
+                 project.data=project.data, db.channel=db.channel)
   }
 }
 
 EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
-                         param=NULL, project.config, project.items=NULL, db.channel) {
+                         param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
   logger(INFO, "++++++++++++++++++++++++EvalItemData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
@@ -137,7 +145,7 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
                      sep=""))
   
   if (is.null(item.data))
-    item.data <- GetItemData(project.name=project.name, project.items=project.items, id=id, keys=keys, value=value)
+    item.data <- GetItemData(project.name=project.name, project.items=project.items, project.data=project.data, id=id, keys=keys, value=value)
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   print( t(item.data))
