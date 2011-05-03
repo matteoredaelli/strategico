@@ -86,20 +86,24 @@ test.035.GetItemsKeys <- function() {
   ##            ) 
 }
 
-test.035.GetItemID <- function() {
+test.035.GetItemsID <- function() {
   project.items <- GetProjectItems(project.name)
   
   checkEquals(
-              2,
-              GetItemID(keys=c("IT","CAR","ALFA"), project.items=project.items)
+              c(2),
+              GetItemsID(keys=c("IT","CAR","ALFA"), project.items=project.items, keys.na.rm=FALSE)
               )
   checkEquals(
-              10,
-              GetItemID(keys=c("IT","CAR",""), project.items=project.items)
+              c(10),
+              GetItemsID(keys=c("IT","CAR",""), project.items=project.items, keys.na.rm=FALSE)
               )
   checkEquals(
-              17,
-              GetItemID(keys=c("DE","",""), project.items=project.items)
+              c(16),
+              GetItemsID(keys=c("IT","",""), project.items=project.items, keys.na.rm=FALSE)
+              )
+  checkEquals(
+              c(1, 2, 8, 10, 14, 16),
+              GetItemsID(keys=c("IT","",""), project.items=project.items, keys.na.rm=TRUE)
               )
 }
 

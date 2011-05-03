@@ -272,21 +272,17 @@ GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=
   result 
 }
 
- 
-GetItemID <- function(keys, project.name=NULL, project.items=NULL) {
+GetItemsID <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
   
-  records <- SubsetByKeys(data=project.items, keys=keys, keys.na.rm=FALSE)
+  records <- SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
   tot <- nrow(records)
   if (tot == 0) {
     logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
     result = NA
   } else {
-    result = as.integer(records[1,]["id"])
-    if (tot > 1) {
-      logger(WARN,  paste("To many IDs for key", keys, sep=' ', collapse=','))
-    }
+    result = records$id
   }
   result
 }
