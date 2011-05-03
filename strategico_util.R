@@ -380,6 +380,10 @@ GetProjectConfig <- function(project.name) {
   project.config
 }
 
+GetProjectsList <- function(projects.home = strategico.config$projects.home) {
+  dir(projects.home)
+}
+                            
 GetProjectPath <- function(project.name, projects.home = strategico.config$projects.home) {
   file.path(projects.home, project.name)
 }
@@ -498,6 +502,10 @@ ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
   else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
          ((now[2] + increment - 1)%%period.freq) + 1)
   now
+}
+
+is.project <- function(project.name) {
+  project.name %in% GetProjectsList()
 }
 
 MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param) {
