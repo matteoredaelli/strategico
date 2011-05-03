@@ -79,12 +79,15 @@ FixDBProjectTablesStructure <- function(project.name, values, db.channel) {
   ## Add unique index on keys in project_items table: needed for speed and consistency
   sql <- c("alter table sample_items MODIFY id integer",
            "alter table sample_V1_results MODIFY item_id integer",
+           "alter table sample_V1_results MODIFY KEY1 varchar(40)",
            "alter table sample_V2_results MODIFY item_id integer",
-           "alter table sample_V1_results MODIFY id varchar(50)",
-           "alter table sample_V2_results MODIFY id varchar(50)",
+           "alter table sample_V1_results MODIFY id integer",
+           "alter table sample_V2_results MODIFY id integer",
            "alter table sample_V1_summary MODIFY id integer",
            "alter table sample_V2_summary MODIFY id integer"
-            )
+  ## ALTER TABLE europool_dev_items ADD UNIQUE ( KEY1, KEY2, KEY3, KEY4);
+  ## ALTER TABLE europool_dev_V1_results ADD INDEX ( item_id ) ;
+)
   RunSQLQueryDB(sql_statement=sql, db.channel=db.channel)         
 }
 
