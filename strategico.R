@@ -142,15 +142,16 @@ if (opt$cmd == "eval_items") {
   if (!is.null(opt$id.range))
     opt$id.range <- unlist(strsplit(opt$id.range, ":"), as.numeric)
       
-  if (is.null(opt$item.values))
-    UsageAndQuit("Missing parameter item.values!")
+##  if (is.null(opt$item.values))
+##    UsageAndQuit("Missing parameter item.values!")
 
   ## item.values could be could be V1 or V1,V2
-  values <- unlist(strsplit(opt$item.values, ","))
+  if (!is.null(opt$item.values))
+    opt$item.values <- unlist(strsplit(opt$item.values, ","))
 
   EvalItems(project.name=opt$project.name, 
             id.range=opt$id.range, id.list=opt$id.list,
-            values=values, param=param, project.config=project.config, db.channel=db.channel)
+            values=opt$values, param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
 
