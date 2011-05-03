@@ -16,28 +16,38 @@
 ## Authors:  M. Redaelli
 
 BuildHtmlElement_input <- function(label, name, value) {
-    str <- '_LABEL_ <input name="_NAME_" type="text" value="_V_" />'
-    str <- gsub("_LABEL_", label, str)
-    str <- gsub("_NAME_", name, str)
-    str <- gsub("_V_", value, str)
-    str
+  str <- '_LABEL_ <input name="_NAME_" type="text" value="_V_" />'
+  str <- gsub("_LABEL_", label, str)
+  str <- gsub("_NAME_", name, str)
+  str <- gsub("_V_", value, str)
+  str
 }
 
-BuildHtmlElement_select <- function(name, value, list.values) {
-    str <- '_LABEL_ <select name="_NAME_" >_OPTIONS_</select>'
-    str <- gsub("_LABEL_", label, str)
-    str <- str.gsub("_name_", name, str)
-    str <- str.gsub("_V_", value, str)
-    ##TODO
+BuildHtmlElement_select <- function(label, name, list.values) {
+  opt_template<- '<option value="_V_">_V_</option>'
+  optlist <- ""
+  for (v in list.values) {
+    opt <- gsub("_V_", v, opt_template)
+    optlist <- paste(optlist, opt, sep=" ")
+  }
+  str <- '_LABEL_ <select name="_NAME_" >_OPTIONS_</select>'
+  str <- gsub("_LABEL_", label, str)
+  str <- gsub("_NAME_", name, str)
+  str <- gsub("_OPTIONS_", optlist, str)
+  str
 }
 
-BuildHtmlKeyElement <- function(name, value, list.values=NULL) {
+BuildHtmlKeyElement <- function(label, name, value, list.values=NULL) {
   if (is.null(list.values)) {
-    str <- BuildHtmlElement_input(name, value)
+    str <- BuildHtmlElement_input(label, name, value)
   } else {
-    str <- BuildHtmlElement_select(name, value, list.values)
+    str <- BuildHtmlElement_select(label, name, value, list.values)
   }
   str
+}
+
+BuildFormElement_project <- function(label="Project") {
+  BuildHtmlElement_select(label, "project", GetProjectsList())
 }
 
 GetTemplatesHome <- function() {
