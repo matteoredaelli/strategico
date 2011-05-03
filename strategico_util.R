@@ -101,7 +101,7 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 }
 
-EvalItems <- function(project.name, id.min, id.max, keys=NULL, values=NULL, param=NULL,
+EvalItems <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
                       project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
@@ -114,8 +114,13 @@ EvalItems <- function(project.name, id.min, id.max, keys=NULL, values=NULL, para
 
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
-  
-  for (id in as.integer(id.min):as.integer(id.max)) {
+
+  if (!is.null(id.range)) {
+    list1 <- as.integer(id.range[1]):as.integer(id.range[2])
+    id.list = append(list1, id.list)
+  }
+
+  for (id in id.list) {
     EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param,
              project.config=project.config, project.items=project.items,
              project.data=project.data, db.channel=db.channel)
@@ -158,11 +163,14 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   if (is.null(id)) {
     logger(INFO, "ID is null, assigning a new value")
     id <- GetNewID()
+  } else {
+    id <- as.integer(id)
   }
+  
   
   param <- MergeParamWithDefault(project.config=project.config, param=param)
 
-  logger(DEBUG, paste("Param= ",BuildParamString(param)))
+  logger(DEBUG, paste("Param= ", BuildParamString(param)))
   
   directory = GetItemPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)

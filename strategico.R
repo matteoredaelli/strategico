@@ -34,8 +34,9 @@ spec <- c(
           'cmd', 'C', 1, "character",
           'help', 'h', 0,  "logical",
           'project.name' , 'n', 1, "character",
-          'id.min', 'i', 1, "double",
-          'id.max', 'M', 1, "double",
+          'id', 'i', 1, "character",
+          'id.list', 'L', 1, "character",
+          'id.range', 'R', 1, "character",
           'eval.param', 'p', 1, "character",
           'item.values', 'v', 1, "character",
           'runit', 'u', 0, "logical",
@@ -121,9 +122,6 @@ db.channel <- DBConnect()
 ## check missing options
 #########################################################################
 
-if (is.null(opt$id.max) )
-  opt$id.max = opt$id.min
-  
 param <- EvalParamString(opt$eval.param)
 
 
@@ -133,13 +131,14 @@ param <- EvalParamString(opt$eval.param)
 
 if (opt$cmd == "eval_items") {
 
-  if (is.null(opt$id.min))
-    UsageAndQuit("Missing parameter id!")
+  if (is.null(opt$id.list) & is.null(opt$id.range))
+    UsageAndQuit("Missing parameter id.list or id.range")
 
-  opt$id.min <- trunc(as.numeric(opt$id.min))
-  if (is.na(opt$id.min))
-    UsageAndQuit("Id parameter id.min is not an integer!")
-  
+  if (!is.null(opt$id.list))
+    opt$id.list <- unlist(strsplit(opt$id.list, ","), as.numeric)
+  if (!is.null(opt$id.range))
+    opt$id.range <- unlist(strsplit(opt$id.range, ":"), as.numeric)
+      
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
 
@@ -147,7 +146,7 @@ if (opt$cmd == "eval_items") {
   values <- unlist(strsplit(opt$item.values, ","))
 
   EvalItems(project.name=opt$project.name, 
-            id=opt$id.min, id.max=opt$id.max,
+            id.range=opt$id.range, id.list=opt$id.list,
             values=values, param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
@@ -173,12 +172,12 @@ if (opt$cmd == "eval_items_from_db") {
 
 if (opt$cmd == "eval_ts") {
 
-  if (is.null(opt$id.min))
-    UsageAndQuit("Missing parameter id.min!")
+  if (is.null(opt$id))
+    UsageAndQuit("Missing parameter id!")
   
-  opt$id.min <- trunc(as.numeric(opt$id.min))
-  if (is.na(opt$id.min))
-    UsageAndQuit("Id parameter id.min is not an integer!")
+  opt$id <- trunc(as.numeric(opt$id))
+  if (is.na(opt$id))
+    UsageAndQuit("Id parameter id is not an integer!")
   
   if (is.null(opt$ts.string))
     UsageAndQuit("Missing parameter ts.string!")
@@ -189,7 +188,7 @@ if (opt$cmd == "eval_ts") {
   if (is.null(opt$ts.freq))
     UsageAndQuit("Missing parameter ts.freq!")
 
-  EvalTSString(project.name=opt$project.name, id=opt$id.min, ts.string=opt$ts.string,
+  EvalTSString(project.name=opt$project.name, id=opt$id, ts.string=opt$ts.string,
                ts.periods.string=opt$ts.periods,
                period.start.string=opt$ts.start,
                period.freq=opt$ts.freq, param=param, project.config=project.config, db.channel=db.channel
