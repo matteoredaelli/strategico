@@ -17,7 +17,7 @@
 library("futile.logger")
 library("xtable")
 
-Quit <- function (msg="", status=-1) {
+Quit <- function (msg="", status=-1, save="no") {
   print(msg)
   print("Bye!")
   q(status=status)
@@ -506,6 +506,10 @@ ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
 
 is.project <- function(project.name) {
   project.name %in% GetProjectsList()
+}
+
+is.value <- function(value, project.name=NULL, project.config=NULL) {
+  value %in% GetValueNames(project.name=project.name, project.config=project.config)
 }
 
 MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param) {
