@@ -36,7 +36,7 @@ project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 %>
 
                 <form method="GET">Project
-                <input name="project" type="text" value="<%=project.name%>">
+		<%=BuildHtmlElement_input("project", "project", project.name)%>
                 <input type="submit" value="Show">
                 </form>
   <%
