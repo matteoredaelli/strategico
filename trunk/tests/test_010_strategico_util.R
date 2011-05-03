@@ -445,6 +445,17 @@ test.incSampleTime <- function() {
               )
 }
 
+test.is.project <- function() {
+  checkEquals(
+              TRUE,
+              is.project("sample")
+              )
+  checkEquals(
+              FALSE,
+              is.project("missingproject")
+              )
+}
+
 test.00.PeriodStringToVector <- function() {
   checkEquals(c(2001, 1),
               PeriodStringToVector("2001-1")
