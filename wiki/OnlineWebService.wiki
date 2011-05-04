@@ -44,14 +44,18 @@ Be sure that the folder projects/web-ltp/1200 will be WRITABLE by the user that 
 
 = Setup (rapache/brew) =
 
+== brew ==
+In stall the R [http://cran.r-project.org/web/packages/brew/index.html brew] package
+
+== RApache ==
+
 You need to download, install and configure [http://rapache.net/ rapache]. For Debian and Ubuntu I suugest to create two files
  * /etc/apache2/mods-available/R.load
 {{{
 LoadModule R_module /usr/lib/apache2/modules/mod_R.so
 }}}
 
- */etc/apache2/mods-available/R.conf and 
-File /etc/apache2/mods-available/R.conf
+ */etc/apache2/mods-available/R.conf 
 {{{
  <IfModule mod_R.c>
     ROutputErrors
@@ -60,8 +64,18 @@ File /etc/apache2/mods-available/R.conf
  </IfModule>
 }}}
 
-After that, add in your apache web server configuration, inside your virtualhost
+And then enable the module with
 {{{
+ a2enmod R
+}}}
+
+After that, add in your apache web server configuration, inside your virtualhost (file /etc/apache2/sites-enabled/000-default for Debian and Ubuntu)
+ 
+{{{
+   <Location /RApacheInfo>
+        SetHandler r-info
+   </Location>
+
    <Files *.brew>
         SetHandler r-script
         RHandler brew::brew
