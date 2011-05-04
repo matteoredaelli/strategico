@@ -10,6 +10,9 @@ You have to install a web server with php support. For php and linux (Debian and
   sudo apt-get install apache2-mpm-prefork libapache2-mod-php5
 }}}
 
+Be sure that the STRATEGICO_HOME is set for the user or the script that starts Apache: for Debian/Ubuntu add it in /etc/apache2/envvars
+
+
 The document root is the directory that corresponds to the url http://localhost
 For Linux it is /var/www
 
