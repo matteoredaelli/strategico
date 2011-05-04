@@ -449,9 +449,11 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
          </form>",sep="")
 }
 
-GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.config) {
+GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.config=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
+  if (is.null(project.config))
+    project.config <- GetProjectConfig(project.name=project.name)
 
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
   sapply(keys, function(x) unique(project.items[[x]]))
