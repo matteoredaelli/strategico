@@ -160,16 +160,32 @@ GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel
     project.config <- GetProjectConfig(project.name)
   }
 
-  stats <- list(
-                #project.data=GetDBTableSize(GetDBTableNameProjectData(project.name), db.channel),
-                project.items=GetDBTableSize(GetDBTableNameProjectItems(project.name), db.channel)
-                )
+  tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+  rows <- unlist(lapply(tables, function(x) GetDBTableSize(x,db.channel)))
+  
+  stats <- as.list(rows)
+  names(stats) <- tables
+  stats
+}
+
+GetProjectTablenamesDB <- function(project.name, project.config=NULL) {
+  if(is.null(project.config)) 
+    project.config <- GetProjectConfig(project.name)
+
+  tables <- c(
+              ##GetDBTableNameProjectData(project.name),
+              GetDBTableNameProjectItems(project.name)
+              )
+
   
   for (value in GetValueNames(project.config$values)) {
-    stats$item.results = paste(stats$item.results, GetDBTableSize(GetDBTableNameItemResults(project.name, value), db.channel))
-    stats$item.summary = paste(stats$item.summary, GetDBTableSize(GetDBTableNameItemSummary(project.name, value), db.channel))
+    value.tables <- c(
+                    GetDBTableNameItemResults(project.name, value),
+                    GetDBTableNameItemSummary(project.name, value)
+                    )
+    tables <- append(tables, value.tables)
   }
-  stats
+  tables
 }
     
 ##input  da db. 

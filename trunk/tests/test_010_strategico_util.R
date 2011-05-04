@@ -376,6 +376,13 @@ test.GetKeyNames <- function() {
               )
 }
 
+test.GetProjectTablenamesDB <- function() {
+   checkEquals(
+               c("sample_items", "sample_V1_results", "sample_V1_summary", "sample_V2_results", "sample_V2_summary"),
+               GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+               )
+}
+
 test.GetValueNames <- function() {
   checkEquals(
               c("V1", "V2"),
