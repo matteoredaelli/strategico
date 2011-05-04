@@ -75,20 +75,30 @@ BuildKeyNames <- function(key.values, na.rm=FALSE) {
     grep('^$', key.values, invert=TRUE)
   else
     seq(1,length(key.values))
-  
-  paste("KEY", idx, sep="")
+
+  if (length(idx) > 0)
+    result <- paste("KEY", idx, sep="")
+  else
+    result <- NULL
+
+  result
 }
 
 BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) {
   ## a filter can be like "KEY1=='IT' & KEY2=='101'
   ## see runit test file for more samples
   
-  key.values[is.na(key.values)] = ""
+  key.values[is.na(key.values)] = ''
   key.names <- BuildKeyNames(key.values, na.rm=na.rm)
-  if (na.rm)
-    key.values <- key.values[ key.values != "" ]
-  quoted.keys <- gsub("^(.*)$", "'\\1'", key.values)
-  paste(key.names, quoted.keys, sep=sep, collapse=collapse)
+  if (is.null(key.names))
+    result <- ""
+  else {
+    if (na.rm)
+      key.values <- key.values[ key.values != "" & !is.na(key.values)]
+    quoted.keys <- gsub("^(.*)$", "'\\1'", key.values)
+    result <- paste(key.names, quoted.keys, sep=sep, collapse=collapse)
+  }
+  result
 }
 
 BuildParamString <- function(param) {
@@ -608,7 +618,14 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
     }
   }  
 
-  # adding ID column
+  ## TODO adding a row with all keys equal to ''
+  ## useful as default value for web forms
+  ## not added beacuse KEY1 becomes NA...
+  ## allvalues.keys <- rep('', length(key_fields))
+  ## project.items <- rbind(project.items, allvalues.keys)
+
+  
+  ## adding ID column
   project.items <- cbind(id=1:nrow(project.items), project.items)
   save( project.items, file=outfile)
 
