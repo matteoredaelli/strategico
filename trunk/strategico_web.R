@@ -15,19 +15,24 @@
 
 ## Authors:  M. Redaelli
 
-BuildHtmlElement_input <- function(label, name, value) {
-  str <- '_LABEL_ <input name="_NAME_" type="text" value="_V_" />'
+BuildHtmlElement_input <- function(label="", name, default, type="text") {
+  str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" />'
   str <- gsub("_LABEL_", label, str)
   str <- gsub("_NAME_", name, str)
-  str <- gsub("_V_", value, str)
+  str <- gsub("_V_", default, str)
+  str <- gsub("_TYPE_", type, str)
   str
 }
 
-BuildHtmlElement_select <- function(label, name, list.values) {
+BuildHtmlElement_select <- function(label, name, list.values, default=NULL) {
   opt_template<- '<option value="_V_">_V_</option>'
+  opt_selected_template<- '<option value="_V_" SELECTED>_V_</option>'
   optlist <- ""
   for (v in list.values) {
-    opt <- gsub("_V_", v, opt_template)
+    if (!is.null(default)&v==default)
+      opt <- gsub("_V_", v, opt_selected_template)
+    else
+      opt <- gsub("_V_", v, opt_template)
     optlist <- paste(optlist, opt, sep=" ")
   }
   str <- '_LABEL_ <select name="_NAME_" >_OPTIONS_</select>'
@@ -46,8 +51,34 @@ BuildHtmlKeyElement <- function(label, name, value, list.values=NULL) {
   str
 }
 
-BuildFormElement_project <- function(label="Project") {
-  BuildHtmlElement_select(label, "project", GetProjectsList())
+BuildFormElement_project <- function(label="Project", default=NULL) {
+  BuildHtmlElement_select(label=label, name="project",list.values= GetProjectsList(), default=default)
+}
+
+BuildFormElement_keys <- function(project.name=NULL, project.config=NULL, project.items=NULL, defaults, sep=" ") {
+  if (is.null(project.config))
+    project.config <- GetProjectConfig(project.name=project.name)
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
+  
+  list.values <- GetUniqueKeyValues(project.name=project.name, project.items=project.items, project.config=project.config)
+  keys <- GetKeyNames(keys=NULL, project.name=project.name, project.config=project.config)
+  result <- ""
+  for (k in 1:length(keys)) 
+    result <- paste(result,
+                    BuildHtmlElement_select(project.config$keys[k], keys[k], list.values[[k]], defaults[k]),
+                    sep=sep)
+  result
+}
+
+BuildFormElement_value <- function(project.name=NULL, project.config=NULL, project.items=NULL, default=NULL) {
+  if (is.null(project.config))
+    project.config <- GetProjectConfig(project.name=project.name)
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
+  
+  list.values <- GetValueNames(values=project.config$values, project.name=project.name, project.config=project.config)
+  BuildHtmlElement_select("Value", "value", list.values, default=default)
 }
 
 GetTemplatesHome <- function() {
