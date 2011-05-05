@@ -62,7 +62,7 @@ test.EvalItemData.e00 <- function() {
               )
 
   ## Check predictions with the one saved to DB
-  records <- GetDBItemResults(project.name, 5, "V1", db.channel=db.channel)
+  records <- GetItemResultsDB(project.name, id=5, value="V1", db.channel=db.channel)
   checkEquals(
               as.vector(e0[1,]),
               sort(sort(records$V1, decreasing=TRUE)[1:project.config$param$n.ahead])
@@ -219,8 +219,8 @@ test.EvalTSString <- function() {
 
 }
 
-test.GetDBItemResults <- function() { 
-  records <- GetDBItemResults(project.name, 1, "V2", db.channel=db.channel)
+test.GetItemResultsDB <- function() { 
+  records <- GetItemResultsDB(project.name, id=1, value="V2", db.channel=db.channel)
   
   checkEquals(24,
               nrow(records)
@@ -230,8 +230,8 @@ test.GetDBItemResults <- function() {
               )  
 }
 
-test.GetDBItemSummary <- function() { 
-  records <- GetDBItemSummary(project.name, 1, "V2", db.channel=db.channel)
+test.GetItemSummaryDB <- function() { 
+  records <- GetItemSummaryDB(project.name, id=1, value="V2", db.channel=db.channel)
   
   checkEquals(1,
               nrow(records)
