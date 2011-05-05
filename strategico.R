@@ -211,13 +211,19 @@ if (opt$cmd == "statistics") {
 }
 
 #########################################################################
-## empty_db
+## empty.db
 #########################################################################
-if (opt$cmd == "empty_db") {
+if (opt$cmd == "empty.db") {
   EmptyProjectTablesDB(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
-
+########################################################################
+## export.db.csv
+#########################################################################
+if (opt$cmd == "export.db.csv") {
+  ExportProjectTables2Csv(project.name=opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
 #########################################################################
 ## import
 #########################################################################
