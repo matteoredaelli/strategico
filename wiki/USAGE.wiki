@@ -6,6 +6,13 @@
 ./strategico.R --project.name=sample --cmd=import
 }}}
 
+
+== Empty DB tables ==
+
+{{{
+./strategico.R --cmd empty.db -n sample
+}}}
+
 == Eval/Run Engine ==
 {{{
 ./strategico.R --project.name=sample --cmd=eval_items --id.list 2,3,4 --item.values=V1,V2 -p "try.models=c('mean')"
@@ -24,15 +31,14 @@
 ./strategico.R --project.name=sample --cmd=eval_ts --ts.string=1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90 --ts.start=2001-1 --ts.freq=2 -i 4343 -p "try.models=c('mean')"
 }}}
 
+== Export DB to CSV ==
+
+{{{
+./strategico.R --cmd export.db.csv -n sample
+}}}
+
 == Runit ==
 
 {{{
 ./strategico.R --cmd=runit
-}}}
-
-
-== Empty DB tables ==
-
-{{{
-./strategico.R --cmd empty_db -n sample
 }}}
