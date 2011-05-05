@@ -105,24 +105,6 @@ FixDBProjectTablesStructure <- function(project.name, values, db.channel) {
   RunSQLQueryDB(sql_statement=sql, db.channel=db.channel)         
 }
 
-GetDBItemResults <- function(project.name, id, value, db.channel) {
-  tablename <- GetDBTableNameItemResults(project.name, value)
-  sql_statement <- "select * from _TABLENAME_ where item_id=_ID_"
-  sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
-  sql_statement <- gsub("_ID_", id, sql_statement)
-  records <- RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
-  ##records$id <- records$item_id <- NULL
-  records
-}
-
-GetDBItemSummary <- function(project.name, id, value, db.channel) {
-  tablename <- GetDBTableNameItemSummary(project.name, value)
-  sql_statement <- "select * from _TABLENAME_ where id=_ID_"
-  sql_statement <- gsub("_TABLENAME_", tablename, sql_statement)
-  sql_statement <- gsub("_ID_", id, sql_statement)
-  RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
-}
-
 GetDBTableNameItemResults <- function(project.name, value) {
   paste(project.name, value, "results", sep="_")
 }
@@ -154,11 +136,11 @@ GetDBTableSize <- function(tablename, db.channel) {
 
 GetItemResultsDB <- function(project.name, value, id, db.channel) {
   tablename <- GetDBTableNameItemResults(project.name, value=value)
-  GetItemRecordsFromDB(project.name, id, tablename=tablename, db.channel=db.channel)
+  GetItemRecordsFromDB(project.name, key="item_id", id=id, tablename=tablename, db.channel=db.channel)
 }
   
-GetItemRecordsFromDB <- function(project.name, id, tablename, db.channel) {
-  filter <- paste("id=", id, sep="")
+GetItemRecordsFromDB <- function(project.name, key="id", id, tablename, db.channel) {
+  filter <- paste(key, "=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
   logger(WARN, sql_statement)
   RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
@@ -166,7 +148,7 @@ GetItemRecordsFromDB <- function(project.name, id, tablename, db.channel) {
   
 GetItemSummaryDB <- function(project.name, value, id, db.channel) {
   tablename <- GetDBTableNameItemSummary(project.name, value=value)
-  GetItemRecordsFromDB(project.name, id, tablename, db.channel=db.channel)
+  GetItemRecordsFromDB(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
 GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel) {

@@ -340,11 +340,6 @@ GetItemUrl <- function(project.name, id, value=NULL) {
   paste(project.url, relative.path, sep="/")
 }
 
-GetItemResultsDB <- function(project.name, value, id) {
-  tablename <- GetDBTableNameItemResults(project.name, value=value)
-  GetItemRecordsFromDB(project.name, id, tablename)
-}
-
 GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(keys)) {
     if (is.null(project.config))
