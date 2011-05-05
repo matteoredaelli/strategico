@@ -16,6 +16,11 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/xtable/index.html xtable library]
  * [http://sirio.stat.unipd.it/index.php?id=libast ast library]
 
+For Debian and Ubuntu most of the libraries are available via
+{{{
+  apt-get install r-cran-xtable r-cran-runit r-cran-getopt r-cran-xtable r-cran-rodbc
+}}} 
+
 = Installation =
 
 Download strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab] and unzip it into a folder like /apps/strategico (Linux) or C:\strategico
