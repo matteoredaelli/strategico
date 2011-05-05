@@ -129,11 +129,11 @@ GetDBTableSize <- function(tablename, db.channel) {
   sql_statement <- paste("select count(*) from", tablename)
   records <- RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
   ## TODO: check if the table doen't exist
-  if (!is.null(records) & !is.numeric(records) & !is.na(records) & is.data.frame(records) & nrow(records) > 0) 
+  if ( is.data.frame(records) )
     result <- as.integer(records[1][1])
   else {
     logger(WARN, paste("cannot count rows of table", tablename))
-    result <- 0
+    result <- "cannot retreive"
   }
   result
 }
