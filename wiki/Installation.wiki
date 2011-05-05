@@ -18,7 +18,7 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
 
 For Debian and Ubuntu most of the libraries are available via
 {{{
-  apt-get install r-cran-xtable r-cran-runit r-cran-getopt r-cran-xtable r-cran-rodbc
+  apt-get install r-cran-xtable r-cran-runit r-cran-getopt r-cran-xtable r-cran-rodbc r-cran-tseries
 }}} 
 
 = Installation =
