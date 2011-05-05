@@ -13,8 +13,8 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/forecast/index.html Forecast library] that requires fracdiff and tseries
  * [http://cran.r-project.org/web/packages/R2HTML/index.html R2HTML library]
  * [http://cran.r-project.org/web/packages/RUnit/index.html runit]
- * [http://cran.r-project.org/web/packages/xtable/index.html Xtable library]
- * [http://sirio.stat.unipd.it/index.php?id=libast Ast library]
+ * [http://cran.r-project.org/web/packages/xtable/index.html xtable library]
+ * [http://sirio.stat.unipd.it/index.php?id=libast ast library]
 
 = Installation =
 
