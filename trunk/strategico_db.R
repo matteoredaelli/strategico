@@ -88,6 +88,27 @@ ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
 }
 
+ExportProjectTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
+  if(is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name)
+  }
+  project.path <- GetProjectPath(project.name)
+  tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) ExportTable2Csv(tablename=x,
+                                             db.channel=db.channel,
+                                             output.file=file.path(project.path, paste(x, ".csv", sep="")),
+                                             sep=sep,
+                                             dec=dec
+                                             )
+         )
+}
+
+ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=",") {
+  sql_statement <- paste("select * from", tablename)
+  records <- RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
+  write.table(records, file=output.file, sep=sep, dec=dec)
+}
+
 FixDBProjectTablesStructure <- function(project.name, values, db.channel) {
   ## TODO: generalize tablenames..
   ## Add unique index on keys in project_items table: needed for speed and consistency
