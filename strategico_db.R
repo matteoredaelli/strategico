@@ -209,7 +209,7 @@ ImportProjectDataFromDB <- function(project.name, db.name, db.user, db.pass, sql
 
 RunSQLQueryDB <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
   db.channel.old <- db.channel
-  if(is.null(db.channel)| db.channel==-1) {
+  if(is.null(db.channel)) {
     if(is.null(db.name))
       db.channel <- DBConnect()
     else
