@@ -35,7 +35,8 @@
 
 library(R2HTML)
 library(hwriter)
-library(tseries, quietly=TRUE)
+#library(tseries, quietly=TRUE) # works only for the latest R releases
+library(tseries, verbose=FALSE)
 library(forecast)
 library(ast)
   
