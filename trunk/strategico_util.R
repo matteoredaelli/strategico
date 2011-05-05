@@ -482,13 +482,12 @@ ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- GetProjectConfig(project.name=project.name)
 
-   
   project.R <- paste("project_", project.name, ".R", sep="")
   MySource(project.R)
   
   cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
   result <- eval(parse(text = cmd))
-  UpdateItemsData(project.name, result, db.channel)
+  UpdateItemsData(project.name=project.name, project.data=result, db.channel=db.channel)
 }
 
 ##input da da csv. 
