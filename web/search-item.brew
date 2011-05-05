@@ -22,7 +22,7 @@ options(hverbose=FALSE,verbose=FALSE)
   
 <html>
 <head>
-<title>Strategico: Show></title>
+<title>Strategico: Item></title>
 </head>
 <body>
 
@@ -31,12 +31,18 @@ options(hverbose=FALSE,verbose=FALSE)
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.home, "strategico_util.R"))
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
-value <- ifelse(is.null(GET$value), "V1", GET$value)
 project.config <- GetProjectConfig(project.name=project.name)
-
+value <- ifelse(is.null(GET$value), "V1", GET$value)
 project.keys <- GetKeyNames(project.config$keys)
 
+for (k in project.keys)
+  if (is.null(GET[k])) {
+    GET[k]=''
+  }
+  
+key.names <- grep("KEY", names(GET), value=TRUE)
+keys <- as.character( unlist(GET[key.names]))
+id <- GetItemsID(project.name=project.name, keys=keys)[1]
 item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
 %>
   <center>
@@ -44,38 +50,20 @@ item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
   </center>
   
                 <form method="GET">
-                <%=BuildFormElement_project(default=project.name)%>
-                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text")%>
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildFormElement_keys(project.name=project.name, defaults=keys)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
                 <input type="submit" value="Show">
                 </form>
   <%
 db.channel <- DBConnect()
+#stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)
 
-item.summary <- GetItemSummaryDB(project.name=project.name, id=id, db.channel=db.channel, value=value)
-item.results <- GetItemResultsDB(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
 DBClose(db.channel)
 %>
 
-<h2>Models</h2>
   <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
   <img src="<%=paste(item.path,"all_models.png",sep="/")%>" />
-
-<h2>Summary</h2>
-<%
-if(is.data.frame(item.summary)) {
-  item.summary <- t(item.summary)
-  print(xtable(item.summary), type="html")
-}
-%>
-<h2>Results</h2>
-<%
-if(is.data.frame(item.results)) {
-  item.results$id <- NULL
-  item.results$item_id <- NULL
-  print(xtable(item.results), type="html")
-}
-%>
-
 <% ShowTemplate('footer') %>
 
