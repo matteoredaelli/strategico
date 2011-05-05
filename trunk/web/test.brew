@@ -1,0 +1,8 @@
+<html>
+<head>
+  <title><%=date()%></title>
+</head>
+<body>
+STRATEGICO_HOME= <%=Sys.getenv("STRATEGICO_HOME")%>
+</body>
+</html>
