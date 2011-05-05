@@ -33,6 +33,20 @@ DBClose <- function(db.channel) {
   odbcClose(db.channel)
 }
 
+EmptyProjectTablesDB <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- GetProjectConfig(project.name)
+  }
+
+  tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) EmptyTableDB(x,db.channel))
+}
+
+EmptyTableDB <- function(tablename, db.channel) {
+  sql_statement <- paste("truncate", tablename)
+  RunSQLQueryDB(sql_statement=sql_statement, db.channel=db.channel)
+}
+
 EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
   
   if (is.null(project.config))
