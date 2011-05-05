@@ -28,8 +28,12 @@ BuildHtmlElement_select <- function(label, name, list.values, default=NULL) {
   opt_template<- '<option value="_V_">_V_</option>'
   opt_selected_template<- '<option value="_V_" SELECTED>_V_</option>'
   optlist <- ""
+
+  if (is.null(default))
+    default <- list.values[1]
+  
   for (v in list.values) {
-    if (!is.null(default)&v==default)
+    if (v==default)
       opt <- gsub("_V_", v, opt_selected_template)
     else
       opt <- gsub("_V_", v, opt_template)
