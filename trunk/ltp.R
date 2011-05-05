@@ -35,7 +35,7 @@
 
 library(R2HTML)
 library(hwriter)
-  
+library(tseries, quietly=TRUE)
 library(forecast)
 library(ast)
   
