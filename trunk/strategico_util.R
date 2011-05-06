@@ -690,15 +690,20 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
   
 } # end function
 
-Version <- function() {"
-Strategico - Copyright(c) 2010, 2011
-Release 1.0.0
-License: GPL V3+
+SW.License <- function() {"GPL V3+"}
 
-Contributors:
+SW.Description <- function() {
+  paste("Strategico - Copyright(c) 2010, 2011
+Version: ", SW.Version(),"
+License: ", SW.License(),"
+Contributors: ",SW.Contributors())
+}
+
+SW.Contributors <- function() {"
   Livio Finos
   Matteo Redaelli
   Marco Rinaldo
 "
 }
 
+SW.Version <- function() {"Release 1.1 SNAPSHOT"}
