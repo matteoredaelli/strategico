@@ -419,6 +419,18 @@ test.GetItemRelativePath <- function() {
               )
 }
 
+
+test.GetItemChildren <- function() {
+  checkEquals(
+              c(3,4),
+              GetItemChildren(id=11, project.name=project.name)
+              )
+  checkEquals(
+              c(),
+              GetItemChildren(id=1, project.name=project.name)
+              )
+}
+
 test.GetItemPath <- function() {
   checkEquals(
               paste(GetProjectPath(project.name), GetItemRelativePath(1, "V1"), sep="/"),
