@@ -65,7 +65,7 @@ source(file.path(strategico.path, "strategico_util.R"))
 #########################################################################
 
 if (!is.null(opt$version)) {
-  UsageAndQuit(Version())
+  UsageAndQuit(SW.Description())
 }
 
 #########################################################################
