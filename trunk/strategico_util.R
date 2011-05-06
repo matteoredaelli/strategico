@@ -16,6 +16,7 @@
 
 library("futile.logger")
 library("xtable")
+library(brew)
 
 Quit <- function (msg="", status=-1, save="no") {
   print(msg)
@@ -305,6 +306,20 @@ GetItemsID <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=F
   result
 }
 
+GetItemChildren <- function(id=NULL, keys=NULL, project.name=NULL, project.items=NULL) {
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
+  
+  if (is.null(keys))
+    keys <- GetItemKeys(id, project.name=project.name, project.items=project.items)
+  
+  ## TODO: now it could work only for keys with empty values at the end..."
+  list.id <- GetItemsID(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
+  result <- list.id[list.id != id]
+  if (length(result)==0)
+    result <- NULL
+  result
+}
 GetItemKeys <- function(id, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
