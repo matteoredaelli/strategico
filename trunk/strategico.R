@@ -127,6 +127,30 @@ db.channel <- DBConnect()
 
 param <- EvalParamString(opt$eval.param)
 
+#########################################################################
+## eval_children
+#########################################################################
+
+if (opt$cmd == "eval_children") {
+
+  if (is.null(opt$id.list))
+    UsageAndQuit("Missing parameter id.list")
+
+  if (!is.null(opt$id.list))
+    opt$id.list <- unlist(strsplit(opt$id.list, ","), as.numeric)
+      
+##  if (is.null(opt$item.values))
+##    UsageAndQuit("Missing parameter item.values!")
+
+  ## item.values could be could be V1 or V1,V2
+  if (!is.null(opt$item.values))
+    opt$item.values <- unlist(strsplit(opt$item.values, ","))
+
+  for (id in opt$id.list)
+    EvalItemChildren(project.name=opt$project.name, id=id,
+                 values=opt$values, param=param, project.config=project.config, db.channel=db.channel)
+  q(status=0)
+}
 
 #########################################################################
 ## eval_items
