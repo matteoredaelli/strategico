@@ -151,6 +151,21 @@ EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
                  project.data=project.data, db.channel=db.channel)
   }
 }
+EvalItemChildren <- function(project.name, id, keys=NULL, values, param=NULL,
+                     project.config, project.items=NULL, project.data=NULL, db.channel) {
+
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
+  
+  if (is.null(project.data))
+    project.data <- GetProjectData(project.name=project.name)
+  
+  id.list <- GetItemChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
+
+  if (!is.null(id.list))
+    EvalItems(project.name=project.name, id.list=id.list, values=values, param=param,
+              project.config=project.config, project.items=project.items, project.data=project.data, db.channel=db.channel)
+}
 
 EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
                          param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
@@ -306,7 +321,7 @@ GetItemsID <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=F
   result
 }
 
-GetItemChildren <- function(id=NULL, keys=NULL, project.name=NULL, project.items=NULL) {
+GetItemChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
   
@@ -314,12 +329,21 @@ GetItemChildren <- function(id=NULL, keys=NULL, project.name=NULL, project.items
     keys <- GetItemKeys(id, project.name=project.name, project.items=project.items)
   
   ## TODO: now it could work only for keys with empty values at the end..."
-  list.id <- GetItemsID(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
-  result <- list.id[list.id != id]
-  if (length(result)==0)
+  id.list <- GetItemsID(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
+  result <- id.list[id.list != id]
+  if (length(result)==0) {
+    logger(WARN, paste("No children for ID=",
+                       id,
+                       " (keys=",
+                       paste(keys, collapse=" - "),
+                       ")"
+                       )
+           )
     result <- NULL
+  }
   result
 }
+
 GetItemKeys <- function(id, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
