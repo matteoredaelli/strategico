@@ -24,7 +24,7 @@ UsageAndQuit <- function(msg.err="\n") {
   
   options <- "
   --help | -h : show help and exit
-  TODO
+  TODO (http://code.google.com/p/strategico/wiki/USAGE)
 "
   cat(paste("\nUsage: ", self, options))
   q(status=1)
