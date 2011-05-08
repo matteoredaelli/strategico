@@ -1,0 +1,69 @@
+<!-- -*- mode: R -*- -->
+  <!--
+  ## This program is fre esoftware: you can redistribute it and/or modify
+  ## it under the terms of the GNU General Public License as published by
+  ## the Free Software Foundation, either version 3 of the License, or
+  ## any later version.
+  ##
+  ## This program is distributed in the hope that it will be useful,
+  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ## GNU General Public License for more details.
+  ##
+  ## You should have received a copy of the GNU General Public License
+  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+  
+  <%
+setContentType("text/html")
+#RApacheOutputErrors(TRUE)
+options(hverbose=FALSE,verbose=FALSE)
+%>
+  
+<html>
+<head>
+<title>Strategico: Item></title>
+</head>
+<body>
+
+  
+  <%
+strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+source(file.path(strategico.home, "strategico_util.R"))
+project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+project.config <- GetProjectConfig(project.name=project.name)
+value <- ifelse(is.null(GET$value), "V1", GET$value)
+project.keys <- GetKeyNames(project.config$keys)
+
+for (k in project.keys)
+  if (is.null(GET[k])) {
+    GET[k]=''
+  }
+  
+key.names <- grep("KEY", names(GET), value=TRUE)
+keys <- as.character( unlist(GET[key.names]))
+id <- GetItemsID(project.name=project.name, keys=keys)[1]
+item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
+%>
+  <center>
+    <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%></h1>
+  </center>
+  
+                <form method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildFormElement_keys(project.name=project.name, defaults=keys)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                <input type="submit" value="Show">
+                </form>
+  <%
+db.channel <- DBConnect()
+#stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)
+
+
+DBClose(db.channel)
+%>
+
+  <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
+  <img src="<%=paste(item.path,"all_models.png",sep="/")%>" />
+<% ShowTemplate('footer') %>
+
