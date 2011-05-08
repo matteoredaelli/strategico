@@ -706,4 +706,4 @@ SW.Contributors <- function() {"
 "
 }
 
-SW.Version <- function() {"Release 1.1 SNAPSHOT"}
+SW.Version <- function() {"Release 1.1.0"}
