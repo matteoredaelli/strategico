@@ -193,6 +193,9 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
     id <- as.integer(id)
   }
   
+  ## param can be a string of parameters: in this case it must be converted to a list
+  if (!is.null(param) & !is.list(param))
+    param <- EvalParamString(param)
   
   param <- MergeParamWithDefault(project.config=project.config, param=param)
 
@@ -706,4 +709,4 @@ SW.Contributors <- function() {"
 "
 }
 
-SW.Version <- function() {"Release 1.1.0"}
+SW.Version <- function() {"Release 1.2.0 SNAPSHOT"}
