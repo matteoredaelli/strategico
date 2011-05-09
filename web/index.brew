@@ -22,23 +22,26 @@ options(hverbose=FALSE,verbose=FALSE)
   
 <html>
 <head>
-<title>Strategico: Project Stats></title>
+<title>Strategico: index</title>
 </head>
 <body>
-  <center>
-<h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico Project Stats</h1>
-  </center>
-  
   <%
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.home, "strategico_util.R"))
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 %>
+  <center>
+<h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: Project <%=project.name%></h1>
+  </center>
+<form action="search-item.brew" method="GET">
+  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+  <input type="submit" name="eval" value="Search item">
+</form>
+<form method="GET">
+  <input type="submit" value="Change project">
+  <%=BuildFormElement_project(label="", default=project.name)%>
+</form>
 
-                <form method="GET">Project
-                <%=BuildFormElement_project(default=project.name)%>
-                <input type="submit" value="Show">
-                </form>
   <%
 db.channel <- DBConnect()
 stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)

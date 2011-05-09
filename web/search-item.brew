@@ -48,27 +48,30 @@ if (is.null(GET$KEY1)) {
  
 key.names <- grep("KEY", names(GET), value=TRUE)
 keys <- as.character( unlist(GET[key.names]))
+keys.string <- paste(keys, collapse = " - ")
 %>
   <center>
-    <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%></h1>
+    <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%> :: <%=keys.string%></h1>
   </center>
-  
-                <form method="GET">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildFormElement_keys(project.name=project.name, defaults=keys)%>
-                <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                <input type="submit" value="Search">
-                </form>
 <%
-id.result <- GetItemsID(project.name=project.name, keys=keys, )
+id.result <- GetItemsID(project.name=project.name, keys=keys )
 if (!is.na(id.result) & !is.null(id.result) & length(id.result)>0) {
   id <- id.result[1] %>
-<br /><br />Item <%=id%> FOUND!  <form action="item.brew" method="GET">
+<br /><br />Item no. <%=id%> FOUND!  <form action="item.brew" method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
                 <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                <input type="submit" value="Show">
+                Show results or (re)run of item <input type="submit" value="<%=keys.string%>">
                 </form>
 <%}%>
+  
+<br />
+<br />
+                <form method="GET">
+                <input type="submit" value="Search new item">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildFormElement_keys(project.name=project.name, defaults=keys)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                </form>
 <% ShowTemplate('footer') %>
 
