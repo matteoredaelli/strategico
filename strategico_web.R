@@ -15,12 +15,13 @@
 
 ## Authors:  M. Redaelli
 
-BuildHtmlElement_input <- function(label="", name, default, type="text") {
-  str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" />'
+BuildHtmlElement_input <- function(label="", name, default, type="text", size=20) {
+  str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" size="_SIZE_" />'
   str <- gsub("_LABEL_", label, str)
   str <- gsub("_NAME_", name, str)
   str <- gsub("_V_", default, str)
   str <- gsub("_TYPE_", type, str)
+  str <- gsub("_SIZE_", size, str)
   str
 }
 
