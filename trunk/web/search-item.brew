@@ -22,7 +22,7 @@ options(hverbose=FALSE,verbose=FALSE)
   
 <html>
 <head>
-<title>Strategico: Item></title>
+<title>Strategico: search Item</title>
 </head>
 <body>
 
@@ -35,15 +35,19 @@ project.config <- GetProjectConfig(project.name=project.name)
 value <- ifelse(is.null(GET$value), "V1", GET$value)
 project.keys <- GetKeyNames(project.config$keys)
 
-for (k in project.keys)
-  if (is.null(GET[k])) {
-    GET[k]=''
-  }
-  
+id <- ifelse(is.null(GET$id), 1, GET$id)
+
+if (is.null(GET$KEY1)) {
+  keys.item1 <- GetItemKeys(project.name=project.name, id=id)
+  for (k in project.keys)
+    GET[[k]]=keys.item1[k]
+} else {
+  for (k in project.keys)
+    GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+}
+ 
 key.names <- grep("KEY", names(GET), value=TRUE)
 keys <- as.character( unlist(GET[key.names]))
-id <- GetItemsID(project.name=project.name, keys=keys)[1]
-item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
 %>
   <center>
     <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%></h1>
@@ -53,17 +57,18 @@ item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildFormElement_keys(project.name=project.name, defaults=keys)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                <input type="submit" value="Search">
+                </form>
+<%
+id.result <- GetItemsID(project.name=project.name, keys=keys, )
+if (!is.na(id.result) & !is.null(id.result) & length(id.result)>0) {
+  id <- id.result[1] %>
+<br /><br />Item <%=id%> FOUND!  <form action="item.brew" method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
                 <input type="submit" value="Show">
                 </form>
-  <%
-db.channel <- DBConnect()
-#stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)
-
-
-DBClose(db.channel)
-%>
-
-  <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
-  <img src="<%=paste(item.path,"all_models.png",sep="/")%>" />
+<%}%>
 <% ShowTemplate('footer') %>
 
