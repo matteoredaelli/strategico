@@ -22,7 +22,7 @@ options(hverbose=FALSE,verbose=FALSE)
   
 <html>
 <head>
-<title>Strategico: Show></title>
+<title>Strategico: show item</title>
 </head>
 <body>
 
@@ -38,8 +38,7 @@ project.config <- GetProjectConfig(project.name=project.name)
 
 keys <- GetKeyNames(project.config$keys)
 item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
-%>
-  <%
+
 db.channel <- DBConnect()
 
 item.keys <- GetItemKeys(project.name=project.name, id=id)
@@ -58,12 +57,17 @@ if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
   </center>
   
                 <form method="GET">
-                <%=BuildFormElement_project(default=project.name)%>
-                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text")%>
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%><br />
-                <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=160)%>
+                <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=150)%><br />
                 <input type="submit" name="show" value="Show">
                 <input type="submit" name="eval" value="Run">
+                </form><form action="search-item.brew" method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%><br />
+                <input type="submit" name="search_item" value="New search">
                 </form>
 <% 
 if (!is.null(GET$eval)) {
@@ -80,6 +84,7 @@ DBClose(db.channel)
 <h2>Summary</h2>
 <%
 if(!is.null(item.summary) & !is.na(item.summary) & is.data.frame(item.summary) & nrow(item.summary) > 0) {
+  item.summary$Parameters <- NULL
   item.summary <- t(item.summary)
   print(xtable(item.summary), type="html")
 }
@@ -89,6 +94,7 @@ if(!is.null(item.summary) & !is.na(item.summary) & is.data.frame(item.summary) &
 if(!is.null(item.results) & !is.na(item.results) & is.data.frame(item.results) & nrow(item.results) > 0) {
   item.results$id <- NULL
   item.results$item_id <- NULL
+  rownames(item.results) <- NULL
   print(xtable(item.results), type="html")
 }
 %>
