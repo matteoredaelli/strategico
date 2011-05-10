@@ -38,15 +38,41 @@ project.name <- ifelse(is.null(GET$project), "sample", GET$project)
   <input type="submit" name="eval" value="Search item">
 </form>
 <form method="GET">
-  <input type="submit" value="Change project">
+  <input type="submit" name=show_statistics" value="Show statistics">
+  <input type="submit" name=export_db" value="Export DB to CSV">
+  <input type="submit" name=empty_db" value="Empty DB tables">
+  <input type="submit" name=import_db" value="Import DB">
+</form>
+<form method="GET">
+  <input type="submit" name="change_project" value="Change project">
   <%=BuildFormElement_project(label="", default=project.name)%>
 </form>
 
-  <%
+<%
 db.channel <- DBConnect()
-stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)
+%>
+
+<%
+if (!is.null(GET$empty_db)) {
+  EmptyProjectTablesDB(project.name=project.name, db.channel=db.channel)
+  GET$show_statistics <- TRUE
+}
+
+if (!is.null(GET$export_db)) {
+  ExportProjectTables2Csv(project.name=project.name, db.channel=db.channel)
+  project.url <- GetProjectUrl(project.name=project.name)
+  link <- paste("<br /><br /><a href=", project.url, ">Goto XLS files.</a>", sep="")
+  cat(link)
+}
+if (!is.null(GET$show_statistics)) {
+  stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)
+  print(xtable(stats), type="html")
+}
+
+%>
+
+<%
 DBClose(db.channel)
-print(xtable(stats), type="html")
 %>
 
 <% ShowTemplate('footer') %>
