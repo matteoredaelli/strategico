@@ -684,7 +684,7 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
   }
 
   ## Putting item ID inside project.data
-  project.data <- merge(project.items, project.data)
+  ## project.data <- merge(project.items, project.data)
   
   outfile <- paste(project.path, "project_data.Rdata", sep="/") 
   save(project.data, file=outfile)

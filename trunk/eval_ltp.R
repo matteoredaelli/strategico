@@ -129,11 +129,14 @@ ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.p
     }
     if("db"%in%project.config$save) {
       data = rbind(item.data[, value, drop = FALSE], prediction)
+      colnames(data)=gsub("V.","V",colnames(data))
       data = cbind(item_id=id, data)
+ 
       data$PERIOD = rownames(data)
       ## primary KEY
       rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
       tablename = GetDBTableNameItemResults(project.name, value)
+  
       ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                      rownames="id", addPK=TRUE, db.channel=db.channel)
     }
