@@ -112,7 +112,7 @@ if ( is.null(opt$project.name) )
 if ( !is.project(opt$project.name) )
   UsageAndQuit( paste("Unknown project name '", opt$project.name, "'", sep=""))
 
-project.config <- GetProjectConfig(opt$project.name)
+project.config <- ProjectGetConfig(opt$project.name)
 
 #########################################################################
 ## Opening DB connection
@@ -229,7 +229,7 @@ if (opt$cmd == "eval_ts") {
 #########################################################################
 
 if (opt$cmd == "statistics") {
-  stats <- GetProjectStatistics(project.name=opt$project.name, db.channel=db.channel)
+  stats <- ProjectGetStatistics(project.name=opt$project.name, db.channel=db.channel)
   print(stats)
   q(status=0)
 }

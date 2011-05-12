@@ -57,14 +57,14 @@ BuildHtmlKeyElement <- function(label, name, value, list.values=NULL) {
 }
 
 BuildFormElement_project <- function(label="Project", default=NULL) {
-  BuildHtmlElement_select(label=label, name="project",list.values= GetProjectsList(), default=default)
+  BuildHtmlElement_select(label=label, name="project",list.values= ProjectGetList(), default=default)
 }
 
 BuildFormElement_keys <- function(project.name=NULL, project.config=NULL, project.items=NULL, defaults, sep=" ") {
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   list.values <- GetUniqueKeyValues(project.name=project.name, project.items=project.items, project.config=project.config)
   keys <- GetKeyNames(keys=NULL, project.name=project.name, project.config=project.config)
@@ -78,9 +78,9 @@ BuildFormElement_keys <- function(project.name=NULL, project.config=NULL, projec
 
 BuildFormElement_value <- function(project.name=NULL, project.config=NULL, project.items=NULL, default=NULL) {
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   list.values <- GetValueNames(values=project.config$values, project.name=project.name, project.config=project.config)
   BuildHtmlElement_select("Value", "value", list.values, default=default)

@@ -16,9 +16,9 @@
  
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
-  project.path   <- GetProjectPath(project.name)
-  project.items  <- GetProjectItems(project.name)
-  project.config <- GetProjectConfig(project.name) ## doen't work inside rapache :-(
+  project.path   <- ProjectGetPath(project.name)
+  project.items  <- ProjectGetItems(project.name)
+  project.config <- ProjectGetConfig(project.name) ## doen't work inside rapache :-(
 %>
 <%
   KEY1 <- ifelse(is.null(GET$KEY1),"",GET$KEY1)

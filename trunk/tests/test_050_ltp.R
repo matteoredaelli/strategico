@@ -16,7 +16,7 @@
 source("eval_ltp.R")
 
 project.name <- "sample"
-project.config <- GetProjectConfig(project.name)
+project.config <- ProjectGetConfig(project.name)
 db.channel <- DBConnect()
 
 test.EvalItemData.e0 <- function() {
@@ -164,7 +164,7 @@ test.EvalItemData.param <- function() {
 }
 
 test.EvalItemData.ProjectData <- function() {
-  project.data=GetProjectData(project.name)
+  project.data=ProjectGetData(project.name)
   
  
 }
