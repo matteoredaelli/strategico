@@ -13,7 +13,7 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-source("eval_ltp.R")
+source("plugins/eval_ltp.R")
 
 test.Item.EvalData.e0 <- function() {
   ## TODO: remove the WARNING
