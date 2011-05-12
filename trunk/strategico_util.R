@@ -147,7 +147,7 @@ EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
 
   for (i in 1:length(values)) {
     value <- values[i]
-    EvalItemData(project.name=project.name, id=id, keys=keys, value=value, param=param,
+    EvalData(project.name=project.name, id=id, keys=keys, value=value, param=param,
                  project.config=project.config, project.items=project.items,
                  project.data=project.data, db.channel=db.channel)
   }
@@ -168,9 +168,9 @@ EvalItemChildren <- function(project.name, id, keys=NULL, values, param=NULL,
               project.config=project.config, project.items=project.items, project.data=project.data, db.channel=db.channel)
 }
 
-EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
+EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
                          param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
-  logger(INFO, "++++++++++++++++++++++++EvalItemData ++++++++++++++++++++++++")
+  logger(INFO, "++++++++++++++++++++++++EvalData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
                      value, "=", project.config$values[value],
@@ -205,7 +205,7 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
   directory = ItemGetPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
-  EvalFunction <- paste(project.config$eval.function,".EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
+  EvalFunction <- paste(project.config$eval.function,".EvalDataByValue(project.name=project.name, id=id, item.data=item.data,
     value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
@@ -240,7 +240,7 @@ EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, p
     project.config$period.end = period.end
   } # otherwise the project config value will be used
   
-  EvalItemData(project.name=project.name, id=id, item.data=item.data, value=value,
+  EvalData(project.name=project.name, id=id, item.data=item.data, value=value,
                param=param, project.config=project.config, db.channel=db.channel)
 }
 
