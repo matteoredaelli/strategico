@@ -31,7 +31,7 @@ options(hverbose=FALSE,verbose=FALSE)
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.home, "strategico_util.R"))
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-project.config <- GetProjectConfig(project.name=project.name)
+project.config <- ProjectGetConfig(project.name=project.name)
 value <- ifelse(is.null(GET$value), "V1", GET$value)
 project.keys <- GetKeyNames(project.config$keys)
 

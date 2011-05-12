@@ -116,13 +116,13 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
 EvalItems <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
                       project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
  
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
 
   if (is.null(project.data))
-    project.data <- GetProjectData(project.name=project.name)
+    project.data <- ProjectGetData(project.name=project.name)
 
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
@@ -143,7 +143,7 @@ EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
                      project.config, project.items=NULL, project.data=NULL, db.channel) {
 
   if (is.null(project.data))
-    project.data <- GetProjectData(project.name=project.name)
+    project.data <- ProjectGetData(project.name=project.name)
 
   for (i in 1:length(values)) {
     value <- values[i]
@@ -156,10 +156,10 @@ EvalItemChildren <- function(project.name, id, keys=NULL, values, param=NULL,
                      project.config, project.items=NULL, project.data=NULL, db.channel) {
 
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   if (is.null(project.data))
-    project.data <- GetProjectData(project.name=project.name)
+    project.data <- ProjectGetData(project.name=project.name)
   
   id.list <- ItemGetChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
 
@@ -248,7 +248,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
                          ts.periods.string=NULL, period.start.string, period.freq,
                          calculate.period.end=TRUE, param=NULL, project.config=NULL, db.channel) {
   if (is.null(project.config)) {
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
   }
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
@@ -287,11 +287,11 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1", keys.na.rm=TRUE) {
  
   if (is.null(project.data))
-    project.data <- GetProjectData(project.name=project.name)
+    project.data <- ProjectGetData(project.name=project.name)
 
   if (is.null(keys)) {
     if (is.null(project.items))
-      project.items <- GetProjectItems(project.name=project.name)
+      project.items <- ProjectGetItems(project.name=project.name)
     keys <- ItemGetKeys(id=id, project.name=project.name, project.items=project.items)
   }
 #    filtered.data <- SubsetByID(data=project.data, id=id)
@@ -312,7 +312,7 @@ GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=
 
 ItemGetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   records <- SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
   tot <- nrow(records)
@@ -327,7 +327,7 @@ ItemGetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=F
 
 ItemGetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   if (is.null(keys))
     keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
@@ -343,7 +343,7 @@ ItemGetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) 
 }
 ItemGetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   if (is.null(keys))
     keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
@@ -366,7 +366,7 @@ ItemGetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL
 
 ItemGetKeys <- function(id, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   
   cmd <- "ds <- subset(project.items, id==__ID__, select=c(-id))"
   cmd <- gsub("__ID__", id, cmd)
@@ -388,13 +388,13 @@ ItemGetRelativePath <- function(id, value=NULL) {
 }
 
 ItemGetPath <- function(project.name, id, value=NULL) {
-  project.path <- GetProjectPath(project.name)
+  project.path <- ProjectGetPath(project.name)
   relative.path <- ItemGetRelativePath(id, value)
   paste(project.path, relative.path, sep="/")
 }
 
 ItemGetUrl <- function(project.name, id, value=NULL) {
-  project.url <- GetProjectUrl(project.name)
+  project.url <- ProjectGetUrl(project.name)
   relative.path <- ItemGetRelativePath(id, value)
   paste(project.url, relative.path, sep="/")
 }
@@ -402,7 +402,7 @@ ItemGetUrl <- function(project.name, id, value=NULL) {
 GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(keys)) {
     if (is.null(project.config))
-      project.config <- GetProjectConfig(project.name)
+      project.config <- ProjectGetConfig(project.name)
    
     keys <- project.config$keys
   }
@@ -413,24 +413,24 @@ GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.confi
   sample(from:to,1)
 }
 
-GetProjectItems <- function(project.name) {
-  project.path <- GetProjectPath(project.name)
+ProjectGetItems <- function(project.name) {
+  project.path <- ProjectGetPath(project.name)
   filename <- file.path(project.path, "project_items.Rdata")
   FileExistsOrQuit(filename)
   load(filename)
   project.items
 }
 
-GetProjectData <- function(project.name) {
-  project.path <- GetProjectPath(project.name)
+ProjectGetData <- function(project.name) {
+  project.path <- ProjectGetPath(project.name)
   filename <- file.path(project.path, "project_data.Rdata")
   FileExistsOrQuit(filename)
   load(filename)
   project.data
 }
 
-GetProjectConfig <- function(project.name) {
-  project.path <- GetProjectPath(project.name)
+ProjectGetConfig <- function(project.name) {
+  project.path <- ProjectGetPath(project.name)
   filename <- file.path(project.path, "project.config")
   
   FileExistsOrQuit(filename)
@@ -444,35 +444,35 @@ GetProjectConfig <- function(project.name) {
   project.config
 }
 
-GetProjectsList <- function(projects.home = strategico.config$projects.home) {
+ProjectGetList <- function(projects.home = strategico.config$projects.home) {
   dir(projects.home)
 }
                             
-GetProjectPath <- function(project.name, projects.home = strategico.config$projects.home) {
+ProjectGetPath <- function(project.name, projects.home = strategico.config$projects.home) {
   file.path(projects.home, project.name)
 }
 
-GetProjectStatistics <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
+ProjectGetStatistics <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   
-  stats.rdata <- GetProjectStatisticsRdata(project.name=project.name, project.config=project.config,
+  stats.rdata <- ProjectGetStatisticsRdata(project.name=project.name, project.config=project.config,
                                            project.items=project.items, project.data=project.data)
   
-  stats.db <- GetProjectStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
+  stats.db <- ProjectGetStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
 
   stats <- t(as.data.frame(append(stats.rdata,stats.db)))
   colnames(stats) = "VALUE"
   stats
 }
   
-GetProjectStatisticsRdata <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL) {
+ProjectGetStatisticsRdata <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL) {
   if (is.null(project.config)) {
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
   }
   if (is.null(project.items)) {
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   }
   if (is.null(project.data)) {
-    project.data <- GetProjectData(project.name=project.name)
+    project.data <- ProjectGetData(project.name=project.name)
   }
   n.items    <- nrow(project.items)
   n.data     <- nrow(project.data)
@@ -495,7 +495,7 @@ GetProjectStatisticsRdata <-function(project.name, project.config=NULL, project.
 }
 
 
-GetProjectUrl <- function(project.name, projects.url = strategico.config$projects.url) {
+ProjectGetUrl <- function(project.name, projects.url = strategico.config$projects.url) {
   paste(projects.url, project.name, sep="/")
 }
 
@@ -515,9 +515,9 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
 
 GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.config=NULL) {
   if (is.null(project.items))
-    project.items <- GetProjectItems(project.name=project.name)
+    project.items <- ProjectGetItems(project.name=project.name)
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
 
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
   sapply(keys, function(x) unique(project.items[[x]]))
@@ -526,7 +526,7 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
 GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(values)) {
     if (is.null(project.config))
-      project.config <- GetProjectConfig(project.name)
+      project.config <- ProjectGetConfig(project.name)
     values <- project.config$values
   }
   paste("V", 1:length(values), sep="")
@@ -534,7 +534,7 @@ GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
 
 ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
 
   project.R <- paste("project_", project.name, ".R", sep="")
   MySource(project.R)
@@ -570,7 +570,7 @@ ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
 }
 
 is.project <- function(project.name) {
-  project.name %in% GetProjectsList()
+  project.name %in% ProjectGetList()
 }
 
 is.value <- function(value, project.name=NULL, project.config=NULL) {
@@ -579,7 +579,7 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
 
 MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param) {
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
   
   c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 }
@@ -645,8 +645,8 @@ SubsetByID <- function(data, id) {
 
 ## creates item.Rdata e item-list
 UpdateItemsData <- function(project.name, project.data, db.channel) {
-  project.path <- GetProjectPath(project.name)
-  project.config <- GetProjectConfig(project.name=project.name)
+  project.path <- ProjectGetPath(project.name)
+  project.config <- ProjectGetConfig(project.name=project.name)
   
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 

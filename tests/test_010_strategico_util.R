@@ -14,11 +14,11 @@
 ## Authors: L. Finos, M. Redaelli
 
 project.name <- "sample"
-project.config <- GetProjectConfig(project.name)
+project.config <- ProjectGetConfig(project.name)
 db.channel <- DBConnect()
 
-test.010.GetProjectConfig <- function() {
-  c <- GetProjectConfig(project.name)
+test.010.ProjectGetConfig <- function() {
+  c <- ProjectGetConfig(project.name)
 
   checkEquals(
               9,
@@ -61,8 +61,8 @@ test.020.ImportProjectData <- function() {
   ## TODO Check if the new files have been created successfully 
 }
 
-test.030.GetProjectItems <- function() {
-  project.items <- GetProjectItems(project.name)
+test.030.ProjectGetItems <- function() {
+  project.items <- ProjectGetItems(project.name)
   checkEquals(20,
               nrow(project.items)
               )
@@ -72,7 +72,7 @@ test.030.GetProjectItems <- function() {
 }
 
 test.035.ItemGetKeys <- function() {
-  project.items <- GetProjectItems(project.name)
+  project.items <- ProjectGetItems(project.name)
   k1 <-     ItemGetKeys(project.name=project.name, id=5)
   k1.bis <- ItemGetKeys(project.items=project.items, id=5)
   
@@ -87,7 +87,7 @@ test.035.ItemGetKeys <- function() {
 }
 
 test.035.ItemGetIDs <- function() {
-  project.items <- GetProjectItems(project.name)
+  project.items <- ProjectGetItems(project.name)
   
   checkEquals(
               c(2),
@@ -107,8 +107,8 @@ test.035.ItemGetIDs <- function() {
               )
 }
 
-test.040.GetProjectData <- function() {
-  project.data <- GetProjectData(project.name)
+test.040.ProjectGetData <- function() {
+  project.data <- ProjectGetData(project.name)
   
   checkEquals(
               c("KEY1", "KEY2", "KEY3", "PERIOD", "V1", "V2"),
@@ -123,7 +123,7 @@ test.040.GetProjectData <- function() {
 }
 
 test.050.Subset <- function() {
-  project.data <- GetProjectData(project.name)
+  project.data <- ProjectGetData(project.name)
   s = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
 
   checkEquals(1,
@@ -132,7 +132,7 @@ test.050.Subset <- function() {
 }
 
 test.GetItemData <- function() {
-  project.data <- GetProjectData(project.name)
+  project.data <- ProjectGetData(project.name)
 
   i0 <-     GetItemData(project.name=project.name, project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
   i0.bis <- GetItemData(project.name=project.name, project.data=project.data, id=5, value="V1")
@@ -206,7 +206,7 @@ test.00.BuildFilterWithKeys <- function() {
 
 
 test.00.BuildFullKey <- function() {
-  project.config <- GetProjectConfig(project.name)
+  project.config <- ProjectGetConfig(project.name)
   
   checkEquals(
               c("IT","",""),
@@ -441,7 +441,7 @@ test.ItemGetChildren <- function() {
 
 test.ItemGetPath <- function() {
   checkEquals(
-              paste(GetProjectPath(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
+              paste(ProjectGetPath(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
               ItemGetPath(project.name, 1, "V1")
               )
   checkEquals(
@@ -452,7 +452,7 @@ test.ItemGetPath <- function() {
 
 test.ItemGetUrl <- function() {
   checkEquals(
-              paste(GetProjectUrl(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
+              paste(ProjectGetUrl(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
               ItemGetUrl(project.name, 1, "V1")
               )
   checkEquals(

@@ -35,7 +35,7 @@ DBClose <- function(db.channel) {
 
 EmptyProjectTablesDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
-    project.config <- GetProjectConfig(project.name)
+    project.config <- ProjectGetConfig(project.name)
   }
 
   tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
@@ -50,7 +50,7 @@ EmptyTableDB <- function(tablename, db.channel) {
 EvalItemsFromDB <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
   
   if (is.null(project.config))
-    project.config <- GetProjectConfig(project.name=project.name)
+    project.config <- ProjectGetConfig(project.name=project.name)
 
   tablename = GetDBTableNameItemSummary(project.name, value)
   sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
@@ -90,9 +90,9 @@ ExportDataToDB <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE
 
 ExportProjectTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
   if(is.null(project.config)) {
-    project.config <- GetProjectConfig(project.name)
+    project.config <- ProjectGetConfig(project.name)
   }
-  project.path <- GetProjectPath(project.name)
+  project.path <- ProjectGetPath(project.name)
   tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) ExportTable2Csv(tablename=x,
                                              db.channel=db.channel,
@@ -172,9 +172,9 @@ GetItemSummaryDB <- function(project.name, value, id, db.channel) {
   GetItemRecordsFromDB(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
-GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
+ProjectGetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
-    project.config <- GetProjectConfig(project.name)
+    project.config <- ProjectGetConfig(project.name)
   }
 
   tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
@@ -187,7 +187,7 @@ GetProjectStatisticsDB <- function(project.name, project.config=NULL, db.channel
 
 GetProjectTablenamesDB <- function(project.name, project.config=NULL) {
   if(is.null(project.config)) 
-    project.config <- GetProjectConfig(project.name)
+    project.config <- ProjectGetConfig(project.name)
 
   tables <- c(
               ##GetDBTableNameProjectData(project.name),

@@ -34,7 +34,7 @@ project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
 param <- ifelse(is.null(GET$param), "", GET$param)
 value <- ifelse(is.null(GET$value), "V1", GET$value)
-project.config <- GetProjectConfig(project.name=project.name)
+project.config <- ProjectGetConfig(project.name=project.name)
 
 keys <- GetKeyNames(project.config$keys)
 item.path <- ItemGetUrl(project.name=project.name, id=id, value=value)

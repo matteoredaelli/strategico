@@ -60,12 +60,12 @@ if (!is.null(GET$empty_db)) {
 
 if (!is.null(GET$export_db)) {
   ExportProjectTables2Csv(project.name=project.name, db.channel=db.channel)
-  project.url <- GetProjectUrl(project.name=project.name)
+  project.url <- ProjectGetUrl(project.name=project.name)
   link <- paste("<br /><br /><a href=", project.url, ">Goto XLS files.</a>", sep="")
   cat(link)
 }
 if (!is.null(GET$show_statistics)) {
-  stats <- GetProjectStatistics(project.name=project.name, db.channel=db.channel)
+  stats <- ProjectGetStatistics(project.name=project.name, db.channel=db.channel)
   print(xtable(stats), type="html")
 }
 
