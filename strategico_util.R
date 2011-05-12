@@ -140,7 +140,7 @@ EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, p
     project.config$period.end = period.end
   } # otherwise the project config value will be used
   
-  EvalData(project.name=project.name, id=id, item.data=item.data, value=value,
+  Item.EvalData(project.name=project.name, id=id, item.data=item.data, value=value,
                param=param, project.config=project.config, db.channel=db.channel)
 }
 
@@ -148,7 +148,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
                          ts.periods.string=NULL, period.start.string, period.freq,
                          calculate.period.end=TRUE, param=NULL, project.config=NULL, db.channel) {
   if (is.null(project.config)) {
-    project.config <- ProjectGetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name=project.name)
   }
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
@@ -187,14 +187,14 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(keys)) {
     if (is.null(project.config))
-      project.config <- ProjectGetConfig(project.name)
+      project.config <- Project.GetConfig(project.name)
    
     keys <- project.config$keys
   }
   paste("KEY", 1:length(keys), sep="")
 }
 
-GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
+GetStrHTMLformItem.Eval <- function(project.path, item.path, value, param) {
   param.string <- BuildParamString(param)
   paste(
         "<h3>Run the engine</h3>
@@ -210,9 +210,9 @@ GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
 
 GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.config=NULL) {
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
   if (is.null(project.config))
-    project.config <- ProjectGetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name=project.name)
 
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
   sapply(keys, function(x) unique(project.items[[x]]))
@@ -221,7 +221,7 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
 GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(values)) {
     if (is.null(project.config))
-      project.config <- ProjectGetConfig(project.name)
+      project.config <- Project.GetConfig(project.name)
     values <- project.config$values
   }
   paste("V", 1:length(values), sep="")
@@ -241,7 +241,7 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
 
 MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param) {
   if (is.null(project.config))
-    project.config <- ProjectGetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name=project.name)
   
   c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 }
@@ -307,8 +307,8 @@ SubsetByID <- function(data, id) {
 
 ## creates item.Rdata e item-list
 UpdateItemsData <- function(project.name, project.data, db.channel) {
-  project.path <- ProjectGetPath(project.name)
-  project.config <- ProjectGetConfig(project.name=project.name)
+  project.path <- Project.GetPath(project.name)
+  project.config <- Project.GetConfig(project.name=project.name)
   
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
@@ -351,13 +351,13 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
               )
   if("items_db"%in%project.config$save) {
 
-    tablename = DBGetTableNameProjectItems(project.config$project.name)
+    tablename = DB.GetTableNameProject.Items(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
     rownames(project.items) <- project.items$id
     project.items$id <- NULL
     
-    ExportDataToDB(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
+    DB.ImportData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
     
     project.items <- project.items.orig
   }

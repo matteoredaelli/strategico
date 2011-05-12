@@ -13,8 +13,8 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-test.010.ProjectGetConfig <- function() {
-  c <- ProjectGetConfig(project.name)
+test.010.Project.GetConfig <- function() {
+  c <- Project.GetConfig(project.name)
 
   checkEquals(
               9,
@@ -52,13 +52,13 @@ test.010.ProjectGetConfig <- function() {
               )
 }
 
-test.020.ProjectImportData <- function() {
-  ProjectImportData(project.name=project.name, db.channel=db.channel)
+test.020.Project.ImportData <- function() {
+  Project.ImportData(project.name=project.name, db.channel=db.channel)
   ## TODO Check if the new files have been created successfully 
 }
 
-test.030.ProjectGetItems <- function() {
-  project.items <- ProjectGetItems(project.name)
+test.030.Project.GetItems <- function() {
+  project.items <- Project.GetItems(project.name)
   checkEquals(20,
               nrow(project.items)
               )
@@ -67,8 +67,8 @@ test.030.ProjectGetItems <- function() {
               )
 }
 
-test.040.ProjectGetData <- function() {
-  project.data <- ProjectGetData(project.name)
+test.040.Project.GetData <- function() {
+  project.data <- Project.GetData(project.name)
   
   checkEquals(
               c("KEY1", "KEY2", "KEY3", "PERIOD", "V1", "V2"),
@@ -82,20 +82,20 @@ test.040.ProjectGetData <- function() {
               )
 }
 
-test.ProjectGetDBTablenames <- function() {
+test.Project.DB.GetTableNames <- function() {
    checkEquals(
                c("sample_items", "sample_results_V1", "sample_summary_V1", "sample_results_V2", "sample_summary_V2"),
-               ProjectGetDBTablenames(project.name=project.name, project.config=project.config)
+               Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
                )
 }
 
-test.is.project.name <- function() {
+test.Project.IsValidName <- function() {
   checkEquals(
               TRUE,
-              is.project.name("sample")
+              Project.IsValidName("sample")
               )
   checkEquals(
               FALSE,
-              is.project.name("missingproject")
+              Project.IsValidName("missingproject")
               )
 }

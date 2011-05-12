@@ -14,7 +14,7 @@
 ## Authors: L. Finos, M. Redaelli
 
 test.050.Subset <- function() {
-  project.data <- ProjectGetData(project.name)
+  project.data <- Project.GetData(project.name)
   s = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
 
   checkEquals(1,
@@ -57,7 +57,7 @@ test.00.BuildFilterWithKeys <- function() {
 
 
 test.00.BuildFullKey <- function() {
-  project.config <- ProjectGetConfig(project.name)
+  project.config <- Project.GetConfig(project.name)
   
   checkEquals(
               c("IT","",""),
@@ -177,20 +177,20 @@ test.0.ParamFunctions <- function() {
               
 test.00.GetDBTableName <- function() {
   checkEquals("sample_summary_V1",
-              DBGetTableNameSummary("sample", value="V1")
+              DB.GetTableNameSummary("sample", value="V1")
               )
   checkEquals("sample_results_V1",
-              DBGetTableNameResults("sample", value="V1")
+              DB.GetTableNameResults("sample", value="V1")
               )
   checkEquals("sample_items",
-              DBGetTableNameProjectItems("sample")
+              DB.GetTableNameProject.Items("sample")
               )
 }
   
-test.DBGetTableSize <- function() {
-  tablename <- DBGetTableNameProjectItems("sample")
+test.DB.GetTableSize <- function() {
+  tablename <- DB.GetTableNameProject.Items("sample")
   checkEquals(20,
-              DBGetTableSize(tablename, db.channel=db.channel)
+              DB.GetTableSize(tablename, db.channel=db.channel)
               )
 }
 

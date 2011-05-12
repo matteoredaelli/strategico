@@ -678,7 +678,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
 
   
 
-  #html.form.eval = GetStrHTMLformEvalItem(project.path, .ItemGetPath(keys), value, param)
+  #html.form.eval = GetStrHTMLformItem.Eval(project.path, .Item.GetPath(keys), value, param)
   #cat(html.form.eval, append = TRUE, file = html.filename)  
 
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 

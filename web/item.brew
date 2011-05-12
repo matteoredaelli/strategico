@@ -34,16 +34,16 @@ project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
 param <- ifelse(is.null(GET$param), "", GET$param)
 value <- ifelse(is.null(GET$value), "V1", GET$value)
-project.config <- ProjectGetConfig(project.name=project.name)
+project.config <- Project.GetConfig(project.name=project.name)
 
 keys <- GetKeyNames(project.config$keys)
-item.path <- ItemGetUrl(project.name=project.name, id=id, value=value)
+item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
 
-db.channel <- DBConnect()
+db.channel <- DB.Connect()
 
-item.keys <- ItemGetKeys(project.name=project.name, id=id)
-item.summary <- ItemDBGetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
-item.results <- ItemDBGetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.keys <- Item.GetKeys(project.name=project.name, id=id)
+item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
 keys.string <- ifelse(is.null(item.keys),
                       "",
@@ -72,10 +72,10 @@ if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
 <% 
 if (!is.null(GET$eval)) {
   param <- EvalParamString(param)
-  EvalItem(project.name=project.name, project.config=project.config, value=value, id=id,
+  Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param)
   }
-DBClose(db.channel)
+DB.Close(db.channel)
 %>
 <h2>Models</h2>
   <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
