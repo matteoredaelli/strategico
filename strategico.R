@@ -234,7 +234,7 @@ if (opt$cmd == "eval_ts") {
 
 if (opt$cmd == "statistics") {
   stats <- Project.GetStatistics(project.name=opt$project.name, db.channel=db.channel)
-  print(stats)
+  print(t(as.data.frame(stats)))
   q(status=0)
 }
 

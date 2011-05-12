@@ -74,8 +74,9 @@ Project.GetStatistics <-function(project.name, project.config=NULL, project.item
   
   stats.db <- Project.GetStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
 
-  stats <- t(as.data.frame(append(stats.rdata,stats.db)))
-  colnames(stats) = "VALUE"
+  stats <- list(fs=stats.rdata,
+                db=stats.db
+                )
   stats
 }
   
@@ -123,7 +124,7 @@ Project.ImportData <- function(project.name, project.config=NULL, db.channel) {
   
   cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
   result <- eval(parse(text = cmd))
-  UpdateItemsData(project.name=project.name, project.data=result, db.channel=db.channel)
+  Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
 }
 
 ##input da da csv. 
