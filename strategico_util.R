@@ -31,6 +31,18 @@ FileExistsOrQuit <- function (filename, msg="", status=10){
   }
 }
 
+GetEtcPath <- function() {
+  path <- file.path(GetStrategicoHome(), "etc")
+  FileExistsOrQuit(path)
+  path
+}
+
+GetPluginsPath <- function() {
+  path <- file.path(GetStrategicoHome(), "plugins")
+  FileExistsOrQuit(path)
+  path
+}
+
 GetStrategicoHome <- function() {
   strategico.path <-as.character(Sys.getenv("STRATEGICO_HOME"))
   if (strategico.path == "") {
@@ -40,14 +52,16 @@ GetStrategicoHome <- function() {
   strategico.path
 }
 
-MySource <- function(filename) {
-  strategico.path <- GetStrategicoHome()
-  fullname = file.path(strategico.path, filename)
+MySource <- function(filename, file.path=NULL) {
+  if(is.null(file.path))
+    file.path <- GetStrategicoHome()
+
+  fullname = file.path(file.path, filename)
   FileExistsOrQuit(fullname)
   source(fullname)
 }
 
-MySource("strategico.config")
+MySource(filename="strategico.config", file.path=GetEtcPath())
 
 config_logger(threshold = strategico.config$logger.threshold)
 logger <- getLogger()

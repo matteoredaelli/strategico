@@ -45,15 +45,16 @@ Project.GetData <- function(project.name) {
 }
 
 Project.GetConfig <- function(project.name) {
-  project.path <- Project.GetPath(project.name)
-  filename <- file.path(project.path, "project.config")
+  etc.path <- GetEtcPath()
+  plugins.path <- GetPluginsPath()
+  filename <- file.path(etc.path, paste(project.name, ".config", sep=""))
   
   FileExistsOrQuit(filename)
-  ## sourcing priect.config file
+  ## sourcing project.config file
   source(filename)
 
   eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
-  MySource(eval.file)
+  MySource(filename=eval.file, file.path=plugins.path)
  
   ##append(project.config, strategico.config)
   project.config
@@ -119,8 +120,8 @@ Project.ImportData <- function(project.name, project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
 
-  project.R <- paste("project_", project.name, ".R", sep="")
-  MySource(project.R)
+  project.R <- paste(project.name, ".R", sep="")
+  MySource(filename=project.R, file.path=GetPluginsPath())
   
   cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
   result <- eval(parse(text = cmd))
