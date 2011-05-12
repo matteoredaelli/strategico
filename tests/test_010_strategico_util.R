@@ -406,6 +406,7 @@ test.GetUniqueKeyValues <- function() {
               )
 }
 
+
 test.GetItemRelativePath <- function() {
   checkEquals("0/1",
               GetItemRelativePath(1)
@@ -415,6 +416,17 @@ test.GetItemRelativePath <- function() {
               )
 }
 
+
+test.ItemGetParent <- function() {
+  checkEquals(
+              10,
+              ItemGetParent(id=1, project.name=project.name)
+              )
+  checkEquals(
+              10,
+              ItemGetParent(keys=c('IT', 'CAR', 'ALFA'), project.name=project.name)
+              )
+}
 
 test.GetItemChildren <- function() {
   checkEquals(

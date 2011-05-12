@@ -112,6 +112,7 @@ BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
 }
 
+
 EvalItems <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
                       project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))
@@ -324,6 +325,22 @@ GetItemsID <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=F
   result
 }
 
+ItemGetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
+  if (is.null(project.items))
+    project.items <- GetProjectItems(project.name=project.name)
+  
+  if (is.null(keys))
+    keys <- GetItemKeys(id, project.name=project.name, project.items=project.items)
+
+  parent.key <- keys
+  parent.key[length(keys)]=''
+  
+  result <- GetItemsID(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
+  if (!is.na(result))
+    result <- result[1]
+
+  result
+}
 GetItemChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
