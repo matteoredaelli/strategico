@@ -19,12 +19,12 @@ project.name <- "sample"
 project.config <- ProjectGetConfig(project.name)
 db.channel <- DBConnect()
 
-test.EvalItemData.e0 <- function() {
+test.EvalData.e0 <- function() {
   ## TODO: remove the WARNING
   ## Warning message:
   ##In sqrt(diag(model$var.coef)) : NaNs produced
 
-  e0     <- EvalItemData(project.name=project.name, id=1, value="V2", project.config=project.config, db.channel=db.channel)
+  e0     <- EvalData(project.name=project.name, id=1, value="V2", project.config=project.config, db.channel=db.channel)
   
   checkEquals(
               c(3756, 5250, 4984, 5985, 6470, 7097, 7389, 8487),
@@ -32,10 +32,10 @@ test.EvalItemData.e0 <- function() {
               )
 }
 
-test.EvalItemData.e00 <- function() {
+test.EvalData.e00 <- function() {
   ## NO DATA time series
-  e0     <- EvalItemData(project.name=project.name, id=5, value="V1", project.config=project.config, db.channel=db.channel)
-  e0.bis <- EvalItemData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="V1",
+  e0     <- EvalData(project.name=project.name, id=5, value="V1", project.config=project.config, db.channel=db.channel)
+  e0.bis <- EvalData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="V1",
                          project.config=project.config, db.channel=db.channel)
   checkEquals(
               e0,
@@ -73,8 +73,8 @@ test.EvalItemData.e00 <- function() {
 ##              )
 }
 
-test.EvalItemData.e1 <- function() {
-  e1     <- EvalItemData(project.name=project.name, keys=c("IT"), value="V1",
+test.EvalData.e1 <- function() {
+  e1     <- EvalData(project.name=project.name, keys=c("IT"), value="V1",
                          project.config=project.config, db.channel=db.channel)
 
   checkEquals(
@@ -90,7 +90,7 @@ test.EvalItemData.e1 <- function() {
               colnames(e1)
               )
   
-  e11     <- EvalItemData(project.name=project.name, keys=c("IT"), value="V2",
+  e11     <- EvalData(project.name=project.name, keys=c("IT"), value="V2",
                           project.config=project.config, db.channel=db.channel)
 
   checkEquals(
@@ -99,8 +99,8 @@ test.EvalItemData.e1 <- function() {
               )
 }
 
-test.EvalItemData.e2 <- function() {
-  e2     <- EvalItemData(project.name=project.name, keys=c("IT", "CAR"), value="V1",
+test.EvalData.e2 <- function() {
+  e2     <- EvalData(project.name=project.name, keys=c("IT", "CAR"), value="V1",
                          project.config=project.config, db.channel=db.channel)
   checkEquals(
               c(5278, 1378, 5996, 2096, 6714, 2814, 7432, 3532),
@@ -111,7 +111,7 @@ test.EvalItemData.e2 <- function() {
               colnames(e2)
               )
 
-  e22     <- EvalItemData(project.name=project.name, keys=c("IT", "CAR"), value="V2",
+  e22     <- EvalData(project.name=project.name, keys=c("IT", "CAR"), value="V2",
                           project.config=project.config, db.channel=db.channel)
   checkEquals(
               c(6847, 7388, 6895, 7436, 6942, 7483, 6990, 7531),
@@ -123,9 +123,9 @@ test.EvalItemData.e2 <- function() {
               )
 }
 
-test.EvalItemData.e3 <- function() {
+test.EvalData.e3 <- function() {
   item.data <- GetItemData(project.name, keys=c("","CAR"), value="V1")
-  e3 <- EvalItemData(project.name=project.name, keys=c("","CAR"), value="V1",
+  e3 <- EvalData(project.name=project.name, keys=c("","CAR"), value="V1",
                      project.config=project.config, db.channel=db.channel)
 
   checkEquals(
@@ -134,14 +134,14 @@ test.EvalItemData.e3 <- function() {
               )
 }
 
-test.EvalItemData.param <- function() {
+test.EvalData.param <- function() {
 
   param.string <- "n.ahead=3"
   param <- EvalParamString(param.string)
   
   ## check passing parameters
   
-  e3     <- EvalItemData(project.name, keys=c("DE", "CAR", "ALFA"),
+  e3     <- EvalData(project.name, keys=c("DE", "CAR", "ALFA"),
                           value="V2", project.config=project.config, param=param, db.channel=db.channel)
   checkEquals(
               c(3998, 3766, 4094),
@@ -150,7 +150,7 @@ test.EvalItemData.param <- function() {
 
   param.string <- "n.ahead=3,try.models=c('mean','trend','lm')"
   param <- EvalParamString(param.string)
-  e4    <- EvalItemData(project.name=project.name, keys=c("DE", "CAR", "BMW"),
+  e4    <- EvalData(project.name=project.name, keys=c("DE", "CAR", "BMW"),
                           value="V2", project.config=project.config, param=param, db.channel=db.channel)
   checkEquals(
               c(2026, 9098, 2328),
@@ -163,7 +163,7 @@ test.EvalItemData.param <- function() {
   ## e fare qualche checkEquals tra i valori di model
 }
 
-test.EvalItemData.ProjectData <- function() {
+test.EvalData.ProjectData <- function() {
   project.data=ProjectGetData(project.name)
   
  
