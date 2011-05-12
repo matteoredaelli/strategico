@@ -82,10 +82,10 @@ test.040.ProjectGetData <- function() {
               )
 }
 
-test.GetProjectTablenamesDB <- function() {
+test.ProjectGetDBTablenames <- function() {
    checkEquals(
-               c("sample_items", "sample_V1_results", "sample_V1_summary", "sample_V2_results", "sample_V2_summary"),
-               GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+               c("sample_items", "sample_results_V1", "sample_summary_V1", "sample_results_V2", "sample_summary_V2"),
+               ProjectGetDBTablenames(project.name=project.name, project.config=project.config)
                )
 }
 
