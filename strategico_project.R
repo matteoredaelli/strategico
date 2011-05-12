@@ -129,7 +129,7 @@ ProjectImportDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","
   result <- data[,c(KEY,"PERIOD",V)]
 }
 
-is.project <- function(project.name) {
+is.project.name <- function(project.name) {
   project.name %in% ProjectGetList()
 }
 

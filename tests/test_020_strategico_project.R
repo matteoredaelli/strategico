@@ -89,13 +89,13 @@ test.GetProjectTablenamesDB <- function() {
                )
 }
 
-test.is.project <- function() {
+test.is.project.name <- function() {
   checkEquals(
               TRUE,
-              is.project("sample")
+              is.project.name("sample")
               )
   checkEquals(
               FALSE,
-              is.project("missingproject")
+              is.project.name("missingproject")
               )
 }

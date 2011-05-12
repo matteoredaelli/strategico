@@ -54,12 +54,12 @@ db.channel <- DBConnect()
 
 <%
 if (!is.null(GET$empty_db)) {
-  EmptyProjectTablesDB(project.name=project.name, db.channel=db.channel)
+  ProjectEmptyDBTables(project.name=project.name, db.channel=db.channel)
   GET$show_statistics <- TRUE
 }
 
 if (!is.null(GET$export_db)) {
-  ExportProjectTables2Csv(project.name=project.name, db.channel=db.channel)
+  ProjectDBExportTables2Csv(project.name=project.name, db.channel=db.channel)
   project.url <- ProjectGetUrl(project.name=project.name)
   link <- paste("<br /><br /><a href=", project.url, ">Goto XLS files.</a>", sep="")
   cat(link)

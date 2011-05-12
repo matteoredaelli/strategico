@@ -113,7 +113,7 @@ if (opt$cmd == "runit") {
 if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
-if ( !is.project(opt$project.name) )
+if ( !is.project.name(opt$project.name) )
   UsageAndQuit( paste("Unknown project name '", opt$project.name, "'", sep=""))
 
 project.config <- ProjectGetConfig(opt$project.name)
@@ -192,7 +192,7 @@ if (opt$cmd == "eval_items_from_db") {
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
   
-  EvalItemsFromDB(project.name=opt$project.name, value=opt$item.value,
+  DBEvalItemsFromSummary(project.name=opt$project.name, value=opt$item.value,
                   verbose=TRUE, project.config, db.channel=db.channel)
   
   q(status=0)
@@ -242,14 +242,14 @@ if (opt$cmd == "statistics") {
 ## empty.db
 #########################################################################
 if (opt$cmd == "empty.db") {
-  EmptyProjectTablesDB(project.name=opt$project.name, db.channel=db.channel)
+  ProjectEmptyDBTables(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
 ########################################################################
 ## export.db.csv
 #########################################################################
 if (opt$cmd == "export.db.csv") {
-  ExportProjectTables2Csv(project.name=opt$project.name, db.channel=db.channel)
+  ProjectDBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
 #########################################################################

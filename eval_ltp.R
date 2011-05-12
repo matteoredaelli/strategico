@@ -135,7 +135,7 @@ ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=
       data$PERIOD = rownames(data)
       ## primary KEY
       rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
-      tablename = GetDBTableNameItemResults(project.name, value)
+      tablename = DBGetTableNameResults(project.name, value)
   
       ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                      rownames="id", addPK=TRUE, db.channel=db.channel)
@@ -150,7 +150,7 @@ ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=
                 onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
   }
   if("summary_db"%in%project.config$save) {
-      tablename = GetDBTableNameItemSummary(project.name, value)
+      tablename = DBGetTableNameItemSummary(project.name, value)
       ExportDataToDB(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
   prediction
