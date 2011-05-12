@@ -65,7 +65,7 @@ test.EvalItemData.e00 <- function() {
   records <- GetItemResultsDB(project.name, id=5, value="V1", db.channel=db.channel)
   checkEquals(
               as.vector(e0[1,]),
-              sort(sort(records$V1, decreasing=TRUE)[1:project.config$param$n.ahead])
+              sort(sort(records$V, decreasing=TRUE)[1:project.config$param$n.ahead])
               )
 ##  checkEquals(
 ##              colnames(e0),

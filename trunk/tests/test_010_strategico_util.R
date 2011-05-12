@@ -111,28 +111,24 @@ test.040.GetProjectData <- function() {
   project.data <- GetProjectData(project.name)
   
   checkEquals(
-              c("KEY1", "KEY2", "KEY3", "id", "PERIOD", "V1", "V2"),
+              c("KEY1", "KEY2", "KEY3", "PERIOD", "V1", "V2"),
               colnames(project.data)
               )
   checkEquals(113,
               nrow(project.data)
               )
-  checkEquals(7,
+  checkEquals(6,
               ncol(project.data)
               )
 }
 
 test.050.Subset <- function() {
   project.data <- GetProjectData(project.name)
-  s1 = SubsetByID(project.data, id=5)
-  s2 = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
+  s = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
 
-  checkEquals(s1,
-              s2,
+  checkEquals(1,
+              nrow(s)
               )
- # checkEquals(c("ES", "MOTO", "DUCATI"),
- #             s1[1,][1:3]
- #             )
 }
 
 test.GetItemData <- function() {
