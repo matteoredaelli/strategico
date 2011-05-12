@@ -40,6 +40,18 @@ Items.Eval <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, valu
   }
 }
 
+Item.EmptyFS <- function(project.name, id, value=NULL, recursive = TRUE) {
+  if (is.na(id) | id < 0) {
+    logger(INFO, paste("Invalid ID=", id))
+  } else {
+    project.path <- Project.GetPath(project.name)
+    relative.path <- Item.GetRelativePath(id, value)
+    item.path <- paste(project.path, relative.path, sep="/")
+    logger(INFO, paste("Deleting Item path:", item.path))
+    unlink(item.path, recursive=recursive)
+  }
+}
+
 Item.Eval <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
                      project.config, project.items=NULL, project.data=NULL, db.channel) {
 
@@ -53,6 +65,7 @@ Item.Eval <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
                  project.data=project.data, db.channel=db.channel)
   }
 }
+
 Item.EvalChildren <- function(project.name, id, keys=NULL, values, param=NULL,
                      project.config, project.items=NULL, project.data=NULL, db.channel) {
 
