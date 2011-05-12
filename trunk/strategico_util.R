@@ -265,7 +265,7 @@ SubsetByID <- function(data, id) {
   eval(parse(text = cmd))
 }
 
-.UpdateItemsDataRecursively.ununsed <- function(project.path, data, keys, values=NULL, stats=FALSE) {
+.Project.Items.UpdateDataRecursively.ununsed <- function(project.path, data, keys, values=NULL, stats=FALSE) {
   if (is.null(values))
     folder <- project.path
   else
@@ -299,14 +299,14 @@ SubsetByID <- function(data, id) {
       
       newData <- data[data[,key]==keyValue,]
       
-      .UpdateItemsDataRecursively(project.path=project.path, data=newData, keys=newKeys, values=newValues)
+      .Project.Items.UpdateDataRecursively(project.path=project.path, data=newData, keys=newKeys, values=newValues)
     }
   }
 }
 
 
 ## creates item.Rdata e item-list
-UpdateItemsData <- function(project.name, project.data, db.channel) {
+Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   project.path <- Project.GetPath(project.name)
   project.config <- Project.GetConfig(project.name=project.name)
   
@@ -368,7 +368,7 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
   outfile <- paste(project.path, "project_data.Rdata", sep="/") 
   save(project.data, file=outfile)
   #print(key_fields)			
-  #.UpdateItemsDataRecursively(project.path, project.data, keys=key_fields, values=NULL )
+  #.Project.Items.UpdateDataRecursively(project.path, project.data, keys=key_fields, values=NULL )
   
 } # end function
 
