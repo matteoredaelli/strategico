@@ -176,10 +176,10 @@ test.0.ParamFunctions <- function() {
 }            
               
 test.00.GetDBTableName <- function() {
-  checkEquals("sample_V1_summary",
-              DBGetTableNameItemSummary("sample", value="V1")
+  checkEquals("sample_summary_V1",
+              DBGetTableNameSummary("sample", value="V1")
               )
-  checkEquals("sample_V1_results",
+  checkEquals("sample_results_V1",
               DBGetTableNameResults("sample", value="V1")
               )
   checkEquals("sample_items",

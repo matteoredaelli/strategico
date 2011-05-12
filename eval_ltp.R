@@ -150,7 +150,7 @@ ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=
                 onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
   }
   if("summary_db"%in%project.config$save) {
-      tablename = DBGetTableNameItemSummary(project.name, value)
+      tablename = DBGetTableNameSummary(project.name, value)
       ExportDataToDB(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
   prediction

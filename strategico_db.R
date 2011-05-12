@@ -38,7 +38,7 @@ ProjectEmptyDBTables <- function(project.name, project.config=NULL, db.channel) 
     project.config <- ProjectGetConfig(project.name)
   }
 
-  tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+  tables <- ProjectGetDBTablenames(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) DBEmptyTable(x,db.channel))
 }
 
@@ -52,7 +52,7 @@ DBEvalItemsFromSummary <- function(project.name, value, verbose=FALSE, project.c
   if (is.null(project.config))
     project.config <- ProjectGetConfig(project.name=project.name)
 
-  tablename = DBGetTableNameItemSummary(project.name, value)
+  tablename = DBGetTableNameSummary(project.name, value)
   sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
   items <-DBRunSQLQuery(sql_statement, db.channel=db.channel)
 
@@ -93,7 +93,7 @@ ProjectDBExportTables2Csv <- function(project.name, project.config=NULL, db.chan
     project.config <- ProjectGetConfig(project.name)
   }
   project.path <- ProjectGetPath(project.name)
-  tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+  tables <- ProjectGetDBTablenames(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) DBExportTable2Csv(tablename=x,
                                              db.channel=db.channel,
                                              output.file=file.path(project.path, paste(x, ".csv", sep="")),
@@ -113,25 +113,25 @@ ProjectFixDBStructure <- function(project.name, values, db.channel) {
   ## TODO: generalize tablenames..
   ## Add unique index on keys in project_items table: needed for speed and consistency
   sql <- c("alter table sample_items MODIFY id integer",
-           "alter table sample_V1_results MODIFY item_id integer",
-           "alter table sample_V1_results MODIFY KEY1 varchar(40)",
-           "alter table sample_V2_results MODIFY item_id integer",
-           "alter table sample_V1_results MODIFY id integer",
-           "alter table sample_V2_results MODIFY id integer",
-           "alter table sample_V1_summary MODIFY id integer",
-           "alter table sample_V2_summary MODIFY id integer"
+           "alter table sample_results_V1 MODIFY item_id integer",
+           "alter table sample_results_V1 MODIFY KEY1 varchar(40)",
+           "alter table sample_results_V2 MODIFY item_id integer",
+           "alter table sample_results_V1 MODIFY id integer",
+           "alter table sample_results_V2 MODIFY id integer",
+           "alter table sample_summary_V1 MODIFY id integer",
+           "alter table sample_summary_V2 MODIFY id integer"
   ## ALTER TABLE europool_dev_items ADD UNIQUE ( KEY1, KEY2, KEY3, KEY4);
-  ## ALTER TABLE europool_dev_V1_results ADD INDEX ( item_id ) ;
+  ## ALTER TABLE europool_dev_results_V1 ADD INDEX ( item_id ) ;
 )
   DBRunSQLQuery(sql_statement=sql, db.channel=db.channel)         
 }
 
 DBGetTableNameResults <- function(project.name, value) {
-  paste(project.name, value, "results", sep="_")
+  paste(project.name, "results", value, sep="_")
 }
 
-DBGetTableNameItemSummary <- function(project.name, value) {
-  paste(project.name, value, "summary", sep="_")
+DBGetTableNameSummary <- function(project.name, value) {
+  paste(project.name, "summary", value, sep="_")
 }
 
 DBGetTableNameProjectData <- function(project.name) {
@@ -157,10 +157,10 @@ DBGetTableSize <- function(tablename, db.channel) {
 
 ItemDBGetResults <- function(project.name, value, id, db.channel) {
   tablename <- DBGetTableNameResults(project.name, value=value)
-  GetItemRecordsFromDB(project.name, key="item_id", id=id, tablename=tablename, db.channel=db.channel)
+  ItemGetDBRecords(project.name, key="item_id", id=id, tablename=tablename, db.channel=db.channel)
 }
   
-GetItemRecordsFromDB <- function(project.name, key="id", id, tablename, db.channel) {
+ItemGetDBRecords <- function(project.name, key="id", id, tablename, db.channel) {
   filter <- paste(key, "=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
   logger(WARN, sql_statement)
@@ -168,8 +168,8 @@ GetItemRecordsFromDB <- function(project.name, key="id", id, tablename, db.chann
 }
   
 ItemDBGetSummary <- function(project.name, value, id, db.channel) {
-  tablename <- DBGetTableNameItemSummary(project.name, value=value)
-  GetItemRecordsFromDB(project.name, id=id, tablename=tablename, db.channel=db.channel)
+  tablename <- DBGetTableNameSummary(project.name, value=value)
+  ItemGetDBRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
 ProjectGetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
@@ -177,7 +177,7 @@ ProjectGetStatisticsDB <- function(project.name, project.config=NULL, db.channel
     project.config <- ProjectGetConfig(project.name)
   }
 
-  tables <- GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
+  tables <- ProjectGetDBTablenames(project.name=project.name, project.config=project.config)
   rows <- unlist(lapply(tables, function(x) DBGetTableSize(x,db.channel)))
   
   stats <- as.list(rows)
@@ -185,7 +185,7 @@ ProjectGetStatisticsDB <- function(project.name, project.config=NULL, db.channel
   stats
 }
 
-GetProjectTablenamesDB <- function(project.name, project.config=NULL) {
+ProjectGetDBTablenames <- function(project.name, project.config=NULL) {
   if(is.null(project.config)) 
     project.config <- ProjectGetConfig(project.name)
 
@@ -198,7 +198,7 @@ GetProjectTablenamesDB <- function(project.name, project.config=NULL) {
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
                     DBGetTableNameResults(project.name, value),
-                    DBGetTableNameItemSummary(project.name, value)
+                    DBGetTableNameSummary(project.name, value)
                     )
     tables <- append(tables, value.tables)
   }
