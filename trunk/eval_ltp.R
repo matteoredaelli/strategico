@@ -72,7 +72,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
         summ
 }
 
-ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
+ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
 
   model <- ltp(product = item.data[, value, drop = FALSE], rule=param$rule, rule.noMaxOver=param$rule.noMaxOver,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
@@ -98,7 +98,7 @@ ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=
     }
     
     if("report"%in%project.config$save) {
-      ##html.form.eval <- GetStrHTMLformEvalItem(project.path, .ItemGetPath(keys), value, param)
+      ##html.form.eval <- GetStrHTMLformItem.Eval(project.path, .Item.GetPath(keys), value, param)
       ltp.HTMLreport(model, id, value, project.config$values[value], param, directory=output.path)
     }
   }
@@ -135,9 +135,9 @@ ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=
       data$PERIOD = rownames(data)
       ## primary KEY
       rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
-      tablename = DBGetTableNameResults(project.name, value)
+      tablename = DB.GetTableNameResults(project.name, value)
   
-      ExportDataToDB(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+      DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                      rownames="id", addPK=TRUE, db.channel=db.channel)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
@@ -150,8 +150,8 @@ ltp.EvalDataByValue <- function(project.name, id, item.data, value, output.path=
                 onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
   }
   if("summary_db"%in%project.config$save) {
-      tablename = DBGetTableNameSummary(project.name, value)
-      ExportDataToDB(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+      tablename = DB.GetTableNameSummary(project.name, value)
+      DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
   prediction
 }

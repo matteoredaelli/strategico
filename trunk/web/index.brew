@@ -49,30 +49,30 @@ project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 </form>
 
 <%
-db.channel <- DBConnect()
+db.channel <- DB.Connect()
 %>
 
 <%
 if (!is.null(GET$empty_db)) {
-  ProjectEmptyDBTables(project.name=project.name, db.channel=db.channel)
+  Project.DB.EmptyTables(project.name=project.name, db.channel=db.channel)
   GET$show_statistics <- TRUE
 }
 
 if (!is.null(GET$export_db)) {
-  ProjectDBExportTables2Csv(project.name=project.name, db.channel=db.channel)
-  project.url <- ProjectGetUrl(project.name=project.name)
+  Project.DBExportTables2Csv(project.name=project.name, db.channel=db.channel)
+  project.url <- Project.GetUrl(project.name=project.name)
   link <- paste("<br /><br /><a href=", project.url, ">Goto XLS files.</a>", sep="")
   cat(link)
 }
 if (!is.null(GET$show_statistics)) {
-  stats <- ProjectGetStatistics(project.name=project.name, db.channel=db.channel)
+  stats <- Project.GetStatistics(project.name=project.name, db.channel=db.channel)
   print(xtable(stats), type="html")
 }
 
 %>
 
 <%
-DBClose(db.channel)
+DB.Close(db.channel)
 %>
 
 <% ShowTemplate('footer') %>

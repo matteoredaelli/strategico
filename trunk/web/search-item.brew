@@ -31,14 +31,14 @@ options(hverbose=FALSE,verbose=FALSE)
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.home, "strategico_util.R"))
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-project.config <- ProjectGetConfig(project.name=project.name)
+project.config <- Project.GetConfig(project.name=project.name)
 value <- ifelse(is.null(GET$value), "V1", GET$value)
 project.keys <- GetKeyNames(project.config$keys)
 
 id <- ifelse(is.null(GET$id), 1, GET$id)
 
 if (is.null(GET$KEY1)) {
-  keys.item1 <- ItemGetKeys(project.name=project.name, id=id)
+  keys.item1 <- Item.GetKeys(project.name=project.name, id=id)
   for (k in project.keys)
     GET[[k]]=keys.item1[k]
 } else {
@@ -54,7 +54,7 @@ keys.string <- paste(keys, collapse = " - ")
     <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%> :: <%=keys.string%></h1>
   </center>
 <%
-id.result <- ItemGetIDs(project.name=project.name, keys=keys )
+id.result <- Item.GetIDs(project.name=project.name, keys=keys )
 if (!is.na(id.result) & !is.null(id.result) & length(id.result)>0) {
   id <- id.result[1] %>
 <br /><br />Item no. <%=id%> FOUND!  <form action="item.brew" method="GET">

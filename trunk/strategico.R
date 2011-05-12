@@ -91,8 +91,8 @@ if (opt$cmd == "runit") {
   library('RUnit')
   
   project.name <- "sample"
-  project.config <- ProjectGetConfig(project.name)
-  db.channel <- DBConnect()
+  project.config <- Project.GetConfig(project.name)
+  db.channel <- DB.Connect()
 
   test.suite <- defineTestSuite("StrategicoTestSuite",
                               dirs = paste(GetStrategicoHome(), "tests", sep="/"),
@@ -113,17 +113,17 @@ if (opt$cmd == "runit") {
 if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
-if ( !is.project.name(opt$project.name) )
+if ( !Project.IsValidName(opt$project.name) )
   UsageAndQuit( paste("Unknown project name '", opt$project.name, "'", sep=""))
 
-project.config <- ProjectGetConfig(opt$project.name)
+project.config <- Project.GetConfig(opt$project.name)
 
 #########################################################################
 ## Opening DB connection
 #########################################################################
 
 # TODO: check if connection fails
-db.channel <- DBConnect()
+db.channel <- DB.Connect()
 
 #########################################################################
 ## check missing options
@@ -151,7 +151,7 @@ if (opt$cmd == "eval_children") {
     opt$item.values <- unlist(strsplit(opt$item.values, ","))
 
   for (id in opt$id.list)
-    EvalItemChildren(project.name=opt$project.name, id=id,
+    Item.EvalChildren(project.name=opt$project.name, id=id,
                  values=opt$values, param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
@@ -177,7 +177,7 @@ if (opt$cmd == "eval_items") {
   if (!is.null(opt$item.values))
     opt$item.values <- unlist(strsplit(opt$item.values, ","))
 
-  EvalItems(project.name=opt$project.name, 
+  Items.Eval(project.name=opt$project.name, 
             id.range=opt$id.range, id.list=opt$id.list,
             values=opt$values, param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
@@ -192,7 +192,7 @@ if (opt$cmd == "eval_items_from_db") {
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
   
-  DBEvalItemsFromSummary(project.name=opt$project.name, value=opt$item.value,
+  Items.DB.EvalFromSummary(project.name=opt$project.name, value=opt$item.value,
                   verbose=TRUE, project.config, db.channel=db.channel)
   
   q(status=0)
@@ -233,7 +233,7 @@ if (opt$cmd == "eval_ts") {
 #########################################################################
 
 if (opt$cmd == "statistics") {
-  stats <- ProjectGetStatistics(project.name=opt$project.name, db.channel=db.channel)
+  stats <- Project.GetStatistics(project.name=opt$project.name, db.channel=db.channel)
   print(stats)
   q(status=0)
 }
@@ -242,14 +242,14 @@ if (opt$cmd == "statistics") {
 ## empty.db
 #########################################################################
 if (opt$cmd == "empty.db") {
-  ProjectEmptyDBTables(project.name=opt$project.name, db.channel=db.channel)
+  Project.DB.EmptyTables(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
 ########################################################################
 ## export.db.csv
 #########################################################################
 if (opt$cmd == "export.db.csv") {
-  ProjectDBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
+  Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
 #########################################################################
@@ -257,7 +257,7 @@ if (opt$cmd == "export.db.csv") {
 #########################################################################
 
 if (opt$cmd == "import") {
-  ProjectImportData(project.name=opt$project.name, db.channel=db.channel)
+  Project.ImportData(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
   
 } else {

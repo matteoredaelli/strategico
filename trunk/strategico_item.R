@@ -14,16 +14,16 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-EvalItems <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
+Items.Eval <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
                       project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))
-    project.config <- ProjectGetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name=project.name)
  
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
 
   if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
+    project.data <- Project.GetData(project.name=project.name)
 
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
@@ -34,51 +34,51 @@ EvalItems <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, value
   }
 
   for (id in id.list) {
-    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param,
+    Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
              project.config=project.config, project.items=project.items,
              project.data=project.data, db.channel=db.channel)
   }
 }
 
-EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
+Item.Eval <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
                      project.config, project.items=NULL, project.data=NULL, db.channel) {
 
   if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
+    project.data <- Project.GetData(project.name=project.name)
 
   for (i in 1:length(values)) {
     value <- values[i]
-    EvalData(project.name=project.name, id=id, keys=keys, value=value, param=param,
+    Item.EvalData(project.name=project.name, id=id, keys=keys, value=value, param=param,
                  project.config=project.config, project.items=project.items,
                  project.data=project.data, db.channel=db.channel)
   }
 }
-EvalItemChildren <- function(project.name, id, keys=NULL, values, param=NULL,
+Item.EvalChildren <- function(project.name, id, keys=NULL, values, param=NULL,
                      project.config, project.items=NULL, project.data=NULL, db.channel) {
 
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
   
   if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
+    project.data <- Project.GetData(project.name=project.name)
   
-  id.list <- ItemGetChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
+  id.list <- Item.GetChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
 
   if (!is.null(id.list))
-    EvalItems(project.name=project.name, id.list=id.list, values=values, param=param,
+    Items.Eval(project.name=project.name, id.list=id.list, values=values, param=param,
               project.config=project.config, project.items=project.items, project.data=project.data, db.channel=db.channel)
 }
 
-EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
+Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
                          param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
-  logger(INFO, "++++++++++++++++++++++++EvalData ++++++++++++++++++++++++")
+  logger(INFO, "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
   logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
                      value, "=", project.config$values[value],
                      sep=""))
   
   if (is.null(item.data))
-    item.data <- ItemGetData(project.name=project.name, project.items=project.items, project.data=project.data, id=id, keys=keys, value=value)
+    item.data <- Item.GetData(project.name=project.name, project.items=project.items, project.data=project.data, id=id, keys=keys, value=value)
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   logger(DEBUG, item.data)
@@ -90,7 +90,7 @@ EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
   
   if (is.null(id)) {
     logger(INFO, "ID is null, assigning a new value")
-    id <- GetNewID()
+    id <- Item.GetNewID()
   } else {
     id <- as.integer(id)
   }
@@ -103,10 +103,10 @@ EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
 
   logger(DEBUG, paste("Param= ", BuildParamString(param)))
   
-  directory = ItemGetPath(project.name, id, value)
+  directory = Item.GetPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
-  EvalFunction <- paste(project.config$eval.function,".EvalDataByValue(project.name=project.name, id=id, item.data=item.data,
+  EvalFunction <- paste(project.config$eval.function,".Item.EvalDataByValue(project.name=project.name, id=id, item.data=item.data,
     value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
@@ -118,15 +118,15 @@ EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
 
 
 
-ItemGetData <- function(project.name, project.data=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1", keys.na.rm=TRUE) {
+Item.GetData <- function(project.name, project.data=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1", keys.na.rm=TRUE) {
  
   if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
+    project.data <- Project.GetData(project.name=project.name)
 
   if (is.null(keys)) {
     if (is.null(project.items))
-      project.items <- ProjectGetItems(project.name=project.name)
-    keys <- ItemGetKeys(id=id, project.name=project.name, project.items=project.items)
+      project.items <- Project.GetItems(project.name=project.name)
+    keys <- Item.GetKeys(id=id, project.name=project.name, project.items=project.items)
   }
 #    filtered.data <- SubsetByID(data=project.data, id=id)
 #  else
@@ -144,9 +144,9 @@ ItemGetData <- function(project.name, project.data=NULL, project.items=NULL, id=
   result 
 }
 
-ItemGetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
+Item.GetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
   
   records <- SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
   tot <- nrow(records)
@@ -159,31 +159,31 @@ ItemGetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=F
   result
 }
 
-ItemGetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
+Item.GetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
   
   if (is.null(keys))
-    keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
+    keys <- Item.GetKeys(id, project.name=project.name, project.items=project.items)
 
   parent.key <- keys
   parent.key[length(keys)]=''
   
-  result <- ItemGetIDs(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
+  result <- Item.GetIDs(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
   if (!is.na(result))
     result <- result[1]
 
   result
 }
-ItemGetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
+Item.GetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
   
   if (is.null(keys))
-    keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
+    keys <- Item.GetKeys(id, project.name=project.name, project.items=project.items)
   
   ## TODO: now it could work only for keys with empty values at the end..."
-  id.list <- ItemGetIDs(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
+  id.list <- Item.GetIDs(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
   result <- id.list[id.list != id]
   if (length(result)==0) {
     logger(WARN, paste("No children for ID=",
@@ -198,9 +198,9 @@ ItemGetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL
   result
 }
 
-ItemGetKeys <- function(id, project.name=NULL, project.items=NULL) {
+Item.GetKeys <- function(id, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
+    project.items <- Project.GetItems(project.name=project.name)
   
   cmd <- "ds <- subset(project.items, id==__ID__, select=c(-id))"
   cmd <- gsub("__ID__", id, cmd)
@@ -214,25 +214,25 @@ ItemGetKeys <- function(id, project.name=NULL, project.items=NULL) {
   result
 }
 
-ItemGetRelativePath <- function(id, value=NULL) { 
+Item.GetRelativePath <- function(id, value=NULL) { 
   path <- file.path(as.integer(id / 500), id)
   if( !is.null(value))
     path <- file.path(path, value)
   path
 }
 
-ItemGetPath <- function(project.name, id, value=NULL) {
-  project.path <- ProjectGetPath(project.name)
-  relative.path <- ItemGetRelativePath(id, value)
+Item.GetPath <- function(project.name, id, value=NULL) {
+  project.path <- Project.GetPath(project.name)
+  relative.path <- Item.GetRelativePath(id, value)
   paste(project.path, relative.path, sep="/")
 }
 
-ItemGetUrl <- function(project.name, id, value=NULL) {
-  project.url <- ProjectGetUrl(project.name)
-  relative.path <- ItemGetRelativePath(id, value)
+Item.GetUrl <- function(project.name, id, value=NULL) {
+  project.url <- Project.GetUrl(project.name)
+  relative.path <- Item.GetRelativePath(id, value)
   paste(project.url, relative.path, sep="/")
 }
 
-GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.config$id.dummies.to) {
+Item.GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.config$id.dummies.to) {
   sample(from:to,1)
 }

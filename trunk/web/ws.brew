@@ -38,7 +38,7 @@ ts             <- ifelse(is.null(GET$ts          ), "0", GET$ts)
 period.start   <- ifelse(is.null(GET$period_start), "2000-1", GET$period_start)
 period.freq    <- ifelse(is.null(GET$period_freq), "2", GET$period_freq)
 eval           <- ifelse(is.null(GET$eval), "ltp", GET$eval)
-id             <- ifelse(is.null(GET$id), GetNewID(), as.numeric(GET$id))
+id             <- ifelse(is.null(GET$id), Item.GetNewID(), as.numeric(GET$id))
 
 if (!decimals==".")
   ts = gsub(decimals, ".", ts)
@@ -50,7 +50,7 @@ ts = gsub(" ", ",", ts)
 
 project.name <- paste("web", eval, sep="-")
 
-output_path = ItemGetUrl(project.name, id=id, value="V1")
+output_path = Item.GetUrl(project.name, id=id, value="V1")
 db.channel <- NULL
 link = file.path(output_path, "report.html")
 %>

@@ -13,10 +13,10 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-test.035.ItemGetKeys <- function() {
-  project.items <- ProjectGetItems(project.name)
-  k1 <-     ItemGetKeys(project.name=project.name, id=5)
-  k1.bis <- ItemGetKeys(project.items=project.items, id=5)
+test.035.Item.GetKeys <- function() {
+  project.items <- Project.GetItems(project.name)
+  k1 <-     Item.GetKeys(project.name=project.name, id=5)
+  k1.bis <- Item.GetKeys(project.items=project.items, id=5)
   
   checkEquals(
               k1,
@@ -28,32 +28,32 @@ test.035.ItemGetKeys <- function() {
   ##            ) 
 }
 
-test.035.ItemGetIDs <- function() {
-  project.items <- ProjectGetItems(project.name)
+test.035.Item.GetIDs <- function() {
+  project.items <- Project.GetItems(project.name)
   
   checkEquals(
               c(2),
-              ItemGetIDs(keys=c("IT","CAR","ALFA"), project.items=project.items, keys.na.rm=FALSE)
+              Item.GetIDs(keys=c("IT","CAR","ALFA"), project.items=project.items, keys.na.rm=FALSE)
               )
   checkEquals(
               c(10),
-              ItemGetIDs(keys=c("IT","CAR",""), project.items=project.items, keys.na.rm=FALSE)
+              Item.GetIDs(keys=c("IT","CAR",""), project.items=project.items, keys.na.rm=FALSE)
               )
   checkEquals(
               c(16),
-              ItemGetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=FALSE)
+              Item.GetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=FALSE)
               )
   checkEquals(
               c(1, 2, 8, 10, 14, 16),
-              ItemGetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=TRUE)
+              Item.GetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=TRUE)
               )
 }
 
-test.ItemGetData <- function() {
-  project.data <- ProjectGetData(project.name)
+test.Item.GetData <- function() {
+  project.data <- Project.GetData(project.name)
 
-  i0 <-     ItemGetData(project.name=project.name, project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
-  i0.bis <- ItemGetData(project.name=project.name, project.data=project.data, id=5, value="V1")
+  i0 <-     Item.GetData(project.name=project.name, project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
+  i0.bis <- Item.GetData(project.name=project.name, project.data=project.data, id=5, value="V1")
 
   checkEquals(
               i0,
@@ -68,7 +68,7 @@ test.ItemGetData <- function() {
               i0[1,]
               )
   
-  i1 <- ItemGetData(project.name=project.name, project.data=project.data, keys=c("IT","CAR",""), value="V1")
+  i1 <- Item.GetData(project.name=project.name, project.data=project.data, keys=c("IT","CAR",""), value="V1")
   checkEquals(
               c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
               i1$V1
@@ -78,7 +78,7 @@ test.ItemGetData <- function() {
               rownames(i1)
               )
 
-  i2 <- ItemGetData(project.name=project.name, project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
+  i2 <- Item.GetData(project.name=project.name, project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
   checkEquals(
               c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
               i2$V1
@@ -89,56 +89,56 @@ test.ItemGetData <- function() {
               )
 }
 
-test.ItemGetRelativePath <- function() {
+test.Item.GetRelativePath <- function() {
   checkEquals("0/1",
-              ItemGetRelativePath(1)
+              Item.GetRelativePath(1)
               )
   checkEquals("0/1/V1",
-              ItemGetRelativePath(1, "V1")
+              Item.GetRelativePath(1, "V1")
               )
 }
 
 
-test.ItemGetParent <- function() {
+test.Item.GetParent <- function() {
   checkEquals(
               10,
-              ItemGetParent(id=1, project.name=project.name)
+              Item.GetParent(id=1, project.name=project.name)
               )
   checkEquals(
               10,
-              ItemGetParent(keys=c('IT', 'CAR', 'ALFA'), project.name=project.name)
+              Item.GetParent(keys=c('IT', 'CAR', 'ALFA'), project.name=project.name)
               )
 }
 
-test.ItemGetChildren <- function() {
+test.Item.GetChildren <- function() {
   checkEquals(
               c(3,4),
-              ItemGetChildren(id=11, project.name=project.name)
+              Item.GetChildren(id=11, project.name=project.name)
               )
   checkEquals(
               c(),
-              ItemGetChildren(id=1, project.name=project.name)
+              Item.GetChildren(id=1, project.name=project.name)
               )
 }
 
-test.ItemGetPath <- function() {
+test.Item.GetPath <- function() {
   checkEquals(
-              paste(ProjectGetPath(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
-              ItemGetPath(project.name, 1, "V1")
+              paste(Project.GetPath(project.name), Item.GetRelativePath(1, "V1"), sep="/"),
+              Item.GetPath(project.name, 1, "V1")
               )
   checkEquals(
               "/var/www/strategico/projects/sample/0/1/V1",
-              ItemGetPath(project.name, 1, "V1")
+              Item.GetPath(project.name, 1, "V1")
               )
 }
 
-test.ItemGetUrl <- function() {
+test.Item.GetUrl <- function() {
   checkEquals(
-              paste(ProjectGetUrl(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
-              ItemGetUrl(project.name, 1, "V1")
+              paste(Project.GetUrl(project.name), Item.GetRelativePath(1, "V1"), sep="/"),
+              Item.GetUrl(project.name, 1, "V1")
               )
   checkEquals(
               "http://localhost/strategico/projects/sample/0/1/V1",
-              ItemGetUrl(project.name, 1, "V1")
+              Item.GetUrl(project.name, 1, "V1")
               )
 }
