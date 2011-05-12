@@ -15,10 +15,6 @@
 
 source("eval_ltp.R")
 
-project.name <- "sample"
-project.config <- ProjectGetConfig(project.name)
-db.channel <- DBConnect()
-
 test.EvalData.e0 <- function() {
   ## TODO: remove the WARNING
   ## Warning message:
@@ -124,7 +120,7 @@ test.EvalData.e2 <- function() {
 }
 
 test.EvalData.e3 <- function() {
-  item.data <- GetItemData(project.name, keys=c("","CAR"), value="V1")
+  item.data <- ItemGetData(project.name, keys=c("","CAR"), value="V1")
   e3 <- EvalData(project.name=project.name, keys=c("","CAR"), value="V1",
                      project.config=project.config, db.channel=db.channel)
 

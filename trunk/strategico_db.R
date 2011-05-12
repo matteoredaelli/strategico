@@ -206,7 +206,7 @@ GetProjectTablenamesDB <- function(project.name, project.config=NULL) {
 }
     
 ##input  da db. 
-ImportProjectDataFromDB <- function(project.name, db.name, db.user, db.pass, sql_statement) {
+ProjectImportDataFromDB <- function(project.name, db.name, db.user, db.pass, sql_statement) {
   RunSQLQueryDB(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
 }
 
