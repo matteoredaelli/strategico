@@ -13,161 +13,12 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-project.name <- "sample"
-project.config <- ProjectGetConfig(project.name)
-db.channel <- DBConnect()
-
-test.010.ProjectGetConfig <- function() {
-  c <- ProjectGetConfig(project.name)
-
-  checkEquals(
-              9,
-              length(c)
-              )
-
-  checkEquals(
-              12,
-              length(c$param)
-              )
-
-  checkEquals(
-              "sample",
-              c$project.name
-              )
-
-  checkEquals(
-              3,
-              length(c$keys)
-              )
-  
-  checkEquals(
-              c("VendutoPirelli", "VendutoMercato"),
-              as.vector(c$values)
-              )
-  
-  checkEquals(
-              8,
-              c$param$n.ahead
-              )
-
-  checkEquals(
-              c("mean", "trend", "lm", "es", "arima"),
-              c$param$try.models
-              )
-}
-
-test.020.ImportProjectData <- function() {
-  ImportProjectData(project.name=project.name, db.channel=db.channel)
-  ## TODO Check if the new files have been created successfully 
-}
-
-test.030.ProjectGetItems <- function() {
-  project.items <- ProjectGetItems(project.name)
-  checkEquals(20,
-              nrow(project.items)
-              )
-  checkEquals(4,
-              ncol(project.items)
-              )
-}
-
-test.035.ItemGetKeys <- function() {
-  project.items <- ProjectGetItems(project.name)
-  k1 <-     ItemGetKeys(project.name=project.name, id=5)
-  k1.bis <- ItemGetKeys(project.items=project.items, id=5)
-  
-  checkEquals(
-              k1,
-              k1.bis
-              )
-  ## checkEquals(
-  ##            c("ES", "MOTO", "DUCATI")
-  ##            k1[1,]
-  ##            ) 
-}
-
-test.035.ItemGetIDs <- function() {
-  project.items <- ProjectGetItems(project.name)
-  
-  checkEquals(
-              c(2),
-              ItemGetIDs(keys=c("IT","CAR","ALFA"), project.items=project.items, keys.na.rm=FALSE)
-              )
-  checkEquals(
-              c(10),
-              ItemGetIDs(keys=c("IT","CAR",""), project.items=project.items, keys.na.rm=FALSE)
-              )
-  checkEquals(
-              c(16),
-              ItemGetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=FALSE)
-              )
-  checkEquals(
-              c(1, 2, 8, 10, 14, 16),
-              ItemGetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=TRUE)
-              )
-}
-
-test.040.ProjectGetData <- function() {
-  project.data <- ProjectGetData(project.name)
-  
-  checkEquals(
-              c("KEY1", "KEY2", "KEY3", "PERIOD", "V1", "V2"),
-              colnames(project.data)
-              )
-  checkEquals(113,
-              nrow(project.data)
-              )
-  checkEquals(6,
-              ncol(project.data)
-              )
-}
-
 test.050.Subset <- function() {
   project.data <- ProjectGetData(project.name)
   s = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
 
   checkEquals(1,
               nrow(s)
-              )
-}
-
-test.GetItemData <- function() {
-  project.data <- ProjectGetData(project.name)
-
-  i0 <-     GetItemData(project.name=project.name, project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
-  i0.bis <- GetItemData(project.name=project.name, project.data=project.data, id=5, value="V1")
-
-  checkEquals(
-              i0,
-              i0.bis
-              )
-  checkEquals(
-              "2010-2",
-              rownames(i0)
-              )
-  checkEquals(
-              c(0),
-              i0[1,]
-              )
-  
-  i1 <- GetItemData(project.name=project.name, project.data=project.data, keys=c("IT","CAR",""), value="V1")
-  checkEquals(
-              c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
-              i1$V1
-              )
-  checkEquals(
-              c("2003-1","2003-2","2004-1","2004-2","2005-1","2005-2","2006-1","2006-2","2007-1","2007-2","2008-1","2008-2","2009-1","2009-2","2010-1","2010-2"),
-              rownames(i1)
-              )
-
-  i2 <- GetItemData(project.name=project.name, project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
-  checkEquals(
-              c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
-              i2$V1
-              )
-  checkEquals(
-              c("2001-2", "2002-2", "2003-1", "2003-2", "2004-1"),
-              rownames(i2)[1:5]
               )
 }
 
@@ -372,13 +223,6 @@ test.GetKeyNames <- function() {
               )
 }
 
-test.GetProjectTablenamesDB <- function() {
-   checkEquals(
-               c("sample_items", "sample_V1_results", "sample_V1_summary", "sample_V2_results", "sample_V2_summary"),
-               GetProjectTablenamesDB(project.name=project.name, project.config=project.config)
-               )
-}
-
 test.GetValueNames <- function() {
   checkEquals(
               c("V1", "V2"),
@@ -406,61 +250,6 @@ test.GetUniqueKeyValues <- function() {
               )
 }
 
-
-test.ItemGetRelativePath <- function() {
-  checkEquals("0/1",
-              ItemGetRelativePath(1)
-              )
-  checkEquals("0/1/V1",
-              ItemGetRelativePath(1, "V1")
-              )
-}
-
-
-test.ItemGetParent <- function() {
-  checkEquals(
-              10,
-              ItemGetParent(id=1, project.name=project.name)
-              )
-  checkEquals(
-              10,
-              ItemGetParent(keys=c('IT', 'CAR', 'ALFA'), project.name=project.name)
-              )
-}
-
-test.ItemGetChildren <- function() {
-  checkEquals(
-              c(3,4),
-              ItemGetChildren(id=11, project.name=project.name)
-              )
-  checkEquals(
-              c(),
-              ItemGetChildren(id=1, project.name=project.name)
-              )
-}
-
-test.ItemGetPath <- function() {
-  checkEquals(
-              paste(ProjectGetPath(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
-              ItemGetPath(project.name, 1, "V1")
-              )
-  checkEquals(
-              "/var/www/strategico/projects/sample/0/1/V1",
-              ItemGetPath(project.name, 1, "V1")
-              )
-}
-
-test.ItemGetUrl <- function() {
-  checkEquals(
-              paste(ProjectGetUrl(project.name), ItemGetRelativePath(1, "V1"), sep="/"),
-              ItemGetUrl(project.name, 1, "V1")
-              )
-  checkEquals(
-              "http://localhost/strategico/projects/sample/0/1/V1",
-              ItemGetUrl(project.name, 1, "V1")
-              )
-}
-
 test.incSampleTime <- function() {
   checkEquals(
               c(2002,1),
@@ -469,17 +258,6 @@ test.incSampleTime <- function() {
   checkEquals(
               c(2014,1),
               .incSampleTime(c(2012,2), period.freq = 2, increment = 3)
-              )
-}
-
-test.is.project <- function() {
-  checkEquals(
-              TRUE,
-              is.project("sample")
-              )
-  checkEquals(
-              FALSE,
-              is.project("missingproject")
               )
 }
 

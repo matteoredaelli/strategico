@@ -52,6 +52,8 @@ MySource("strategico.config")
 config_logger(threshold = strategico.config$logger.threshold)
 logger <- getLogger()
 
+MySource("strategico_project.R")
+MySource("strategico_item.R")
 MySource("strategico_db.R")
 MySource("strategico_web.R")
 
@@ -110,108 +112,6 @@ BuildParamString <- function(param) {
 
 BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
-}
-
-
-EvalItems <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
-                      project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
-  if (is.null(project.config))
-    project.config <- ProjectGetConfig(project.name=project.name)
- 
-  if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
-
-  if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
-
-  if (is.null(values))
-    values <- GetValueNames(project.config=project.config)
-
-  if (!is.null(id.range)) {
-    list1 <- as.integer(id.range[1]):as.integer(id.range[2])
-    id.list = append(list1, id.list)
-  }
-
-  for (id in id.list) {
-    EvalItem(project.name=project.name, id=id, keys=keys, values=values, param=param,
-             project.config=project.config, project.items=project.items,
-             project.data=project.data, db.channel=db.channel)
-  }
-}
-
-EvalItem <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
-                     project.config, project.items=NULL, project.data=NULL, db.channel) {
-
-  if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
-
-  for (i in 1:length(values)) {
-    value <- values[i]
-    EvalData(project.name=project.name, id=id, keys=keys, value=value, param=param,
-                 project.config=project.config, project.items=project.items,
-                 project.data=project.data, db.channel=db.channel)
-  }
-}
-EvalItemChildren <- function(project.name, id, keys=NULL, values, param=NULL,
-                     project.config, project.items=NULL, project.data=NULL, db.channel) {
-
-  if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
-  
-  if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
-  
-  id.list <- ItemGetChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
-
-  if (!is.null(id.list))
-    EvalItems(project.name=project.name, id.list=id.list, values=values, param=param,
-              project.config=project.config, project.items=project.items, project.data=project.data, db.channel=db.channel)
-}
-
-EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
-                         param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
-  logger(INFO, "++++++++++++++++++++++++EvalData ++++++++++++++++++++++++")
-  logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
-                     " KEYS=", paste(keys,collapse=","), " ",
-                     value, "=", project.config$values[value],
-                     sep=""))
-  
-  if (is.null(item.data))
-    item.data <- GetItemData(project.name=project.name, project.items=project.items, project.data=project.data, id=id, keys=keys, value=value)
-  
-  logger(INFO, paste("TS length=", nrow(item.data)))
-  print( t(item.data))
-  
-  logger(INFO, paste("period.start=", paste(project.config$period.start, collapse="-"),
-                     " period.freq=", project.config$period.freq,
-                     " period.end=", paste(project.config$period.end, collapse="-"),
-                     sep=""))
-  
-  if (is.null(id)) {
-    logger(INFO, "ID is null, assigning a new value")
-    id <- GetNewID()
-  } else {
-    id <- as.integer(id)
-  }
-  
-  ## param can be a string of parameters: in this case it must be converted to a list
-  if (!is.null(param) & !is.list(param))
-    param <- EvalParamString(param)
-  
-  param <- MergeParamWithDefault(project.config=project.config, param=param)
-
-  logger(DEBUG, paste("Param= ", BuildParamString(param)))
-  
-  directory = ItemGetPath(project.name, id, value)
-  dir.create(directory, showWarnings = FALSE, recursive = TRUE)
-  
-  EvalFunction <- paste(project.config$eval.function,".EvalDataByValue(project.name=project.name, id=id, item.data=item.data,
-    value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
-
-  prediction <- eval(parse(text=EvalFunction))
-  logger(INFO, "RESULTS:")
-  print(t(prediction))
-  t(prediction)
 }
 
 EvalParamString <- function(param.string) {
@@ -284,121 +184,6 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
   grep(paste("^",toupper(pattern),"[:digit:]*",sep=""), toupper(fields))
 }
 
-GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1", keys.na.rm=TRUE) {
- 
-  if (is.null(project.data))
-    project.data <- ProjectGetData(project.name=project.name)
-
-  if (is.null(keys)) {
-    if (is.null(project.items))
-      project.items <- ProjectGetItems(project.name=project.name)
-    keys <- ItemGetKeys(id=id, project.name=project.name, project.items=project.items)
-  }
-#    filtered.data <- SubsetByID(data=project.data, id=id)
-#  else
-  filtered.data <- SubsetByKeys(data=project.data, keys=keys, keys.na.rm=keys.na.rm)
-
-  if (is.null(filtered.data)) {
-    logger(INFO, "filtered data is NULL")
-    result = filtered.data
-  } else if (nrow(filtered.data) > 0)
-    result <- AggregateItemData(filtered.data, value=value)
-  else {
-    logger(INFO, "No rows: cannot aggregate data")
-    result = filtered.data
-  }
-  result 
-}
-
-ItemGetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
-  if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
-  
-  records <- SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
-  tot <- nrow(records)
-  if (tot == 0) {
-    logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
-    result = NA
-  } else {
-    result = records$id
-  }
-  result
-}
-
-ItemGetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
-  if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
-  
-  if (is.null(keys))
-    keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
-
-  parent.key <- keys
-  parent.key[length(keys)]=''
-  
-  result <- ItemGetIDs(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
-  if (!is.na(result))
-    result <- result[1]
-
-  result
-}
-ItemGetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
-  if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
-  
-  if (is.null(keys))
-    keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
-  
-  ## TODO: now it could work only for keys with empty values at the end..."
-  id.list <- ItemGetIDs(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
-  result <- id.list[id.list != id]
-  if (length(result)==0) {
-    logger(WARN, paste("No children for ID=",
-                       id,
-                       " (keys=",
-                       paste(keys, collapse=" - "),
-                       ")"
-                       )
-           )
-    result <- NULL
-  }
-  result
-}
-
-ItemGetKeys <- function(id, project.name=NULL, project.items=NULL) {
-  if (is.null(project.items))
-    project.items <- ProjectGetItems(project.name=project.name)
-  
-  cmd <- "ds <- subset(project.items, id==__ID__, select=c(-id))"
-  cmd <- gsub("__ID__", id, cmd)
-  eval(parse(text = cmd))
-  if (nrow(ds) >0)
-    result <- as.matrix(ds)[1, ]
-  else {
-    logger(WARN, paste("No keys found for ID=", id))
-    result <- NULL
-  }
-  result
-}
-
-ItemGetRelativePath <- function(id, value=NULL) { 
-  path <- file.path(as.integer(id / 500), id)
-  if( !is.null(value))
-    path <- file.path(path, value)
-  path
-}
-
-ItemGetPath <- function(project.name, id, value=NULL) {
-  project.path <- ProjectGetPath(project.name)
-  relative.path <- ItemGetRelativePath(id, value)
-  paste(project.path, relative.path, sep="/")
-}
-
-ItemGetUrl <- function(project.name, id, value=NULL) {
-  project.url <- ProjectGetUrl(project.name)
-  relative.path <- ItemGetRelativePath(id, value)
-  paste(project.url, relative.path, sep="/")
-}
-
 GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(keys)) {
     if (is.null(project.config))
@@ -407,96 +192,6 @@ GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
     keys <- project.config$keys
   }
   paste("KEY", 1:length(keys), sep="")
-}
-
-GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.config$id.dummies.to) {
-  sample(from:to,1)
-}
-
-ProjectGetItems <- function(project.name) {
-  project.path <- ProjectGetPath(project.name)
-  filename <- file.path(project.path, "project_items.Rdata")
-  FileExistsOrQuit(filename)
-  load(filename)
-  project.items
-}
-
-ProjectGetData <- function(project.name) {
-  project.path <- ProjectGetPath(project.name)
-  filename <- file.path(project.path, "project_data.Rdata")
-  FileExistsOrQuit(filename)
-  load(filename)
-  project.data
-}
-
-ProjectGetConfig <- function(project.name) {
-  project.path <- ProjectGetPath(project.name)
-  filename <- file.path(project.path, "project.config")
-  
-  FileExistsOrQuit(filename)
-  ## sourcing priect.config file
-  source(filename)
-
-  eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
-  MySource(eval.file)
- 
-  ##append(project.config, strategico.config)
-  project.config
-}
-
-ProjectGetList <- function(projects.home = strategico.config$projects.home) {
-  dir(projects.home)
-}
-                            
-ProjectGetPath <- function(project.name, projects.home = strategico.config$projects.home) {
-  file.path(projects.home, project.name)
-}
-
-ProjectGetStatistics <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
-  
-  stats.rdata <- ProjectGetStatisticsRdata(project.name=project.name, project.config=project.config,
-                                           project.items=project.items, project.data=project.data)
-  
-  stats.db <- ProjectGetStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
-
-  stats <- t(as.data.frame(append(stats.rdata,stats.db)))
-  colnames(stats) = "VALUE"
-  stats
-}
-  
-ProjectGetStatisticsRdata <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL) {
-  if (is.null(project.config)) {
-    project.config <- ProjectGetConfig(project.name=project.name)
-  }
-  if (is.null(project.items)) {
-    project.items <- ProjectGetItems(project.name=project.name)
-  }
-  if (is.null(project.data)) {
-    project.data <- ProjectGetData(project.name=project.name)
-  }
-  n.items    <- nrow(project.items)
-  n.data     <- nrow(project.data)
-  n.values   <- length(project.config$values)
-  levels     <- levels(project.data$PERIOD)
-  period.min <- min(levels)
-  period.max <- max(levels)
-  
-  stats <- list(
-                keys=paste(project.config$keys, collapse=","),
-                values=paste(project.config$values, collapse=","),
-                n.data=n.data,
-                n.items=n.items,
-                n.ts=n.items * n.values,
-                ts.length=n.data/n.items,
-                period.min=period.min,
-                period.max=period.max
-                )
-  stats
-}
-
-
-ProjectGetUrl <- function(project.name, projects.url = strategico.config$projects.url) {
-  paste(projects.url, project.name, sep="/")
 }
 
 GetStrHTMLformEvalItem <- function(project.path, item.path, value, param) {
@@ -532,45 +227,12 @@ GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
   paste("V", 1:length(values), sep="")
 }
 
-ImportProjectData <- function(project.name, project.config=NULL, db.channel) {
-  if (is.null(project.config))
-    project.config <- ProjectGetConfig(project.name=project.name)
-
-  project.R <- paste("project_", project.name, ".R", sep="")
-  MySource(project.R)
-  
-  cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
-  result <- eval(parse(text = cmd))
-  UpdateItemsData(project.name=project.name, project.data=result, db.channel=db.channel)
-}
-
-##input da da csv. 
-ImportProjectDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","KEY2"),
-                                     timesKeys=c("YEAR","SEMESTER"), V=c("CORP")){ 
-
-  ##restituisce una list (itemList) con una ts per ogni elemento. 
-  ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
-  ##torna utile in seguito, nelle creazioni degli output dell'analisi
-  
-  if (is.null(filename)) filename=file.choose()
-  data=read.csv(filename,sep=",") 
-  
-  if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
-  else data$PERIOD=data[,timesKeys]
-
-  result <- data[,c(KEY,"PERIOD",V)]
-}
-
 .incSampleTime <- function(now, period.freq = 2, increment = 1) {
   if (now[2] + increment - 1 <= period.freq - 1) 
     now[2] = now[2] + increment
   else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
          ((now[2] + increment - 1)%%period.freq) + 1)
   now
-}
-
-is.project <- function(project.name) {
-  project.name %in% ProjectGetList()
 }
 
 is.value <- function(value, project.name=NULL, project.config=NULL) {

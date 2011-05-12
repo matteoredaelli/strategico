@@ -90,6 +90,10 @@ if ( is.null(opt$cmd) )
 if (opt$cmd == "runit") {
   library('RUnit')
   
+  project.name <- "sample"
+  project.config <- ProjectGetConfig(project.name)
+  db.channel <- DBConnect()
+
   test.suite <- defineTestSuite("StrategicoTestSuite",
                               dirs = paste(GetStrategicoHome(), "tests", sep="/"),
                               testFileRegexp = 'test_.+\\.R$',
@@ -253,7 +257,7 @@ if (opt$cmd == "export.db.csv") {
 #########################################################################
 
 if (opt$cmd == "import") {
-  ImportProjectData(project.name=opt$project.name, db.channel=db.channel)
+  ProjectImportData(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
   
 } else {
