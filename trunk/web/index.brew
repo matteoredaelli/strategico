@@ -38,10 +38,10 @@ project.name <- ifelse(is.null(GET$project), "sample", GET$project)
   <input type="submit" name="eval" value="Search item">
 </form>
 <form method="GET">
-  <input type="submit" name=show_statistics" value="Show statistics">
-  <input type="submit" name=export_db" value="Export DB to CSV">
-  <input type="submit" name=empty_db" value="Empty DB tables">
-  <input type="submit" name=import_db" value="Import DB">
+  <input type="submit" name="show_statistics" value="Show statistics">
+  <input type="submit" name="export_db" value="Export DB to CSV">
+  <input type="submit" name="empty_db" value="Empty DB tables">
+  <input type="submit" name="import_db" value="Import DB">
 </form>
 <form method="GET">
   <input type="submit" name="change_project" value="Change project">

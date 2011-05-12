@@ -161,7 +161,7 @@ EvalItemChildren <- function(project.name, id, keys=NULL, values, param=NULL,
   if (is.null(project.data))
     project.data <- GetProjectData(project.name=project.name)
   
-  id.list <- GetItemChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
+  id.list <- ItemGetChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
 
   if (!is.null(id.list))
     EvalItems(project.name=project.name, id.list=id.list, values=values, param=param,
@@ -202,7 +202,7 @@ EvalItemData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value
 
   logger(DEBUG, paste("Param= ", BuildParamString(param)))
   
-  directory = GetItemPath(project.name, id, value)
+  directory = ItemGetPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
   EvalFunction <- paste(project.config$eval.function,".EvalItemDataByValue(project.name=project.name, id=id, item.data=item.data,
@@ -292,7 +292,7 @@ GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=
   if (is.null(keys)) {
     if (is.null(project.items))
       project.items <- GetProjectItems(project.name=project.name)
-    keys <- GetItemKeys(id=id, project.name=project.name, project.items=project.items)
+    keys <- ItemGetKeys(id=id, project.name=project.name, project.items=project.items)
   }
 #    filtered.data <- SubsetByID(data=project.data, id=id)
 #  else
@@ -310,7 +310,7 @@ GetItemData <- function(project.name, project.data=NULL, project.items=NULL, id=
   result 
 }
 
-GetItemsID <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
+ItemGetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
   
@@ -330,26 +330,26 @@ ItemGetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) 
     project.items <- GetProjectItems(project.name=project.name)
   
   if (is.null(keys))
-    keys <- GetItemKeys(id, project.name=project.name, project.items=project.items)
+    keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
 
   parent.key <- keys
   parent.key[length(keys)]=''
   
-  result <- GetItemsID(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
+  result <- ItemGetIDs(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
   if (!is.na(result))
     result <- result[1]
 
   result
 }
-GetItemChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
+ItemGetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
   
   if (is.null(keys))
-    keys <- GetItemKeys(id, project.name=project.name, project.items=project.items)
+    keys <- ItemGetKeys(id, project.name=project.name, project.items=project.items)
   
   ## TODO: now it could work only for keys with empty values at the end..."
-  id.list <- GetItemsID(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
+  id.list <- ItemGetIDs(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
   result <- id.list[id.list != id]
   if (length(result)==0) {
     logger(WARN, paste("No children for ID=",
@@ -364,7 +364,7 @@ GetItemChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL
   result
 }
 
-GetItemKeys <- function(id, project.name=NULL, project.items=NULL) {
+ItemGetKeys <- function(id, project.name=NULL, project.items=NULL) {
   if (is.null(project.items))
     project.items <- GetProjectItems(project.name=project.name)
   
@@ -380,22 +380,22 @@ GetItemKeys <- function(id, project.name=NULL, project.items=NULL) {
   result
 }
 
-GetItemRelativePath <- function(id, value=NULL) { 
+ItemGetRelativePath <- function(id, value=NULL) { 
   path <- file.path(as.integer(id / 500), id)
   if( !is.null(value))
     path <- file.path(path, value)
   path
 }
 
-GetItemPath <- function(project.name, id, value=NULL) {
+ItemGetPath <- function(project.name, id, value=NULL) {
   project.path <- GetProjectPath(project.name)
-  relative.path <- GetItemRelativePath(id, value)
+  relative.path <- ItemGetRelativePath(id, value)
   paste(project.path, relative.path, sep="/")
 }
 
-GetItemUrl <- function(project.name, id, value=NULL) {
+ItemGetUrl <- function(project.name, id, value=NULL) {
   project.url <- GetProjectUrl(project.name)
-  relative.path <- GetItemRelativePath(id, value)
+  relative.path <- ItemGetRelativePath(id, value)
   paste(project.url, relative.path, sep="/")
 }
 

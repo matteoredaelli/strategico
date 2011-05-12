@@ -98,7 +98,7 @@ ltp.EvalItemDataByValue <- function(project.name, id, item.data, value, output.p
     }
     
     if("report"%in%project.config$save) {
-      ##html.form.eval <- GetStrHTMLformEvalItem(project.path, .GetItemPath(keys), value, param)
+      ##html.form.eval <- GetStrHTMLformEvalItem(project.path, .ItemGetPath(keys), value, param)
       ltp.HTMLreport(model, id, value, project.config$values[value], param, directory=output.path)
     }
   }

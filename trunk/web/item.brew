@@ -37,11 +37,11 @@ value <- ifelse(is.null(GET$value), "V1", GET$value)
 project.config <- GetProjectConfig(project.name=project.name)
 
 keys <- GetKeyNames(project.config$keys)
-item.path <- GetItemUrl(project.name=project.name, id=id, value=value)
+item.path <- ItemGetUrl(project.name=project.name, id=id, value=value)
 
 db.channel <- DBConnect()
 
-item.keys <- GetItemKeys(project.name=project.name, id=id)
+item.keys <- ItemGetKeys(project.name=project.name, id=id)
 item.summary <- GetItemSummaryDB(project.name=project.name, id=id, db.channel=db.channel, value=value)
 item.results <- GetItemResultsDB(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
