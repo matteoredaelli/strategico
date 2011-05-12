@@ -177,20 +177,20 @@ test.0.ParamFunctions <- function() {
               
 test.00.GetDBTableName <- function() {
   checkEquals("sample_V1_summary",
-              GetDBTableNameItemSummary("sample", value="V1")
+              DBGetTableNameItemSummary("sample", value="V1")
               )
   checkEquals("sample_V1_results",
-              GetDBTableNameItemResults("sample", value="V1")
+              DBGetTableNameResults("sample", value="V1")
               )
   checkEquals("sample_items",
-              GetDBTableNameProjectItems("sample")
+              DBGetTableNameProjectItems("sample")
               )
 }
   
-test.GetDBTableSize <- function() {
-  tablename <- GetDBTableNameProjectItems("sample")
+test.DBGetTableSize <- function() {
+  tablename <- DBGetTableNameProjectItems("sample")
   checkEquals(20,
-              GetDBTableSize(tablename, db.channel=db.channel)
+              DBGetTableSize(tablename, db.channel=db.channel)
               )
 }
 

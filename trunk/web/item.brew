@@ -42,8 +42,8 @@ item.path <- ItemGetUrl(project.name=project.name, id=id, value=value)
 db.channel <- DBConnect()
 
 item.keys <- ItemGetKeys(project.name=project.name, id=id)
-item.summary <- GetItemSummaryDB(project.name=project.name, id=id, db.channel=db.channel, value=value)
-item.results <- GetItemResultsDB(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.summary <- ItemDBGetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.results <- ItemDBGetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
 keys.string <- ifelse(is.null(item.keys),
                       "",

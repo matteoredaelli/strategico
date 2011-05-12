@@ -351,7 +351,7 @@ UpdateItemsData <- function(project.name, project.data, db.channel) {
               )
   if("items_db"%in%project.config$save) {
 
-    tablename = GetDBTableNameProjectItems(project.config$project.name)
+    tablename = DBGetTableNameProjectItems(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
     rownames(project.items) <- project.items$id
