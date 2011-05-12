@@ -81,7 +81,7 @@ EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
     item.data <- ItemGetData(project.name=project.name, project.items=project.items, project.data=project.data, id=id, keys=keys, value=value)
   
   logger(INFO, paste("TS length=", nrow(item.data)))
-  print( t(item.data))
+  logger(DEBUG, item.data)
   
   logger(INFO, paste("period.start=", paste(project.config$period.start, collapse="-"),
                      " period.freq=", project.config$period.freq,
@@ -111,7 +111,8 @@ EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
 
   prediction <- eval(parse(text=EvalFunction))
   logger(INFO, "RESULTS:")
-  print(t(prediction))
+  logger(DEBUG, rownames(prediction))
+  logger(INFO, prediction)
   t(prediction)
 }
 
