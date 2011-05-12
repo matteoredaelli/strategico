@@ -50,7 +50,7 @@ ts = gsub(" ", ",", ts)
 
 project.name <- paste("web", eval, sep="-")
 
-output_path = GetItemUrl(project.name, id=id, value="V1")
+output_path = ItemGetUrl(project.name, id=id, value="V1")
 db.channel <- NULL
 link = file.path(output_path, "report.html")
 %>
