@@ -242,9 +242,18 @@ if (opt$cmd == "statistics") {
 ## empty.db
 #########################################################################
 if (opt$cmd == "empty.db") {
-  Project.DB.EmptyTables(project.name=opt$project.name, db.channel=db.channel)
+  Project.DB.Empty(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
+
+#########################################################################
+## empty.fs
+#########################################################################
+if (opt$cmd == "empty.fs") {
+  Project.FS.Empty(project.name=opt$project.name)
+  q(status=0)
+}
+
 ########################################################################
 ## export.db.csv
 #########################################################################

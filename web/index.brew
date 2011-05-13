@@ -54,7 +54,7 @@ db.channel <- DB.Connect()
 
 <%
 if (!is.null(GET$empty_db)) {
-  Project.DB.EmptyTables(project.name=project.name, db.channel=db.channel)
+  Project.DB.Empty(project.name=project.name, db.channel=db.channel)
   GET$show_statistics <- TRUE
 }
 

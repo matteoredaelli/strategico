@@ -33,7 +33,7 @@ DB.Close <- function(db.channel) {
   odbcClose(db.channel)
 }
 
-Project.DB.EmptyTables <- function(project.name, project.config=NULL, db.channel) {
+Project.DB.Empty <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
   }

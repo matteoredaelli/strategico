@@ -14,18 +14,14 @@
 
 ## Authors: L. Finos, M. Redaelli
 
-Project.IsValid <- function(project.name, db.channel) {
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
- 
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-
-  if (is.null(project.data))
-    project.data <- Project.GetData(project.name=project.name)
-
-  ## TODO: check if project.data contains KEY1, KEY2, .. V1, ..
-  TRUE
+Project.FS.Empty <- function(project.name, recursive = TRUE) {
+  if (!Project.IsValidName(project.name)) {
+    logger(WARN, paste("Project folder=", project.name, "doesn't exist"))
+  } else {
+    project.path <- Project.GetPath(project.name)
+    logger(INFO, paste("Deleting project path:", project.path))
+    unlink(project.path, recursive=recursive)
+  }
 }
 
 Project.GetItems <- function(project.name) {
@@ -44,10 +40,14 @@ Project.GetData <- function(project.name) {
   project.data
 }
 
+Project.GetConfigFilename <- function(project.name) {
+  paste("p_", project.name, ".config", sep="")
+}
+
 Project.GetConfig <- function(project.name) {
   etc.path <- GetEtcPath()
   plugins.path <- GetPluginsPath()
-  filename <- file.path(etc.path, paste(project.name, ".config", sep=""))
+  filename <- file.path(etc.path, Project.GetConfigFilename(project.name))
   
   FileExistsOrQuit(filename)
   ## sourcing project.config file
@@ -145,6 +145,20 @@ Project.ImportDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1",
   result <- data[,c(KEY,"PERIOD",V)]
 }
 
+Project.IsValid <- function(project.name, db.channel) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+ 
+  if (is.null(project.items))
+    project.items <- Project.GetItems(project.name=project.name)
+
+  if (is.null(project.data))
+    project.data <- Project.GetData(project.name=project.name)
+
+  ## TODO: check if project.data contains KEY1, KEY2, .. V1, ..
+  TRUE
+}
+
 Project.IsValidName <- function(project.name) {
   project.name %in% Project.GetList()
 }
@@ -156,7 +170,10 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
 ## creates item.Rdata e item-list
 Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   project.path <- Project.GetPath(project.name)
+  dir.create(project.path, showWarnings = FALSE)
+  
   project.config <- Project.GetConfig(project.name=project.name)
+
   
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
