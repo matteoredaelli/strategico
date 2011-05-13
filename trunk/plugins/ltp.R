@@ -159,14 +159,25 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
                                         # product
 ## }
 
-
-
 ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.freq,increment,period.end) {
   period.start.fix = period.start
+  ## TODO: adding a parameter to decide if changing period.start to the first period of the year
+  ## if the minimun period is c(2002,2), it will changed to c(2002,1)
   period.start = apply(matrix(as.numeric(unlist(strsplit(rownames(product),"-"))),nrow=2),1,min)
 
-  ## TODO: Using BuildPeriodRange(period.start, period.freq, n, shift=0) 
-  times=sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+  ## TODO: Using BuildPeriodRange(period.start, period.freq, n, shift=0)
+  ## removing teh test with times.old
+  n <- sum((period.end-period.start)*c(period.freq,1)) + 1
+  times <- BuildPeriodRange(period.start, period.freq, n, shift=0)
+  times.old =sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+  ## ####################################
+  ##TODO:  removing teh test with times.old
+  if (paste(times,collapse=",", sep="-") != paste(times.old,collapse=",", sep="-")) {
+    logger(INFO, "ERRORE: valori differenti")
+    print(times.old)
+    print(times)
+  }
+  ## ###################
   if (is.na(NA2value)){
 	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
 	if(period.start[2]>1) temp = c(temp[period.start[2]:period.freq], temp[1:(period.start[2]-1)])
