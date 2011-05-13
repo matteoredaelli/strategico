@@ -15,7 +15,7 @@
 
 source("plugins/eval_ltp.R")
 
-test.Item.EvalData.e0 <- function() {
+test.00.Item.EvalData.e0 <- function() {
   ## TODO: remove the WARNING
   ## Warning message:
   ##In sqrt(diag(model$var.coef)) : NaNs produced
@@ -28,7 +28,7 @@ test.Item.EvalData.e0 <- function() {
               )
 }
 
-test.Item.EvalData.e00 <- function() {
+test.00.Item.EvalData.e00 <- function() {
   ## NO DATA time series
   e0     <- Item.EvalData(project.name=project.name, id=5, value="V1", project.config=project.config, db.channel=db.channel)
   e0.bis <- Item.EvalData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="V1",
@@ -69,7 +69,7 @@ test.Item.EvalData.e00 <- function() {
 ##              )
 }
 
-test.Item.EvalData.e1 <- function() {
+test.00.Item.EvalData.e1 <- function() {
   e1     <- Item.EvalData(project.name=project.name, keys=c("IT"), value="V1",
                          project.config=project.config, db.channel=db.channel)
 
@@ -95,7 +95,7 @@ test.Item.EvalData.e1 <- function() {
               )
 }
 
-test.Item.EvalData.e2 <- function() {
+test.00.Item.EvalData.e2 <- function() {
   e2     <- Item.EvalData(project.name=project.name, keys=c("IT", "CAR"), value="V1",
                          project.config=project.config, db.channel=db.channel)
   checkEquals(
@@ -119,7 +119,7 @@ test.Item.EvalData.e2 <- function() {
               )
 }
 
-test.Item.EvalData.e3 <- function() {
+test.00.Item.EvalData.e3 <- function() {
   item.data <- Item.GetData(project.name, keys=c("","CAR"), value="V1")
   e3 <- Item.EvalData(project.name=project.name, keys=c("","CAR"), value="V1",
                      project.config=project.config, db.channel=db.channel)
@@ -130,7 +130,7 @@ test.Item.EvalData.e3 <- function() {
               )
 }
 
-test.Item.EvalData.param <- function() {
+test.00.Item.EvalData.param <- function() {
 
   param.string <- "n.ahead=3"
   param <- EvalParamString(param.string)
@@ -162,10 +162,9 @@ test.Item.EvalData.param <- function() {
 test.Item.EvalData.ProjectData <- function() {
   project.data=Project.GetData(project.name)
   
- 
 }
   
-test.EvalTSString <- function() {
+test.00.EvalTSString <- function() {
   ts.string="10.00, 7.60, 9.20, 8.67, 9.00, 3.60, 9.00, 5.90, 6.90, 6.50, 8.10, 9.00, 8.00, 7.00, 6.00, 7.00, 8.00, 6.00"
   #ts.string <- "10,7.6,9.2,8.67,9,3.6,9.0,5.9,6.9,6.5,8.1,9,8,7,6,7,8,6"
   e1 <- EvalTSString(project.name,ts.string=ts.string,
