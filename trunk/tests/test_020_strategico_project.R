@@ -67,6 +67,14 @@ test.030.Project.GetItems <- function() {
               )
 }
 
+  
+test.030.DB.GetTableSize <- function() {
+  tablename <- DB.GetTableNameProject.Items("sample")
+  checkEquals(20,
+              DB.GetTableSize(tablename, db.channel=db.channel)
+              )
+}
+
 test.040.Project.GetData <- function() {
   project.data <- Project.GetData(project.name)
   
