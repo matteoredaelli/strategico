@@ -129,7 +129,7 @@ db.channel <- DB.Connect()
 ## check missing options
 #########################################################################
 
-param <- EvalParamString(opt$eval.param)
+param <- Param.EvalString(opt$eval.param)
 
 #########################################################################
 ## eval_children

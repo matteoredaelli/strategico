@@ -133,7 +133,7 @@ test.00.Item.EvalData.e3 <- function() {
 test.00.Item.EvalData.param <- function() {
 
   param.string <- "n.ahead=3"
-  param <- EvalParamString(param.string)
+  param <- Param.EvalString(param.string)
   
   ## check passing parameters
   
@@ -145,7 +145,7 @@ test.00.Item.EvalData.param <- function() {
               )
 
   param.string <- "n.ahead=3,try.models=c('mean','trend','lm')"
-  param <- EvalParamString(param.string)
+  param <- Param.EvalString(param.string)
   e4    <- Item.EvalData(project.name=project.name, keys=c("DE", "CAR", "BMW"),
                           value="V2", project.config=project.config, param=param, db.channel=db.channel)
   checkEquals(

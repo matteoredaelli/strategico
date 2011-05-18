@@ -71,7 +71,7 @@ if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
                 </form>
 <% 
 if (!is.null(GET$eval)) {
-  param <- EvalParamString(param)
+  param <- Param.EvalString(param)
   Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param)
   }

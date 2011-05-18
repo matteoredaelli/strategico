@@ -65,7 +65,7 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
       logger(INFO, paste("Found ID=", items$id))
       logger(INFO, paste("Param String:", item$Parameters))
       
-      param <- EvalParamString(as.character(item$Parameters))
+      param <- Param.EvalString(as.character(item$Parameters))
       Item.Eval(project.name=project.name, id=item$id, project.config=project.config,
                value=value, param=param, db.channel=db.channel
                )
