@@ -78,9 +78,9 @@ test.Item.GetData <- function() {
               rownames(i1)
               )
 
-  i2 <- Item.GetData(project.name=project.name, project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1")
+  i2 <- Item.GetData(project.name=project.name, project.data=project.data, keys=c("", "MOTO","DUCATI"), value="V1", period.end=c(2010,2))
   checkEquals(
-              c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53, 44),
+              c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53),
               i2$V1
               )
   checkEquals(

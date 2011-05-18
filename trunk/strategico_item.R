@@ -91,7 +91,8 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
                      sep=""))
   
   if (is.null(item.data))
-    item.data <- Item.GetData(project.name=project.name, project.items=project.items, project.data=project.data, id=id, keys=keys, value=value)
+    item.data <- Item.GetData(project.name=project.name, project.items=project.items, project.data=project.data,
+                              project.config=project.config, id=id, keys=keys, value=value)
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   logger(DEBUG, item.data)
