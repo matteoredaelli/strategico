@@ -131,11 +131,15 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
 
 
 
-Item.GetData <- function(project.name, project.data=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1", keys.na.rm=TRUE) {
+Item.GetData <- function(project.name, project.data=NULL, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
+                         keys.na.rm=TRUE, period.start=NULL, period.end=NULL) {
  
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+  
   if (is.null(project.data))
     project.data <- Project.GetData(project.name=project.name)
-
+  
   if (is.null(keys)) {
     if (is.null(project.items))
       project.items <- Project.GetItems(project.name=project.name)
@@ -154,7 +158,15 @@ Item.GetData <- function(project.name, project.data=NULL, project.items=NULL, id
     logger(INFO, "No rows: cannot aggregate data")
     result = filtered.data
   }
-  result 
+  n.char <- nchar(project.config$period.freq)
+
+  if (is.null(period.start)) period.start <- project.config$period.start
+  if (is.null(period.end)) period.end <- project.config$period.end
+  
+  string.period.start <- Period.ToString(period.start, n.char=n.char)
+  string.period.end <- Period.ToString(period.end, n.char=n.char)
+
+  subset(result, rownames(result)  >=  string.period.start & rownames(result) <= string.period.end) 
 }
 
 Item.GetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
