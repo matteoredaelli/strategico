@@ -130,14 +130,14 @@ test.BuildKeyNames <- function() {
   
 }
 
-test.00.BuildPeriodRange <- function() {
+test.00.Period.BuildRange <- function() {
   checkEquals(
               c("2001-2","2001-3","2002-1","2002-2","2002-3"),
-              BuildPeriodRange(c(2001,2), 3, 5)
+              Period.BuildRange(c(2001,2), 3, 5)
               )
   checkEquals(
               c("2001-3","2002-1","2002-2","2002-3","2003-1"),
-              BuildPeriodRange(c(2001,2), 3, 5, shift=1)
+              Period.BuildRange(c(2001,2), 3, 5, shift=1)
               )
 }
 
@@ -158,11 +158,11 @@ test.0.ParamFunctions <- function() {
 
   checkEquals(
               param.string,
-              BuildParamString(project.config$param)
+              Param.ToString(project.config$param)
               )
 
   param1 <- EvalParamString("try.models=c('es','mean')")
-  param2 <- MergeParamWithDefault(project.config=project.config, param=param1)
+  param2 <- Param.MergeWithDefault(project.config=project.config, param=param1)
 
   checkEquals(
               length(param2),

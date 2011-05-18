@@ -60,7 +60,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
 
 	stats["Timestamp"] = as.character(Sys.time())
 	stats["ManualModel"] = manual.model
-	stats["Parameters"] = BuildParamString(param)
+	stats["Parameters"] = Param.ToString(param)
 	stats["ReturnCode"] = return.code
 	stats["Run"] = 0
 	
@@ -89,8 +89,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     #n <-length(model[[model$BestModel]]$prediction)
     #now <- start(model[[model$BestModel]]$prediction)
     #freq <- frequency(model[[model$BestModel]]$prediction)
-    #rownames(prediction)=BuildPeriodRange(period.start=now, period.freq=freq, n=n, shift=0) 
-    rownames(prediction)=BuildPeriodRange(period.start=project.config$period.end, period.freq=project.config$period.freq, n=param$n.ahead, shift=1)
+    #rownames(prediction)=Period.BuildRange(period.start=now, period.freq=freq, n=n, shift=0) 
+    rownames(prediction)=Period.BuildRange(period.start=project.config$period.end, period.freq=project.config$period.freq, n=param$n.ahead, shift=1)
     return.code <- 0 
     ## write report
     if("images"%in%project.config$save) {
@@ -107,7 +107,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     logger(INFO, "No data")
     prediction=data.frame(rep(0, param$n.ahead))
 
-    rownames(prediction) = BuildPeriodRange(period.start=project.config$period.end,
+    rownames(prediction) = Period.BuildRange(period.start=project.config$period.end,
               period.freq=project.config$period.freq, n=param$n.ahead, shift=1) 
   }
                                    

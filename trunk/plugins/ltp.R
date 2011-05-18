@@ -165,10 +165,10 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
   ## if the minimun period is c(2002,2), it will changed to c(2002,1)
   period.start = apply(matrix(as.numeric(unlist(strsplit(rownames(product),"-"))),nrow=2),1,min)
 
-  ## TODO: Using BuildPeriodRange(period.start, period.freq, n, shift=0)
+  ## TODO: Using Period.BuildRange(period.start, period.freq, n, shift=0)
   ## removing teh test with times.old
   n <- sum((period.end-period.start)*c(period.freq,1)) + 1
-  times <- BuildPeriodRange(period.start, period.freq, n, shift=0)
+  times <- Period.BuildRange(period.start, period.freq, n, shift=0)
   times.old =sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
   ## ####################################
   ##TODO:  removing teh test with times.old
@@ -723,7 +723,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
     period.freq = frequency(obj[[obj$BestModel]]$ts.product)
     end_serie = end(obj[[obj$BestModel]]$ts.product)
     
-    ## TODO: Using BuildPeriodRange(period.start, period.freq, n, shift=0) 
+    ## TODO: Using Period.BuildRange(period.start, period.freq, n, shift=0) 
     pred.names = sapply(1:dim(pred)[1],function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
