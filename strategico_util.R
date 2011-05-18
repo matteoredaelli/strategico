@@ -269,10 +269,13 @@ Period.FromString <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
 
-Period.ToString <- function (period, n.char=1, sep="-") {
+Period.ToString <- function (period, n.char=NULL, period.freq=2, sep="-") {
   p1 <- period[1]
   p2 <- as.character(period[2])
-  nchar.p2 <- nchar(p2) 
+  nchar.p2 <- nchar(p2)
+
+  if (is.null(n.char)) n.char <- nchar(period.freq)
+  
   if (nchar.p2 < n.char) {
     zeros <- paste(rep("0",n.char - nchar.p2), collapse="")
     p2 <- paste(zeros, p2, collapse="", sep="")
