@@ -118,13 +118,13 @@ BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) 
   result
 }
 
-BuildParamString <- function(param) {
+Param.ToString <- function(param) {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
   gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=";")))
 }
 
-BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
+Period.BuildRange <- function(period.start, period.freq, n, shift=0) {
   sapply ((0+shift):(n+shift-1), function(i) Period.ToString(.incSampleTime(now=period.start, period.freq = period.freq, increment = i)))
 }
 
@@ -169,7 +169,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
   period.start <- Period.FromString(period.start.string)
   period.freq <- as.integer(period.freq)
 
-  ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
+  ts.periods <- Period.BuildRange(period.start, period.freq, length(ts.values))
   
   if(is.character(ts.periods.string)) {
     ts.periods.tmp <- unlist(lapply(strsplit(ts.periods.string, ","), as.character))
@@ -209,7 +209,7 @@ GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
 }
 
 GetStrHTMLformItem.Eval <- function(project.path, item.path, value, param) {
-  param.string <- BuildParamString(param)
+  param.string <- Param.ToString(param)
   paste(
         "<h3>Run the engine</h3>
                 <form action=\"/strategico/eval_item.php\" method=\"post\" id=\"eval\"> 
@@ -253,7 +253,7 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
   value %in% GetValueNames(project.name=project.name, project.config=project.config)
 }
 
-MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param) {
+Param.MergeWithDefault <- function(project.name=NULL, project.config=NULL, param) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
   

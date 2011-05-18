@@ -112,9 +112,9 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
   if (!is.null(param) & !is.list(param))
     param <- EvalParamString(param)
   
-  param <- MergeParamWithDefault(project.config=project.config, param=param)
+  param <- Param.MergeWithDefault(project.config=project.config, param=param)
 
-  logger(DEBUG, paste("Param= ", BuildParamString(param)))
+  logger(DEBUG, paste("Param= ", Param.ToString(param)))
   
   directory = Item.GetPath(project.name, id, value)
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
