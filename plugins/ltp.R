@@ -43,7 +43,7 @@ library(ast)
 ############## ltp()
 
 ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", rule.noMaxOver = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
-                period.freq = 2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
+                period.freq=2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
                 xreg.arima = NULL,idDiff=FALSE,idLog=FALSE, stationary.arima = FALSE, period.start = c(1997, 1),
                 period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negTo0 = TRUE, toInteger = TRUE) {
   
@@ -163,8 +163,8 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
   period.start.fix = period.start
   ## TODO: adding a parameter to decide if changing period.start to the first period of the year
   ## if the minimun period is c(2002,2), it will changed to c(2002,1)
-  period.start = apply(matrix(as.numeric(unlist(strsplit(rownames(product),"-"))),nrow=2),1,min)
-
+  period.start = apply(matrix(as.numeric(Period.FromString(rownames(product))),nrow=2),1,min)
+  n.char <- nchar(period.freq)
   ## TODO: Using Period.BuildRange(period.start, period.freq, n, shift=0)
   ## removing teh test with times.old
   n <- sum((period.end-period.start)*c(period.freq,1)) + 1
@@ -181,9 +181,11 @@ temp=NA2value
   productnew=data.frame( rep(temp, len = length(times) ))
   rownames(productnew)=times
   colnames(productnew)=colnames(product)
+  print(productnew)
   productnew[rownames(product),]=product
   
-  id.start=which(paste(period.start.fix,collapse="-")==rownames(product))
+  id.start=which(Period.ToString(period.start.fix, n.char=n.char)==rownames(product))
+  #id.start=which(paste(period.start.fix,collapse="-")==rownames(product))
   if( length(id.start)>0 ) {
 	productnew=productnew[id.start:dim(productnew)[1],,drop=FALSE]
 	period.start=period.start.fix
@@ -194,7 +196,7 @@ temp=NA2value
   temp=mean(product[grep(period.end[1],rownames(product)),],na.rm=TRUE) #mean of values in last year
   temp=ifelse(is.na(temp),0,temp)
   if (temp>0) {
-    productnew=productnew[1:which(rownames(productnew)==Period.ToString(period.end,n.char=period.freq)),,drop=FALSE]
+    productnew=productnew[1:which(rownames(productnew)==Period.ToString(period.end,n.char=n.char)),,drop=FALSE]
   } else {
     return(list(product=productnew[-(1:dim(productnew)[1]), ,drop=FALSE],start=NA))
   }
