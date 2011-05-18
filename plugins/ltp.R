@@ -194,7 +194,7 @@ temp=NA2value
   temp=mean(product[grep(period.end[1],rownames(product)),],na.rm=TRUE) #mean of values in last year
   temp=ifelse(is.na(temp),0,temp)
   if (temp>0) {
-    productnew=productnew[1:which(rownames(productnew)==paste(period.end,collapse="-")),,drop=FALSE]
+    productnew=productnew[1:which(rownames(productnew)==Period.ToString(period.end,n.char=period.freq)),,drop=FALSE]
   } else {
     return(list(product=productnew[-(1:dim(productnew)[1]), ,drop=FALSE],start=NA))
   }
