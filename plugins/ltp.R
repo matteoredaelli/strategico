@@ -169,14 +169,7 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
   ## removing teh test with times.old
   n <- sum((period.end-period.start)*c(period.freq,1)) + 1
   times <- Period.BuildRange(period.start, period.freq, n, shift=0)
-  times.old =sapply (0:(sum((period.end-period.start)*c(period.freq,1))),	function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
-  ## ####################################
-  ##TODO:  removing teh test with times.old
-  if (paste(times,collapse=",", sep="-") != paste(times.old,collapse=",", sep="-")) {
-    logger(INFO, "ERRORE: valori differenti")
-    print(times.old)
-    print(times)
-  }
+
   ## ###################
   if (is.na(NA2value)){
 	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
