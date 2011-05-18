@@ -125,7 +125,7 @@ BuildParamString <- function(param) {
 }
 
 BuildPeriodRange <- function(period.start, period.freq, n, shift=0) {
-  sapply ((0+shift):(n+shift-1), function(i) paste(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),collapse="-"))
+  sapply ((0+shift):(n+shift-1), function(i) Period.ToString(.incSampleTime(now=period.start, period.freq = period.freq, increment = i)))
 }
 
 EvalParamString <- function(param.string) {
@@ -166,7 +166,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
   }
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
-  period.start <- PeriodStringToVector(period.start.string)
+  period.start <- Period.FromString(period.start.string)
   period.freq <- as.integer(period.freq)
 
   ts.periods <- BuildPeriodRange(period.start, period.freq, length(ts.values))
@@ -260,8 +260,12 @@ MergeParamWithDefault <- function(project.name=NULL, project.config=NULL, param)
   c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 }
 
-PeriodStringToVector <- function (period.string) {
+Period.FromString <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
+}
+
+Period.ToString <- function (period) {
+  paste(period, collapse="-")
 }
 
 SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {
