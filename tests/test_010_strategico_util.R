@@ -254,11 +254,22 @@ test.incSampleTime <- function() {
               )
 }
 
-test.00.PeriodStringToVector <- function() {
+test.00.Period.FromToString <- function() {
   checkEquals(c(2001, 1),
-              PeriodStringToVector("2001-1")
+              Period.FromString("2001-1")
               )
   checkEquals(c(1987, 12),
-              PeriodStringToVector("1987-12")
+              Period.FromString("1987-12")
+              )
+
+  checkEquals("1999-1",
+              Period.ToString(c(1999,1))
+              )
+  checkEquals("2009-12",
+              Period.ToString(c(2009, 12))
+              )
+  
+  checkEquals("2009-9",
+              Period.ToString( Period.FromString("2009-9") )
               )
 }
