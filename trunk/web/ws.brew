@@ -64,7 +64,7 @@ link = file.path(output_path, "report.html")
   RUN:<br /><br />  
   <%
 if (!is.null(GET$submit)) {
-  param <- EvalParamString(GET$params)
+  param <- Param.EvalString(GET$params)
   EvalTSString(project.name=project.name,
                id=id,
                ts.string=ts,

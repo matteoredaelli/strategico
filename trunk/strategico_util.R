@@ -118,16 +118,6 @@ BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) 
   result
 }
 
-EvalParamString <- function(param.string) {
-  if (is.character(param.string)) {
-    param.string <- gsub(";",",", param.string)
-    param <- eval(parse(text=paste("list(",param.string,")")))
-  } else {
-    param <- list()
-  }
-  param
-}
-
 EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, period.freq,
                    calculate.period.end=TRUE, param=NULL, project.config, value="V1", db.channel ) {
   item.data <- cbind(ts.values)
@@ -241,6 +231,16 @@ GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
 
 is.value <- function(value, project.name=NULL, project.config=NULL) {
   value %in% GetValueNames(project.name=project.name, project.config=project.config)
+}
+
+Param.EvalString <- function(param.string) {
+  if (is.character(param.string)) {
+    param.string <- gsub(";",",", param.string)
+    param <- eval(parse(text=paste("list(",param.string,")")))
+  } else {
+    param <- list()
+  }
+  param
 }
 
 Param.MergeWithDefault <- function(project.name=NULL, project.config=NULL, param) {

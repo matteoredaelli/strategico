@@ -111,7 +111,7 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
   
   ## param can be a string of parameters: in this case it must be converted to a list
   if (!is.null(param) & !is.list(param))
-    param <- EvalParamString(param)
+    param <- Param.EvalString(param)
   
   param <- Param.MergeWithDefault(project.config=project.config, param=param)
 

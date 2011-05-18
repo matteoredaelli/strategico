@@ -145,7 +145,7 @@ test.0.ParamFunctions <- function() {
   
   param.string <- "n.ahead=8;range=c(-Inf,Inf);NA2value=0;n.min=10;try.models=c('mean','trend','lm','es','arima');logtransform=FALSE;stepwise=TRUE;formula.right.lm='S*trend+S*trend2';rule='BestAIC';rule.noMaxOver=2;negTo0=FALSE;toInteger=TRUE"
   
-  param <- EvalParamString(param.string)
+  param <- Param.EvalString(param.string)
 
   checkEquals( 12, length(param))
 
@@ -161,7 +161,7 @@ test.0.ParamFunctions <- function() {
               Param.ToString(project.config$param)
               )
 
-  param1 <- EvalParamString("try.models=c('es','mean')")
+  param1 <- Param.EvalString("try.models=c('es','mean')")
   param2 <- Param.MergeWithDefault(project.config=project.config, param=param1)
 
   checkEquals(
@@ -268,13 +268,27 @@ test.00.Period.FromToString <- function() {
   checkEquals("2009-12",
               Period.ToString(c(2009, 12))
               )
+  
   checkEquals("1999-01",
               Period.ToString(c(1999,1), n.char=2)
               )
+  checkEquals("1999-01",
+              Period.ToString(c(1999,1), period.freq=12)
+              )
+  
   checkEquals("2009-12",
               Period.ToString(c(2009, 12), n.char=2)
               )
+
+  checkEquals("2009-12",
+              Period.ToString(c(2009, 12), period.freq=12)
+              )
+  
   checkEquals("2009-009",
               Period.ToString( Period.FromString("2009-009"), n.char=3 )
+              )
+  
+  checkEquals("2009-009",
+              Period.ToString( Period.FromString("2009-009"), period.freq=100 )
               )
 }
