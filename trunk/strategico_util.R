@@ -118,16 +118,6 @@ BuildFilterWithKeys <- function(key.values, sep="=", collapse=",", na.rm=FALSE) 
   result
 }
 
-Param.ToString <- function(param) {
-  param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
-  param <- param[names(param)!=""]
-  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=";")))
-}
-
-Period.BuildRange <- function(period.start, period.freq, n, shift=0) {
-  sapply ((0+shift):(n+shift-1), function(i) Period.ToString(.incSampleTime(now=period.start, period.freq = period.freq, increment = i)))
-}
-
 EvalParamString <- function(param.string) {
   if (is.character(param.string)) {
     param.string <- gsub(";",",", param.string)
@@ -260,12 +250,34 @@ Param.MergeWithDefault <- function(project.name=NULL, project.config=NULL, param
   c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 }
 
+Param.ToString <- function(param) {
+  param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
+  param <- param[names(param)!=""]
+  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=";")))
+}
+
+Period.BuildRange <- function(period.start, period.freq, n, shift=0) {
+  n.char <- nchar(period.freq)
+  sapply ((0+shift):(n+shift-1),
+          function(i) Period.ToString(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),
+                                      n.char=n.char
+                                      )
+          )
+}
+
 Period.FromString <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
 
-Period.ToString <- function (period) {
-  paste(period, collapse="-")
+Period.ToString <- function (period, n.char=1, sep="-") {
+  p1 <- period[1]
+  p2 <- as.character(period[2])
+  nchar.p2 <- nchar(p2) 
+  if (nchar.p2 < n.char) {
+    zeros <- paste(rep("0",n.char - nchar.p2), collapse="")
+    p2 <- paste(zeros, p2, collapse="", sep="")
+  }
+  paste(p1, p2, sep=sep)
 }
 
 SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {

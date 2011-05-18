@@ -95,10 +95,10 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   logger(DEBUG, item.data)
-  
-  logger(INFO, paste("period.start=", Period.ToString(project.config$period.start),
+  n.char <- nchar(project.config$period.freq)
+  logger(INFO, paste("period.start=", Period.ToString(project.config$period.start, n.char=n.char),
                      " period.freq=", project.config$period.freq,
-                     " period.end=", Period.ToString(project.config$period.end),
+                     " period.end=", Period.ToString(project.config$period.end, n.char=n.char),
                      sep=""))
   
   if (is.null(id)) {

@@ -132,8 +132,8 @@ test.BuildKeyNames <- function() {
 
 test.00.Period.BuildRange <- function() {
   checkEquals(
-              c("2001-2","2001-3","2002-1","2002-2","2002-3"),
-              Period.BuildRange(c(2001,2), 3, 5)
+              c("2001-09","2001-10","2001-11","2001-12","2002-01"),
+              Period.BuildRange(c(2001,9), 12, 5)
               )
   checkEquals(
               c("2001-3","2002-1","2002-2","2002-3","2003-1"),
@@ -256,7 +256,7 @@ test.incSampleTime <- function() {
 
 test.00.Period.FromToString <- function() {
   checkEquals(c(2001, 1),
-              Period.FromString("2001-1")
+              Period.FromString("2001-01")
               )
   checkEquals(c(1987, 12),
               Period.FromString("1987-12")
@@ -268,8 +268,13 @@ test.00.Period.FromToString <- function() {
   checkEquals("2009-12",
               Period.ToString(c(2009, 12))
               )
-  
-  checkEquals("2009-9",
-              Period.ToString( Period.FromString("2009-9") )
+  checkEquals("1999-01",
+              Period.ToString(c(1999,1), n.char=2)
+              )
+  checkEquals("2009-12",
+              Period.ToString(c(2009, 12), n.char=2)
+              )
+  checkEquals("2009-009",
+              Period.ToString( Period.FromString("2009-009"), n.char=3 )
               )
 }
