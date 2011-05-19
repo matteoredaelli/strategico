@@ -29,7 +29,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
 	#nunb of points (observations)
 	stats["Points"]=nrow(model$values)
 	#non zero values
-	stats["NotZeroPoints"]=ifelse(dim(model$values)[1]==0,0, sum(model$values!=0))
+	stats["NotZeroPoints"]=ifelse(nrow(model$values)==0,0, sum(model$values!=0))
 
 	if(!is.null(model$BestModel)){
 		stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
