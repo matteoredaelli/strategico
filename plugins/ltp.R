@@ -58,7 +58,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
   logger(DEBUG, result.normalize)
   period.start = result.normalize$start
   product = result.normalize$product
-  n = dim(product)[1]
+  n = nrow(product)
   
   
   if(idLog) logtransform = IDlog(product,period.start)
@@ -134,12 +134,12 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
 
                                         # stop = which(rownames(product) == paste(period.end, collapse = "-"))[1]
                                         # if (!is.na(stop)) {
-                                        # if (stop < dim(product)[1]) 
-                                        # out <- ((stop + 1):dim(product)[1])
+                                        # if (stop < nrow(product)) 
+                                        # out <- ((stop + 1):nrow(product))
                                         # else if (is.na(product[period.end,]) | (unlist(product[period.end,]) == 0) )
-                                        # out= (1:dim(product)[1])
+                                        # out= (1:nrow(product))
                                         # } else {
-                                        # out= (1:dim(product)[1])
+                                        # out= (1:nrow(product))
                                         # }
 
                                         # product = product[-out, ,drop=FALSE]
@@ -151,7 +151,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
                                         # }
                                         # }
 
-                                        # if(dim(product)[1]==0) return(product)
+                                        # if(nrow(product)==0) return(product)
 
                                         # product[is.na(product), ] = NA2value
                                         # product[product < range[1], ] = range[1]
@@ -173,7 +173,7 @@ ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.
 
   ## ###################
   if (is.na(NA2value)){
-	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,dim(product)[1])),],na.rm=TRUE))
+	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,nrow(product))),],na.rm=TRUE))
 	if(period.start[2]>1) temp = c(temp[period.start[2]:period.freq], temp[1:(period.start[2]-1)])
   } 
   #temp = rep(NA2value, period.freq)
@@ -186,10 +186,10 @@ temp=NA2value
   id.start=which(Period.ToString(period.start.fix, n.char=n.char)==rownames(product))
   #id.start=which(paste(period.start.fix,collapse="-")==rownames(product))
   if( length(id.start)>0 ) {
-	productnew=productnew[id.start:dim(productnew)[1],,drop=FALSE]
+	productnew=productnew[id.start:nrow(productnew),,drop=FALSE]
 	period.start=period.start.fix
   } else if( sum(period.start.fix*c(period.freq,1)) > sum(period.start*c(period.freq,1)) ){
-	return(list(product=productnew[-(1:dim(productnew)[1]),,drop=FALSE],start=NA))
+	return(list(product=productnew[-(1:nrow(productnew)),,drop=FALSE],start=NA))
   }  #else go on
   
   temp=mean(product[grep(period.end[1],rownames(product)),],na.rm=TRUE) #mean of values in last year
@@ -197,11 +197,11 @@ temp=NA2value
   if (temp>0) {
     productnew=productnew[1:which(rownames(productnew)==Period.ToString(period.end,n.char=n.char)),,drop=FALSE]
   } else {
-    return(list(product=productnew[-(1:dim(productnew)[1]), ,drop=FALSE],start=NA))
+    return(list(product=productnew[-(1:nrow(productnew)), ,drop=FALSE],start=NA))
   }
   
 
-  n = dim(productnew)[1]
+  n = nrow(productnew)
 
   if(n>0){
     flag = TRUE
@@ -214,11 +214,11 @@ temp=NA2value
       }
       else flag = FALSE
     }
-    if(dim(productnew)[1]==0) return(productnew)
+    if(nrow(productnew)==0) return(productnew)
     if (!is.na(NA2value))    productnew[is.na(productnew), ] = NA2value
     else{
       for(i in 1:period.freq) 
-        productnew[seq(from=i,by=period.freq,to=dim(productnew)[1])[is.na(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),])],]=mean(productnew[seq(from=i,by=period.freq,to=dim(productnew)[1]),],na.rm=TRUE)
+        productnew[seq(from=i,by=period.freq,to=nrow(productnew))[is.na(productnew[seq(from=i,by=period.freq,to=nrow(productnew)),])],]=mean(productnew[seq(from=i,by=period.freq,to=nrow(productnew)),],na.rm=TRUE)
     }
     productnew[productnew < range[1], ] = range[1]
     productnew[productnew > range[2], ] = range[2]
@@ -245,7 +245,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   if(is.null(formula.right.lm)) formula.right.lm = match.arg(formula.right.lm, " S * trend + S * trend2")
   
   y = as.vector(product)
-  n = max(length(y), dim(y)[1])
+  n = max(length(y), nrow(y))
   y = ts(y, start = period.start, frequency = period.freq)
   attr(y, "product") = names(product)
   
@@ -296,10 +296,10 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   lm.AIC = AIC(modlm, k = 2)
   lm.R2 = summary(modlm)$r.squared
   ic.delta = mean(IC.pred.modlm$upr - IC.pred.modlm$lwr)
-  maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modlm[1:period.freq]-1),na.rm=TRUE)
+  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.modlm[1:period.freq]-1),na.rm=TRUE)
   VarCoeff= sd(c(as.vector(pred.modlm),unlist(product)),na.rm=TRUE)/mean(c(as.vector(pred.modlm),unlist(product)),na.rm=TRUE)
   # m=matrix(NA,period.freq, ceiling((dim(pred.modlm)[1])/period.freq)+1)
-  # m[1:(length(pred.modlm)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.modlm)
+  # m[1:(length(pred.modlm)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modlm)
   # m=apply(m,2,mean,na.rm=TRUE)
   # sdJumps = sd(m[-1]/m[-length(m)])
   res = ts(residuals(modlm), start = period.start, frequency = period.freq)
@@ -312,7 +312,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
 mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.q,max.P,
                       max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima,negTo0=negTo0,toInteger=toInteger) {
   y = as.vector(product)
-  n = max(length(y), dim(y)[1])
+  n = max(length(y), nrow(y))
                                         # vettore errori
                                         #errori_arima = rep(NA,fuori)
   y = ts(y, start = period.start, frequency = period.freq)
@@ -391,10 +391,10 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
   arima.R2 = r2
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.arima$upr - IC.pred.arima$lwr)
-  maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
+  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
   VarCoeff=sd(c(as.vector(pred.arima),t(as.vector(product))),na.rm=TRUE)/mean(c(as.vector(pred.arima),t(as.vector(product))),na.rm=TRUE)
   # m=matrix(NA,period.freq, ceiling((length(pred.arima))/period.freq)+1)
-  # m[1:(length(pred.arima)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.arima)
+  # m[1:(length(pred.arima)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.arima)
   # m=apply(m,2,mean,na.rm=TRUE)
   # sdJumps = sd(m[-1]/m[-length(m)])
   lista.arima = list(ts.product = y, model = mod.arima, prediction = pred.arima, 
@@ -409,7 +409,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
 	product[product==0]=1
 	
   y = as.vector(product)
-  n = max(length(y), dim(y)[1])
+  n = max(length(y), nrow(y))
   y = ts(y, start = period.start, frequency = period.freq)
                                         # data mancanti mercato
                                         #stima_le = window(y,end=end_stima)
@@ -472,10 +472,10 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
   es.R2 = r2
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.modle$upr - IC.pred.modle$lwr)
-  maxJump = max(abs(product[(dim(product)[1]-period.freq+1):dim(product)[1],1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
+  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
   VarCoeff=sd(c(as.vector(pred.modle),t(as.vector(product))),na.rm=TRUE)/mean(c(as.vector(pred.modle),t(as.vector(product))),na.rm=TRUE)
   # # m=matrix(NA,period.freq, ceiling((length(pred.modle))/period.freq)+1)
-  # # m[1:(length(pred.modle)+period.freq)]=c(y[dim(y)[1]:(dim(y)[1]-period.freq+1),],pred.modle)
+  # # m[1:(length(pred.modle)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modle)
   # # m=apply(m,2,mean,na.rm=TRUE)
   # # sdJumps = sd(m[-1]/m[-length(m)])
   lista.es = list(ts.product = y, model = modle, prediction = pred.modle, 
@@ -718,7 +718,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
     end_serie = end(obj[[obj$BestModel]]$ts.product)
     
     ## TODO: Using Period.BuildRange(period.start, period.freq, n, shift=0) 
-    pred.names = sapply(1:dim(pred)[1],function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
+    pred.names = sapply(1:nrow(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
 
@@ -744,7 +744,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   R2 = list$R2
   Coefficients = cbind(Estimate = model$coef, Std.Error=matrix(sqrt(diag(model$var.coef))))
   colnames(Coefficients) = c("Estimate", "Std. Error")
-  if (dim(Coefficients)[1]==0) Coefficients=rbind(Coefficients,NA)
+  if (nrow(Coefficients)==0) Coefficients=rbind(Coefficients,NA)
   rr=t(as.matrix(summary(model$residuals)))
   list(Call = model$call, residuals = list("Residuals",summary(model$residuals)), 
        Coefficients = list("Coefficients",Coefficients), AIC = paste("AIC:",round(AIC, 4), sep = " "), 
