@@ -135,10 +135,10 @@ DB.GetTableNameSummary <- function(project.name, value) {
 }
 
 DB.GetTableNameProjectData <- function(project.name) {
-  paste(project.name, "items_data", sep="_")
+  paste(project.name, "data", sep="_")
 }
 
-DB.GetTableNameProject.Items <- function(project.name) {
+DB.GetTableNameProjectItems <- function(project.name) {
   paste(project.name, "items", sep="_")
 }
 
@@ -153,6 +153,38 @@ DB.GetTableSize <- function(tablename, db.channel) {
     result <- "cannot retreive"
   }
   result
+}
+
+Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
+                         keys.na.rm=TRUE, period.start=NULL, period.end=NULL, db.channel) {
+ 
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+  
+  if (is.null(keys)) {
+    if (is.null(project.items))
+      project.items <- Project.GetItems(project.name=project.name)
+    keys <- Item.GetKeys(id=id, project.name=project.name, project.items=project.items)
+  }
+
+  n.char <- nchar(project.config$period.freq)                
+  if (is.null(period.start)) period.start <- project.config$period.start
+  if (is.null(period.end)) period.end <- project.config$period.end
+  
+  string.period.start <- Period.ToString(period.start, n.char=n.char)
+  string.period.end <- Period.ToString(period.end, n.char=n.char)
+
+  filter.key <- BuildFilterWithKeys(key.values=keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
+  filter.period <- paste("period >= '", string.period.start, "' and period <= '", string.period.end, "'", sep="")
+  
+  tablename <- DB.GetTableNameProjectData(project.name)
+  sql_statement <- paste("select period, sum(", value, ") as ", value, "from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
+
+  logger(WARN, sql_statement)
+  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+  rownames(records) <- records$period
+  records$period <- NULL
+  records
 }
 
 Item.DB.GetResults <- function(project.name, value, id, db.channel) {
@@ -190,8 +222,8 @@ Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
     project.config <- Project.GetConfig(project.name)
 
   tables <- c(
-              ##DB.GetTableNameProjectData(project.name),
-              DB.GetTableNameProject.Items(project.name)
+              DB.GetTableNameProjectData(project.name),
+              DB.GetTableNameProjectItems(project.name)
               )
 
   

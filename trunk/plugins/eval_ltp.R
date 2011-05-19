@@ -113,21 +113,21 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                                    
   colnames(prediction)=value
   
-    if("fullcsv"%in%project.config$save) {
+    if ("fullcsv" %in% project.config$save) {
       #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
       #data = rbind(model$values[, , drop = FALSE], prediction)
       data = rbind(item.data[, value, drop = FALSE], prediction)
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
     }
-    if("csv"%in%project.config$save) {
+    if ("csv" %in% project.config$save) {
       data = prediction
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
     }
-    if("t_csv"%in%project.config$save) {
+    if ("t_csv" %in% project.config$save) {
       data = t(prediction)
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
     }
-    if("db"%in%project.config$save) {
+    if ("data_db" %in% project.config$save) {
       data = rbind(item.data[, value, drop = FALSE], prediction)
       colnames(data)=gsub("V.","V",colnames(data))
       data = cbind(item_id=id, data)
@@ -141,15 +141,15 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                      rownames="id", addPK=TRUE, db.channel=db.channel)
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
-  if(("summary_db"%in%project.config$save) | ("summary_csv"%in%project.config$save)) {
+  if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {
     manual.model <- ifelse(length(param$try.models) > 1, FALSE, TRUE)
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
   }
-  if("summary_csv"%in%project.config$save) {
+  if ("summary_csv" %in% project.config$save) {
     write.table(file = paste(output.path, "/item-summary.csv", sep = ""),
                 onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
   }
-  if("summary_db"%in%project.config$save) {
+  if ("summary_db" %in% project.config$save) {
       tablename = DB.GetTableNameSummary(project.name, value)
       DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
