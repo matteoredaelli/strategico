@@ -209,14 +209,14 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   project.items <- cbind(id=1:nrow(project.items), project.items)
   save( project.items, file=outfile)
 
-  if("items_csv"%in%project.config$save)
+  if ("items_csv" %in% project.config$save)
     write.csv(project.items,
               file= paste(project.path, "/project_items.csv", sep=""),
               row.names = FALSE
               )
-  if("items_db"%in%project.config$save) {
 
-    tablename = DB.GetTableNameProject.Items(project.config$project.name)
+  if ("items_db" %in% project.config$save) {
+    tablename = DB.GetTableNameProjectItems(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
     rownames(project.items) <- project.items$id
@@ -226,12 +226,19 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
     
     project.items <- project.items.orig
   }
-
-  ## Putting item ID inside project.data
-  ## project.data <- merge(project.items, project.data)
   
   outfile <- paste(project.path, "project_data.Rdata", sep="/") 
   save(project.data, file=outfile)
+  
+  if ("data_db" %in% project.config$save) {
+    ## Putting item ID inside project.data
+    #project.data.db <- merge(project.items, project.data)
+    tablename = DB.GetTableNameProjectData(project.config$project.name)
+    ## preparing data for prymary key in DB  (id must be the rownames)  
+    DB.ImportData(project.data, tablename, id=NULL, rownames=NULL,
+                  addPK=FALSE, db.channel=db.channel)
+  }
+ 
   #print(key_fields)			
   #.Project.Items.UpdateDataRecursively(project.path, project.data, keys=key_fields, values=NULL )
   

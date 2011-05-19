@@ -54,7 +54,8 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
   
   ## result.normalize <- ltp.normalizeData(product, range, NA2value,period.end)
   result.normalize <- ltp.normalizeData(product=product,range=range,NA2value=NA2value,period.start=period.start,increment=increment,period.end=period.end,period.freq=period.freq)
-
+  logger(DEBUG, "Normalized data:")
+  logger(DEBUG, result.normalize)
   period.start = result.normalize$start
   product = result.normalize$product
   n = dim(product)[1]
@@ -181,9 +182,7 @@ temp=NA2value
   productnew=data.frame( rep(temp, len = length(times) ))
   rownames(productnew)=times
   colnames(productnew)=colnames(product)
-  print(productnew)
   productnew[rownames(product),]=product
-  
   id.start=which(Period.ToString(period.start.fix, n.char=n.char)==rownames(product))
   #id.start=which(paste(period.start.fix,collapse="-")==rownames(product))
   if( length(id.start)>0 ) {

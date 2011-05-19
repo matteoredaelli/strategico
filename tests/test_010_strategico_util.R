@@ -183,7 +183,7 @@ test.00.GetDBTableName <- function() {
               DB.GetTableNameResults("sample", value="V1")
               )
   checkEquals("sample_items",
-              DB.GetTableNameProject.Items("sample")
+              DB.GetTableNameProjectItems("sample")
               )
 }
 
