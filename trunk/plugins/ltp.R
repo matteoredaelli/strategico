@@ -217,8 +217,10 @@ temp=NA2value
     if(nrow(productnew)==0) return(productnew)
     if (!is.na(NA2value))    productnew[is.na(productnew), ] = NA2value
     else{
-      for(i in 1:period.freq) 
-        productnew[seq(from=i,by=period.freq,to=nrow(productnew))[is.na(productnew[seq(from=i,by=period.freq,to=nrow(productnew)),])],]=mean(productnew[seq(from=i,by=period.freq,to=nrow(productnew)),],na.rm=TRUE)
+      for(i in 1:period.freq) {
+        my.seq <- seq(from=i,by=period.freq,to=nrow(productnew))
+        productnew[my.seq[is.na(productnew[my.seq,])],]=mean(productnew[my.seq,],na.rm=TRUE)
+      }
     }
     productnew[productnew < range[1], ] = range[1]
     productnew[productnew > range[2], ] = range[2]
