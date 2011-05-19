@@ -85,11 +85,11 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   if (!is.null(model$BestModel)) {
     ## write data and prediction in .csv
     prediction= data.frame(model[[model$BestModel]]$prediction)
-    
-    #n <-length(model[[model$BestModel]]$prediction)
-    #now <- start(model[[model$BestModel]]$prediction)
-    #freq <- frequency(model[[model$BestModel]]$prediction)
-    #rownames(prediction)=Period.BuildRange(period.start=now, period.freq=freq, n=n, shift=0) 
+
+    ##n <-length(model[[model$BestModel]]$prediction)
+    ##now <- start(model[[model$BestModel]]$prediction)
+    ##freq <- frequency(model[[model$BestModel]]$prediction)
+    ##rownames(prediction)=Period.BuildRange(period.start=now, period.freq=freq, n=n, shift=0) 
     rownames(prediction)=Period.BuildRange(period.start=project.config$period.end, period.freq=project.config$period.freq, n=param$n.ahead, shift=1)
     return.code <- 0 
     ## write report
@@ -112,10 +112,15 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
                                    
   colnames(prediction)=value
+
+  ## TODO: Normalized data are useful only for prediction? do we want to save them to results?
+  ##data = rbind(model$values[, , drop = FALSE], prediction)
+  ##data = rbind(item.data[, value, drop = FALSE], prediction)
   
     if ("fullcsv" %in% project.config$save) {
-      #data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
-      #data = rbind(model$values[, , drop = FALSE], prediction)
+      ##data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
+      ##
+      ##data = rbind(model$values[, , drop = FALSE], prediction)
       data = rbind(item.data[, value, drop = FALSE], prediction)
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
     }
@@ -150,8 +155,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                 onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
   }
   if ("summary_db" %in% project.config$save) {
-      tablename = DB.GetTableNameSummary(project.name, value)
-      DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+    tablename = DB.GetTableNameSummary(project.name, value)
+    DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
   prediction
 }
