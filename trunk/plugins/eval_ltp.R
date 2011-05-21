@@ -155,8 +155,16 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   prediction
 }
 
-ltp.GetAllModels <- function() {
-  c("Mean","Trend","LinearModel","ExponentialSmooth","Arima")
+ltp.GetModels <- function() {
+  models <- rbind(
+                  c("linear", "LinearModel", "green"),
+                  c("arima", "Arima", "red"),
+                  c("es", "ExponentialSmooth", "blue"),
+                  c("trend", "Trend", "gray"),
+                  c("mean", "Mean", "black")
+                  )
+  colnames(models) <- c("id", "name", "color")
+  models
 }
 
 ltp.GetModelsComparisonTable <-  function(obj) {
