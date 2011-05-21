@@ -204,6 +204,7 @@ Item.DB.GetRecords <- function(project.name, key="id", id, tablename, db.channel
 }
 
 Item.Db.SaveData <- function(id, data, tablename, db.channel) {
+  logger(DEBUG, paste("Saving data for ID=", id, "to table", tablename))
   if (nrow(data)==0) {
     logger(WARN, paste("No data to be saved to", tablename)) 
   } else {
