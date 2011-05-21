@@ -75,7 +75,7 @@ AggregateItemData <- function(data, value) {
   options(na.action="na.omit")
 
   d2 <- aggregate(data[[value]],  by=list(data[["PERIOD"]]),  FUN=sum, na.rm=TRUE)
-  names(d2) <- c('PERIOD', value)
+  names(d2) <- c('PERIOD', 'V')
   rownames(d2) <- d2$PERIOD
   d2$PERIOD <- NULL
   d2

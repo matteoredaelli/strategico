@@ -74,7 +74,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
 
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
 
-  model <- ltp(product = item.data[, value, drop = FALSE], rule=param$rule, rule.noMaxOver=param$rule.noMaxOver,
+  model <- ltp(product = item.data, rule=param$rule, rule.noMaxOver=param$rule.noMaxOver,
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = project.config$period.freq, 
                period.start = project.config$period.start, period.end = project.config$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
@@ -90,8 +90,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     ##now <- start(model[[model$BestModel]]$prediction)
     ##freq <- frequency(model[[model$BestModel]]$prediction)
     ##rownames(prediction)=Period.BuildRange(period.start=now, period.freq=freq, n=n, shift=0) 
-    rownames(prediction)=Period.BuildRange(period.start=project.config$period.end, period.freq=project.config$period.freq, n=param$n.ahead, shift=1)
-    return.code <- 0 
+   
+    return.code <- 0
+    
     ## write report
     if("images"%in%project.config$save) {
       PlotLtpResults(model, directory=output.path)
@@ -106,22 +107,20 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     return.code <- 1 
     logger(INFO, "No data")
     prediction=data.frame(rep(0, param$n.ahead))
-
-    rownames(prediction) = Period.BuildRange(period.start=project.config$period.end,
-              period.freq=project.config$period.freq, n=param$n.ahead, shift=1) 
   }
-                                   
-  colnames(prediction)=value
+  rownames(prediction) <- Period.BuildRange(period.start=project.config$period.end,
+                                            period.freq=project.config$period.freq, n=param$n.ahead, shift=1)                            
+  colnames(prediction) <- "V"
 
-  ## TODO: Normalized data are useful only for prediction? do we want to save them to results?
-  ##data = rbind(model$values[, , drop = FALSE], prediction)
-  ##data = rbind(item.data[, value, drop = FALSE], prediction)
+
+  data.normalized = model$values[, , drop = FALSE]
+  colnames(data.normalized) <- "V"
   
     if ("fullcsv" %in% project.config$save) {
       ##data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
       ##
       ##data = rbind(model$values[, , drop = FALSE], prediction)
-      data = rbind(item.data[, value, drop = FALSE], prediction)
+      data = rbind(data.normalized, prediction)
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
     }
     if ("csv" %in% project.config$save) {
@@ -133,17 +132,12 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
     }
     if ("data_db" %in% project.config$save) {
-      data = rbind(item.data[, value, drop = FALSE], prediction)
-      colnames(data)=gsub("V.","V",colnames(data))
-      data = cbind(item_id=id, data)
- 
-      data$PERIOD = rownames(data)
-      ## primary KEY
-      rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
+      tablename = DB.GetTableNameNormalizedData(project.name, value)
+      Item.Db.SaveData(id=id, data=data.normalized, tablename=tablename, db.channel=db.channel)
+      
       tablename = DB.GetTableNameResults(project.name, value)
-  
-      DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                     rownames="id", addPK=TRUE, db.channel=db.channel)
+      Item.Db.SaveData(id=id, data=prediction, tablename=tablename, db.channel=db.channel)
+
     }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {

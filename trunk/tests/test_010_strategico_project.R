@@ -94,7 +94,9 @@ test.040.Project.GetData <- function() {
 
 test.Project.DB.GetTableNames <- function() {
    checkEquals(
-               c("sample_data", "sample_items", "sample_results_V1", "sample_summary_V1", "sample_results_V2", "sample_summary_V2"),
+               c("sample_data_raw", "sample_items",
+                 "sample_data_norm_V1", "sample_results_V1", "sample_summary_V1",
+                 "sample_data_norm_V2", "sample_results_V2", "sample_summary_V2"),
                Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
                )
 }
