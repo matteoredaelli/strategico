@@ -18,6 +18,8 @@
 MySource(filename="ltp.R", file.path=GetPluginsPath())
 
 ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
+  models.names <- ltp.GetModels()[,"name"]
+  
 	stats=as.list(rep(NA,16))
 	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump",
                "VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
@@ -50,9 +52,9 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
 		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
 		#Best Model if not exclusion rule were performed
-		st=names(which.min(unlist(lapply(model[ltp.GetAllModels()],function(x) x$AIC))))
+		st=names(which.min(unlist(lapply(model[models.names],function(x) x$AIC))))
 		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		st=names(which.min(unlist(lapply(model[ltp.GetAllModels()],function(x) x$IC.width))))
+		st=names(which.min(unlist(lapply(model[models.names],function(x) x$IC.width))))
 		stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
 		#note: stat is changed from numeric to string
 		stats["BestModel"] = model$BestModel
