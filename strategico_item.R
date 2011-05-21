@@ -59,8 +59,7 @@ Item.Eval <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
     project.data <- Project.GetData(project.name=project.name)
 
   for (i in 1:length(values)) {
-    value <- values[i]
-    Item.EvalData(project.name=project.name, id=id, keys=keys, value=value, param=param,
+    Item.EvalData(project.name=project.name, id=id, keys=keys, value=values[i], param=param,
                  project.config=project.config, project.items=project.items,
                  project.data=project.data, db.channel=db.channel)
   }

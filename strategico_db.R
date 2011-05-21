@@ -135,7 +135,11 @@ DB.GetTableNameSummary <- function(project.name, value) {
 }
 
 DB.GetTableNameProjectData <- function(project.name) {
-  paste(project.name, "data", sep="_")
+  paste(project.name, "data_raw", sep="_")
+}
+
+DB.GetTableNameNormalizedData <- function(project.name, value) {
+  paste(project.name, "data_norm", value, sep="_")
 }
 
 DB.GetTableNameProjectItems <- function(project.name) {
@@ -178,7 +182,7 @@ Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NUL
   filter.period <- paste("period >= '", string.period.start, "' and period <= '", string.period.end, "'", sep="")
   
   tablename <- DB.GetTableNameProjectData(project.name)
-  sql_statement <- paste("select period, sum(", value, ") as ", value, "from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
+  sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
 
   logger(WARN, sql_statement)
   records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
@@ -198,7 +202,21 @@ Item.DB.GetRecords <- function(project.name, key="id", id, tablename, db.channel
   logger(WARN, sql_statement)
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
 }
-  
+
+Item.Db.SaveData <- function(id, data, tablename, db.channel) {
+  if (nrow(data)==0) {
+    logger(WARN, paste("No data to be saved to", tablename)) 
+  } else {
+    data = cbind(item_id=id, data)
+    data$PERIOD = rownames(data)
+    ## primary KEY
+    rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
+ 
+    DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                  rownames="id", addPK=TRUE, db.channel=db.channel)
+  }
+}
+
 Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameSummary(project.name, value=value)
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
@@ -229,9 +247,10 @@ Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
   
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
-                    DB.GetTableNameResults(project.name, value),
-                    DB.GetTableNameSummary(project.name, value)
-                    )
+                      DB.GetTableNameNormalizedData(project.name, value),
+                      DB.GetTableNameResults(project.name, value),
+                      DB.GetTableNameSummary(project.name, value)
+                      )
     tables <- append(tables, value.tables)
   }
   tables
