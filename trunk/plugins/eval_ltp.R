@@ -61,13 +61,11 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
     stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
     ##note: stat is changed from numeric to string
     stats["BestModel"] = model$BestModel
-    stats["ManualModel"] = manual.model
   }
 
   stats["Timestamp"] = as.character(Sys.time())
-
-  
-    stats["Parameters"] = Param.ToString(param)
+  stats["ManualModel"] = manual.model
+  stats["Parameters"] = Param.ToString(param)
   stats["ReturnCode"] = return.code
   stats["Run"] = 0
   
@@ -152,7 +150,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {
-    manual.model <- NULL
+    manual.model <- "no"
     if (length(param$try.models) == 1)
       manual.model <- param$try.models[1]
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
