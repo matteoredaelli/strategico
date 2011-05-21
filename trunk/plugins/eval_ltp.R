@@ -81,18 +81,34 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                NA2value = param$NA2value, range = param$range, period.freq = project.config$period.freq, 
                period.start = project.config$period.start, period.end = project.config$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0)
+
+  models.names <- ltp.GetModels()[,"name"]
   
   ## write results in .RData
-  if("model"%in%project.config$save) save(file =  paste(output.path, "/model.RData", sep = ""), model)
-  if (!is.null(model$BestModel)) {
-    ## write data and prediction in .csv
-    prediction= data.frame(model[[model$BestModel]]$prediction)
+  if ("model" %in% project.config$save)
+    save(file =  paste(output.path, "/model.RData", sep = ""), model)
 
-    ##n <-length(model[[model$BestModel]]$prediction)
-    ##now <- start(model[[model$BestModel]]$prediction)
-    ##freq <- frequency(model[[model$BestModel]]$prediction)
-    ##rownames(prediction)=Period.BuildRange(period.start=now, period.freq=freq, n=n, shift=0) 
-   
+  data.predicted <- NULL
+  prediction.null <- rep(0, param$n.ahead)
+  for (m in models.names) {
+    if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
+      data.predicted <- cbind(data.predicted, prediction.null)
+    else
+      data.predicted <- cbind(data.predicted, model[[m]]$prediction)
+  }
+  
+  data.predicted <- data.frame(data.predicted)
+  predictions.periods <- Period.BuildRange(period.start=project.config$period.end,
+                                           period.freq=project.config$period.freq,
+                                           n=param$n.ahead, shift=1)
+  
+  rownames(data.predicted) <- predictions.periods
+  colnames(data.predicted) <- models.names
+  ##names(data.predicted) <- models.names
+  
+  if (!is.null(model$BestModel)) {
+    logger(WARN, paste("Best Model is ", model$BestModel))
+    result <- data.frame(model[[model$BestModel]]$prediction)
     return.code <- 0
     
     ## write report
@@ -107,40 +123,28 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   else {
     return.code <- 1 
-    logger(INFO, "No data")
-    prediction=data.frame(rep(0, param$n.ahead))
+    logger(INFO, "Strategico didn't select any BestModel")
+    result <- data.frame(rep(0, param$n.ahead))
   }
-  rownames(prediction) <- Period.BuildRange(period.start=project.config$period.end,
-                                            period.freq=project.config$period.freq, n=param$n.ahead, shift=1)                            
-  colnames(prediction) <- "V"
 
-
+  
+  rownames(result) <- predictions.periods
+  colnames(result) <- "V"
+  
   data.normalized = model$values[, , drop = FALSE]
   colnames(data.normalized) <- "V"
   
-    if ("fullcsv" %in% project.config$save) {
-      ##data = cbind(keydf, rbind(model$values[, , drop = FALSE], prediction))
-      ##
-      ##data = rbind(model$values[, , drop = FALSE], prediction)
-      data = rbind(data.normalized, prediction)
-      write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
-    }
-    if ("csv" %in% project.config$save) {
-      data = prediction
-      write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""))
-    }
-    if ("t_csv" %in% project.config$save) {
-      data = t(prediction)
-      write.csv(data, file = paste(output.path, "/item-results.csv", sep = ""), row.names = FALSE)
-    }
-    if ("data_db" %in% project.config$save) {
-      tablename = DB.GetTableNameNormalizedData(project.name, value)
-      Item.Db.SaveData(id=id, data=data.normalized, tablename=tablename, db.channel=db.channel)
+  if ("csv" %in% project.config$save) {
+    write.csv(data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))
+  }
+  if ("data_db" %in% project.config$save) {
+    tablename = DB.GetTableNameNormalizedData(project.name, value)
+    Item.Db.SaveData(id=id, data=data.normalized, tablename=tablename, db.channel=db.channel)
       
-      tablename = DB.GetTableNameResults(project.name, value)
-      Item.Db.SaveData(id=id, data=prediction, tablename=tablename, db.channel=db.channel)
+    tablename = DB.GetTableNameResults(project.name, value)
+    Item.Db.SaveData(id=id, data=data.predicted, tablename=tablename, db.channel=db.channel)
 
-    }
+  }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {
     manual.model <- ifelse(length(param$try.models) > 1, FALSE, TRUE)
@@ -154,7 +158,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     tablename = DB.GetTableNameSummary(project.name, value)
     DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
   }
-  prediction
+
+  result
 }
  
 ltp.GetModels <- function() {

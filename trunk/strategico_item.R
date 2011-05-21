@@ -129,9 +129,9 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
     value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
-  logger(INFO, "RESULTS:")
+  logger(DEBUG, "RESULTS:")
   logger(DEBUG, rownames(prediction))
-  logger(INFO, prediction)
+  logger(DEBUG, prediction)
   t(prediction)
 }
 

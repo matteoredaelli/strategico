@@ -57,12 +57,14 @@ test.00.Item.EvalData.e00 <- function() {
               colnames(e0)
               )
 
-  ## Check predictions with the one saved to DB
-  records <- Item.DB.GetResults(project.name, id=5, value="V1", db.channel=db.channel)
-  checkEquals(
-              as.vector(e0[1,]),
-              sort(sort(records$V, decreasing=TRUE)[1:project.config$param$n.ahead])
-              )
+  ## TODO: 
+  ## Check predictions with the one saved to DB.
+  ## we need to retreive whic is the best model (now all models predictions are saved to db... ;-)
+  ##  records <- Item.DB.GetResults(project.name, id=5, value="V1", db.channel=db.channel)
+  ##  checkEquals(
+  ##              as.vector(e0[1,]),
+  ##              sort(sort(records$V, decreasing=TRUE)[1:project.config$param$n.ahead])
+  ##            )
 ##  checkEquals(
 ##              colnames(e0),
 ##              sort(sort(records$PERIOD, decreasing=TRUE)[1:project.config$param$n.ahead])
