@@ -173,7 +173,8 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   
   ReporTable = cbind(matrix("--",5,6),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
-  rownames(ReporTable) = c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean")
+  rownames(ReporTable) = models.names <- ltp.GetModels()[,"name"]
+
   
   if(!is.null(obj$ExponentialSmooth)) {
     terms=sapply(c("drift","seasonality"),
