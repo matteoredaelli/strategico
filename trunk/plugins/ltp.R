@@ -67,6 +67,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
     try.models = c("mean","trend","lm", "arima", "es")
 
   AIC <- rep(NA,5)
+  ## TODO Using ltp.GetModels()[,"name"]
   names(AIC) <- c("Mean","Trend","ExponentialSmooth","LinearModel","Arima")
   IC.width <- R2 <- VarCoeff <- AIC
   NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima
@@ -688,6 +689,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   #html.form.eval = GetStrHTMLformItem.Eval(project.path, .Item.GetPath(keys), value, param)
   #cat(html.form.eval, append = TRUE, file = html.filename)  
 
+  ## TODO Using ltp.GetModels()[,"name"]
   notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
   
