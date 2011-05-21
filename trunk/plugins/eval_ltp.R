@@ -19,59 +19,64 @@ MySource(filename="ltp.R", file.path=GetPluginsPath())
 
 ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
   models.names <- ltp.GetModels()[,"name"]
+
+  if (is.null(manual.model))
+    manual.model <- model$BestModel
   
-	stats=as.list(rep(NA,16))
-	names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump",
-               "VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
-               "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
-               "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
-        #stats["id"] <- id
-	#mean values (ie observed data)
-	stats["MeanValues"]=mean(model$values,na.rm=TRUE)
-	#nunb of points (observations)
-	stats["Points"]=nrow(model$values)
-	#non zero values
-	stats["NotZeroPoints"]=ifelse(nrow(model$values)==0,0, sum(model$values!=0))
+  stats=as.list(rep(NA,16))
+  names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump",
+         "VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
+         "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
+         "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
+  ##stats["id"] <- id
+  ##mean values (ie observed data)
+  stats["MeanValues"]=mean(model$values,na.rm=TRUE)
+  ##nunb of points (observations)
+  stats["Points"]=nrow(model$values)
+  ##non zero values
+  stats["NotZeroPoints"]=ifelse(nrow(model$values)==0,0, sum(model$values!=0))
 
-	if(!is.null(model$BestModel)){
-		stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
-		stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
+  if(!is.null(model$BestModel)){
+    stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
+    stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
 
-		#find (che cum sum of) not equal (ie constant) consecutive values
-		temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
-		#length of last not-constant consecutives serie of values
-		stats["LastNotEqualValues"]=sum(temp==max(temp))-1
+    ##find (che cum sum of) not equal (ie constant) consecutive values
+    temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
+    ##length of last not-constant consecutives serie of values
+    stats["LastNotEqualValues"]=sum(temp==max(temp))-1
 		
-		#mean predicted
-		stats["MeanPredicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
-		#mean predicted over mean values (ie observed data)
-		stats["MeanPredictedRatioMeanValues"]=stats[["MeanPredicted"]]/stats[["MeanValues"]]
-		#and rounding
+    ##mean predicted
+    stats["MeanPredicted"]=mean(model[[model$BestModel]]$prediction,na.rm=T)
+    ##mean predicted over mean values (ie observed data)
+    stats["MeanPredictedRatioMeanValues"]=stats[["MeanPredicted"]]/stats[["MeanValues"]]
+    ##and rounding
 		stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")]=lapply(stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")],round,3)
-		#sd predicted over sd values (ie observed data)
-		stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
+    ##sd predicted over sd values (ie observed data)
+    stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
-		#Best Model if not exclusion rule were performed
-		st=names(which.min(unlist(lapply(model[models.names],function(x) x$AIC))))
-		stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		st=names(which.min(unlist(lapply(model[models.names],function(x) x$IC.width))))
-		stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
-		#note: stat is changed from numeric to string
-		stats["BestModel"] = model$BestModel
-	}
+    ##Best Model if not exclusion rule were performed
+    st=names(which.min(unlist(lapply(model[models.names],function(x) x$AIC))))
+    stats["BestAICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
+    st=names(which.min(unlist(lapply(model[models.names],function(x) x$IC.width))))
+    stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
+    ##note: stat is changed from numeric to string
+    stats["BestModel"] = model$BestModel
+    stats["ManualModel"] = manual.model
+  }
 
-	stats["Timestamp"] = as.character(Sys.time())
-	stats["ManualModel"] = manual.model
-	stats["Parameters"] = Param.ToString(param)
-	stats["ReturnCode"] = return.code
-	stats["Run"] = 0
+  stats["Timestamp"] = as.character(Sys.time())
+
+  
+    stats["Parameters"] = Param.ToString(param)
+  stats["ReturnCode"] = return.code
+  stats["Run"] = 0
+  
+  ##clean out the (possible) Inf values
+  stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
 	
-	#clean out the (possible) Inf values
-	stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
-	
-	summ=as.data.frame(stats)
-        rownames(summ) <- c(id)
-        summ
+  summ=as.data.frame(stats)
+  rownames(summ) <- c(id)
+  summ
 }
 
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
@@ -147,7 +152,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {
-    manual.model <- ifelse(length(param$try.models) > 1, FALSE, TRUE)
+    manual.model <- NULL
+    if (length(param$try.models) == 1)
+      manual.model <- param$try.models[1]
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
   }
   if ("summary_csv" %in% project.config$save) {
