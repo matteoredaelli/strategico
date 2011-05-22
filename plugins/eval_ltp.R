@@ -209,7 +209,7 @@ ltp.GetModelsComparisonTable <-  function(obj) {
     
     es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
   }
-  
+  ## TODO: pay attention: the list of models is important... maybe it is better to use explicit coordinates ReporTable["Arima"][1] ..
   ReporTable[,1] <- 
     c(ifelse(is.null(obj$LinearModel),"--", gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),
       ##paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
