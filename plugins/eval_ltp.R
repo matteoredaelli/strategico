@@ -142,9 +142,11 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   if ("data_db" %in% project.config$save) {
     tablename = DB.GetTableNameNormalizedData(project.name, value)
+    logger(DEBUG, paste("Saving data to table", tablename))
     Item.Db.SaveData(id=id, data=data.normalized, tablename=tablename, db.channel=db.channel)
       
     tablename = DB.GetTableNameResults(project.name, value)
+    logger(DEBUG, paste("Saving data to table", tablename))
     Item.Db.SaveData(id=id, data=data.predicted, tablename=tablename, db.channel=db.channel)
 
   }
@@ -161,7 +163,19 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   if ("summary_db" %in% project.config$save) {
     tablename = DB.GetTableNameSummary(project.name, value)
+    logger(DEBUG, paste("Saving data to table", tablename))
     DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+
+    if (!is.null(model$BestModel)) {
+      ## Summary Models
+      summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
+      summary.models$selected <- NULL
+      tablename = DB.GetTableNameSummaryModels(project.name, value)
+      logger(DEBUG, paste("Saving data to table", tablename))
+      data = cbind(item_id=id, model=rownames(summary.models), summary.models)
+      DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
+    }
   }
 
   result
@@ -181,10 +195,11 @@ ltp.GetModels <- function() {
 
 ltp.GetModelsComparisonTable <-  function(obj) {
   
-  ReporTable = cbind(matrix("--",5,6),"")
-  colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
+  ReporTable = matrix("--",5,6)
+  colnames(ReporTable) = c("formula", "R2","AIC","IC.width","maxJump","VarCoeff")
   rownames(ReporTable) <- ltp.GetModels()$name
 
+  indicator.list <- c("R2","AIC", "IC.width","maxJump","VarCoeff")
   
   if(!is.null(obj$ExponentialSmooth)) {
     terms=sapply(c("drift","seasonality"),
@@ -195,14 +210,20 @@ ltp.GetModelsComparisonTable <-  function(obj) {
     es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
   }
   
-  ReporTable[, 1] = c(ifelse(is.null(obj$LinearModel),"--",	gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),#paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
-              ifelse(is.null(obj$Arima),"--",ifelse(length(obj$Arima$model$coef)==0,"-constant-",paste(obj$Arima$model$series,"=",paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
-              ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
-              ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
-              ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
-  temp=rbind(unlist(obj$LinearModel[c( "R2","AIC", "IC.width","maxJump","VarCoeff")]), unlist(obj$Arima[c( "R2", "AIC","IC.width","maxJump","VarCoeff")]), 
-  unlist(obj$ExponentialSmooth[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]),unlist(obj$Trend[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]),unlist(obj$Mean[c("R2", "AIC", "IC.width","maxJump","VarCoeff")]))
-  colnames(temp)= c("R2", "AIC", "IC.width","maxJump","VarCoeff")
+  ReporTable[,1] <- 
+    c(ifelse(is.null(obj$LinearModel),"--", gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),
+      ##paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
+      ifelse(is.null(obj$Arima),"--",
+             ifelse(length(obj$Arima$model$coef)==0,
+                    "-constant-",
+                    paste(obj$Arima$model$series,"=", paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
+      ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
+      ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
+      ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
+  
+  temp <- rbind(unlist(obj$LinearModel[indicator.list]), unlist(obj$Arima[indicator.list]), 
+    unlist(obj$ExponentialSmooth[indicator.list]),unlist(obj$Trend[indicator.list]),unlist(obj$Mean[indicator.list]))
+  colnames(temp)= indicator.list
   
 
   temp[,"R2"]=round(temp[,"R2"],4)	
@@ -211,10 +232,8 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   temp[,"maxJump"]=round(temp[,"maxJump"],3)
   temp[,"VarCoeff"]=round(temp[,"VarCoeff"],3)
 
-  ReporTable[which(!(ReporTable[,1]=="--")),c("R2", "AIC", "IC.width","maxJump","VarCoeff")] = as.matrix(temp)
+  ReporTable[which(!(ReporTable[,1]=="--")),indicator.list] = as.matrix(temp)
   ReporTable=as.data.frame(ReporTable)
-  levels(ReporTable$selected)=c("","BEST")
-  ReporTable[obj$BestModel,"selected"]="BEST"
 
   ReporTable
 }
