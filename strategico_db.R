@@ -33,18 +33,92 @@ DB.Close <- function(db.channel) {
   odbcClose(db.channel)
 }
 
-Project.DB.Empty <- function(project.name, project.config=NULL, db.channel) {
-  if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
-  }
-
-  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
-  lapply(tables, function(x) DB.EmptyTable(x,db.channel))
+DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=",") {
+  sql_statement <- paste("select * from", tablename)
+  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+  write.table(records, file=output.file, sep=sep, dec=dec)
 }
 
 DB.EmptyTable <- function(tablename, db.channel) {
   sql_statement <- paste("truncate", tablename)
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+}
+
+DB.ImportData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
+                           rownames=FALSE, append=TRUE, addPK=FALSE, db.channel) {
+  delete_sql <- paste("delete from", tablename)
+  
+  if(!is.null(id)) 
+    delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
+
+  logger(DEBUG, delete_sql)
+  DB.RunSQLQuery(sql_statement=delete_sql, db.channel=db.channel)
+
+
+  sqlSave(db.channel, data, tablename=tablename, rownames=rownames,
+          append=append, verbose=verbose, addPK=addPK, fast=FALSE)
+}
+
+DB.GetTableNameResults <- function(project.name, value) {
+  paste(project.name, "results", value, sep="_")
+}
+
+DB.GetTableNameSummary <- function(project.name, value) {
+  paste(project.name, "summary", value, sep="_")
+}
+
+DB.GetTableNameSummaryModels <- function(project.name, value) {
+  paste(project.name, "summary_models", value, sep="_")
+}
+
+DB.GetTableNameProjectData <- function(project.name) {
+  paste(project.name, "data_raw", sep="_")
+}
+
+DB.GetTableNameNormalizedData <- function(project.name, value) {
+  paste(project.name, "data_norm", value, sep="_")
+}
+
+DB.GetTableNameProjectItems <- function(project.name) {
+  paste(project.name, "items", sep="_")
+}
+
+DB.GetTableSize <- function(tablename, db.channel) {
+  sql_statement <- paste("select count(*) from", tablename)
+  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+  ## TODO: check if the table doen't exist
+  if ( is.data.frame(records) )
+    result <- as.integer(records[1][1])
+  else {
+    logger(WARN, paste("cannot count rows of table", tablename))
+    result <- "cannot retreive"
+  }
+  result
+}
+
+DB.RunSQLQuery <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
+  db.channel.old <- db.channel
+  if(is.null(db.channel)) {
+    if(is.null(db.name))
+      db.channel <- DB.Connect()
+    else
+      db.channel <- DB.Connect(db.name=db.name, db.user=db.user, db.pass=db.pass)
+  }
+
+  for (statement in sql_statement) {
+    logger(DEBUG, paste("Running SQL:", statement))
+    result <- sqlQuery(db.channel, statement)
+    ## checking return code
+    ##if (is.numeric(result) & result == -1) {
+    ##  logget(INFO, odbcGetErrMsg(db.channel))
+    ##  odbcClearError(db.channel)
+    ##}
+
+  }
+  if(is.null(db.channel.old)) {
+    odbcClose(db.channel)
+  }
+  result
 }
 
 Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
@@ -71,92 +145,6 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
                )
     } #end for
   } #end if
-}
-
-DB.ImportData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
-                           rownames=FALSE, append=TRUE, addPK=FALSE, db.channel) {
-  delete_sql <- paste("delete from", tablename)
-  
-  if(!is.null(id)) 
-    delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
-
-  logger(DEBUG, delete_sql)
-  DB.RunSQLQuery(sql_statement=delete_sql, db.channel=db.channel)
-
-
-  sqlSave(db.channel, data, tablename=tablename, rownames=rownames,
-          append=append, verbose=verbose, addPK=addPK, fast=FALSE)
-}
-
-Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
-  if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
-  }
-  project.path <- Project.GetPath(project.name)
-  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
-  lapply(tables, function(x) DB.ExportTable2Csv(tablename=x,
-                                             db.channel=db.channel,
-                                             output.file=file.path(project.path, paste(x, ".csv", sep="")),
-                                             sep=sep,
-                                             dec=dec
-                                             )
-         )
-}
-
-DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=",") {
-  sql_statement <- paste("select * from", tablename)
-  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
-  write.table(records, file=output.file, sep=sep, dec=dec)
-}
-
-Project.DB.FixStructure <- function(project.name, values, db.channel) {
-  ## TODO: generalize tablenames..
-  ## Add unique index on keys in project_items table: needed for speed and consistency
-  sql <- c("alter table sample_items MODIFY id integer",
-           "alter table sample_results_V1 MODIFY item_id integer",
-           "alter table sample_results_V1 MODIFY KEY1 varchar(40)",
-           "alter table sample_results_V2 MODIFY item_id integer",
-           "alter table sample_results_V1 MODIFY id integer",
-           "alter table sample_results_V2 MODIFY id integer",
-           "alter table sample_summary_V1 MODIFY id integer",
-           "alter table sample_summary_V2 MODIFY id integer"
-  ## ALTER TABLE europool_dev_items ADD UNIQUE ( KEY1, KEY2, KEY3, KEY4);
-  ## ALTER TABLE europool_dev_results_V1 ADD INDEX ( item_id ) ;
-)
-  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)         
-}
-
-DB.GetTableNameResults <- function(project.name, value) {
-  paste(project.name, "results", value, sep="_")
-}
-
-DB.GetTableNameSummary <- function(project.name, value) {
-  paste(project.name, "summary", value, sep="_")
-}
-
-DB.GetTableNameProjectData <- function(project.name) {
-  paste(project.name, "data_raw", sep="_")
-}
-
-DB.GetTableNameNormalizedData <- function(project.name, value) {
-  paste(project.name, "data_norm", value, sep="_")
-}
-
-DB.GetTableNameProjectItems <- function(project.name) {
-  paste(project.name, "items", sep="_")
-}
-
-DB.GetTableSize <- function(tablename, db.channel) {
-  sql_statement <- paste("select count(*) from", tablename)
-  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
-  ## TODO: check if the table doen't exist
-  if ( is.data.frame(records) )
-    result <- as.integer(records[1][1])
-  else {
-    logger(WARN, paste("cannot count rows of table", tablename))
-    result <- "cannot retreive"
-  }
-  result
 }
 
 Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
@@ -223,6 +211,47 @@ Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
+Project.DB.Empty <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+
+  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) DB.EmptyTable(x,db.channel))
+}
+
+Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+  project.path <- Project.GetPath(project.name)
+  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) DB.ExportTable2Csv(tablename=x,
+                                             db.channel=db.channel,
+                                             output.file=file.path(project.path, paste(x, ".csv", sep="")),
+                                             sep=sep,
+                                             dec=dec
+                                             )
+         )
+}
+
+Project.DB.FixStructure <- function(project.name, values, db.channel) {
+  ## TODO: generalize tablenames..
+  ## Add unique index on keys in project_items table: needed for speed and consistency
+  sql <- c("alter table sample_items MODIFY id integer",
+           "alter table sample_results_V1 MODIFY item_id integer",
+           "alter table sample_results_V1 MODIFY KEY1 varchar(40)",
+           "alter table sample_results_V2 MODIFY item_id integer",
+           "alter table sample_results_V1 MODIFY id integer",
+           "alter table sample_results_V2 MODIFY id integer",
+           "alter table sample_summary_V1 MODIFY id integer",
+           "alter table sample_summary_V2 MODIFY id integer"
+  ## ALTER TABLE europool_dev_items ADD UNIQUE ( KEY1, KEY2, KEY3, KEY4);
+  ## ALTER TABLE europool_dev_results_V1 ADD INDEX ( item_id ) ;
+)
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)         
+}
+
 Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
@@ -250,7 +279,8 @@ Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
     value.tables <- c(
                       DB.GetTableNameNormalizedData(project.name, value),
                       DB.GetTableNameResults(project.name, value),
-                      DB.GetTableNameSummary(project.name, value)
+                      DB.GetTableNameSummary(project.name, value),
+                      DB.GetTableNameSummaryModels(project.name, value)
                       )
     tables <- append(tables, value.tables)
   }
@@ -260,29 +290,4 @@ Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
 ##input  da db. 
 Project.DB.ImportData <- function(project.name, db.name, db.user, db.pass, sql_statement) {
   DB.RunSQLQuery(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
-}
-
-DB.RunSQLQuery <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
-  db.channel.old <- db.channel
-  if(is.null(db.channel)) {
-    if(is.null(db.name))
-      db.channel <- DB.Connect()
-    else
-      db.channel <- DB.Connect(db.name=db.name, db.user=db.user, db.pass=db.pass)
-  }
-
-  for (statement in sql_statement) {
-    logger(DEBUG, paste("Running SQL:", statement))
-    result <- sqlQuery(db.channel, statement)
-    ## checking return code
-    ##if (is.numeric(result) & result == -1) {
-    ##  logget(INFO, odbcGetErrMsg(db.channel))
-    ##  odbcClearError(db.channel)
-    ##}
-
-  }
-  if(is.null(db.channel.old)) {
-    odbcClose(db.channel)
-  }
-  result
 }

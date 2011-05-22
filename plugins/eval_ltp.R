@@ -18,7 +18,7 @@
 MySource(filename="ltp.R", file.path=GetPluginsPath())
 
 ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
-  models.names <- ltp.GetModels()[,"name"]
+  models.names <- ltp.GetModels()$name
 
   if (is.null(manual.model))
     manual.model <- model$BestModel
@@ -85,7 +85,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                period.start = project.config$period.start, period.end = project.config$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0)
 
-  models.names <- ltp.GetModels()[,"name"]
+  models.names <- ltp.GetModels()$name
   
   ## write results in .RData
   if ("model" %in% project.config$save)
@@ -176,14 +176,14 @@ ltp.GetModels <- function() {
                   c("mean", "Mean", "black")
                   )
   colnames(models) <- c("id", "name", "color")
-  models
+  data.frame(models)
 }
 
 ltp.GetModelsComparisonTable <-  function(obj) {
   
   ReporTable = cbind(matrix("--",5,6),"")
   colnames(ReporTable) = c("model", "R2","AIC","IC.width","maxJump","VarCoeff","selected")
-  rownames(ReporTable) = models.names <- ltp.GetModels()[,"name"]
+  rownames(ReporTable) <- ltp.GetModels()$name
 
   
   if(!is.null(obj$ExponentialSmooth)) {
