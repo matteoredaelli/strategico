@@ -30,7 +30,7 @@
      $command = "/apps/strategico/strategico.R"
      . " --cmd eval_ts" 
      . " --project.name " . $project_name
-     . " --id.min " . $id
+     . " --id.list " . $id
      . " --ts.string " . $ts
      . " --ts.start " . $_GET['period_start']
      . " --ts.freq " . $_GET['period_freq']
@@ -45,7 +45,7 @@
      echo "<br />";
      echo "<br />";
      $link = $output_path . "/report.html";
-     echo "Goto <a href=\"" . $link . "\">Report</a> page";
+     echo "Goto <a href=\"" . $link . "\">Report</a> page (if generated) or <a href=\"" . $output_path . "\">folder</a> page";
      } else
      echo "no post submit";
      ?>
@@ -54,7 +54,7 @@
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-20402785-2']);
+  _gaq.push(['_setAccount', 'UA-20402785-1']);
   _gaq.push(['_trackPageview']);
 
   (function() {
