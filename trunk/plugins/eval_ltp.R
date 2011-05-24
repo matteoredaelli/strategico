@@ -90,24 +90,40 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## write results in .RData
   if ("model" %in% project.config$save)
     save(file =  paste(output.path, "/model.RData", sep = ""), model)
+  
+  predictions.periods <-Period.BuildRange(period.start=project.config$period.end,
+                                          period.freq=project.config$period.freq,
+                                          n=param$n.ahead, shift=1)
 
+  ## RELEASE 1: more columsn, less rows. slow extraction of betModel values
+  ##data.predicted <- NULL
+  ##prediction.null <- rep(0, param$n.ahead)
+  ##for (m in models.names) {
+  ##  if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
+  ##    data.predicted <- cbind(data.predicted, prediction.null)
+  ##  else
+  ##    data.predicted <- cbind(data.predicted, model[[m]]$prediction)
+  ##}
+  ##data.predicted <- data.frame(data.predicted)
+
+  ## RELEASE 2: more rows, less columns. faster extraction of betModel values
+  ## we could create partioned tables..
+  
   data.predicted <- NULL
-  prediction.null <- rep(0, param$n.ahead)
+  prediction.null <- cbind(id, NA, V=rep(0, param$n.ahead),PERIOD=predictions.periods)
+  
   for (m in models.names) {
     if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
-      data.predicted <- cbind(data.predicted, prediction.null)
-    else
-      data.predicted <- cbind(data.predicted, model[[m]]$prediction)
+      data.predicted <- rbind(data.predicted, prediction.null)
+    else {
+      model.predicted <- model[[m]]$prediction
+      model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
+      data.predicted <- rbind(data.predicted, model.predicted)
+    }
   }
-  
+
   data.predicted <- data.frame(data.predicted)
-  predictions.periods <- Period.BuildRange(period.start=project.config$period.end,
-                                           period.freq=project.config$period.freq,
-                                           n=param$n.ahead, shift=1)
-  
-  rownames(data.predicted) <- predictions.periods
-  colnames(data.predicted) <- models.names
-  ##names(data.predicted) <- models.names
+  colnames(data.predicted) <- c("item_id", "model", "PERIOD", "V")
   
   if (!is.null(model$BestModel)) {
     logger(WARN, paste("Best Model is ", model$BestModel))
@@ -147,8 +163,10 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       
     tablename = DB.GetTableNameResults(project.name, value)
     logger(DEBUG, paste("Saving data to table", tablename))
-    Item.Db.SaveData(id=id, data=data.predicted, tablename=tablename, db.channel=db.channel)
-
+  
+    DB.ImportData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+    
   }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
   if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {
