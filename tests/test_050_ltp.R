@@ -219,7 +219,7 @@ test.00.EvalTSString <- function() {
 test.Item.DB.GetResults <- function() { 
   records <- Item.DB.GetResults(project.name, id=1, value="V2", db.channel=db.channel)
   
-  checkEquals(project.config$param$n.ahead,
+  checkEquals(project.config$param$n.ahead * 5,
               nrow(records)
               )
   checkEquals(1,
