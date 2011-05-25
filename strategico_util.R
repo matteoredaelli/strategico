@@ -122,7 +122,7 @@ EvalTS <- function(project.name, id=NULL, ts.values, ts.periods, period.start, p
                    calculate.period.end=TRUE, param=NULL, project.config, value="V1", db.channel ) {
   item.data <- cbind(ts.values)
   rownames(item.data) <-ts.periods
-  colnames(item.data) <- c(value)
+  colnames(item.data) <- "V"
 
   project.config$period.start <-  period.start
   
@@ -314,7 +314,7 @@ SubsetByID <- function(data, id) {
   colnames(item_data) <- vals.names
   save(item_data, file= paste(folder, "item.Rdata", sep="/"))
   
-  if("items_csv"%in%project.config$save)
+  if("data_csv"%in%project.config$save)
     write.csv(item_data,
               file= paste(folder, "item.csv", sep="/"),
               row.names = FALSE

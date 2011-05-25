@@ -18,11 +18,17 @@
 
 MySource(filename="ltp.R", file.path=GetPluginsPath())
 
-ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) {
+ltp.BuildOneRowSummary <- function(id, model, param) {
   models.names <- ltp.GetModels()$name
+  no.values <- nrow(model$values)
+  
+  return.code <- 0
 
-  if (is.null(manual.model))
-    manual.model <- model$BestModel
+  if (is.null(model$BestModel))
+    return.code <- 1
+
+  if (no.values == 0)
+    return.code <- 2
   
   stats=as.list(rep(NA,11))
   names(stats)=c("BestModel",
@@ -33,7 +39,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
   ##mean values (ie observed data)
   stats["MeanValues"]=mean(model$values,na.rm=TRUE)
   ##nunb of points (observations)
-  no.values <- nrow(model$values)
+ 
 
   stats["Points"] <- no.values
   ##non zero values
@@ -67,7 +73,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
   }
 
   stats["Timestamp"] = as.character(Sys.time())
-  stats["ManualModel"] = manual.model
+  stats["TotModels"] = length(param$try.models)
   stats["Parameters"] = Param.ToString(param)
   stats["ReturnCode"] = return.code
   stats["Run"] = 0
@@ -115,7 +121,6 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   if (!is.null(model$BestModel)) {
     logger(WARN, paste("Best Model is ", model$BestModel))
     result <- data.frame(model[[model$BestModel]]$prediction)
-    return.code <- 0
 
     ## RELEASE 2: more rows, less columns. faster extraction of betModel values
     ## we could create partioned tables..
@@ -130,7 +135,6 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       }
     }
 
-    
     ## write report
     if("images"%in%project.config$save) {
       PlotLtpResults(model, directory=output.path)
@@ -142,7 +146,6 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     }
   }
   else {
-    return.code <- 1 
     logger(INFO, "Strategico didn't select any BestModel")
     result <- data.frame(rep(0, param$n.ahead))
     data.predicted <- prediction.null
@@ -162,7 +165,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
   }
   
-  if ("csv" %in% project.config$save) {
+  if ("data_csv" %in% project.config$save) {
     write.csv(data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))
   }
   
@@ -180,34 +183,31 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     
   }
   ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
-  if (("summary_db" %in% project.config$save) | ("summary_csv" %in% project.config$save)) {
-    manual.model <- "no"
-    if (length(param$try.models) == 1)
-      manual.model <- param$try.models[1]
-    onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, manual.model, param, return.code)
-  }
-  if ("summary_csv" %in% project.config$save) {
-    write.table(file = paste(output.path, "/item-summary.csv", sep = ""),
-                onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
-  }
-  if ("summary_db" %in% project.config$save) {
-    tablename = DB.GetTableNameSummary(project.name, value)
-    DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
-
-    if (!is.null(model$BestModel)) {
-      ## Summary Models
-      summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
-      summary.models$selected <- NULL
-      tablename = DB.GetTableNameSummaryModels(project.name, value)
-      data = cbind(item_id=id, model=rownames(summary.models), summary.models)
-      DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
+  if ("summary" %in% project.config$save) {
+    onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
+    if ("data_csv" %in% project.config$save) {
+      write.table(file = paste(output.path, "/item-summary.csv", sep = ""),
+                  onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
+    }
+    if ("data_db" %in% project.config$save) {
+      tablename = DB.GetTableNameSummary(project.name, value)
+      DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+   
+      if (!is.null(model$BestModel)) {
+        ## Summary Models
+        summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
+        summary.models$selected <- NULL
+        tablename = DB.GetTableNameSummaryModels(project.name, value)
+        data = cbind(item_id=id, model=rownames(summary.models), summary.models)
+        DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                      rownames=NULL, addPK=FALSE, db.channel=db.channel)
+      }
     }
   }
-
+  
   result
 }
- 
+
 ltp.GetModels <- function() {
   models <- rbind(
                   c("linear", "LinearModel", "green"),

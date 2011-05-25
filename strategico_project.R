@@ -174,7 +174,6 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   
   project.config <- Project.GetConfig(project.name=project.name)
 
-  
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
   key_fields <- .GetFields( colnames(project.data) ,"key" )
@@ -190,6 +189,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   
   project.items=leaves
   if ("gitems" %in% project.config$save) {
+    logger("INFO", "Finding gitems")
     ## save also gitems (only key1 values, key1+key2 values, ...
     for (i in (ncol(leaves)):2){
       leaves[,i]=""
@@ -204,18 +204,26 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## allvalues.keys <- rep('', length(key_fields))
   ## project.items <- rbind(project.items, allvalues.keys)
 
-  
   ## adding ID column
   project.items <- cbind(id=1:nrow(project.items), project.items)
+  logger("WARN", paste("Saving Project Items to file", outfile))
   save( project.items, file=outfile)
 
-  if ("items_csv" %in% project.config$save)
+  if ("data_csv" %in% project.config$save) {
+    outfile <- paste(project.path, "/project_items.csv", sep="")
+    logger("WARN", paste("Saving Project Items to file", outfile))
     write.csv(project.items,
-              file= paste(project.path, "/project_items.csv", sep=""),
+              file=outfile,
               row.names = FALSE
               )
-
-  if ("items_db" %in% project.config$save) {
+  }
+  
+  ## SAVING PROJECT_DATA.RDATA
+  filename <- paste(project.path, "project_data.Rdata", sep="/")
+  logger("WARN", paste("Saving Project data to file", filename))
+  save(project.data, file=filename)
+  
+  if ("data_db" %in% project.config$save) {
     tablename = DB.GetTableNameProjectItems(project.config$project.name)
     ## preparing data for prymary key in DB  (id must be the rownames)
     project.items.orig <- project.items
@@ -225,12 +233,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
     DB.ImportData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
     
     project.items <- project.items.orig
-  }
-  
-  outfile <- paste(project.path, "project_data.Rdata", sep="/") 
-  save(project.data, file=outfile)
-  
-  if ("data_db" %in% project.config$save) {
+
     ## Putting item ID inside project.data
     #project.data.db <- merge(project.items, project.data)
     tablename = DB.GetTableNameProjectData(project.config$project.name)
