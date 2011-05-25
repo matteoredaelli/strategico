@@ -21,6 +21,10 @@ Project.FS.Empty <- function(project.name, recursive = TRUE) {
     project.path <- paste(Project.GetPath(project.name), "/[0-9]*", sep="")
     logger(INFO, paste("Deleting project path:", project.path))
     unlink(project.path, recursive=recursive)
+    
+    project.path <- paste(Project.GetPath(project.name), "/project*", sep="")
+    logger(INFO, paste("Deleting project files:", project.path))
+    unlink(project.path)
   }
 }
 
