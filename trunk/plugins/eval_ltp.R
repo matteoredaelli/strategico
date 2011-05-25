@@ -79,8 +79,7 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   stats["Run"] = 0
   
   ##clean out the (possible) Inf values
-  stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))
-	
+  stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))	
   summ=as.data.frame(stats)
   rownames(summ) <- c(id)
   summ
@@ -95,36 +94,90 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0)
 
   models.names <- ltp.GetModels()$name
+
+  ## ###################################################################################
+  ## Saving model.RData
+  ## ###################################################################################
+
+  if ("model" %in% project.config$save) {
+    filename <- paste(output.path, "/model.RData", sep = "")
+    logger(WARN, paste("Saving Model to file", filename))
+    save(file=filename, model)
+  }
+
+  ## ###################################################################################
+  ## Saving Normalized Data
+  ## ###################################################################################
+    
+  data.normalized <- model$values[, , drop = FALSE]
+  if ( nrow(data.normalized) == 0) {
+    logger(INFO, "No records in normalized data. No saving to DB")
+    data.normalized <- NULL
+  } else {
+    data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
+
+    if ("data_db" %in% project.config$save) {
+      tablename = DB.GetTableNameNormalizedData(project.name, value)
+      DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                    rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+    }
+    else
+      if ("data_csv" %in% project.config$save) {
+        write.csv(data.predicted, file = paste(output.path, "/item-data-norm-", value,".csv", sep = ""))
+      }
+  }
   
-  ## write results in .RData
-  if ("model" %in% project.config$save)
-    save(file =  paste(output.path, "/model.RData", sep = ""), model)
+  ## ###################################################################################
+  ## Saving Summary Data
+  ## ###################################################################################
   
+  if ("summary" %in% project.config$save) {
+    onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
+        
+    if (is.null(model$BestModel))
+      summary.models <- cbind(item_id=id, model=NULL)
+    else {
+      summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
+      summary.models$selected <- NULL
+      summary.models = cbind(item_id=id, model=rownames(summary.models), summary.models)
+    }
+    
+    if  ("data_db" %in% project.config$save) {
+      ## TODO: fails if normalized data is empty
+      ## ./strategico.R --cmd eval_items --id.list 5 -n sample
+      tablename = DB.GetTableNameSummary(project.name, value)
+      DB.ImportData(onerow.summ[onerow.summ], tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+
+      tablename = DB.GetTableNameSummaryModels(project.name, value)
+      DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
+    }
+    else
+      if ("data_csv" %in% project.config$save) {
+        write.table(file = paste(output.path, "/item-summary-", value, ".csv", sep = ""),
+                    onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
+        write.table(file = paste(output.path, "/item-summary-models-", value, ".csv", sep = ""),
+                    summary.models, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
+      }
+  }
+  
+  ## ###################################################################################
+  ## Saving Predicted Data
+  ## ###################################################################################
   predictions.periods <-Period.BuildRange(period.start=project.config$period.end,
                                           period.freq=project.config$period.freq,
                                           n=param$n.ahead, shift=1)
-
-  ## RELEASE 1: more columsn, less rows. slow extraction of betModel values
-  ##data.predicted <- NULL
-  ##prediction.null <- rep(0, param$n.ahead)
-  ##for (m in models.names) {
-  ##  if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
-  ##    data.predicted <- cbind(data.predicted, prediction.null)
-  ##  else
-  ##    data.predicted <- cbind(data.predicted, model[[m]]$prediction)
-  ##}
-  ##data.predicted <- data.frame(data.predicted)
-
   data.predicted <- NULL
-  prediction.null <- cbind(id, NA, V=rep(0, param$n.ahead),PERIOD=predictions.periods)
+  prediction.null <- cbind(id, NA,PERIOD=predictions.periods, V=rep(0, param$n.ahead))
   
-  if (!is.null(model$BestModel)) {
+  if (is.null(model$BestModel)) {
+    logger(INFO, "NO BestModel found ;-(")
+    result <- data.frame(rep(0, param$n.ahead))
+    data.predicted <- prediction.null
+  }
+  else {
     logger(WARN, paste("Best Model is ", model$BestModel))
     result <- data.frame(model[[model$BestModel]]$prediction)
-
-    ## RELEASE 2: more rows, less columns. faster extraction of betModel values
-    ## we could create partioned tables..
-    
     for (m in models.names) {
       if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
         data.predicted <- rbind(data.predicted, prediction.null)
@@ -133,78 +186,38 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
         model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
         data.predicted <- rbind(data.predicted, model.predicted)
       }
-    }
-
-    ## write report
-    if("images"%in%project.config$save) {
-      PlotLtpResults(model, directory=output.path)
-    }
-    
-    if("report"%in%project.config$save) {
-      ##html.form.eval <- GetStrHTMLformItem.Eval(project.path, .Item.GetPath(keys), value, param)
-      ltp.HTMLreport(model, id, value, project.config$values[value], param, directory=output.path)
-    }
+    } # for
   }
-  else {
-    logger(INFO, "Strategico didn't select any BestModel")
-    result <- data.frame(rep(0, param$n.ahead))
-    data.predicted <- prediction.null
-  }
-
   data.predicted <- data.frame(data.predicted)
   colnames(data.predicted) <- c("item_id", "model", "PERIOD", "V")
   
   rownames(result) <- predictions.periods
   colnames(result) <- "V"
-  
-  data.normalized <- model$values[, , drop = FALSE]
-  if ( nrow(data.normalized) == 0) {
-    logger(INFO, "No records in normalized data. No saving to DB")
-    data.normalized <- NULL
-  } else {
-    data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
-  }
-  
-  if ("data_csv" %in% project.config$save) {
-    write.csv(data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))
-  }
-  
-  if ("data_db" %in% project.config$save) {
 
-    if (!is.null(data.normalized)) {
-      tablename = DB.GetTableNameNormalizedData(project.name, value)
-      DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                    rownames=FALSE, addPK=FALSE, db.channel=db.channel)
-    }
-    
+  if ("data_db" %in% project.config$save) {   
     tablename = DB.GetTableNameResults(project.name, value)  
     DB.ImportData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                   rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+  }
+  else
+    if ("data_csv" %in% project.config$save) 
+      write.csv(data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))  
+
+  if (!is.null(model$BestModel)) {
+    ## ###################################################################################
+    ## Creating Saving Images
+    ## ###################################################################################
+    if ("images"%in%project.config$save) {
+      PlotLtpResults(model, directory=output.path)
+    }
     
-  }
-  ## create a single-line summary with short summary (to be merged in report-summary.csv or in the DB, see below)
-  if ("summary" %in% project.config$save) {
-    onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
-    if ("data_csv" %in% project.config$save) {
-      write.table(file = paste(output.path, "/item-summary.csv", sep = ""),
-                  onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
-    }
-    if ("data_db" %in% project.config$save) {
-      tablename = DB.GetTableNameSummary(project.name, value)
-      DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
-   
-      if (!is.null(model$BestModel)) {
-        ## Summary Models
-        summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
-        summary.models$selected <- NULL
-        tablename = DB.GetTableNameSummaryModels(project.name, value)
-        data = cbind(item_id=id, model=rownames(summary.models), summary.models)
-        DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                      rownames=NULL, addPK=FALSE, db.channel=db.channel)
-      }
+    ## ###################################################################################
+    ## Creating and Saving Reports
+    ## ###################################################################################
+    if ("report"%in%project.config$save) {
+      ltp.HTMLreport(model, id, value, project.config$values[value], param, directory=output.path)
     }
   }
-  
   result
 }
 
