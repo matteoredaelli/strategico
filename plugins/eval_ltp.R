@@ -24,25 +24,27 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
   if (is.null(manual.model))
     manual.model <- model$BestModel
   
-  stats=as.list(rep(NA,16))
-  names(stats)=c("BestModel","R2","AIC","ICwidth","maxJump",
-         "VarCoeff","Points","NotZeroPoints","LastNotEqualValues",
+  stats=as.list(rep(NA,11))
+  names(stats)=c("BestModel",
+         "Points","NotZeroPoints","LastNotEqualValues",
          "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
          "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
   ##stats["id"] <- id
   ##mean values (ie observed data)
   stats["MeanValues"]=mean(model$values,na.rm=TRUE)
   ##nunb of points (observations)
-  stats["Points"]=nrow(model$values)
-  ##non zero values
-  stats["NotZeroPoints"]=ifelse(nrow(model$values)==0,0, sum(model$values!=0))
+  no.values <- nrow(model$values)
 
-  if(!is.null(model$BestModel)){
-    stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
+  stats["Points"] <- no.values
+  ##non zero values
+  stats["NotZeroPoints"]=ifelse(no.values==0,0, sum(model$values!=0))
+
+  if (!is.null(model$BestModel)) {
+    ##stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
     stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
 
     ##find (che cum sum of) not equal (ie constant) consecutive values
-    temp=cumsum((model$values[-1,]-model$values[-nrow(model$values),])==0)
+    temp=cumsum((model$values[-1,]-model$values[-no.values,])==0)
     ##length of last not-constant consecutives serie of values
     stats["LastNotEqualValues"]=sum(temp==max(temp))-1
 		
@@ -51,7 +53,7 @@ ltp.BuildOneRowSummary <- function(id, model, manual.model, param, return.code) 
     ##mean predicted over mean values (ie observed data)
     stats["MeanPredictedRatioMeanValues"]=stats[["MeanPredicted"]]/stats[["MeanValues"]]
     ##and rounding
-		stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")]=lapply(stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")],round,3)
+    stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")]=lapply(stats[c("MeanPredicted","MeanValues","MeanPredictedRatioMeanValues")],round,3)
     ##sd predicted over sd values (ie observed data)
     stats["SdPredictedRatioSdValues"]=round(sd(model[[model$BestModel]]$prediction,na.rm=T)/sd(model$values),3)
 		
@@ -107,29 +109,27 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ##}
   ##data.predicted <- data.frame(data.predicted)
 
-  ## RELEASE 2: more rows, less columns. faster extraction of betModel values
-  ## we could create partioned tables..
-  
   data.predicted <- NULL
   prediction.null <- cbind(id, NA, V=rep(0, param$n.ahead),PERIOD=predictions.periods)
-  
-  for (m in models.names) {
-    if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
-      data.predicted <- rbind(data.predicted, prediction.null)
-    else {
-      model.predicted <- model[[m]]$prediction
-      model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
-      data.predicted <- rbind(data.predicted, model.predicted)
-    }
-  }
-
-  data.predicted <- data.frame(data.predicted)
-  colnames(data.predicted) <- c("item_id", "model", "PERIOD", "V")
   
   if (!is.null(model$BestModel)) {
     logger(WARN, paste("Best Model is ", model$BestModel))
     result <- data.frame(model[[model$BestModel]]$prediction)
     return.code <- 0
+
+    ## RELEASE 2: more rows, less columns. faster extraction of betModel values
+    ## we could create partioned tables..
+    
+    for (m in models.names) {
+      if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
+        data.predicted <- rbind(data.predicted, prediction.null)
+      else {
+        model.predicted <- model[[m]]$prediction
+        model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
+        data.predicted <- rbind(data.predicted, model.predicted)
+      }
+    }
+
     
     ## write report
     if("images"%in%project.config$save) {
@@ -145,26 +145,36 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     return.code <- 1 
     logger(INFO, "Strategico didn't select any BestModel")
     result <- data.frame(rep(0, param$n.ahead))
+    data.predicted <- prediction.null
   }
 
+  data.predicted <- data.frame(data.predicted)
+  colnames(data.predicted) <- c("item_id", "model", "PERIOD", "V")
   
   rownames(result) <- predictions.periods
   colnames(result) <- "V"
   
-  data.normalized = model$values[, , drop = FALSE]
-  colnames(data.normalized) <- "V"
+  data.normalized <- model$values[, , drop = FALSE]
+  if ( nrow(data.normalized) == 0) {
+    logger(INFO, "No records in normalized data. No saving to DB")
+    data.normalized <- NULL
+  } else {
+    data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
+  }
   
   if ("csv" %in% project.config$save) {
     write.csv(data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))
   }
-  if ("data_db" %in% project.config$save) {
-    tablename = DB.GetTableNameNormalizedData(project.name, value)
-    logger(DEBUG, paste("Saving data to table", tablename))
-    Item.Db.SaveData(id=id, data=data.normalized, tablename=tablename, db.channel=db.channel)
-      
-    tablename = DB.GetTableNameResults(project.name, value)
-    logger(DEBUG, paste("Saving data to table", tablename))
   
+  if ("data_db" %in% project.config$save) {
+
+    if (!is.null(data.normalized)) {
+      tablename = DB.GetTableNameNormalizedData(project.name, value)
+      DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                    rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+    }
+    
+    tablename = DB.GetTableNameResults(project.name, value)  
     DB.ImportData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                   rownames=FALSE, addPK=FALSE, db.channel=db.channel)
     
@@ -182,7 +192,6 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   if ("summary_db" %in% project.config$save) {
     tablename = DB.GetTableNameSummary(project.name, value)
-    logger(DEBUG, paste("Saving data to table", tablename))
     DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
 
     if (!is.null(model$BestModel)) {
@@ -190,7 +199,6 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
       summary.models$selected <- NULL
       tablename = DB.GetTableNameSummaryModels(project.name, value)
-      logger(DEBUG, paste("Saving data to table", tablename))
       data = cbind(item_id=id, model=rownames(summary.models), summary.models)
       DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                     rownames=NULL, addPK=FALSE, db.channel=db.channel)
@@ -213,7 +221,7 @@ ltp.GetModels <- function() {
 }
 
 ltp.GetModelsComparisonTable <-  function(obj) {
-  
+ 
   ReporTable = matrix("--",5,6)
   colnames(ReporTable) = c("formula", "R2","AIC","IC.width","maxJump","VarCoeff")
   rownames(ReporTable) <- ltp.GetModels()$name

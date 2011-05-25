@@ -46,15 +46,16 @@ DB.EmptyTable <- function(tablename, db.channel) {
 
 DB.ImportData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
                            rownames=FALSE, append=TRUE, addPK=FALSE, db.channel) {
+  logger(DEBUG, paste("Importing data to table", tablename))
   delete_sql <- paste("delete from", tablename)
   
   if(!is.null(id)) 
     delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
 
-  logger(DEBUG, delete_sql)
+  ##logger(DEBUG, delete_sql)
   DB.RunSQLQuery(sql_statement=delete_sql, db.channel=db.channel)
 
-
+  logger(DEBUG, paste("Saving data to table", tablename))
   sqlSave(db.channel, data, tablename=tablename, rownames=rownames,
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
 }
