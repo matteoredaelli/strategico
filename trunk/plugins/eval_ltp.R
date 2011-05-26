@@ -44,7 +44,12 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   stats["Points"] <- no.values
   ##non zero values
   stats["NotZeroPoints"]=ifelse(no.values==0,0, sum(model$values!=0))
-
+  stats["BestModel"] = model$BestModel
+  stats["Timestamp"] = as.character(Sys.time())
+  stats["TotModels"] = length(param$try.models)
+  stats["Parameters"] = Param.ToString(param)
+  stats["ReturnCode"] = return.code
+  stats["Run"] = 0
   if (!is.null(model$BestModel)) {
     ##stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
     stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
@@ -69,14 +74,9 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
     st=names(which.min(unlist(lapply(model[models.names],function(x) x$IC.width))))
     stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
     ##note: stat is changed from numeric to string
-    stats["BestModel"] = model$BestModel
+   
   }
 
-  stats["Timestamp"] = as.character(Sys.time())
-  stats["TotModels"] = length(param$try.models)
-  stats["Parameters"] = Param.ToString(param)
-  stats["ReturnCode"] = return.code
-  stats["Run"] = 0
   
   ##clean out the (possible) Inf values
   stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))	
@@ -146,7 +146,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       ## TODO: fails if normalized data is empty
       ## ./strategico.R --cmd eval_items --id.list 5 -n sample
       tablename = DB.GetTableNameSummary(project.name, value)
-      DB.ImportData(onerow.summ[onerow.summ], tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+      DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
 
       tablename = DB.GetTableNameSummaryModels(project.name, value)
       DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
