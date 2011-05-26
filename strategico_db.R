@@ -56,7 +56,7 @@ DB.ImportData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
   DB.RunSQLQuery(sql_statement=delete_sql, db.channel=db.channel)
 
   logger(DEBUG, paste("Saving data to table", tablename))
-  sqlSave(db.channel, data, tablename=tablename, rownames=rownames,
+  sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
 }
 

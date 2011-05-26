@@ -30,8 +30,8 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   if (no.values == 0)
     return.code <- 2
   
-  stats=as.list(rep(NA,11))
-  names(stats)=c("BestModel",
+  stats=as.list(rep(NA,12))
+  names(stats)=c("BestModel","ICwidth",
          "Points","NotZeroPoints","LastNotEqualValues",
          "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
          "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
@@ -44,13 +44,14 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   stats["Points"] <- no.values
   ##non zero values
   stats["NotZeroPoints"]=ifelse(no.values==0,0, sum(model$values!=0))
-  stats["BestModel"] = model$BestModel
-  stats["Timestamp"] = as.character(Sys.time())
+  stats["BestModel"] = ifelse(is.null(model$BestModel), NA, model$BestModel)
+  stats["Timestamp"] = Sys.time()
   stats["TotModels"] = length(param$try.models)
   stats["Parameters"] = Param.ToString(param)
   stats["ReturnCode"] = return.code
   stats["Run"] = 0
-  if (!is.null(model$BestModel)) {
+  stats["ICwidth"]=NA
+  if (!is.null(model$BestModel) & (stats["MeanValues"] != 0) ) {
     ##stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
     stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
 
@@ -74,13 +75,12 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
     st=names(which.min(unlist(lapply(model[models.names],function(x) x$IC.width))))
     stats["BestICNoOutRangeExclude"]=ifelse(is.null(st),"None",st)
     ##note: stat is changed from numeric to string
-   
   }
 
   
   ##clean out the (possible) Inf values
   stats= lapply(stats,function(x) ifelse(is.numeric(x) & (!is.finite(x)), NA,x))	
-  summ=as.data.frame(stats)
+  summ=data.frame(stats)
   rownames(summ) <- c(id)
   summ
 }
@@ -134,13 +134,11 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   if ("summary" %in% project.config$save) {
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
         
-    if (is.null(model$BestModel))
-      summary.models <- cbind(item_id=id, model=NULL)
-    else {
+    if (!is.null(model$BestModel)) {
       summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
       summary.models$selected <- NULL
       summary.models = cbind(item_id=id, model=rownames(summary.models), summary.models)
-    }
+     }
     
     if  ("data_db" %in% project.config$save) {
       ## TODO: fails if normalized data is empty
@@ -148,16 +146,19 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       tablename = DB.GetTableNameSummary(project.name, value)
       DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
 
-      tablename = DB.GetTableNameSummaryModels(project.name, value)
-      DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
+      if (!is.null(model$BestModel)) {
+        tablename = DB.GetTableNameSummaryModels(project.name, value)
+        DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                      rownames=NULL, addPK=FALSE, db.channel=db.channel)
+      }
     }
     else
       if ("data_csv" %in% project.config$save) {
         write.table(file = paste(output.path, "/item-summary-", value, ".csv", sep = ""),
                     onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
-        write.table(file = paste(output.path, "/item-summary-models-", value, ".csv", sep = ""),
-                    summary.models, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
+        if (!is.null(model$BestModel)) 
+          write.table(file = paste(output.path, "/item-summary-models-", value, ".csv", sep = ""),
+                      summary.models, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
       }
   }
   
@@ -234,9 +235,19 @@ ltp.GetModels <- function() {
 }
 
 ltp.GetModelsComparisonTable <-  function(obj) {
- 
+  
+  col.names <- c("formula", "R2","AIC","IC.width","maxJump","VarCoeff")
+
+  if (is.null(obj$BestModel)) {
+    ReporTable <- cbind( rep(NA, length(col.names)))
+    colnames(ReporTable) <- col.names
+    rownames(ReporTable) <- "None"
+    return (ReporTable)
+  }
+  
   ReporTable = matrix("--",5,6)
-  colnames(ReporTable) = c("formula", "R2","AIC","IC.width","maxJump","VarCoeff")
+
+  colnames(ReporTable) <- col.names
   rownames(ReporTable) <- ltp.GetModels()$name
 
   indicator.list <- c("R2","AIC", "IC.width","maxJump","VarCoeff")
