@@ -123,7 +123,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     }
     else
       if ("data_csv" %in% project.config$save) {
-        write.csv(data.predicted, file = paste(output.path, "/item-data-norm-", value,".csv", sep = ""))
+        write.csv(data.normalized, file = paste(output.path, "/item-data-norm-", value,".csv", sep = ""))
       }
   }
   
@@ -202,7 +202,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   else
     if ("data_csv" %in% project.config$save) 
-      write.csv(data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))  
+      write.csv(x=data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))  
 
   if (!is.null(model$BestModel)) {
     ## ###################################################################################
