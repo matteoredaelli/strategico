@@ -60,7 +60,7 @@ BuildFormElement_project <- function(label="Project", default=NULL) {
   BuildHtmlElement_select(label=label, name="project",list.values= Project.GetList(), default=default)
 }
 
-BuildFormElement_keys <- function(project.name=NULL, project.config=NULL, project.items=NULL, defaults, sep=" ") {
+BuildFormElement_keys <- function(project.name=NULL, project.config=NULL, project.items=NULL, default=NULL, sep=" ") {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
   if (is.null(project.items))
@@ -71,7 +71,7 @@ BuildFormElement_keys <- function(project.name=NULL, project.config=NULL, projec
   result <- ""
   for (k in 1:length(keys)) 
     result <- paste(result,
-                    BuildHtmlElement_select(project.config$keys[k], keys[k], list.values[[k]], defaults[k]),
+                    BuildHtmlElement_select(label=project.config$keys[k], name=keys[k], list.values=list.values[[k]], default=ifelse(is.null(default),NULL,default[k])),
                     sep=sep)
   result
 }
