@@ -38,14 +38,15 @@ library(hwriter)
 #library(tseries, quietly=TRUE) # works only for the latest R releases
 library(tseries, verbose=FALSE)
 library(forecast)
-library(ast)
+#library(ast)
   
 ############## ltp()
 
 ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", rule.noMaxOver = Inf, n.ahead = 4, logtransform = TRUE,logtransform.es=FALSE, 
                 period.freq=2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
                 xreg.arima = NULL,idDiff=FALSE,idLog=FALSE, stationary.arima = FALSE, period.start = c(1997, 1),
-                period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negTo0 = TRUE, toInteger = TRUE) {
+                period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negTo0 = TRUE, toInteger = TRUE,
+				naive.values="last") {
   
 #####################################
   ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
@@ -64,14 +65,22 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
   if(idLog) logtransform = IDlog(product,period.start)
   
   if (is.null(try.models)) 
-    try.models = c("mean","trend","lm", "arima", "es")
+    try.models = ltp.GetModels("id")
 
-  AIC <- rep(NA,5)
-  ## TODO Using ltp.GetModels()[,"name"]
-  names(AIC) <- c("Mean","Trend","ExponentialSmooth","LinearModel","Arima")
+  AIC <- rep(NA,6)
+  names(AIC) <- ltp.GetModels("name")
   IC.width <- R2 <- VarCoeff <- AIC
-  NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima
+  NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima -> Naive
   
+  if (("naive" %in% try.models)) {
+    Naive = mod.naive(product = product, n.ahead = n.ahead, 
+      period.start = period.start, period.freq = period.freq, 
+      logtransform = FALSE, negTo0=negTo0,toInteger=toInteger,naive.values=naive.values)
+    AIC["Naive"] = Naive$AIC
+    IC.width["Naive"] = Naive$IC.width
+    R2["Naive"] = Naive$R2
+	VarCoeff["Naive"] = Naive$VarCoeff
+  }
   if (("mean" %in% try.models)&(n >= period.freq )) {
     Mean = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
@@ -125,7 +134,7 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
   ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff<rule.noMaxOver,1,NA))), 
                                 BestAIC = which.min(AIC*(ifelse(VarCoeff<rule.noMaxOver,1,NA))) )		
   results = list(values = product, Mean = Mean, Trend = Trend, LinearModel = LinearModel, 
-    ExponentialSmooth = ExponentialSmooth, Arima = Arima, BestModel = names(ID.model), rule=rule, rule.noMaxOver=rule.noMaxOver)
+    ExponentialSmooth = ExponentialSmooth, Arima = Arima, Naive = Naive, BestModel = names(ID.model), rule=rule, rule.noMaxOver=rule.noMaxOver)
   results
 }
 
@@ -485,6 +494,66 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     IC = IC.pred.modle, AIC = es.AIC, R2 = es.R2, IC.width = ic.delta, maxJump=maxJump,  VarCoeff=VarCoeff, Residuals = res)
   lista.es
 }
+###############################################
+############## best.lm()
+mod.naive <- function(product, n.ahead, period.start, period.freq, logtransform, negTo0=negTo0,toInteger=toInteger,naive.values="last") {
+  
+  y = as.vector(product)
+  n = max(length(y), nrow(y))
+  y = ts(y, start = period.start, frequency = period.freq)
+  attr(y, "product") = names(product)
+  
+  if(is.null(naive.values)) naive.values="last"
+  
+  if(is.character(naive.values)){
+	if(naive.values=="last"){
+	    pred = y[length(y)]
+	} else if(naive.values=="lastPeriod"){
+		pred = y[(length(y)-period.freq)+(1:period.freq)] ## se length(y)<period.freq il risultato perde senso
+	}
+  } else {
+	pred = naive.values 
+  }
+  pred=data.frame(pred = rep(pred,length=n.ahead))
+  
+  if (logtransform) {
+    pred.modnaive = exp(pred)
+  }
+  else {
+    pred.modnaive = pred
+  }
+  IC.pred.modnaive = list(upr = pred.modnaive, lwr = pred.modnaive)
+	  
+  if(negTo0) {
+	pred.modnaive[pred.modnaive<0]=0
+	IC.pred.modnaive$upr[IC.pred.modnaive$upr<0]=0
+	IC.pred.modnaive$lwr[IC.pred.modnaive$lwr<0]=0
+	}
+  if(toInteger) {
+	pred.modnaive=round(pred.modnaive,0)
+	}
+  
+  pred.modnaive=ts(pred.modnaive, start=.incSampleTime(now=end(y), period.freq = period.freq) , frequency=period.freq)
+  
+  naive.AIC = Inf
+  naive.R2 = NA
+  ic.delta = Inf
+  maxJump = Inf
+  VarCoeff= Inf
+  # m=matrix(NA,period.freq, ceiling((dim(pred.modnaive)[1])/period.freq)+1)
+  # m[1:(length(pred.modnaive)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modnaive)
+  # m=apply(m,2,mean,na.rm=TRUE)
+  # sdJumps = sd(m[-1]/m[-length(m)])
+  res = y
+                                        #media_errori = mean(errori_naive)
+  lista.naive = list(ts.product = y, model = NULL, prediction = pred.modnaive, 
+    IC = IC.pred.modnaive, AIC = naive.AIC, R2 = naive.R2, IC.width = ic.delta, maxJump=maxJump,  VarCoeff=VarCoeff, Residuals = res)
+  lista.naive
+}
+
+########################################
+
+
 
 ## funzione che calcola in modo automatico il numero delle differenze per l'arima
 IDdiff = function(y,period.freq){
@@ -523,7 +592,7 @@ IDlog = function(product,period.start){
 #####################################
 
 .plot.best = function(best, plot.trend =TRUE, color.ic, 
-  color.forecast, fies.name, title,filename="modelBest.png", width = width, height = height) {
+  color.forecast, title,filename="modelBest.png", width = width, height = height) {
   
   y = best$ts.product
   period.freq = frequency(y)
@@ -569,29 +638,23 @@ IDlog = function(product,period.start){
   dev.off()
 }
 
-.plot.all = function(model, color.forecast, plot.trend = TRUE, fies.name, title,filename="modelAll.png",width = width, height = height) {
+.plot.all = function(model, color.forecast, plot.trend = TRUE, title = "",filename="modelAll.png",width = width, height = height) {
   y = model[[model$BestModel]]$ts.product
   period.freq = frequency(y)
   end_serie = end(y)
   period.start = start(y)
   start_pred = .incSampleTime(period.freq = period.freq, now = end_serie)
   
-  pred=list(pred.lm = model[["LinearModel"]]$prediction,
-    pred.arima = model[["Arima"]]$prediction,
-	pred.es = model[["ExponentialSmooth"]]$prediction,
-    pred.trend = model[["Trend"]]$prediction,
-    pred.mean = model[["Mean"]]$prediction)
-  names(pred)=c("LinearModel","Arima","ExponentialSmooth","Trend","Mean")
   
+  pred=sapply(as.vector(ltp.GetModels("name")),function(name) model[[name]]$prediction)
   
   pred = lapply(pred, function(pr){ if (!is.null(pr))  if (!is.ts(pr)) pr = ts(pr, start = start_pred, frequency = period.freq); pr})
   
-  
                                         #concateno la prima prediction
   
-  p = lapply( pred, function(pr) {pr=append(as.vector(window(y, end = end_serie)), pr)
+  p = lapply( pred, function(pr) {pr=append(as.vector(window(y, end = end_serie)), pr); 
                                   pr= ts(pr, start = period.start, frequency = period.freq)})
-  
+  names(p)=ltp.GetModels("name")
   yy=list()
   for(i in which(sapply(p,function(yyy)!is.null(yyy) ))){
     if(!is.null(p[i])){ 
@@ -613,7 +676,7 @@ IDlog = function(product,period.start){
     lines(window(p[[i]], start = end_serie) , col = color.forecast[i], pch = "*", cex = 2, lwd = 2)
   }
   
-  legend(x = period.start[1], y = (sup + (sup/2)), legend = c("Linear Model","Arima" , "Exp. Smooth" , "Trend" ,"Mean" )[which(sapply(pred,function(pp)!is.null(pp) ))], 
+  legend(x = period.start[1], y = (sup + (sup/2)), legend = ltp.GetModels("legend")[which(sapply(pred,function(pp)!is.null(pp) ))], 
          col = color.forecast[names(color.forecast)[which(sapply(pred,function(pp)!is.null(pp) ))]], lty = 1, lwd = 2, horiz = FALSE, x.intersp = 1)
   if (plot.trend) {
     for(i in which(sapply(pred,function(yyy)!is.null(yyy) ))){
@@ -623,6 +686,8 @@ IDlog = function(product,period.start){
   } 
 dev.off()
   }
+  #.plot.all(res,height=400,width=600,title="prova",color.forecast=ltp.GetModels("color"))
+
 
 ####################### decidere per il nome grafico e filename
 
@@ -637,8 +702,8 @@ plot.ltp = function(model, plot.try.models = c("best",
   plot.trend = FALSE, title = "Time Series", filename,width = width, height = height) {
   
   if(is.null(color.forecast)) {
-	color.forecast=c("green", "red", "blue","gray","black")
-	names(color.forecast)=c("LinearModel","Arima","ExponentialSmooth","Trend","Mean")
+	color.forecast=as.vector(ltp.GetModels("color"))
+	names(color.forecast)=as.vector(ltp.GetModels("name"))
 	}
   
   for (i in plot.try.models) {
@@ -656,7 +721,7 @@ PlotLtpResults <- function(obj, directory=NULL, width=1000, height=600) {
   plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = obj$BestModel ,filename=file.path(directory, "best_model.png"),width = width, height = height)
         
   ## plot ALL models
-  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = "All Predictors" ,filename=file.path(directory, "all_models.png"),width = width, height = height)
+  plot.ltp(obj, plot.try.models = c("all"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = "All Models" ,filename=file.path(directory, "all_models.png"),width = width, height = height)
 }
 
 
@@ -689,8 +754,8 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   #html.form.eval = GetStrHTMLformItem.Eval(project.path, .Item.GetPath(keys), value, param)
   #cat(html.form.eval, append = TRUE, file = html.filename)  
 
-  ## TODO Using ltp.GetModels()[,"name"]
-  notNA <- sapply(c("LinearModel", "Arima", "ExponentialSmooth","Trend","Mean"), 
+  ## TODO Using ltp.GetModels("name")
+  notNA <- sapply(ltp.GetModels("name"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
   
     for (modType in names(notNA[notNA])) {
@@ -854,3 +919,5 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
      eq3 = paste("sea(t)=","(1-",model$par[4],") * sea(t-f) + ",model$par[4]," * (y(t) / (level(t-1) - drift(t-1)) )",sep="") }
  c(eq1,eq2,eq3)
  }
+
+ 

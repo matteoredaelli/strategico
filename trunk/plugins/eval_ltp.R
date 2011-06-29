@@ -19,7 +19,7 @@
 MySource(filename="ltp.R", file.path=GetPluginsPath())
 
 ltp.BuildOneRowSummary <- function(id, model, param) {
-  models.names <- ltp.GetModels()$name
+  models.names <- ltp.GetModels("name")
   no.values <- nrow(model$values)
   
   return.code <- 0
@@ -91,9 +91,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = project.config$period.freq, 
                period.start = project.config$period.start, period.end = project.config$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
-               formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0)
+               formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0,naive.values=param$naive.values)
 
-  models.names <- ltp.GetModels()$name
+  models.names <- ltp.GetModels("name")
 
   ## ###################################################################################
   ## Saving model.RData
@@ -221,18 +221,24 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   result
 }
-
-ltp.GetModels <- function() {
-  models <- rbind(
-                  c("linear", "LinearModel", "green"),
-                  c("arima", "Arima", "red"),
-                  c("es", "ExponentialSmooth", "blue"),
-                  c("trend", "Trend", "gray"),
-                  c("mean", "Mean", "black")
-                  )
-  colnames(models) <- c("id", "name", "color")
-  data.frame(models)
+##################################
+ ltp.GetModels <- function(what=NULL) {
+	model=data.frame(id=c("linear", "arima","es", "trend", "mean","naive"),
+			name=c("LinearModel", "Arima", "ExponentialSmooth", "Trend", "Mean","Naive"),
+			color = c("green", "red", "blue", "gray", "black","yellow"),
+			legend= c("Linear Model","Arima" , "Exp. Smooth" , "Trend" ,"Mean", "Naive"))
+	rownames(model)=model$id
+	
+	if(!is.null(what)) { 
+		names=model$id
+		model=as.character(model[,what])
+		names(model)=names
+		}
+  
+  model
 }
+#es: ltp.GetModels("es")
+
 
 ltp.GetModelsComparisonTable <-  function(obj) {
   
@@ -248,7 +254,7 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   ReporTable = matrix("--",5,6)
 
   colnames(ReporTable) <- col.names
-  rownames(ReporTable) <- ltp.GetModels()$name
+  rownames(ReporTable) <- ltp.GetModels("name")
 
   indicator.list <- c("R2","AIC", "IC.width","maxJump","VarCoeff")
   
@@ -289,4 +295,3 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   ReporTable
 }
 
-  
