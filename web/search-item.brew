@@ -46,7 +46,8 @@ if (is.null(GET$KEY1)) {
     GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
 }
  
-key.names <- grep("KEY", names(GET), value=TRUE)
+#key.names <- grep("KEY", names(GET), value=TRUE)
+key.names <- GetKeyNames(keys=NULL, project.name=project.name, project.config=project.config)
 keys <- as.character( unlist(GET[key.names]))
 keys.string <- paste(keys, collapse = " - ")
 %>
@@ -70,7 +71,7 @@ if (!is.na(id.result) & !is.null(id.result) & length(id.result)>0) {
                 <form method="GET">
                 <input type="submit" value="Search new item">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildFormElement_keys(project.name=project.name, defaults=keys)%>
+                <%=BuildFormElement_keys(project.name=project.name, default=keys)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
                 </form>
 <% ShowTemplate('footer') %>
