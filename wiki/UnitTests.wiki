@@ -24,7 +24,7 @@ Executing test function test.BuildKeyNames  ...  done successfully.
 
 Executing test function test.EvalItemValue  ... [1] " Loading item: IT"
 [1] "  Time series: length= 18"
-[1] " Evaluating VALUE1: VendutoPirelli"
+[1] " Evaluating VALUE1: Venduto"
 Loading required package: tseries
 Loading required package: quadprog
 Loading required package: zoo
@@ -38,7 +38,7 @@ criterion computed using exact likelihood
 VALUE1   5192   1345   5824   1977   6456   2609   7088   3241
 [1] " Loading item: IT"
 [1] "  Time series: length= 18"
-[1] " Evaluating VALUE1: VendutoPirelli"
+[1] " Evaluating VALUE1: Venduto"
 arimaId: estimation by ML
 criterion computed using exact likelihood
   p d q P D Q np    loglik      BIC      AIC rankAIC
