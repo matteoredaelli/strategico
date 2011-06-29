@@ -56,7 +56,7 @@ opt = getopt( matrix(spec,ncol=4,byrow=TRUE))
 strategico.path <-as.character(Sys.getenv("STRATEGICO_HOME"))
 
 if (strategico.path == "")
-  UsageAndQuit("Environment STRATEGICO_HOME is nor set!")
+  UsageAndQuit("Environment STRATEGICO_HOME is not set!")
 
 source(file.path(strategico.path, "strategico_util.R"))	
 
