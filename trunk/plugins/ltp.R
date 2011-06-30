@@ -38,7 +38,7 @@ library(hwriter)
 #library(tseries, quietly=TRUE) # works only for the latest R releases
 library(tseries, verbose=FALSE)
 library(forecast)
-#library(ast)
+library(ast)
   
 ############## ltp()
 
