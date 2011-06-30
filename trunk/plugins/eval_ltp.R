@@ -254,7 +254,7 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   ReporTable = matrix("--",5,6)
 
   colnames(ReporTable) <- col.names
-  rownames(ReporTable) <- ltp.GetModels("name")
+  rownames(ReporTable) <- c("Linear Model","Arima", "Exponential Smooth","Trend","Mean")
 
   indicator.list <- c("R2","AIC", "IC.width","maxJump","VarCoeff")
   
