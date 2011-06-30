@@ -37,7 +37,7 @@ test.010.Project.GetConfig <- function() {
               )
   
   checkEquals(
-              c("VendutoPirelli", "VendutoMercato"),
+              c("VendutoCorporate", "VendutoMercato"),
               as.vector(c$values)
               )
   
