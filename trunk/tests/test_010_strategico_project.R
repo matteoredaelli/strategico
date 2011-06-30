@@ -22,7 +22,7 @@ test.010.Project.GetConfig <- function() {
               )
 
   checkEquals(
-              12,
+              13,
               length(c$param)
               )
 
@@ -47,7 +47,7 @@ test.010.Project.GetConfig <- function() {
               )
 
   checkEquals(
-              c("mean", "trend", "lm", "es", "arima"),
+              c("mean", "trend", "lm", "es", "arima","naive"),
               c$param$try.models
               )
 }
