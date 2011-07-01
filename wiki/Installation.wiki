@@ -83,7 +83,7 @@ Enter in mysql console with
  CREATE DATABASE strategico CHARACTER SET utf8 COLLATE utf8_general_ci;
 
  grant all on strategico.* to r identified by 'r';
- grant all on strategico.* to r%'%' identified by 'r';
+ grant all on strategico.* to r@'%' identified by 'r';
  flush privileges;
 }}}
  
