@@ -72,9 +72,9 @@ ltp <- function(product, try.models = c("lm", "arima","es"), rule = "BestIC", ru
   IC.width <- R2 <- VarCoeff <- AIC
   NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima -> Naive
   
-  if (("naive" %in% try.models)) {
+  if (("naive" %in% try.models)&(n >= 1)) {
     Naive = mod.naive(product = product, n.ahead = n.ahead, 
-      period.start = period.start, period.freq = period.freq, 
+      period.start = period.start, period.freq = period.freq, period.end= period.end,
       logtransform = FALSE, negTo0=negTo0,toInteger=toInteger,naive.values=naive.values)
     AIC["Naive"] = Naive$AIC
     IC.width["Naive"] = Naive$IC.width
@@ -496,12 +496,15 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
 }
 ###############################################
 ############## best.lm()
-mod.naive <- function(product, n.ahead, period.start, period.freq, logtransform, negTo0=negTo0,toInteger=toInteger,naive.values="last") {
+mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, logtransform, negTo0=negTo0,toInteger=toInteger,naive.values="last") {
   
+  n = dim(product)[1]
   y = as.vector(product)
-  n = max(length(y), nrow(y))
-  y = ts(y, start = period.start, frequency = period.freq)
-  attr(y, "product") = names(product)
+  
+  if(n>0){
+	y = ts(y, start = period.start, frequency = period.freq)
+	attr(y, "product") = names(product)
+  }
   
   if(is.null(naive.values)) naive.values="last"
   
@@ -510,10 +513,9 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, logtransform,
 	    pred = y[length(y)]
 	} else if(naive.values=="lastPeriod"){
 		pred = y[(length(y)-period.freq)+(1:period.freq)] ## se length(y)<period.freq il risultato perde senso
-	}
-  } else {
-	pred = naive.values 
-  }
+	}   
+	} else pred = naive.values 
+  
   pred=data.frame(pred = rep(pred,length=n.ahead))
   
   if (logtransform) {
@@ -533,7 +535,7 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, logtransform,
 	pred.modnaive=round(pred.modnaive,0)
 	}
   
-  pred.modnaive=ts(pred.modnaive, start=.incSampleTime(now=end(y), period.freq = period.freq) , frequency=period.freq)
+  pred.modnaive=ts(pred.modnaive, start=.incSampleTime(now=period.end, period.freq = period.freq) , frequency=period.freq)
   
   naive.AIC = Inf
   naive.R2 = NA
@@ -663,8 +665,8 @@ IDlog = function(product,period.start){
     }
   }
 
-  inf = min(unlist(pred), y,na.rm = TRUE)
-  sup = max(unlist(pred), y,na.rm = TRUE)
+  inf = min(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
+  sup = max(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
   
   
                                         #bmp(file=fies.name)
