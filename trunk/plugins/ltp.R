@@ -618,9 +618,6 @@ IDlog = function(product,period.start){
   
   inf = min(ic.lwr,y,na.rm = TRUE)
   sup = max(ic.upr,y,na.rm = TRUE)
-print("bestmodel")
-print(inf)
-print(sup)
 
   
   bitmap(units="px",filename, width = width, height = height)
@@ -661,8 +658,7 @@ print(sup)
                                   pr= ts(pr, start = period.start, frequency = period.freq)})
 
   names(p)=ltp.GetModels("name")
-  print("Allmodels")
-  print((p))
+
 
   yy=list()
   for(i in which(sapply(p,function(yyy)!is.null(yyy) ))){
@@ -674,8 +670,7 @@ print(sup)
 
   inf = min(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
   sup = max(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
-print(inf)
-print(sup)  
+  
   
                                         #bmp(file=fies.name)
   bitmap(units="px",filename, width = width, height = height)
@@ -768,11 +763,8 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   ## TODO Using ltp.GetModels("name")
   notNA <- sapply(ltp.GetModels("name"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
-  print("here")
-print(ltp.GetModels("name"))
-print(notNA)
+
     for (modType in setdiff(ltp.GetModels("name")[notNA],"Naive")) {
-print(modType)
     residPlot = paste("resid_", modType,".png", sep = "")
     bitmap(units="px",file.path(directory, residPlot), width = width * 0.6, height = height * 0.6 )
     plot(obj[[modType]]$Residuals, type = "p", col="blue", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
