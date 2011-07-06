@@ -21,6 +21,11 @@ For Debian and Ubuntu most of the libraries are available via
   apt-get install r-cran-xtable r-cran-runit r-cran-getopt r-cran-xtable r-cran-rodbc r-cran-tseries
 }}} 
 
+Otherwise you can use R command
+{{{
+  install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "runit", "xtable", "R2HTML","fracdiff"), dependencies = TRUE)
+}}}
+
 = Installation =
 
 Download strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab] and unzip it into a folder like /apps/strategico (Linux) or C:\strategico
