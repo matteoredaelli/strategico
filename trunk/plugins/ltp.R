@@ -244,7 +244,7 @@ temp=NA2value
 ## da chiarire la frequenza dei data suprattutto per la classe lm
 ## intervalli di confidenza per le previsioni a 0.95 per tutte le classi di modelli
 ## per quanto riguarda lm ho lasciato libera la scelta del log
-## possibilitÃ  di inserire fino a due regressori perÃ² devono essere della medesima lunghezza della serie analizzata
+## possibilit�.  di inserire fino a due regressori per�.² devono essere della medesima lunghezza della serie analizzata
 ## criterio utilizzato AIC
 
 
@@ -618,6 +618,10 @@ IDlog = function(product,period.start){
   
   inf = min(ic.lwr,y,na.rm = TRUE)
   sup = max(ic.upr,y,na.rm = TRUE)
+print("bestmodel")
+print(inf)
+print(sup)
+
   
   bitmap(units="px",filename, width = width, height = height)
   plot(window(p.best, end = start_pred), ylim = c((inf - (inf/4)), 
@@ -648,15 +652,18 @@ IDlog = function(product,period.start){
   start_pred = .incSampleTime(period.freq = period.freq, now = end_serie)
   
   
-  pred=sapply(as.vector(ltp.GetModels("name")),function(name) model[[name]]$prediction)
-  
+  pred=lapply(as.vector(ltp.GetModels("name")),function(name) model[[name]]$prediction)
   pred = lapply(pred, function(pr){ if (!is.null(pr))  if (!is.ts(pr)) pr = ts(pr, start = start_pred, frequency = period.freq); pr})
   
                                         #concateno la prima prediction
   
   p = lapply( pred, function(pr) {pr=append(as.vector(window(y, end = end_serie)), pr); 
                                   pr= ts(pr, start = period.start, frequency = period.freq)})
+
   names(p)=ltp.GetModels("name")
+  print("Allmodels")
+  print((p))
+
   yy=list()
   for(i in which(sapply(p,function(yyy)!is.null(yyy) ))){
     if(!is.null(p[i])){ 
@@ -667,14 +674,16 @@ IDlog = function(product,period.start){
 
   inf = min(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
   sup = max(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
-  
+print(inf)
+print(sup)  
   
                                         #bmp(file=fies.name)
   bitmap(units="px",filename, width = width, height = height)
   plot(y, ylim = c((inf - (inf/4)), (sup + (sup/2))), xlim = c(period.start[1], end(p[[model$BestModel]])[1]), 
        lwd = 2, main = title,ylab="y")
- 
- for(i in names(pred)[which(sapply(pred,function(pp)!is.null(pp) ))]){
+
+ for(i in names(p)[which(sapply(pred,function(pp)!is.null(pp) ))]){
+
     lines(window(p[[i]], start = end_serie) , col = color.forecast[i], pch = "*", cex = 2, lwd = 2)
   }
   
@@ -698,7 +707,7 @@ dev.off()
                                         #paste('Best model for--',names(product),'.bmp',sep='')
                                         #paste('Best model for--',names(product),'.bmp',sep='')
 
-## best Ã¨ la il risultato fornito da ltp una lista che contiene il model migliore
+## best �.¨ la il risultato fornito da ltp una lista che contiene il model migliore
 plot.ltp = function(model, plot.try.models = c("best", 
                              "all"), color.forecast = NULL, color.ic = "red", 
   plot.trend = FALSE, title = "Time Series", filename,width = width, height = height) {
@@ -759,12 +768,11 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
   ## TODO Using ltp.GetModels("name")
   notNA <- sapply(ltp.GetModels("name"), 
                   function(i) if(!is.null(obj[[i]])) ( !is.null(obj[[i]]$Residuals))&(!any(is.na(obj[[i]]$Residuals))) else FALSE )
-  
-    for (modType in names(notNA[notNA])) {
-
-
-
-
+  print("here")
+print(ltp.GetModels("name"))
+print(notNA)
+    for (modType in setdiff(ltp.GetModels("name")[notNA],"Naive")) {
+print(modType)
     residPlot = paste("resid_", modType,".png", sep = "")
     bitmap(units="px",file.path(directory, residPlot), width = width * 0.6, height = height * 0.6 )
     plot(obj[[modType]]$Residuals, type = "p", col="blue", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
