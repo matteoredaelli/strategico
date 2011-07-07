@@ -211,6 +211,7 @@ test.00.EvalTSString <- function() {
                      period.start="2010-4", period.freq=12, project.config=project.config, db.channel=db.channel)
   checkEquals(
               c(5, 6, 7, 5, 6, 7, 5, 6),  # RANDOM... IT FAILS.....
+              ##c(317, 298, 274, 174, 176, 124, 113, 97),
               as.vector(e3[1,])
               )
 
@@ -219,7 +220,7 @@ test.00.EvalTSString <- function() {
 test.Item.DB.GetResults <- function() { 
   records <- Item.DB.GetResults(project.name, id=1, value="V2", db.channel=db.channel)
   
-  checkEquals(project.config$param$n.ahead * 5,
+  checkEquals(project.config$param$n.ahead * length(project.config$param$try.models),
               nrow(records)
               )
   checkEquals(1,
