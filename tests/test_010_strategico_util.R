@@ -143,22 +143,22 @@ test.00.Period.BuildRange <- function() {
 
 test.0.ParamFunctions <- function() {
   
-  param.string <- "n.ahead=8;range=c(-Inf,Inf);NA2value=0;n.min=10;try.models=c('mean','trend','lm','es','arima');logtransform=FALSE;stepwise=TRUE;formula.right.lm='S*trend+S*trend2';rule='BestAIC';rule.noMaxOver=2;negTo0=FALSE;toInteger=TRUE;naive.values='last'"
+  param.string <- "n.ahead=8;range=c(-Inf,Inf);NA2value=0;n.min=10;try.models=c('mean','trend','lm','es','arima','naive');logtransform=FALSE;stepwise=TRUE;formula.right.lm='S*trend+S*trend2';rule='BestAIC';rule.noMaxOver=2;negTo0=FALSE;toInteger=TRUE;naive.values='last'"
   
   param <- Param.EvalString(param.string)
 
-  checkEquals( 12, length(param))
+  checkEquals(13, length(param))
 
   checkEquals(8, param$n.ahead)
   
   checkEquals(
-              c("mean", "trend", "lm", "es", "arima"),
+              c("mean", "trend", "lm", "es", "arima","naive"),
               param$try.models
               )
 
   checkEquals(
               param.string,
-              Param.ToString(project.config$param)
+              Param.ToString(param)
               )
 
   param1 <- Param.EvalString("try.models=c('es','mean')")
