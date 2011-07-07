@@ -1,16 +1,24 @@
 #summary Quick start
 
+== Rscript? ==
+
+You can run Strategico.R using Rscript command or (for windows users) something like
+{{{
+R --slave --no-save --no-restore --no-environ --silent --args --cmd runit < strategico.R
+}}}
+
+
 == Import dati dall'esterno ==
 
 {{{
-./strategico.R --project.name=sample --cmd=import
+Rscript strategico.R --project.name=sample --cmd=import
 }}}
 
 
 == Empty DB tables ==
 
 {{{
-./strategico.R --cmd empty.db -n sample
+Rscript strategico.R --cmd empty.db -n sample
 }}}
 
 == Eval/Run Engine ==
