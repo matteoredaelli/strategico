@@ -2,6 +2,9 @@
 
 = Requirements =
 
+Strategico requires the library AST that at the moment works only in Linux/Unix 
+
+
 You need to install 
  * the [http://www.r-project.org R] (release >= 2.11) statistical software
 
