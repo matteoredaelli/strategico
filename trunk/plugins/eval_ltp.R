@@ -45,6 +45,7 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   ##non zero values
   stats["NotZeroPoints"]=ifelse(no.values==0,0, sum(model$values!=0))
   stats["BestModel"] = ifelse(is.null(model$BestModel), NA, model$BestModel)
+  stats["SuggestedModel"] =  stats["BestModel"]
   stats["Timestamp"] = Sys.time()
   stats["TotModels"] = length(param$try.models)
   stats["Parameters"] = Param.ToString(param)
