@@ -26,7 +26,7 @@ For Debian and Ubuntu most of the libraries are available via
 
 Otherwise you can use R command
 {{{
-  install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "runit", "xtable", "R2HTML","fracdiff"), dependencies = TRUE)
+  install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff"), dependencies = TRUE)
 }}}
 
 = Installation =
