@@ -82,6 +82,12 @@ I principali indicatori per valutare la qualità di un modello lineare sono R2, 
 di una unità del predittore; il P-value per la verifica che questo effetto sia significativo (cioè non diverso da 0 solo per caso) è riportato nella colonna "Pr(>|t|)" 
 (basso è meglio)
 
+== Naive Model ==
+permette di inserire dati decisi dall'utente. se "naive"%in%try.models ltp usa i valori di naive.values per la predizione.
+il modello risulterà essere il bestModel solo se tutti gli altri non sono inclusi.
+naive.values può contenere numeri o "last" o "lastPeriod". Se naive.values="last" predirrà con l'ultimo valore della serie storica,
+se naive.values="lastPeriod" prederà gli ultimi n.freq e replicherà quelli. se naive.values è un numero di valori minore del numero di forcast richiesti, replicherà i valori fino a raggiungere la lunghezza di predizione richiesta
+
 == Riferimenti ==
 
 TODO: aggiungere qui' link a documentazioni utilizzate/inerenti al long term prediction
