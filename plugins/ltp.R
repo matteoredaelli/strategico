@@ -72,7 +72,7 @@ ltp <- function(product, try.models = c("lm", "arima","es","naive"), rule = "Bes
   IC.width <- R2 <- VarCoeff <- AIC
   NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima -> Naive
   
-  if (("naive" %in% try.models)&(n >= 1)) {
+  if (("naive" %in% try.models)) {
     Naive = mod.naive(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, period.end= period.end,
       logtransform = FALSE, negTo0=negTo0,toInteger=toInteger,naive.values=naive.values)
@@ -501,39 +501,41 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   n = dim(product)[1]
   y = as.vector(product)
   
-  if(n>0){
-	y = ts(y, start = period.start, frequency = period.freq)
-	attr(y, "product") = names(product)
-  }
-  
   if(is.null(naive.values)) naive.values="last"
   
-  if(is.character(naive.values)){
-	if(naive.values=="last"){
-	    pred = y[length(y)]
-	} else if(naive.values=="lastPeriod"){
-		pred = y[(length(y)-period.freq)+(1:period.freq)] ## se length(y)<period.freq il risultato perde senso
-	}   
+  if(n==0){
+	pred.modnaive=data.frame(pred = rep(ifelse(is.character(naive.values),0,naive.values),length=n.ahead))
+	IC.pred.modnaive = list(upr = pred.modnaive, lwr = pred.modnaive)	
+  } else {
+	y = ts(y, start = period.start, frequency = period.freq)
+	attr(y, "product") = names(product)
+  
+	if(is.character(naive.values)){
+		if(naive.values=="last"){
+			pred = y[length(y)]
+		} else if(naive.values=="lastPeriod"){
+			pred = y[(length(y)-period.freq)+(1:period.freq)] ## se length(y)<period.freq il risultato perde senso
+		}   
 	} else pred = naive.values 
   
-  pred=data.frame(pred = rep(pred,length=n.ahead))
+	pred=data.frame(pred = rep(pred,length=n.ahead))
   
-  if (logtransform) {
-    pred.modnaive = exp(pred)
-  }
-  else {
-    pred.modnaive = pred
-  }
-  IC.pred.modnaive = list(upr = pred.modnaive, lwr = pred.modnaive)
+	if (logtransform) {
+		pred.modnaive = exp(pred)
+	} else {
+		pred.modnaive = pred
+	}
+	IC.pred.modnaive = list(upr = pred.modnaive, lwr = pred.modnaive)
 	  
-  if(negTo0) {
-	pred.modnaive[pred.modnaive<0]=0
-	IC.pred.modnaive$upr[IC.pred.modnaive$upr<0]=0
-	IC.pred.modnaive$lwr[IC.pred.modnaive$lwr<0]=0
+	if(negTo0) {
+		pred.modnaive[pred.modnaive<0]=0
+		IC.pred.modnaive$upr[IC.pred.modnaive$upr<0]=0
+		IC.pred.modnaive$lwr[IC.pred.modnaive$lwr<0]=0
 	}
-  if(toInteger) {
-	pred.modnaive=round(pred.modnaive,0)
+	if(toInteger) {
+		pred.modnaive=round(pred.modnaive,0)
 	}
+  }
   
   pred.modnaive=ts(pred.modnaive, start=.incSampleTime(now=period.end, period.freq = period.freq) , frequency=period.freq)
   
@@ -547,7 +549,7 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   # m=apply(m,2,mean,na.rm=TRUE)
   # sdJumps = sd(m[-1]/m[-length(m)])
   res = y
-                                        #media_errori = mean(errori_naive)
+                                        
   lista.naive = list(ts.product = y, model = NULL, prediction = pred.modnaive, 
     IC = IC.pred.modnaive, AIC = naive.AIC, R2 = naive.R2, IC.width = ic.delta, maxJump=maxJump,  VarCoeff=VarCoeff, Residuals = res)
   lista.naive
