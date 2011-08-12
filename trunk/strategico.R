@@ -113,9 +113,6 @@ if (opt$cmd == "runit") {
 if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
-if ( !Project.IsValidName(opt$project.name) )
-  UsageAndQuit( paste("Unknown project name '", opt$project.name, "'", sep=""))
-
 project.config <- Project.GetConfig(opt$project.name)
 
 #########################################################################
