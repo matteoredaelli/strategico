@@ -20,14 +20,15 @@
   <?php
      // TODO: remove FIXED path for strategico scripts (now /apps/strategico)
      //       remove FIXED relative web path for projects path (../projects/
-     $id=rand(600001,600199);
+     $id=rand(600001,600499);
      $ts = str_replace($_GET['decimals'], ".", $_GET['ts']);
      $ts = str_replace(array("\r\n","\r","\n"), ",", $ts);
      $project_name = "web-" .  $_GET['eval'];
      $output_path = "../projects/" . $project_name . "/1200/". $id . "/V1";
 
      if (isset($_GET['submit'])) {
-     $command = "/apps/strategico/strategico.R"
+     $strategico_home = getenv("STRATEGICO_HOME");
+     $command = $strategico_home . "/strategico.R"
      . " --cmd eval_ts" 
      . " --project.name " . $project_name
      . " --id.list " . $id
