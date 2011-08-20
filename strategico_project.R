@@ -14,6 +14,10 @@
 
 ## Authors: L. Finos, M. Redaelli
 
+## project name: strategico
+## project website: http://code.google.com/p/strategico/
+## created: 2011
+
 Project.FS.Empty <- function(project.name, recursive = TRUE) {
   if (!Project.IsValidName(project.name)) {
     logger(WARN, paste("Project folder=", project.name, "doesn't exist"))

@@ -13,8 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-####################### prediction
-## fa tutto: richiama ltp o chi per essa, scrive il report e salva i dati.
+## project name: strategico
+## project website: http://code.google.com/p/strategico/
+## authors: L. Finos, M. Redaelli, M. Rinaldo
+## created: 2011
 
 MySource(filename="ltp.R", file.path=GetPluginsPath())
 

@@ -14,6 +14,10 @@
 
 ## Authors: L. Finos, M. Redaelli
 
+## project name: strategico
+## project website: http://code.google.com/p/strategico/
+## created: 2011
+
 Items.Eval <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
                       project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))

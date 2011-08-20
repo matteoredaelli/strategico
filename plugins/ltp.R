@@ -13,7 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-##authors L. Finos, M. Rinaldo
+## project name: strategico
+## project website: http://code.google.com/p/strategico/
+## authors: L. Finos, M. Rinaldo
+## created: 2011
 
 ## parametri aggiunti
 ## diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff=FALSE, idLog =FALSE
