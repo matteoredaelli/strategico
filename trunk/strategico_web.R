@@ -13,7 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## Authors:  M. Redaelli
+## project name: strategico
+## project website: http://code.google.com/p/strategico/
+## authors: M. Redaelli
+## created: 2011
 
 BuildHtmlElement_input <- function(label="", name, default, type="text", size=20) {
   str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" size="_SIZE_" />'

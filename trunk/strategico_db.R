@@ -14,6 +14,10 @@
 
 ## Authors: L. Finos, M. Redaelli
 
+## project name: strategico
+## project website: http://code.google.com/p/strategico/
+## created: 2011
+
 library(RODBC)
 
 DB.Connect <- function(db.name=strategico.config$db.name
