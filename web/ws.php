@@ -22,6 +22,8 @@
      //       remove FIXED relative web path for projects path (../projects/
      $id=rand(600001,600499);
      $ts = str_replace($_GET['decimals'], ".", $_GET['ts']);
+     $ts = str_replace($_GET['thousands'], "", $ts);
+     // removing empty rows and spaces from the beginning and end
      $ts = trim($ts);
      $ts = str_replace(array("\r\n","\r","\n"), ",", $ts);
      $project_name = "web-" .  $_GET['eval'];
