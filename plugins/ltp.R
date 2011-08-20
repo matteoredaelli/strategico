@@ -622,7 +622,7 @@ IDlog = function(product,period.start){
   sup = max(ic.upr,y,na.rm = TRUE)
 
   
-  png(units="px",filename, width = width, height = height)
+  png(units="px",filename, width = width, height = height, type="cairo")
   plot(window(p.best, end = start_pred), ylim = c((inf - (inf/4)), 
                                            (sup + (sup/2))), xlim = c(period.start[1], end(pred)[1]), 
        main = title,ylab="y")
@@ -674,8 +674,7 @@ IDlog = function(product,period.start){
   sup = max(unlist(pred)[is.finite(unlist(pred))], y,na.rm = TRUE)
   
   
-                                        #bmp(file=fies.name)
-  png(units="px",filename, width = width, height = height)
+  png(units="px",filename, width = width, height = height, type="cairo")
   plot(y, ylim = c((inf - (inf/4)), (sup + (sup/2))), xlim = c(period.start[1], end(p[[model$BestModel]])[1]), 
        lwd = 2, main = title,ylab="y")
 
@@ -768,7 +767,7 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
 
     for (modType in setdiff(ltp.GetModels("name")[notNA],"Naive")) {
     residPlot = paste("resid_", modType,".png", sep = "")
-    png(units="px",file.path(directory, residPlot), width = width * 0.6, height = height * 0.6 )
+    png(units="px",file.path(directory, residPlot), width = width * 0.6, height = height * 0.6, type="cairo")
     plot(obj[[modType]]$Residuals, type = "p", col="blue", main = paste("Residuals of ", modType, sep = ""),ylab="Residuals")
     abline(0, 0, col="red")
     dev.off()
