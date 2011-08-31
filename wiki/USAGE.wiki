@@ -8,12 +8,17 @@ R --slave --no-save --no-restore --no-environ --silent --args --cmd runit < stra
 }}}
 
 
-== Import dati dall'esterno ==
+== Import data from external sources ==
 
 {{{
 Rscript strategico.R --project.name=sample --cmd=import
 }}}
 
+== Empty filesystem ==
+
+{{{
+Rscript strategico.R --cmd empty.fs -n sample
+}}}
 
 == Empty DB tables ==
 
