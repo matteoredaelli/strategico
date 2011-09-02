@@ -116,19 +116,24 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   if ( nrow(data.normalized) == 0) {
     logger(INFO, "No records in normalized data. No saving to DB")
     data.normalized <- NULL
-  } else {
-    data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
+    return(1)
+  } 
+  if (is.null(model$BestModel)) {
+    logger(INFO, "Best model is null. No saving to DB")
+    return(2)
+  } 
 
-    if ("data_db" %in% project.config$save) {
-      tablename = DB.GetTableNameNormalizedData(project.name, value)
-      DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                    rownames=FALSE, addPK=FALSE, db.channel=db.channel)
-    }
-    else
-      if ("data_csv" %in% project.config$save) {
-        write.csv(data.normalized, file = paste(output.path, "/item-data-norm-", value,".csv", sep = ""))
-      }
+  data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
+
+  if ("data_db" %in% project.config$save) {
+    tablename = DB.GetTableNameNormalizedData(project.name, value)
+    DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
   }
+  else
+    if ("data_csv" %in% project.config$save) {
+      write.csv(data.normalized, file = paste(output.path, "/item-data-norm-", value,".csv", sep = ""))
+    }
   
   ## ###################################################################################
   ## Saving Summary Data
