@@ -88,7 +88,7 @@ Item.EvalChildren <- function(project.name, id, keys=NULL, values, param=NULL,
 Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
                          param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
   logger(INFO, "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
-  logger(INFO, paste("Project=", project.name, " Loading item ID=", id,
+  logger(WARN, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
                      value, "=", project.config$values[value],
                      sep=""))
@@ -118,7 +118,7 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
                      sep=""))
   
   if (is.null(id)) {
-    logger(INFO, "ID is null, assigning a new value")
+    logger(WARN, "ID is null, assigning a new value")
     id <- Item.GetNewID()
   } else {
     id <- as.integer(id)
