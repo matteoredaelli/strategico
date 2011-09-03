@@ -211,6 +211,11 @@ Item.Db.SaveData <- function(id, data, tablename, db.channel) {
   }
 }
 
+Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
+  tablename <- DB.GetTableNameNormalizedData(project.name, value=value)
+  Item.DB.GetRecords(project.name, id=id, key="item_id", tablename=tablename, db.channel=db.channel)
+}
+
 Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameSummary(project.name, value=value)
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
