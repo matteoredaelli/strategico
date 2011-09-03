@@ -53,6 +53,7 @@ GetStrategicoHome <- function() {
     print("Environment STRATEGICO_HOME not set, Bye!")
     q(status=2)
   }
+  ##print(paste("Environment STRATEGICO_HOME is set to", strategico.path))
   strategico.path
 }
 

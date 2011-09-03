@@ -129,9 +129,13 @@ Project.ImportData <- function(project.name, project.config=NULL, db.channel) {
     project.config <- Project.GetConfig(project.name=project.name)
 
   project.R <- paste(project.name, ".R", sep="")
+  logger(DEBUG, paste("Sourcing file", project.R))
   MySource(filename=project.R, file.path=GetPluginsPath())
   
   cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
+
+  logger(DEBUG, paste("Extracting data from the external source running command", cmd))
+  
   result <- eval(parse(text = cmd))
   Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
 }
@@ -177,6 +181,17 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
 
 ## creates item.Rdata e item-list
 Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
+  if (is.null(project.data)) {
+    logger(WARN, "Project data is empty: No records. Maybe there is something wrong. No data to import to DB/Rdata")
+    return(2)
+  }
+  rows <- nrow(project.data)
+  logger(WARN, paste("Found ", rows, "records!"))
+  
+  if (rows == 0) {
+    logger(WARN, "No records. Maybe there is something wrong. No data to import to DB/Rdata")
+    return(3)
+  }
   project.path <- Project.GetPath(project.name)
   dir.create(project.path, showWarnings = FALSE)
   
@@ -197,7 +212,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   
   project.items=leaves
   if ("gitems" %in% project.config$save) {
-    logger("INFO", "Finding gitems")
+    logger(INFO, "Finding gitems")
     ## save also gitems (only key1 values, key1+key2 values, ...
     for (i in (ncol(leaves)):2){
       leaves[,i]=""
@@ -214,12 +229,12 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
 
   ## adding ID column
   project.items <- cbind(id=1:nrow(project.items), project.items)
-  logger("WARN", paste("Saving Project Items to file", outfile))
+  logger(WARN, paste("Saving Project Items to file", outfile))
   save( project.items, file=outfile)
 
   if ("data_csv" %in% project.config$save) {
     outfile <- paste(project.path, "/project_items.csv", sep="")
-    logger("WARN", paste("Saving Project Items to file", outfile))
+    logger(WARN, paste("Saving Project Items to file", outfile))
     write.csv(project.items,
               file=outfile,
               row.names = FALSE
@@ -228,7 +243,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   
   ## SAVING PROJECT_DATA.RDATA
   filename <- paste(project.path, "project_data.Rdata", sep="/")
-  logger("WARN", paste("Saving Project data to file", filename))
+  logger(WARN, paste("Saving Project data to file", filename))
   save(project.data, file=filename)
   
   if ("data_db" %in% project.config$save) {
