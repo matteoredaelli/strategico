@@ -136,7 +136,7 @@ param <- Param.EvalString(opt$eval.param)
 ## eval_children
 #########################################################################
 
-if (opt$cmd == "eval_children") {
+if (opt$cmd == "eval.children") {
 
   if (is.null(opt$id.list))
     UsageAndQuit("Missing parameter id.list")
@@ -161,7 +161,7 @@ if (opt$cmd == "eval_children") {
 ## eval_items
 #########################################################################
 
-if (opt$cmd == "eval_items") {
+if (opt$cmd == "eval.items") {
 
   if (is.null(opt$id.list) & is.null(opt$id.range))
     UsageAndQuit("Missing parameter id.list or id.range")
@@ -188,7 +188,7 @@ if (opt$cmd == "eval_items") {
 ## eval_items_from_db
 #########################################################################
 
-if (opt$cmd == "eval_items_from_db") {
+if (opt$cmd == "eval.items.from.db") {
 
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
@@ -203,7 +203,7 @@ if (opt$cmd == "eval_items_from_db") {
 ## eval_ts
 #########################################################################
 
-if (opt$cmd == "eval_ts") {
+if (opt$cmd == "eval.ts") {
 
   if (is.null(opt$id))
     UsageAndQuit("Missing parameter id!")
