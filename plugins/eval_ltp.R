@@ -104,7 +104,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 
   if ("model" %in% project.config$save) {
     filename <- paste(output.path, "/model.RData", sep = "")
-    logger(WARN, paste("Saving Model to file", filename))
+    logger(DEBUG, paste("Saving Model to file", filename))
     save(file=filename, model)
   }
 
@@ -114,12 +114,12 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     
   data.normalized <- model$values[, , drop = FALSE]
   if ( nrow(data.normalized) == 0) {
-    logger(INFO, "No records in normalized data. No saving to DB")
+    logger(WARN, "No records in normalized data. No saving to DB")
     data.normalized <- NULL
     return(1)
   } 
   if (is.null(model$BestModel)) {
-    logger(INFO, "Best model is null. No saving to DB")
+    logger(WARN, "Best model is null. No saving to DB")
     return(2)
   } 
 
@@ -180,7 +180,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   prediction.null <- cbind(id, NA,PERIOD=predictions.periods, V=rep(0, param$n.ahead))
   
   if (is.null(model$BestModel)) {
-    logger(INFO, "NO BestModel found ;-(")
+    logger(WARN, "NO BestModel found ;-(")
     result <- data.frame(rep(0, param$n.ahead))
     data.predicted <- prediction.null
   }
