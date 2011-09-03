@@ -28,21 +28,21 @@ Rscript strategico.R --cmd empty.db -n sample
 
 == Eval/Run Engine ==
 {{{
-./strategico.R --project.name=sample --cmd=eval_items --id.list 2,3,4 --item.values=V1,V2 -p "try.models=c('mean')"
+./strategico.R --project.name=sample --cmd=eval.items --id.list 2,3,4 --item.values=V1,V2 -p "try.models=c('mean')"
 
-./strategico.R --project.name=sample --cmd=eval_items --id.range 1:4 --item.values=V1,V2 -p "try.models=c('mean')"
+./strategico.R --project.name=sample --cmd=eval.items --id.range 1:4 --item.values=V1,V2 -p "try.models=c('mean')"
 
-./strategico.R --cmd eval_children -n sample --id.list "16"
+./strategico.R --cmd eval.children -n sample --id.list "16"
 
 }}}
 == Eval/Run engine (dbsummary records/items with Run=1) ==
 {{{
-./strategico.R --project.name=sample --cmd=eval_items_from_db -v V1
+./strategico.R --project.name=sample --cmd=eval.items.from.db -v V1
 }}}
 
 == Eval/Run engine for a generic (unknown item) TS ==
 {{{
-./strategico.R --project.name=sample --cmd=eval_ts --ts.string=1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90 --ts.start=2001-1 --ts.freq=2 -i 4343 -p "try.models=c('mean')"
+./strategico.R --project.name=sample --cmd=eval.ts --ts.string=1,2,32,32,32,33,32,32,32,32,32,3,6,7,8,8,99,9,90 --ts.start=2001-1 --ts.freq=2 -i 4343 -p "try.models=c('mean')"
 }}}
 
 == Export DB to CSV ==
