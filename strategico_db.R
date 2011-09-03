@@ -216,6 +216,11 @@ Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
+Item.DB.GetSummaryModels <- function(project.name, value, id, db.channel) {
+  tablename <- DB.GetTableNameSummaryModels(project.name, value=value)
+  Item.DB.GetRecords(project.name, id=id, key="item_id", tablename=tablename, db.channel=db.channel)
+}
+
 Project.DB.Empty <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)

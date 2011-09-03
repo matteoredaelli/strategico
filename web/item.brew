@@ -43,6 +43,7 @@ db.channel <- DB.Connect()
 
 item.keys <- Item.GetKeys(project.name=project.name, id=id)
 item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
 item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
 keys.string <- ifelse(is.null(item.keys),
@@ -80,8 +81,16 @@ DB.Close(db.channel)
 <h2>Models</h2>
   <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
   <img src="<%=paste(item.path,"all_models.png",sep="/")%>" />
-
+  
 <h2>Summary</h2>
+<%
+if(!is.null(item.summary.models) & !is.na(item.summary.models) & is.data.frame(item.summary.models) & nrow(item.summary.models) > 0) {
+  item.summary.models$item_id <- NULL
+  rownames(item.summary.models) <- NULL
+  print(xtable(item.summary.models), type="html")
+}
+%>
+
 <%
 if(!is.null(item.summary) & !is.na(item.summary) & is.data.frame(item.summary) & nrow(item.summary) > 0) {
   item.summary$Parameters <- NULL
@@ -92,10 +101,11 @@ if(!is.null(item.summary) & !is.na(item.summary) & is.data.frame(item.summary) &
 <h2>Results</h2>
 <%
 if(!is.null(item.results) & !is.na(item.results) & is.data.frame(item.results) & nrow(item.results) > 0) {
+ 
   item.results$id <- NULL
   item.results$item_id <- NULL
   rownames(item.results) <- NULL
-  print(xtable(item.results), type="html")
+  print(xtable(xtabs( V ~ PERIOD + model, item.results)), type="html")
 }
 %>
 
