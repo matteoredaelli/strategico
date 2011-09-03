@@ -95,7 +95,7 @@ DB.GetTableSize <- function(tablename, db.channel) {
   if ( is.data.frame(records) )
     result <- as.integer(records[1][1])
   else {
-    logger(WARN, paste("cannot count rows of table", tablename))
+    logger(ERROR, paste("cannot count rows of table", tablename))
     result <- "cannot retreive"
   }
   result
@@ -177,7 +177,7 @@ Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NUL
   tablename <- DB.GetTableNameProjectData(project.name)
   sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
 
-  logger(WARN, sql_statement)
+  logger(DEBUG, sql_statement)
   records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
   rownames(records) <- records$period
   records$period <- NULL
@@ -192,12 +192,12 @@ Item.DB.GetResults <- function(project.name, value, id, db.channel) {
 Item.DB.GetRecords <- function(project.name, key="id", id, tablename, db.channel) {
   filter <- paste(key, "=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
-  logger(WARN, sql_statement)
+  logger(DEBUG, sql_statement)
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
 }
 
 Item.Db.SaveData <- function(id, data, tablename, db.channel) {
-  logger(DEBUG, paste("Saving data for ID=", id, "to table", tablename))
+  logger(INFO, paste("Saving data for ID=", id, "to table", tablename))
   if (nrow(data)==0) {
     logger(WARN, paste("No data to be saved to", tablename)) 
   } else {
