@@ -18,6 +18,7 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/RUnit/index.html runit]
  * [http://cran.r-project.org/web/packages/xtable/index.html xtable library]
  * [http://sirio.stat.unipd.it/index.php?id=libast ast library]
+ * [http://cran.r-project.org/web/packages/brew/index.html brew]
 
 For Debian and Ubuntu most of the libraries are available via
 {{{
@@ -26,7 +27,7 @@ For Debian and Ubuntu most of the libraries are available via
 
 Otherwise you can use R command
 {{{
-  install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff"), dependencies = TRUE)
+  install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew"), dependencies = TRUE)
 }}}
 
 = Installation =
