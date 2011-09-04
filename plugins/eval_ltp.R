@@ -261,8 +261,11 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   
   ReporTable = matrix("--",5,6)
 
+  model.names <- ltp.GetModels("name")
+  model.names <- model.names[! model.names == "Naive"]
+  
   colnames(ReporTable) <- col.names
-  rownames(ReporTable) <- c("Linear Model","Arima", "Exponential Smooth","Trend","Mean")
+  rownames(ReporTable) <- model.names #c("Linear Model","Arima", "Exponential Smooth","Trend","Mean")
 
   indicator.list <- c("R2","AIC", "IC.width","maxJump","VarCoeff")
   
