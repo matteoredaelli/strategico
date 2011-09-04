@@ -30,6 +30,11 @@ Otherwise you can use R command
   install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew"), dependencies = TRUE)
 }}}
 
+if you use the web application, install also 
+{{{
+  install.packages("googleVis")
+}}}
+
 = Installation =
 
 Download strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab] and unzip it into a folder like /apps/strategico (Linux) or C:\strategico
