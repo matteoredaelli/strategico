@@ -232,9 +232,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 ##################################
  ltp.GetModels <- function(what=NULL) {
 	model=data.frame(id=c("linear", "arima","es", "trend", "mean","naive"),
-			name=c("LinearModel", "Arima", "ExponentialSmooth", "Trend", "Mean","Naive"),
+			name=c("Linear", "Arima", "ExpSmooth", "Trend", "Mean","Naive"),
 			color = c("green", "red", "blue", "gray", "black","yellow"),
-			legend= c("Linear Model","Arima" , "Exp. Smooth" , "Trend" ,"Mean", "Naive"))
+			legend= c("Linear","Arima" , "Exp.Smooth" , "Trend" ,"Mean", "Naive"))
 	rownames(model)=model$id
 	
 	if(!is.null(what)) { 
@@ -269,28 +269,28 @@ ltp.GetModelsComparisonTable <-  function(obj) {
 
   indicator.list <- c("R2","AIC", "IC.width","maxJump","VarCoeff")
   
-  if(!is.null(obj$ExponentialSmooth)) {
+  if(!is.null(obj$ExpSmooth)) {
     terms=sapply(c("drift","seasonality"),
-      function(compon){ if(obj$ExponentialSmooth$model[compon]=="none") return() 
+      function(compon){ if(obj$ExpSmooth$model[compon]=="none") return() 
                         compon})
     terms=terms[!sapply(terms,is.null)] 
     
-    es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExponentialSmooth$model["seasonality"])>0),"*","+")))
+    es.string=paste( "level",sep="+", paste(terms,collapse=ifelse(length(grep("multiplicative",obj$ExpSmooth$model["seasonality"])>0),"*","+")))
   }
   ## TODO: pay attention: the list of models is important... maybe it is better to use explicit coordinates ReporTable["Arima"][1] ..
   ReporTable[,1] <- 
-    c(ifelse(is.null(obj$LinearModel),"--", gsub("~","=",gsub("stima$qta","y",as.character(obj$LinearModel$model$call[2]),fixed=TRUE))),
-      ##paste("Y=",paste(attributes(obj$LinearModel$model$call[[2]])$term.labels,collapse="+"),sep="")), 
+    c(ifelse(is.null(obj$Linear),"--", gsub("~","=",gsub("stima$qta","y",as.character(obj$Linear$model$call[2]),fixed=TRUE))),
+      ##paste("Y=",paste(attributes(obj$Linear$model$call[[2]])$term.labels,collapse="+"),sep="")), 
       ifelse(is.null(obj$Arima),"--",
              ifelse(length(obj$Arima$model$coef)==0,
                     "-constant-",
                     paste(obj$Arima$model$series,"=", paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
-      ifelse(is.null(obj$ExponentialSmooth),"--", es.string ),
+      ifelse(is.null(obj$ExpSmooth),"--", es.string ),
       ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
       ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
   
-  temp <- rbind(unlist(obj$LinearModel[indicator.list]), unlist(obj$Arima[indicator.list]), 
-    unlist(obj$ExponentialSmooth[indicator.list]),unlist(obj$Trend[indicator.list]),unlist(obj$Mean[indicator.list]))
+  temp <- rbind(unlist(obj$Linear[indicator.list]), unlist(obj$Arima[indicator.list]), 
+    unlist(obj$ExpSmooth[indicator.list]),unlist(obj$Trend[indicator.list]),unlist(obj$Mean[indicator.list]))
   colnames(temp)= indicator.list
   
 

@@ -73,7 +73,7 @@ ltp <- function(product, try.models = c("lm", "arima","es","naive"), rule = "Bes
   AIC <- rep(NA,6)
   names(AIC) <- ltp.GetModels("name")
   IC.width <- R2 <- VarCoeff <- AIC
-  NULL -> Mean -> Trend -> ExponentialSmooth -> LinearModel -> Arima -> Naive
+  NULL -> Mean -> Trend -> ExpSmooth -> Linear -> Arima -> Naive
   
   if (("naive" %in% try.models)) {
     Naive = mod.naive(product = product, n.ahead = n.ahead, 
@@ -105,23 +105,23 @@ ltp <- function(product, try.models = c("lm", "arima","es","naive"), rule = "Bes
 	VarCoeff["Trend"] = Trend$VarCoeff
   }
   if (("lm" %in% try.models)&(n >= n.min )) {
-    LinearModel = mod.lm(product = product, n.ahead = n.ahead, 
+    Linear = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
       xreg.lm = xreg.lm, logtransform = logtransform, 
       stepwise = stepwise, formula.right.lm = formula.right.lm, negTo0=negTo0,toInteger=toInteger)
-    AIC["LinearModel"] = LinearModel$AIC
-    IC.width["LinearModel"] = LinearModel$IC.width
-    R2["LinearModel"] = LinearModel$R2
-	VarCoeff["LinearModel"] = LinearModel$VarCoeff
+    AIC["Linear"] = Linear$AIC
+    IC.width["Linear"] = Linear$IC.width
+    R2["Linear"] = Linear$R2
+	VarCoeff["Linear"] = Linear$VarCoeff
   }
   if (("es" %in% try.models)&(n >= n.min )) {
-    ExponentialSmooth = mod.es(product = product, n.ahead = n.ahead, 
+    ExpSmooth = mod.es(product = product, n.ahead = n.ahead, 
       period.freq = period.freq, period.start = period.start, 
       logtransform.es = logtransform.es, stepwise = stepwise, negTo0=negTo0,toInteger=toInteger)
-    AIC["ExponentialSmooth"] = ExponentialSmooth$AIC
-    IC.width["ExponentialSmooth"] = ExponentialSmooth$IC.width
-    R2["ExponentialSmooth"] = ExponentialSmooth$R2
-	VarCoeff["ExponentialSmooth"] = ExponentialSmooth$VarCoeff 
+    AIC["ExpSmooth"] = ExpSmooth$AIC
+    IC.width["ExpSmooth"] = ExpSmooth$IC.width
+    R2["ExpSmooth"] = ExpSmooth$R2
+	VarCoeff["ExpSmooth"] = ExpSmooth$VarCoeff 
   }
   if (("arima" %in% try.models)&(n >= n.min )) {
     Arima = mod.arima(product=product,logtransform=logtransform,
@@ -136,8 +136,8 @@ ltp <- function(product, try.models = c("lm", "arima","es","naive"), rule = "Bes
  
   ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff<=rule.noMaxOver,1,NA))), 
                                 BestAIC = which.min(AIC*(ifelse(VarCoeff<=rule.noMaxOver,1,NA))) )		
-  results = list(values = product, Mean = Mean, Trend = Trend, LinearModel = LinearModel, 
-    ExponentialSmooth = ExponentialSmooth, Arima = Arima, Naive = Naive, BestModel = names(ID.model), rule=rule, rule.noMaxOver=rule.noMaxOver)
+  results = list(values = product, Mean = Mean, Trend = Trend, Linear = Linear, 
+    ExpSmooth = ExpSmooth, Arima = Arima, Naive = Naive, BestModel = names(ID.model), rule=rule, rule.noMaxOver=rule.noMaxOver)
   results
 }
 
