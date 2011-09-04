@@ -18,7 +18,7 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-Items.Eval <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, values=NULL, param=NULL,
+Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=NULL,
                       project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
@@ -31,11 +31,6 @@ Items.Eval <- function(project.name, id.range=NULL, id.list=c(), keys=NULL, valu
 
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
-
-  if (!is.null(id.range)) {
-    list1 <- as.integer(id.range[1]):as.integer(id.range[2])
-    id.list = append(list1, id.list)
-  }
 
   for (id in id.list) {
     Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
