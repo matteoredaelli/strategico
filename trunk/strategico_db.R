@@ -192,7 +192,6 @@ Item.DB.GetResults <- function(project.name, value, id, db.channel) {
 Item.DB.GetRecords <- function(project.name, key="id", id, tablename, db.channel) {
   filter <- paste(key, "=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
-  logger(DEBUG, sql_statement)
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
 }
 
@@ -224,6 +223,19 @@ Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
 Item.DB.GetSummaryModels <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameSummaryModels(project.name, value=value)
   Item.DB.GetRecords(project.name, id=id, key="item_id", tablename=tablename, db.channel=db.channel)
+}
+
+Items.DB.SetBestModel <- function(project.name, value, id.list,
+                                  model, db.channel) {
+  str.id.list <- paste(id.list, collapse=",")
+  logger(DEBUG, paste("Setting bestmodel=", model, " for id.list=", str.id.list, sep=""))
+  tablename <- DB.GetTableNameSummary(project.name, value=value)
+  str <- "update _TABLENAME_ set BestModel='_MODEL_' where id in (_IDLIST_)"
+  str <- gsub("_TABLENAME_", tablename, str)
+  str <- gsub("_MODEL_", model, str)
+  str <- gsub("_IDLIST_", str.id.list, str)
+
+  DB.RunSQLQuery(sql_statement=str, db.channel=db.channel)
 }
 
 Project.DB.Empty <- function(project.name, project.config=NULL, db.channel) {

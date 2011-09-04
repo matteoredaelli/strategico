@@ -20,11 +20,13 @@
 ## created: 2011
 
 library(methods)
-library('getopt');
+library(getopt);
 
 UsageAndQuit <- function(msg.err="\n") {
   self = commandArgs()[1];
-  cat(msg.err)
+  cat( paste("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++\n",
+             "message: ", msg.err,
+             "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"))
   
   options <- "
   --help | -h : show help and exit
@@ -43,6 +45,7 @@ spec <- c(
           'id.range', 'R', 1, "character",
           'eval.param', 'p', 1, "character",
           'item.values', 'v', 1, "character",
+          'model', 'm', 1, "character",
           'runit', 'u', 0, "logical",
           'ts.freq', 'f', 1, "double",
           'ts.string', 't', 1, "character",
@@ -127,10 +130,25 @@ project.config <- Project.GetConfig(opt$project.name)
 db.channel <- DB.Connect()
 
 #########################################################################
-## check missing options
+## Normalizing options
 #########################################################################
 
 param <- Param.EvalString(opt$eval.param)
+
+id.list <- c()
+
+if (!is.null(opt$id.list))
+  id.list <- unlist(strsplit(opt$id.list, ","), as.numeric)
+
+if (!is.null(opt$id.range))
+  id.list <- append(id.list, StrToRange(opt$id.range))
+
+opt$id.list <- id.list
+
+
+## item.values could be could be V1 or V1,V2
+if (!is.null(opt$item.values))
+  opt$item.values <- unlist(strsplit(opt$item.values, ","))
 
 #########################################################################
 ## eval_children
@@ -141,19 +159,10 @@ if (opt$cmd == "eval.children") {
   if (is.null(opt$id.list))
     UsageAndQuit("Missing parameter id.list")
 
-  if (!is.null(opt$id.list))
-    opt$id.list <- unlist(strsplit(opt$id.list, ","), as.numeric)
-      
-##  if (is.null(opt$item.values))
-##    UsageAndQuit("Missing parameter item.values!")
-
-  ## item.values could be could be V1 or V1,V2
-  if (!is.null(opt$item.values))
-    opt$item.values <- unlist(strsplit(opt$item.values, ","))
-
   for (id in opt$id.list)
     Item.EvalChildren(project.name=opt$project.name, id=id,
-                 values=opt$values, param=param, project.config=project.config, db.channel=db.channel)
+                      values=opt$values, param=param,
+                      project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
 
@@ -163,24 +172,13 @@ if (opt$cmd == "eval.children") {
 
 if (opt$cmd == "eval.items") {
 
-  if (is.null(opt$id.list) & is.null(opt$id.range))
+  if (is.null(opt$id.list))
     UsageAndQuit("Missing parameter id.list or id.range")
 
-  if (!is.null(opt$id.list))
-    opt$id.list <- unlist(strsplit(opt$id.list, ","), as.numeric)
-  if (!is.null(opt$id.range))
-    opt$id.range <- unlist(strsplit(opt$id.range, ":"), as.numeric)
-      
-##  if (is.null(opt$item.values))
-##    UsageAndQuit("Missing parameter item.values!")
-
-  ## item.values could be could be V1 or V1,V2
-  if (!is.null(opt$item.values))
-    opt$item.values <- unlist(strsplit(opt$item.values, ","))
 
   Items.Eval(project.name=opt$project.name, 
-            id.range=opt$id.range, id.list=opt$id.list,
-            values=opt$values, param=param, project.config=project.config, db.channel=db.channel)
+             id.list=opt$id.list, values=opt$values,
+             param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
 
@@ -194,7 +192,7 @@ if (opt$cmd == "eval.items.from.db") {
     UsageAndQuit("Missing parameter item.values!")
   
   Items.DB.EvalFromSummary(project.name=opt$project.name, value=opt$item.value,
-                  verbose=TRUE, project.config, db.channel=db.channel)
+                           verbose=TRUE, project.config, db.channel=db.channel)
   
   q(status=0)
 }
@@ -263,16 +261,41 @@ if (opt$cmd == "export.db.csv") {
   q(status=0)
 }
 #########################################################################
-## import
+## CMD import
 #########################################################################
 
 if (opt$cmd == "import") {
   Project.ImportData(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
   
-} else {
-  UsageAndQuit(paste("Unknown command", opt$cmd))
 }
+
+#########################################################################
+## CMD set.best.model
+#########################################################################
+
+if (opt$cmd == "set.best.model") {
+
+  if (is.null(opt$id.list))
+    UsageAndQuit("Missing parameter id.list")
+  
+  if (is.null(opt$item.values))
+    UsageAndQuit("Missing parameter item.values")
+  
+  if (is.null(opt$model))
+    UsageAndQuit("Missing parameter model")
+  
+  for (v in opt$item.values)
+    Items.DB.SetBestModel(project.name=opt$project.name, id.list=opt$id.list,
+                       value=v, model=opt$model, db.channel=db.channel)
+  q(status=0)
+}
+
+#########################################################################
+## CMD: unknown command
+#########################################################################
+
+UsageAndQuit(paste("Unknown command", opt$cmd))
 
 
 
