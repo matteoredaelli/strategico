@@ -342,6 +342,11 @@ SubsetByID <- function(data, id) {
   }
 }
 
+StrToRange <- function(str) {
+  values <- unlist(strsplit(str, ":"), as.numeric)
+  as.integer(values[1]):as.integer(values[2])
+}
+
 SW.License <- function() {"GPL V3+"}
 
 SW.Description <- function() {
