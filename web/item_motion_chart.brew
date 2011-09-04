@@ -67,7 +67,7 @@ M <- gvisMotionChart(data=item.all, idvar="model",
                      options=list(
                        #gvis.editor="Editor",
                        legend="bottom",
-                       width=1000,
+                       width=800,
                        height=600
                        )
                      )

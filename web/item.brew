@@ -28,6 +28,7 @@ options(hverbose=FALSE,verbose=FALSE)
 
   
   <%
+suppressPackageStartupMessages(library(googleVis))
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
 source(file.path(strategico.home, "strategico_util.R"))
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
@@ -42,9 +43,18 @@ item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
 db.channel <- DB.Connect()
 
 item.keys <- Item.GetKeys(project.name=project.name, id=id)
+
+if (!is.null(GET$setmodel) & !is.null(GET$model)) {
+  Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
+                        db.channel=db.channel, model=GET$model)
+  }
+
+
 item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
 item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
 item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+model.names <- unique(item.results$model)
 
 keys.string <- ifelse(is.null(item.keys),
                       "",
@@ -56,58 +66,88 @@ if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
   <center>
     <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%> :: <%=keys.string%></h1>
   </center>
-  
-                <form method="GET">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
-                <%=BuildFormElement_value(project.name=project.name, default=value)%><br />
-                <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=150)%><br />
-                <input type="submit" name="show" value="Show">
-                <input type="submit" name="eval" value="Run">
-                </form><form action="search-item.brew" method="GET">
+  <h2>Search</h2>
+                   <form action="search-item.brew" method="GET">
+  <input type="submit" name="search_item" value="Search by keys">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
-                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%><br />
-                <input type="submit" name="search_item" value="New search">
+                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
                 </form>
+  
+                <form method="GET">
+  <input type="submit" name="show" value="Search by ID">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+  <h2>Run</h2>
+                <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=120)%><br />
+                <input type="submit" name="eval" value="Run">
+                </form>
+
 <% 
 if (!is.null(GET$eval)) {
   param <- Param.EvalString(param)
   Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param)
   }
-DB.Close(db.channel)
 %>
-<h2>Models</h2>
-  <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
+  
+<h2>Results</h2>
+   <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
   <img src="<%=paste(item.path,"all_models.png",sep="/")%>" />
   
-<h2>Summary</h2>
+                     <form action="item_motion_chart.brew" method="GET">
+  <input type="submit" name="view" value="Show motion chart">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
+                </form>
 <%
 if(!is.null(item.summary.models) & !is.na(item.summary.models) & is.data.frame(item.summary.models) & nrow(item.summary.models) > 0) {
   item.summary.models$item_id <- NULL
   rownames(item.summary.models) <- NULL
-  print(xtable(item.summary.models), type="html")
-}
+  #print(xtable(item.summary.models), type="html")
+
+  M <- gvisTable(item.summary.models, options=list(width=600, height=170))
 %>
+  <%= M$html$chart %>
+
+               <form  method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
+                  <% for (model in model.names) { 
+                       str <- paste(BuildHtmlElement_input(name="model", default=model, type="radio"),
+                         model, " ", sep="")
+                       cat(str)
+                     }
+                  %>
+                    <input type="submit" name="setmodel" value="Set best model" />
+                </form>
 
 <%
-if(!is.null(item.summary) & !is.na(item.summary) & is.data.frame(item.summary) & nrow(item.summary) > 0) {
+
   item.summary$Parameters <- NULL
-  item.summary <- t(item.summary)
+  item.summary$id <- NULL
+  rownames(item.summary) <- NULL
+  item.summary <- as.data.frame(t(item.summary))
+  #colnames(item.summary) <- c("Key", "Value")
   print(xtable(item.summary), type="html")
-}
+  #M <- gvisTable(item.summary)#, options=list(width=400, height=270))
+
 %>
+
 <h2>Results</h2>
 <%
-if(!is.null(item.results) & !is.na(item.results) & is.data.frame(item.results) & nrow(item.results) > 0) {
- 
   item.results$id <- NULL
   item.results$item_id <- NULL
   rownames(item.results) <- NULL
-  print(xtable(xtabs( V ~ PERIOD + model, item.results)), type="html")
+  pivot.results <- xtabs( V ~ PERIOD + model, item.results)
+  print(xtable(pivot.results), type="html")
 }
 %>
-
-<% ShowTemplate('footer') %>
+<%
+ShowTemplate('footer')
+DB.Close(db.channel)
+%>
 

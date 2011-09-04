@@ -54,25 +54,29 @@ keys.string <- paste(keys, collapse = " - ")
   <center>
     <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%> :: <%=keys.string%></h1>
   </center>
+
+                  <form method="GET">
+
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildFormElement_keys(project.name=project.name, default=keys)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                  <input type="submit" value="Search">
+                </form>
+    
+<br />
+  
 <%
 id.result <- Item.GetIDs(project.name=project.name, keys=keys )
 if (!is.na(id.result) & !is.null(id.result) & length(id.result)>0) {
   id <- id.result[1] %>
-<br /><br />Item no. <%=id%> FOUND!  <form action="item.brew" method="GET">
+Item no. <%=id%> FOUND!  <form action="item.brew" method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
                 <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
                 Show results or (re)run of item <input type="submit" value="<%=keys.string%>">
                 </form>
 <%}%>
-  
-<br />
-<br />
-                <form method="GET">
-                <input type="submit" value="Search new item">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildFormElement_keys(project.name=project.name, default=keys)%>
-                <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                </form>
+
+
 <% ShowTemplate('footer') %>
 
