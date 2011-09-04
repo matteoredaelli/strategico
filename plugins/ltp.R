@@ -729,7 +729,7 @@ plot.ltp = function(model, plot.try.models = c("best",
   }
 }
 
-PlotLtpResults <- function(obj, directory=NULL, width=1000, height=600) {
+PlotLtpResults <- function(obj, directory=NULL, width=600, height=400) {
   plot.ltp(obj, plot.try.models = c("best"), color.forecast = NULL, color.ic = "orange", plot.trend = FALSE, title = obj$BestModel ,filename=file.path(directory, "best_model.png"),width = width, height = height)
         
   ## plot ALL models
