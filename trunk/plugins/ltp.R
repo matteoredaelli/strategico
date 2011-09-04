@@ -36,11 +36,13 @@
 ## seasonality = c("none","additive", "c/additive", "multiplicative", "c/multiplicative"),
 ## innovation = c("additive", "multiplicative"))
 
+
 library(R2HTML)
 library(hwriter)
 #library(tseries, quietly=TRUE) # works only for the latest R releases
-library(tseries, verbose=FALSE)
-library(forecast)
+#options(Hverbose=FALSE, verbose=FALSE)
+suppressMessages(library(tseries, verbose=FALSE))
+suppressMessages(library(forecast))
 library(ast)
   
 ############## ltp()
