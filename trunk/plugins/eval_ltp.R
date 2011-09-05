@@ -173,6 +173,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## ###################################################################################
   ## Saving Predicted Data
   ## ###################################################################################
+  logger(DEBUG, "Saving results for all models")
   predictions.periods <-Period.BuildRange(period.start=project.config$period.end,
                                           period.freq=project.config$period.freq,
                                           n=param$n.ahead, shift=1)
@@ -189,7 +190,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     result <- data.frame(model[[model$BestModel]]$prediction)
     for (m in models.names) {
       if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
-        data.predicted <- rbind(data.predicted, prediction.null)
+        #data.predicted <- rbind(data.predicted, prediction.null)
+        logger(WARN, paste("No predictions for model", m, ": skipping it.."))
       else {
         model.predicted <- model[[m]]$prediction
         model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
