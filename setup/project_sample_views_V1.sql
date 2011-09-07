@@ -7,7 +7,7 @@ select
   data_norm.PERIOD,
   data_norm.V
 from
-  sample_items items left join 
+  sample_items items inner join 
   sample_data_norm_V1 data_norm on (items.id = data_norm.item_id)
 order by
   items.id,
@@ -20,8 +20,8 @@ create or replace view sample_view_summary_V1 as select
   items.KEY3,
   sm.*
 from
-  sample_items items left join
-  sample_summary_V1 s on (items.id = s.id) left join
+  sample_items items inner join
+  sample_summary_V1 s on (items.id = s.id) inner join
   sample_summary_models_V1 sm on (items.id = sm.item_id)
 where
   s.BestModel = sm.model
@@ -37,8 +37,8 @@ create or replace view sample_view_results_V1 as select
   r.PERIOD,
   r.V
 from
-  sample_items items left join
-  sample_summary_V1 s on (items.id=s.id) left join
+  sample_items items inner join
+  sample_summary_V1 s on (items.id=s.id) inner join
   sample_results_V1 r on (items.id=r.item_id)
 where
   s.BestModel = r.model
