@@ -258,6 +258,7 @@ if (opt$cmd == "empty.fs") {
 #########################################################################
 if (opt$cmd == "export.db.csv") {
   Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
+  Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
 #########################################################################

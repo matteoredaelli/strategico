@@ -101,6 +101,15 @@ DB.GetTableSize <- function(tablename, db.channel) {
   result
 }
 
+DB.GetViewNameResults <- function(project.name, value) {
+  paste(project.name, "view", "results", value, sep="_")
+}
+
+DB.GetViewNameSummary <- function(project.name, value) {
+  paste(project.name, "view", "summary", value, sep="_")
+}
+
+
 DB.RunSQLQuery <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
   db.channel.old <- db.channel
   if(is.null(db.channel)) {
@@ -262,6 +271,21 @@ Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.cha
          )
 }
 
+Project.DBExportViews2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+  project.path <- Project.GetPath(project.name)
+  tables <- Project.DB.GetViewNames(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) DB.ExportTable2Csv(tablename=x,
+                                             db.channel=db.channel,
+                                             output.file=file.path(project.path, paste(x, ".csv", sep="")),
+                                             sep=sep,
+                                             dec=dec
+                                             )
+         )
+}
+
 Project.DB.FixStructure <- function(project.name, values, db.channel) {
   ## TODO: generalize tablenames..
   ## Add unique index on keys in project_items table: needed for speed and consistency
@@ -313,7 +337,24 @@ Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
   }
   tables
 }
-    
+
+
+Project.DB.GetViewNames <- function(project.name, project.config=NULL) {
+  if(is.null(project.config)) 
+    project.config <- Project.GetConfig(project.name)
+
+  views <- c()
+  
+  for (value in GetValueNames(project.config$values)) {
+    value.tables <- c(
+                      DB.GetViewNameResults(project.name, value),
+                      DB.GetViewNameSummary(project.name, value)
+                      )
+    views <- append(views, value.tables)
+  }
+  views
+}
+
 ##input  da db. 
 Project.DB.ImportData <- function(project.name, db.name, db.user, db.pass, sql_statement) {
   DB.RunSQLQuery(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
