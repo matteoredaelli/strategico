@@ -32,7 +32,7 @@
      if (isset($_GET['submit'])) {
      $strategico_home = getenv("STRATEGICO_HOME");
      $command = $strategico_home . "/strategico.R"
-     . " --cmd eval_ts" 
+     . " --cmd eval.ts" 
      . " --project.name " . $project_name
      . " --id.list " . $id
      . " --ts.string " . $ts
