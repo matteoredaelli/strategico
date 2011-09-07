@@ -161,6 +161,18 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
   } #end if
 }
 
+Items.DB.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
+
+  tablename = DB.GetTableNameProjectItems(project.name)
+  sql_statement <- paste("select max(id) from ", tablename, sep="")
+  records <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+
+  result <- as.integer(records[1,][1])
+
+  logger(DEBUG, paste("Max ID =", result))
+  result 
+}
+
 Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
                          keys.na.rm=TRUE, period.start=NULL, period.end=NULL, db.channel) {
 

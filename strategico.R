@@ -136,8 +136,10 @@ db.channel <- DB.Connect()
 ## Normalizing options
 #########################################################################
 
+logger(DEBUG, "checking parameter: eval.param")
 param <- Param.EvalString(opt$eval.param)
 
+logger(DEBUG, "checking parameters: id.list and id.range")
 id.list <- c()
 
 if (!is.null(opt$id.list))
@@ -146,8 +148,16 @@ if (!is.null(opt$id.list))
 if (!is.null(opt$id.range))
   id.list <- append(id.list, StrToRange(opt$id.range))
 
-opt$id.list <- id.list
+id.list <- as.integer(id.list)
 
+## removing IDs > max id
+
+max.id <- Items.DB.GetMaxID(opt$project.name, db.channel=db.channel)
+
+wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
+logger(WARN, paste("Skipping the following too high ids:", wrong.id))
+
+opt$id.list <- id.list[id.list <= max.id]
 
 ## item.values could be could be V1 or V1,V2
 if (!is.null(opt$item.values))
