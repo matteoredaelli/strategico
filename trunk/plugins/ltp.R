@@ -793,9 +793,10 @@ ltp.HTMLreport <- function(obj, id, value, value.description, param, directory="
     pred = as.data.frame(obj[[obj$BestModel]]$prediction,ncol=1)
     period.freq = frequency(obj[[obj$BestModel]]$ts.product)
     end_serie = end(obj[[obj$BestModel]]$ts.product)
-    
-    ## TODO: Using Period.BuildRange(period.start, period.freq, n, shift=0) 
-    pred.names = sapply(1:nrow(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
+    ## TODO end_serie is wrong! do not correspond with period.start
+    ##cat(end_serie)
+    pred.names <- Period.BuildRange(end_serie, period.freq, nrow(pred), shift=0) 
+    ##pred.names = sapply(1:nrow(pred),function(x) paste(.incSampleTime(period.freq = period.freq, now = end_serie,increment =x),collapse="-"))
     rownames(pred)=pred.names
     colnames(pred)="Predicted values"
 
