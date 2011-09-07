@@ -163,26 +163,47 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
 
 Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
                          keys.na.rm=TRUE, period.start=NULL, period.end=NULL, db.channel) {
- 
+
+  ## id or keys must be not null
+  
+  if (is.null(keys) & is.null(id)) {
+    msg <- "Cannot retrive Item data for missing ID and KEYS" 
+    logger(ERROR, msg)
+    return(NULL)
+  }
+  
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
-  
+
+  if (!is.value(value, project.config=project.config)) {
+    msg <- paste("Invalid value=", value, ". No data to retreive") 
+    logger(ERROR, msg)
+    return(NULL)
+  }
+
   if (is.null(keys)) {
     if (is.null(project.items))
       project.items <- Project.GetItems(project.name=project.name)
     keys <- Item.GetKeys(id=id, project.name=project.name, project.items=project.items)
-  }
 
-  n.char <- nchar(project.config$period.freq)                
+    ## now keys should not be null
+     if (is.null(keys)) {
+       msg <- paste("NO Keys NO data for id=", id) 
+       logger(ERROR, msg)
+       return(NULL)
+     }
+  }
+            
   if (is.null(period.start)) period.start <- project.config$period.start
   if (is.null(period.end)) period.end <- project.config$period.end
   
+  n.char <- nchar(project.config$period.freq)    
   string.period.start <- Period.ToString(period.start, n.char=n.char)
   string.period.end <- Period.ToString(period.end, n.char=n.char)
 
   filter.key <- BuildFilterWithKeys(key.values=keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
   filter.period <- paste("period >= '", string.period.start, "' and period <= '", string.period.end, "'", sep="")
-  
+
   tablename <- DB.GetTableNameProjectData(project.name)
   sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
 
