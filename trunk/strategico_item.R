@@ -87,6 +87,12 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
                      " KEYS=", paste(keys,collapse=","), " ",
                      value, "=", project.config$values[value],
                      sep=""))
+
+  if (!is.value(value, project.config=project.config)) {
+    msg <- paste("Invalid value=", value, ". Skipping prediction") 
+    logger(ERROR, msg)
+    return(NULL)
+  }
   
   if (is.null(item.data))
     if ("data_db" %in% project.config$save)
@@ -97,6 +103,11 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
       item.data <- Item.GetData(project.name=project.name, project.items=project.items,
                                 project.data=project.data, project.config=project.config,
                                 id=id, keys=keys, value=value)
+
+  if (is.null(item.data)) {
+    logger(INFO, "Empty data: skipping prediction")
+    return(NULL)
+  }
   
   logger(INFO, paste("TS length=", nrow(item.data)))
   logger(DEBUG, item.data)

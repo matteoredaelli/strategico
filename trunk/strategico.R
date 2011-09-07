@@ -161,7 +161,7 @@ if (opt$cmd == "eval.children") {
 
   for (id in opt$id.list)
     Item.EvalChildren(project.name=opt$project.name, id=id,
-                      values=opt$values, param=param,
+                      values=opt$item.values, param=param,
                       project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
@@ -177,7 +177,7 @@ if (opt$cmd == "eval.items") {
 
 
   Items.Eval(project.name=opt$project.name, 
-             id.list=opt$id.list, values=opt$values,
+             id.list=opt$id.list, values=opt$item.values,
              param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
@@ -191,7 +191,7 @@ if (opt$cmd == "eval.items.from.db") {
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values!")
   
-  Items.DB.EvalFromSummary(project.name=opt$project.name, value=opt$item.value,
+  Items.DB.EvalFromSummary(project.name=opt$project.name, value=opt$item.values,
                            verbose=TRUE, project.config, db.channel=db.channel)
   
   q(status=0)
