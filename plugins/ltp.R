@@ -175,73 +175,43 @@ ltp <- function(product, try.models = c("lm", "arima","es","naive"), rule = "Bes
                                         # product
 ## }
 
-ltp.normalizeData <- function(product, range, NA2value=NULL,period.start,period.freq,increment,period.end) {
-  period.start.fix = period.start
-  ## TODO: adding a parameter to decide if changing period.start to the first period of the year
-  ## if the minimun period is c(2002,2), it will changed to c(2002,1)
-  period.start = apply(matrix(as.numeric(Period.FromString(rownames(product))),nrow=2),1,min)
-  n.char <- nchar(period.freq)
-  ## TODO: Using Period.BuildRange(period.start, period.freq, n, shift=0)
-  ## removing teh test with times.old
-  n <- sum((period.end-period.start)*c(period.freq,1)) + 1
-  times <- Period.BuildRange(period.start, period.freq, n, shift=0)
-
-  ## ###################
-  if (is.na(NA2value)){
-	temp = sapply(1: period.freq,function(i) mean(product[seq(from=i,by=period.freq,to=max(i,nrow(product))),],na.rm=TRUE))
-	if(period.start[2]>1) temp = c(temp[period.start[2]:period.freq], temp[1:(period.start[2]-1)])
-  } 
-  #temp = rep(NA2value, period.freq)
-temp=NA2value
+ltp.normalizeData <- function(product, range, NA2value=0,period.start,period.freq,increment,period.end) {
+  #increment non lo sto usando. a cosa serviva?
+  #i dati che arrivano gia' con un NA vengono rimpiazzati subito. se is.na(NA2value) non cambia nulla
+  product[is.na(product),]=NA2value
+  #trova l'effettiva data di partenza: minima data su product e minore di period.end 
+  period.start = Number.ToPeriod(min(Period.ToNumber(period.end), max(Period.ToNumber(period.start),min(Period.ToNumber(rownames(product))))))
+  n <- Period.ToNumber(period.end)-Period.ToNumber(period.start) +1
   
-  productnew=data.frame( rep(temp, len = length(times) ))
+  times <- Period.BuildRange(period.start, period.freq, n, shift=0)
+  productnew=data.frame( rep(NA2value, len = length(times) ))
   rownames(productnew)=times
   colnames(productnew)=colnames(product)
-  productnew[rownames(product),]=product
-  id.start=which(Period.ToString(period.start.fix, n.char=n.char)==rownames(product))
-  #id.start=which(paste(period.start.fix,collapse="-")==rownames(product))
-  if( length(id.start)>0 ) {
-	productnew=productnew[id.start:nrow(productnew),,drop=FALSE]
-	period.start=period.start.fix
-  } else if( sum(period.start.fix*c(period.freq,1)) > sum(period.start*c(period.freq,1)) ){
-	return(list(product=productnew[-(1:nrow(productnew)),,drop=FALSE],start=NA))
-  }  #else go on
+  if(n==0) { #se non ci sono dati ne creo uno fittizio
+	productnew[1,]=NA2value
+	rownames(productnew)=Period.ToString(period.end)
+    }
   
-  temp=mean(product[grep(period.end[1],rownames(product)),],na.rm=TRUE) #mean of values in last year
-  temp=ifelse(is.na(temp),0,temp)
-  if (temp>0) {
-    productnew=productnew[1:which(rownames(productnew)==Period.ToString(period.end,n.char=n.char)),,drop=FALSE]
-  } else {
-    return(list(product=productnew[-(1:nrow(productnew)), ,drop=FALSE],start=NA))
+  
+  #mette i dati originali dove ci sono.
+  ValidValues=intersect(rownames(product),rownames(productnew)) #se ci sono prezzi con data successiva li toglie
+  if (length(ValidValues)>0)   productnew[ValidValues,]=product[ValidValues,]
+  
+  #se NA2value==NA ci mette la media delle stagioni presenti nel dataset.
+  if(any(is.na(productnew))){
+	for(i in 1:period.freq) {
+		if(length(grep(paste("-",i,sep=""),rownames(productnew)))>0)
+		productnew[grep(paste("-",i,sep=""),rownames(productnew)),][is.na(productnew[grep(paste("-",i,sep=""),rownames(productnew)),])] = 
+		mean(productnew[grep(paste("-",i,sep=""),rownames(productnew)),],na.rm=TRUE)	
+	}
   }
-  
-
-  n = nrow(productnew)
-
-  if(n>0){
-    flag = TRUE
-    i = 1
-    start = period.start
-    while ((i<=n)&flag) {
-      if (is.na(productnew[1,])) {
-        productnew = productnew[-1,,drop=FALSE]
-        start = .incSampleTime(start, period.freq = period.freq, increment=increment) 
-      }
-      else flag = FALSE
-    }
-    if(nrow(productnew)==0) return(productnew)
-    if (!is.na(NA2value))    productnew[is.na(productnew), ] = NA2value
-    else{
-      for(i in 1:period.freq) {
-        my.seq <- seq(from=i,by=period.freq,to=nrow(productnew))
-        productnew[my.seq[is.na(productnew[my.seq,])],]=mean(productnew[my.seq,],na.rm=TRUE)
-      }
-    }
+  #se proprio non c'e' nulla da fare ci sbatte uno 0
+  productnew[is.na(productnew)]=0
+  	
     productnew[productnew < range[1], ] = range[1]
     productnew[productnew > range[2], ] = range[2]
-
-    return(list(product=productnew,start=start))
-  } else {return(list(product=productnew,start=NA))}
+    return(list(product=productnew,start=period.start))
+	
 }
 
 
@@ -555,7 +525,7 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   # sdJumps = sd(m[-1]/m[-length(m)])
   res = y
                                         
-  lista.naive = list(ts.product = y, model = NULL, prediction = pred.modnaive, 
+  lista.naive = list(ts.product = y, model = naive.values, prediction = pred.modnaive, 
     IC = IC.pred.modnaive, AIC = naive.AIC, R2 = naive.R2, IC.width = ic.delta, maxJump=maxJump,  VarCoeff=VarCoeff, Residuals = res)
   lista.naive
 }
