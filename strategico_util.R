@@ -270,6 +270,14 @@ Period.BuildRange <- function(period.start, period.freq, n, shift=0) {
           )
 }
 
+Period.ToNumber <- function(period){
+  if(is.numeric(period)) #un unico valore espresso in un vector di due elementi
+	return(sum((period-c(0,1))*c(2,1))) else #un vector di stringhe ognuna contenente un period
+	return(sapply(period,function(per) sum((Period.FromString(per)-c(0,1))*c(2,1))))
+  }
+
+Number.ToPeriod <- function(period){  return(c(period%/%2,period%%2+1))  }
+
 Period.FromString <- function (period.string) {
   unlist(lapply(strsplit(period.string, "-"), as.numeric))
 }
