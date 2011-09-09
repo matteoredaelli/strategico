@@ -37,6 +37,18 @@
 ## innovation = c("additive", "multiplicative"))
 
 
+#################UTILITIES
+getMaxJump <- function(product, period.freq, pred.mod)  {
+  res=exp(abs(log(mean(product[max(1,(nrow(product)-period.freq+1)):nrow(product),1],na.rm=TRUE)/mean(pred.mod[1:min(period.freq,nrow(product))],na.rm=TRUE))))
+  if(length(res)!=0) res=1
+  if(any(is.na(res))) res=1
+  res
+}
+
+getVarCoeff <- function(product, pred.mod){
+   sd(c(as.vector(pred.mod),unlist(product)),na.rm=TRUE)/mean(c(as.vector(pred.mod),unlist(product)),na.rm=TRUE)
+}
+
 library(R2HTML)
 library(hwriter)
 #library(tseries, quietly=TRUE) # works only for the latest R releases
@@ -133,7 +145,6 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
     IC.width["ExpSmooth"] = ExpSmooth$IC.width
     R2["ExpSmooth"] = ExpSmooth$R2
 	VarCoeff["ExpSmooth"] = ExpSmooth$VarCoeff 
-   print(ExpSmooth$maxJump)
 	maxJump["ExpSmooth"] = ExpSmooth$maxJump
   }
   if (("arima" %in% try.models)&(n >= n.min )) {
@@ -297,8 +308,8 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
   lm.AIC = AIC(modlm, k = 2)
   lm.R2 = summary(modlm)$r.squared
   ic.delta = mean(IC.pred.modlm$upr - IC.pred.modlm$lwr)
-  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.modlm[1:period.freq]-1),na.rm=TRUE)
-  VarCoeff= sd(c(as.vector(pred.modlm),unlist(product)),na.rm=TRUE)/mean(c(as.vector(pred.modlm),unlist(product)),na.rm=TRUE)
+  maxJump = getMaxJump (product, period.freq, pred.modlm)
+  VarCoeff= getVarCoeff(product,pred.modlm) 
   # m=matrix(NA,period.freq, ceiling((dim(pred.modlm)[1])/period.freq)+1)
   # m[1:(length(pred.modlm)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modlm)
   # m=apply(m,2,mean,na.rm=TRUE)
@@ -311,7 +322,7 @@ mod.lm <- function(product, n.ahead, period.start, period.freq, xreg.lm = NA, lo
 }
 ############## best.arima()
 mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.q,max.P,
-                      max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima,negTo0=negTo0,toInteger=toInteger) {
+                       max.Q,n.ahead,period.freq,xreg.arima,period.start,stepwise,stationary.arima,negTo0=negTo0,toInteger=toInteger) {
   logger(DEBUG, "  function mod.arima")
   y = as.vector(product)
   n = max(length(y), nrow(y))
@@ -393,8 +404,8 @@ mod.arima <- function(product,logtransform,diff.sea,diff.trend,idDiff,max.p,max.
   arima.R2 = r2
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.arima$upr - IC.pred.arima$lwr)
-  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.arima[1:period.freq]-1),na.rm=TRUE)
-  VarCoeff=sd(c(as.vector(pred.arima),t(as.vector(product))),na.rm=TRUE)/mean(c(as.vector(pred.arima),t(as.vector(product))),na.rm=TRUE)
+  maxJump = getMaxJump (product, period.freq, pred.arima)
+  VarCoeff= getVarCoeff(product,pred.arima) 
   # m=matrix(NA,period.freq, ceiling((length(pred.arima))/period.freq)+1)
   # m[1:(length(pred.arima)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.arima)
   # m=apply(m,2,mean,na.rm=TRUE)
@@ -475,8 +486,8 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
   es.R2 = r2
   attr(y, "product") = names(product)
   ic.delta = mean(IC.pred.modle$upr - IC.pred.modle$lwr)
-  maxJump = max(abs(product[(nrow(product)-period.freq+1):nrow(product),1]/pred.modle[1:period.freq]-1),na.rm=TRUE)
-  VarCoeff=sd(c(as.vector(pred.modle),t(as.vector(product))),na.rm=TRUE)/mean(c(as.vector(pred.modle),t(as.vector(product))),na.rm=TRUE)
+  maxJump = getMaxJump (product, period.freq, pred.modle)
+  VarCoeff= getVarCoeff(product,pred.modle) 
   # # m=matrix(NA,period.freq, ceiling((length(pred.modle))/period.freq)+1)
   # # m[1:(length(pred.modle)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modle)
   # # m=apply(m,2,mean,na.rm=TRUE)
