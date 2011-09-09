@@ -233,7 +233,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 }
 ##################################
  ltp.GetModels <- function(what=NULL) {
-	model=data.frame(id=c("linear", "arima","es", "trend", "mean","naive"),
+	model=data.frame(id=c("lm", "arima","es", "trend", "mean","naive"),
 			name=c("Linear", "Arima", "ExpSmooth", "Trend", "Mean","Naive"),
 			color = c("green", "red", "blue", "gray", "black","yellow"),
 			legend= c("Linear","Arima" , "Exp.Smooth" , "Trend" ,"Mean", "Naive"))
