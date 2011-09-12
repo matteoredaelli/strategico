@@ -103,7 +103,7 @@ if (!is.null(GET$eval)) {
                 <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
                 </form>
 <%
-if(!is.null(item.summary.models) & !is.na(item.summary.models) & is.data.frame(item.summary.models) & nrow(item.summary.models) > 0) {
+if(nrow(item.summary.models) > 0) {
   item.summary.models$item_id <- NULL
   rownames(item.summary.models) <- NULL
   #print(xtable(item.summary.models), type="html")
