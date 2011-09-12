@@ -157,7 +157,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
     IC.width["Arima"] = Arima$IC.width
     R2["Arima"] = Arima$R2
 	VarCoeff["Arima"] = Arima$VarCoeff
-	maxJump["Arima"] = Arima$VarCoeff
+	maxJump["Arima"] = Arima$maxJump
   }
  
   ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff<=rule.noMaxOver,1,NA))*ifelse(maxJump<=Inf,1,NA)), 
