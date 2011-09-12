@@ -149,7 +149,6 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
 CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
   `id` int(11) NOT NULL,
   `BestModel` varchar(20) default NULL,
-  `ICwidth` double default NULL,
   `Points` int(11) default NULL,
   `NotZeroPoints` int(11) default NULL,
   `LastNotEqualValues` double default NULL,
@@ -177,7 +176,6 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
 CREATE TABLE IF NOT EXISTS `sample_summary_V2` (
   `id` int(11) NOT NULL,
   `BestModel` varchar(20) default NULL,
-  `ICwidth` double default NULL,
   `Points` int(11) default NULL,
   `NotZeroPoints` int(11) default NULL,
   `LastNotEqualValues` double default NULL,

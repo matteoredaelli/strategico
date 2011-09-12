@@ -32,8 +32,8 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   if (no.values == 0)
     return.code <- 2
   
-  stats=as.list(rep(NA,12))
-  names(stats)=c("BestModel","ICwidth",
+  stats=as.list(rep(NA,11))
+  names(stats)=c("BestModel",
          "Points","NotZeroPoints","LastNotEqualValues",
          "MeanPredicted","MeanValues","MeanPredictedRatioMeanValues","SdPredictedRatioSdValues",
          "BestAICNoOutRangeExclude","BestICNoOutRangeExclude","Timestamp")
@@ -53,10 +53,10 @@ ltp.BuildOneRowSummary <- function(id, model, param) {
   stats["Parameters"] = Param.ToString(param)
   stats["ReturnCode"] = return.code
   stats["Run"] = 0
-  stats["ICwidth"]=NA
+
   if (!is.null(model$BestModel) & (stats["MeanValues"] != 0) ) {
     ##stats[c("R2","AIC","maxJump","VarCoeff")]=round(unlist(model[[model$BestModel]][c("R2","AIC","maxJump","VarCoeff")]),4)
-    stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
+    ##stats["ICwidth"] = round(model[[model$BestModel]][["IC.width"]],0)
 
     ##find (che cum sum of) not equal (ie constant) consecutive values
     temp=cumsum((model$values[-1,]-model$values[-no.values,])==0)
