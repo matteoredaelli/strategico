@@ -39,9 +39,16 @@
 
 #################UTILITIES
 getMaxJump <- function(product, period.freq, pred.mod)  {
-  res=exp(abs(log(mean(product[max(1,(nrow(product)-period.freq+1)):nrow(product),1],na.rm=TRUE)/mean(pred.mod[1:min(period.freq,nrow(product))],na.rm=TRUE))))
-  if(length(res)!=0) res=1
-  if(any(is.na(res))) res=1
+  res=exp(abs(log(
+    mean(product[max(1,(nrow(product)-period.freq+1)):nrow(product),1],na.rm=TRUE)/
+	mean(pred.mod[1:min(period.freq,nrow(product))],na.rm=TRUE))
+	))
+  if(is.null(res)) {
+	res = NA 
+  } else {
+	if(length(res)!=1) res=1
+	if(any(is.na(res))) res=1
+  }
   res
 }
 
@@ -55,7 +62,7 @@ library(hwriter)
 #options(Hverbose=FALSE, verbose=FALSE)
 suppressMessages(library(tseries, verbose=FALSE))
 suppressMessages(library(forecast))
-library(ast)
+#library(ast)
   
 ############## ltp()
 
@@ -435,7 +442,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     pred = try(predict(modle, n.ahead, method = "resample"),TRUE)
     
     if( is(pred,"try-error") ) { 
-      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, VarCoeff =NA, Residuals = NA))
+      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, VarCoeff =NA, maxJump = NA, Residuals = NA))
     } else {
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
@@ -455,7 +462,7 @@ mod.es <- function(product, n.ahead, period.start, period.freq, n, logtransform.
     modle = esFit(y, mod$drift, mod$sea, mod$inn)  
     pred = try(predict(modle, n.ahead, method = "resample"),TRUE)
     if( is(pred,"try-error") ) { 
-      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, VarCoeff =NA,Residuals = NA))
+      return(list(ts.product = y, model = modle, prediction = NA, IC = NA, AIC = NA, R2 = NA, IC.width = NA, VarCoeff =NA, maxJump = NA, Residuals = NA))
     } else {
       n.par = mod$np
       es.AIC = modle$loglik + 2 * n.par
