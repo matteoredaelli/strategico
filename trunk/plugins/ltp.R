@@ -62,7 +62,7 @@ library(hwriter)
 #options(Hverbose=FALSE, verbose=FALSE)
 suppressMessages(library(tseries, verbose=FALSE))
 suppressMessages(library(forecast))
-#library(ast)
+library(ast)
   
 ############## ltp()
 
@@ -167,10 +167,14 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 	maxJump["Arima"] = Arima$maxJump
   }
  
-  ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff<=rule.noMaxOver,1,NA))*ifelse(maxJump<=Inf,1,NA)), 
-                                BestAIC = which.min(AIC*(ifelse(VarCoeff<=rule.noMaxOver,1,NA))*ifelse(maxJump<=Inf,1,NA)) )		
+  ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff[names(IC.width)]<=rule.noMaxOver,1,NA))*ifelse(maxJump[names(IC.width)]<=Inf,1,NA)), 
+                          BestAIC = which.min(AIC*(ifelse(VarCoeff[names(AIC)]<=rule.noMaxOver,1,NA))*ifelse(maxJump[names(AIC)]<=Inf,1,NA)) 
+					)
+  ID.model <- names(ID.model)
+  if(is.null(ID.model))  ID.model <-  "naive"
+
   results = list(values = product, Mean = Mean, Trend = Trend, Linear = Linear, 
-    ExpSmooth = ExpSmooth, Arima = Arima, Naive = Naive, BestModel = names(ID.model), rule=rule, rule.noMaxOver=rule.noMaxOver)
+    ExpSmooth = ExpSmooth, Arima = Arima, Naive = Naive, BestModel = ID.model, rule=rule, rule.noMaxOver=rule.noMaxOver)
   results
 }
 
