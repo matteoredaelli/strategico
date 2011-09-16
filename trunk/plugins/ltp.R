@@ -78,6 +78,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 #####################################
   logger(DEBUG, "Original data:")
   logger(DEBUG, product)
+  logger(DEBUG, rownames(product))
   ## result.normalize <- ltp.normalizeData(product, range, NA2value,period.end)
   result.normalize <- ltp.normalizeData(product=product,range=range,NA2value=NA2value,period.start=period.start,increment=increment,period.end=period.end,period.freq=period.freq)
   logger(DEBUG, "Normalized data:")
@@ -153,7 +154,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
     IC.width["ExpSmooth"] = ExpSmooth$IC.width
     R2["ExpSmooth"] = ExpSmooth$R2
 	VarCoeff["ExpSmooth"] = ExpSmooth$VarCoeff 
-	maxJump["ExpSmooth"] = ExpSmooth$maxJump
+	maxJump["ExpSmooth"] = ifelse(is.null(ExpSmooth$maxJump), "", ExpSmooth$maxJump)
   }
   if (("arima" %in% try.models)&(n >= n.min )) {
     logger(DEBUG, "Evaluating model arima...")
@@ -171,14 +172,20 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
   ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff[names(IC.width)]<=rule.noMaxOver,1,NA))*ifelse(maxJump[names(IC.width)]<=Inf,1,NA)), 
                           BestAIC = which.min(AIC*(ifelse(VarCoeff[names(AIC)]<=rule.noMaxOver,1,NA))*ifelse(maxJump[names(AIC)]<=Inf,1,NA)) 
 					)
-  ID.model <- names(ID.model)
-  if(is.null(ID.model))  ID.model <-  "naive"
+print("qui")  
+print(AIC)
+print(VarCoeff)
+print(maxJump)
+print(ID.model)	
+    ID.model <- ltp.GetModels("name")[names(ID.model)]
+ 
+  if((is.null(ID.model)||(length(ID.model)==0))||is.na(ID.model))  ID.model <-  "Naive"
   
   results = list(values = product, Mean = Mean, Trend = Trend, Linear = Linear, 
     ExpSmooth = ExpSmooth, Arima = Arima, Naive = Naive, BestModel = ID.model, rule=rule, rule.noMaxOver=rule.noMaxOver)
   logger(DEBUG, "Predicted data (BestModel):")
   logger(DEBUG, ID.model)
-  logger(DEBUG, list(results[[ID.model]]$prediction))
+  logger(DEBUG, (results["Naive"]))
   results
 }
 
@@ -521,13 +528,13 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   
   if(is.null(naive.values)) naive.values="last"
   
+  #print( dim(product))
   if(n==0){
 	pred.modnaive=data.frame(pred = rep(ifelse(is.character(naive.values),0,naive.values),length=n.ahead))
 	IC.pred.modnaive = list(upr = pred.modnaive, lwr = pred.modnaive)	
   } else {
 	y = ts(y, start = period.start, frequency = period.freq)
 	attr(y, "product") = names(product)
-  
 	if(is.character(naive.values)){
 		if(naive.values=="last"){
 			pred = y[length(y)]
@@ -537,7 +544,6 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
 	} else pred = naive.values 
   
 	pred=data.frame(pred = rep(pred,length=n.ahead))
-  
 	if (logtransform) {
 		pred.modnaive = exp(pred)
 	} else {
@@ -556,7 +562,6 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   }
   
   pred.modnaive=ts(pred.modnaive, start=.incSampleTime(now=period.end, period.freq = period.freq) , frequency=period.freq)
-  
   naive.AIC = Inf
   naive.R2 = NA
   ic.delta = Inf
@@ -566,11 +571,10 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   # m[1:(length(pred.modnaive)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modnaive)
   # m=apply(m,2,mean,na.rm=TRUE)
   # sdJumps = sd(m[-1]/m[-length(m)])
-  res = y
-                                        
+  res = y                                      
   lista.naive = list(ts.product = y, model = naive.values, prediction = pred.modnaive, 
     IC = IC.pred.modnaive, AIC = naive.AIC, R2 = naive.R2, IC.width = ic.delta, maxJump=maxJump,  VarCoeff=VarCoeff, Residuals = res)
-  lista.naive
+ lista.naive
 }
 
 ########################################
