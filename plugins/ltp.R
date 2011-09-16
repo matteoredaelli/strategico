@@ -177,6 +177,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
   results = list(values = product, Mean = Mean, Trend = Trend, Linear = Linear, 
     ExpSmooth = ExpSmooth, Arima = Arima, Naive = Naive, BestModel = ID.model, rule=rule, rule.noMaxOver=rule.noMaxOver)
   logger(DEBUG, "Predicted data (BestModel):")
+  logger(DEBUG, ID.model)
   logger(DEBUG, list(results[[ID.model]]$prediction))
   results
 }
