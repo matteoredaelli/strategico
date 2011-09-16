@@ -172,12 +172,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
   ID.model <- switch(rule, BestIC = which.min(IC.width*(ifelse(VarCoeff[names(IC.width)]<=rule.noMaxOver,1,NA))*ifelse(maxJump[names(IC.width)]<=Inf,1,NA)), 
                           BestAIC = which.min(AIC*(ifelse(VarCoeff[names(AIC)]<=rule.noMaxOver,1,NA))*ifelse(maxJump[names(AIC)]<=Inf,1,NA)) 
 					)
-print("qui")  
-print(AIC)
-print(VarCoeff)
-print(maxJump)
-print(ID.model)	
-    ID.model <- ltp.GetModels("name")[names(ID.model)]
+  ID.model <- ltp.GetModels("name")[names(ID.model)]
  
   if((is.null(ID.model)||(length(ID.model)==0))||is.na(ID.model))  ID.model <-  "Naive"
   
