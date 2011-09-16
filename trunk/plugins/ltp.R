@@ -76,7 +76,8 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
   ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
   ## l'importante secondo me e' che venga aggiornata anche il nuovo period.start
 #####################################
-  
+  logger(DEBUG, "Original data:")
+  logger(DEBUG, product)
   ## result.normalize <- ltp.normalizeData(product, range, NA2value,period.end)
   result.normalize <- ltp.normalizeData(product=product,range=range,NA2value=NA2value,period.start=period.start,increment=increment,period.end=period.end,period.freq=period.freq)
   logger(DEBUG, "Normalized data:")
@@ -172,9 +173,11 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 					)
   ID.model <- names(ID.model)
   if(is.null(ID.model))  ID.model <-  "naive"
-
+  
   results = list(values = product, Mean = Mean, Trend = Trend, Linear = Linear, 
     ExpSmooth = ExpSmooth, Arima = Arima, Naive = Naive, BestModel = ID.model, rule=rule, rule.noMaxOver=rule.noMaxOver)
+  logger(DEBUG, "Predicted data (BestModel):")
+  logger(DEBUG, list(results[[ID.model]]$prediction))
   results
 }
 
