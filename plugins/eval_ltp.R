@@ -188,6 +188,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   else {
     logger(WARN, paste("Best Model is ", model$BestModel))
     result <- data.frame(model[[model$BestModel]]$prediction)
+    print(names(model))
     for (m in models.names) {
       if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
         #data.predicted <- rbind(data.predicted, prediction.null)
@@ -195,15 +196,17 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       else {
         model.predicted <- model[[m]]$prediction
         model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
-        data.predicted <- rbind(data.predicted, model.predicted)
+        data.predicted <- rbind(data.predicted, model.predicted) 
       }
     } # for
   }
   data.predicted <- data.frame(data.predicted)
+
   colnames(data.predicted) <- c("item_id", "model", "PERIOD", "V")
-  
   rownames(result) <- predictions.periods
+
   colnames(result) <- "V"
+
 
   if ("data_db" %in% project.config$save) {   
     tablename = DB.GetTableNameResults(project.name, value)  
@@ -261,10 +264,10 @@ ltp.GetModelsComparisonTable <-  function(obj) {
     return (ReporTable)
   }
   
-  ReporTable = matrix("--",5,6)
+  ReporTable = matrix("--",6,6)
 
   model.names <- ltp.GetModels("name")
-  model.names <- model.names[! model.names == "Naive"]
+  #model.names <- model.names[! model.names == "Naive"]
   
   colnames(ReporTable) <- col.names
   rownames(ReporTable) <- model.names #c("Linear Model","Arima", "Exponential Smooth","Trend","Mean")
@@ -289,13 +292,14 @@ ltp.GetModelsComparisonTable <-  function(obj) {
                     paste(obj$Arima$model$series,"=", paste(names(obj$Arima$model$coef), collapse = "+"),sep=""))), 
       ifelse(is.null(obj$ExpSmooth),"--", es.string ),
       ifelse(is.null(obj$Trend),"--",paste("y=",paste(attributes(obj$Trend$model$call[[2]])$term.labels,collapse="+"),sep="")),
-      ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")) )
+      ifelse(is.null(obj$Mean),"--",paste("y=",paste(attributes(obj$Mean$model$call[[2]])$term.labels,collapse="+"),sep="")),
+      ifelse(is.null(obj$Naive),"--","Fixed Values")   )
   
   temp <- rbind(unlist(obj$Linear[indicator.list]), unlist(obj$Arima[indicator.list]), 
-    unlist(obj$ExpSmooth[indicator.list]),unlist(obj$Trend[indicator.list]),unlist(obj$Mean[indicator.list]))
+    unlist(obj$ExpSmooth[indicator.list]),unlist(obj$Trend[indicator.list]),unlist(obj$Mean[indicator.list]),unlist(obj$Naive[indicator.list]))
   colnames(temp)= indicator.list
-  
-
+ print(temp) 
+print(ReporTable)
   temp[,"R2"]=round(temp[,"R2"],4)	
   temp[,"AIC"]=round(temp[,"AIC"],2)
   temp[,"IC.width"]=round(temp[,"IC.width"],0)
