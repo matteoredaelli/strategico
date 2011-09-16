@@ -188,7 +188,6 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   else {
     logger(WARN, paste("Best Model is ", model$BestModel))
     result <- data.frame(model[[model$BestModel]]$prediction)
-    print(names(model))
     for (m in models.names) {
       if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
         #data.predicted <- rbind(data.predicted, prediction.null)
@@ -298,8 +297,6 @@ ltp.GetModelsComparisonTable <-  function(obj) {
   temp <- rbind(unlist(obj$Linear[indicator.list]), unlist(obj$Arima[indicator.list]), 
     unlist(obj$ExpSmooth[indicator.list]),unlist(obj$Trend[indicator.list]),unlist(obj$Mean[indicator.list]),unlist(obj$Naive[indicator.list]))
   colnames(temp)= indicator.list
- print(temp) 
-print(ReporTable)
   temp[,"R2"]=round(temp[,"R2"],4)	
   temp[,"AIC"]=round(temp[,"AIC"],2)
   temp[,"IC.width"]=round(temp[,"IC.width"],0)
