@@ -305,7 +305,7 @@ ltp.GetModelsComparisonTable <-  function(obj) {
 
   ReporTable[which(!(ReporTable[,1]=="--")),indicator.list] = as.matrix(temp)
   ReporTable=as.data.frame(ReporTable)
-
+  ReporTable = ReporTable[which(!(ReporTable[,1]=="--")),]
   ReporTable
 }
 
