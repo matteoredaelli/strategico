@@ -1,0 +1,336 @@
+<!-- -*- mode: R -*- -->
+  <!--
+  ## This program is fre esoftware: you can redistribute it and/or modify
+  ## it under the terms of the GNU General Public License as published by
+  ## the Free Software Foundation, either version 3 of the License, or
+  ## any later version.
+  ##
+  ## This program is distributed in the hope that it will be useful,
+  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ## GNU General Public License for more details.
+  ##
+  ## You should have received a copy of the GNU General Public License
+  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+  
+  <%
+  suppressPackageStartupMessages(library(googleVis))
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+  id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+  param <- ifelse(is.null(GET$param), "", GET$param)
+  value <- ifelse(is.null(GET$value), "V1", GET$value)
+ 
+  source(file.path(strategico.home, "strategico_util.R"))
+  project.config <- Project.GetConfig(project.name=project.name)
+
+  keys <- GetKeyNames(project.config$keys)
+  item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
+
+  db.channel <- DB.Connect()
+  item.keys <- Item.GetKeys(project.name=project.name, id=id)
+  keys.string <- ifelse(is.null(item.keys),
+                        "",
+                        paste(item.keys, collapse=" - "))
+
+  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=keys.string)
+  Sys.setenv(STRATEGICO_PROJECT_VALUE=value)
+  %>
+  
+  <% ShowTemplate('header')%>
+
+  <%
+
+  ########################################################################################
+  ##  Change Best model
+  ########################################################################################
+  if (!is.null(GET$setmodel) & !is.null(GET$model)) {
+    Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
+                        db.channel=db.channel, model=GET$model)
+  }
+
+  ########################################################################################
+  ##  Retriving all results
+  ########################################################################################
+  item.summary <-        Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.results <-        Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.hist <-           Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.all <-           Item.DB.GetNormalizedDataAndResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  model.names <- unique(item.results$model)
+  best.model <- as.character(item.summary[1,]$BestModel)
+
+  if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
+    param <- as.character(item.summary[1,]$Parameters)
+  %>
+
+  
+<% 
+if (!is.null(GET$eval)) {
+  param <- Param.EvalString(param)
+  Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
+           db.channel=db.channel, param=param)
+  }
+%>
+
+
+  <%
+   project.keys <- GetKeyNames(project.config$keys)
+   if (is.null(GET$KEY1)) {
+     keys.item1 <- Item.GetKeys(project.name=project.name, id=id)
+   for (k in project.keys)
+     GET[[k]]=keys.item1[k]
+   } else {
+   for (k in project.keys)
+     GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+   }
+  %>
+  <center>
+<!--
+  ###############################################################################################################
+  ## TAB Home
+  ###############################################################################################################
+-->
+ 
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Home</h2>
+
+  <%
+  keys.char <- as.character( unlist(GET[keys]))
+  %>
+  <h3>Search by keys</h3>
+                <form method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildFormElement_keys(project.name=project.name, default=keys.char)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                 <input type="submit" value="Search">
+                </form>
+  <h3>Search by ID</h3>
+                <form method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                <input type="submit" name="show" value="Search">
+                </form>
+      <p>
+     <br /><br /><br />
+      </p>
+				</article>
+							</div>
+						</div>
+<!--
+  ###############################################################################################################
+  ## TAB All Models
+  ###############################################################################################################
+-->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">All Models</h2>
+
+  <%
+  if (nrow(item.all) > 0) {
+    i.all.pivot <- as.data.frame(cast(item.all, PERIOD ~model, value="V"))
+    ML <- gvisLineChart(data=as.data.frame(i.all.pivot))
+  %>
+  <%= ML$html$chart %>
+  <%} %>
+    <p>
+     <br /><br />
+    </p>
+
+				</article>
+							</div>
+						</div>
+  <!--
+  ###############################################################################################################
+  ## TAB Motion Chart
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Motion Chart</h2>
+
+ <%
+  if (nrow(item.all) > 0) {
+    i.all <- item.all
+    i.all$PERIOD <- as.numeric(sub("-","", i.all$PERIOD))
+  
+    M <- gvisMotionChart(data=i.all, idvar="model",
+                         timevar="PERIOD", chartid="item",
+                         options=list(
+                           ##gvis.editor="Editor",
+                           legend="bottom",
+                           width=800,
+                           height=600
+                           )
+                         )
+    %>
+      <%= M$html$chart %>
+        
+        <% } %>
+    <p>
+      <br /><br />
+    </p>
+				</article>
+							</div>
+						</div>
+    <!--
+  ###############################################################################################################
+  ## TAB Residuals
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Residuals</h2>
+
+    <p>
+      <br />TODO<br />
+    </p>
+				</article>
+							</div>
+						</div>
+  
+  <!--
+  ###############################################################################################################
+  ## TAB best Model
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">BestModel <%=best.model%></h2>
+
+  <%
+  if (nrow(item.all) > 0) {
+    ML <- gvisLineChart(data=subset(i.all.pivot, select=c("PERIOD", best.model)))
+  %>
+  <%= ML$html$chart %>
+  <%} %>
+
+    <p>
+      <br /><br />
+    </p>
+				</article>
+							</div>
+						</div>
+  
+<!--
+  ###############################################################################################################
+  ## TAB Predictions
+  ###############################################################################################################
+-->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Predictions</h2>
+                                                
+<%
+  if (nrow(item.results) > 0) {
+    i.results <- item.results
+    i.results$id <- NULL
+    i.results$item_id <- NULL
+    rownames(i.results) <- NULL
+    pivot.results <- xtabs( V ~ PERIOD + model, i.results)
+    print(xtable(pivot.results), type="html")
+  }
+%>
+         <p>
+     <br /><br />
+      </p>                                                  
+				</article>
+							</div>
+						</div>
+
+<!--
+  ###############################################################################################################
+  ## TAB Summary
+  ###############################################################################################################
+-->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Summary</h2>
+  <%
+  if(nrow(item.summary.models) > 0) {
+    i.summary.models <- item.summary.models
+    i.summary.models$item_id <- NULL
+    rownames(i.summary.models) <- NULL
+    print(xtable(i.summary.models), type="html")
+    #MMT <- gvisTable(i.summary.models)# , options=list(width=500, height=170))
+  %>
+  <%
+    i.summary <- item.summary
+    i.summary$Parameters <- NULL
+    i.summary$id <- NULL
+    rownames(i.summary) <- NULL
+    i.summary <- data.frame(name=colnames(i.summary), value=as.character(i.summary[1,]))
+    print(xtable(i.summary), type="html")
+    ##MST <- gvisTable(i.summary)#, options=list(width=400, height=270))
+  %>
+  <%}%>
+                                                     <p><br /><br /></p>
+				</article>
+							</div>
+                                               </div>
+<!--
+  ###############################################################################################################
+  ## TAB Change Model
+  ###############################################################################################################
+-->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Change Model</h2>
+     
+               <form method="GET">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
+                  <% for (model in model.names) { 
+                       str <- paste(BuildHtmlElement_input(name="model", default=model, type="radio"),
+                         model, " ", sep="")
+                       cat(str)
+                     }
+                  %>
+                    <input type="submit" name="setmodel" value="Set best model" />
+                </form>   
+                <p>
+                  <br /><br /><br />
+                </p> 
+				</article>
+							</div>
+						</div>
+  <!--
+  ###############################################################################################################
+  ## TAB Run
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Run</h2>
+                <form method="GET">
+                  <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
+                  <input type="submit" name="eval" value="Run">
+                </form>        
+
+                <p>
+                  <br /><br />
+                </p>  
+				</article>
+							</div>
+						</div>
+  
+  <%
+  DB.Close(db.channel)
+  %>
+  </center>
+  <% ShowTemplate('footer') %>

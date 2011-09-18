@@ -19,7 +19,8 @@
 ## created: 2011
 
 library("futile.logger")
-library("xtable")
+library(xtable)
+library(reshape)
 library(brew)
 
 Quit <- function (msg="", status=-1, save="no") {
@@ -55,6 +56,10 @@ GetStrategicoHome <- function() {
   }
   ##print(paste("Environment STRATEGICO_HOME is set to", strategico.path))
   strategico.path
+}
+
+GetTemplatesHome <- function() {
+  file.path(GetStrategicoHome(), "templates")
 }
 
 MySource <- function(filename, file.path=NULL) {

@@ -89,11 +89,11 @@ BuildFormElement_value <- function(project.name=NULL, project.config=NULL, proje
   BuildHtmlElement_select("Value", "value", list.values, default=default)
 }
 
-GetTemplatesHome <- function() {
-  file.path(GetStrategicoHome(), "web_templates")
+GetWebTemplatesHome <- function() {
+  file.path(GetTemplatesHome(), "web")
 }
 
 ShowTemplate <- function(template.name) {
   template.file <- paste(template.name, '.brew', sep='')
-  brew(file.path(GetTemplatesHome(), template.file))
+  brew(file.path(GetWebTemplatesHome(), template.file))
 }
