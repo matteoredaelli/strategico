@@ -147,6 +147,7 @@ if(nrow(item.summary.models) > 0) {
 }
 %>
 <%
+Sys.setenv(A = "test")
 ShowTemplate('footer')
 DB.Close(db.channel)
 %>

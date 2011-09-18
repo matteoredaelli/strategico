@@ -226,6 +226,20 @@ Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NUL
   records
 }
 
+Item.DB.GetNormalizedDataAndResults <- function(project.name, value, id, db.channel) {
+  i.results <-        Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  i.hist <-           Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  i.hist$item_id <- NULL
+  i.results$item_id <- NULL
+  
+  model.names <- unique(i.results$model)
+  nrow <- nrow(i.hist)
+  repeted.models <- unlist(lapply(model.names, function(x) rep(x,nrow)))
+
+  i.hist <- data.frame(model=repeted.models, i.hist)
+  rbind(i.hist, i.results)
+}
+
 Item.DB.GetResults <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameResults(project.name, value=value)
   Item.DB.GetRecords(project.name, key="item_id", id=id, tablename=tablename, db.channel=db.channel)

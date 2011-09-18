@@ -1,8 +1,16 @@
 
-<hr /><center>
-<a href="index.brew">Home</a><br /><br />
-Powered by <a href="http://code.google.com/p/strategico/">Strategico</a>
-</center>
+					</div>
+				</div>
+			</section><!-- end of #content -->
+
+			<footer>
+				<br />
+				<p>Powered by <a href="http://code.google.com/p/strategico/">Strategico</a></p>
+				<br />
+			</footer>
+	
+</div><!-- #wrapper -->
+<!-- Free template created by http://freehtml5templates.com -->
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -16,6 +24,5 @@ Powered by <a href="http://code.google.com/p/strategico/">Strategico</a>
   })();
 
 </script>
-
 </body>
 </html>
