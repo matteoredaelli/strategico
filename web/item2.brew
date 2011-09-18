@@ -32,7 +32,7 @@
   item.keys <- Item.GetKeys(project.name=project.name, id=id)
   keys.string <- ifelse(is.null(item.keys),
                         "",
-                        paste(item.keys, collapse=" - "))
+                        paste(item.keys, collapse="-"))
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
   Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
@@ -60,6 +60,10 @@
   item.results <-        Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.hist <-           Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.all <-           Item.DB.GetNormalizedDataAndResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+ 
+  DB.Close(db.channel)
+  
   model.names <- unique(item.results$model)
   best.model <- as.character(item.summary[1,]$BestModel)
 
@@ -329,8 +333,6 @@ if (!is.null(GET$eval)) {
 							</div>
 						</div>
   
-  <%
-  DB.Close(db.channel)
-  %>
+
   </center>
   <% ShowTemplate('footer') %>
