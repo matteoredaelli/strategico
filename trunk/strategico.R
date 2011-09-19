@@ -183,12 +183,12 @@ if (opt$cmd == "eval.children") {
 
 if (opt$cmd == "eval.items") {
 
-  if (is.null(opt$id.list))
+  if (is.null(id.list))
     UsageAndQuit("Missing parameter id.list or id.range")
 
 
   Items.Eval(project.name=opt$project.name, 
-             id.list=opt$id.list, values=opt$item.values,
+             id.list=id.list, values=opt$item.values,
              param=param, project.config=project.config, db.channel=db.channel)
   q(status=0)
 }
