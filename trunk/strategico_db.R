@@ -360,7 +360,20 @@ Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channe
   
   stats <- as.list(rows)
   names(stats) <- tables
+
+  t.items <- DB.GetTableNameProjectItems(project.name)
+  for (value in GetValueNames(project.config$values)) {
+    ## adding % of predictions
+    t.sum <- DB.GetTableNameSummary(project.name, value)
+    stats[[paste("perc_predictions", value, sep= "_")]] <- stats[[t.sum]] / stats[[t.items]] * 100
+  }
   stats
+}
+
+Project.DB.GetStatistics.Models <- function(project.name, value, db.channel) {  
+  t <- DB.GetTableNameSummary(project.name, value)
+  sql <- paste("select BestModel, count(*) as tot from", t, "group by 1")
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
 }
 
 Project.DB.GetTableNames <- function(project.name, project.config=NULL) {

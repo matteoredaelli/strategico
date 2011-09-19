@@ -1,0 +1,56 @@
+<!-- -*- mode: R -*- -->
+  <!--
+  ## This program is fre esoftware: you can redistribute it and/or modify
+  ## it under the terms of the GNU General Public License as published by
+  ## the Free Software Foundation, either version 3 of the License, or
+  ## any later version.
+  ##
+  ## This program is distributed in the hope that it will be useful,
+  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ## GNU General Public License for more details.
+  ##
+  ## You should have received a copy of the GNU General Public License
+  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+ 
+  <%
+setContentType("text/html")
+RApacheOutputErrors(TRUE)
+options(hverbose=FALSE,verbose=FALSE)
+
+%>
+  
+<html>
+  <title>Strategico - Stats</title>
+<body>
+
+  <%
+suppressPackageStartupMessages(library(googleVis))
+
+strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+source(file.path(strategico.home, "strategico_util.R"))
+
+project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+project.config <- Project.GetConfig(project.name)
+
+db.channel <- DB.Connect()
+stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
+print(xtable(t(as.data.frame(stats))), type="html")
+
+for (value in GetValueNames(project.config$values)) {
+  t.sum <- DB.GetTableNameSummary(project.name, value)
+  stats.models <- Project.DB.GetStatistics.Models(project.name, value, db.channel)
+  M <- gvisPieChart(stats.models)
+  cat(value)
+  %>  
+  <%= M$html$chart %> 
+<%
+}
+
+DB.Close(db.channel) 
+%>
+
+  </body>
+  </html>
+
