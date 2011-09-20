@@ -42,9 +42,12 @@ for (value in GetValueNames(project.config$values)) {
   t.sum <- DB.GetTableNameSummary(project.name, value)
   stats.models <- Project.DB.GetStatistics.Models(project.name, value, db.channel)
   M <- gvisPieChart(stats.models)
+  MG <- gvisGauge(stats.models, options=list(min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
+  #MG <- gvisGauge(stats.models, options=list(min=0, max=stats[["europool_items"]]))
   cat(value)
   %>  
   <%= M$html$chart %> 
+  <%= MG$html$chart %> 
 <%
 }
 
