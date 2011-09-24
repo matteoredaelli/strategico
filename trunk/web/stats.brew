@@ -1,25 +1,8 @@
-<!-- -*- mode: R -*- -->
-  <!--
-  ## This program is fre esoftware: you can redistribute it and/or modify
-  ## it under the terms of the GNU General Public License as published by
-  ## the Free Software Foundation, either version 3 of the License, or
-  ## any later version.
-  ##
-  ## This program is distributed in the hope that it will be useful,
-  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ## GNU General Public License for more details.
-  ##
-  ## You should have received a copy of the GNU General Public License
-  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->
- 
   <%
 setContentType("text/html")
-RApacheOutputErrors(TRUE)
+RApacheOutputErrors(FALSE)
 options(hverbose=FALSE,verbose=FALSE)
-
-%>
+  %>
   
 <html>
   <title>Strategico - Stats</title>
@@ -41,10 +24,11 @@ print(xtable(t(as.data.frame(stats))), type="html")
 for (value in GetValueNames(project.config$values)) {
   t.sum <- DB.GetTableNameSummary(project.name, value)
   stats.models <- Project.DB.GetStatistics.Models(project.name, value, db.channel)
-  M <- gvisPieChart(stats.models)
-  MG <- gvisGauge(stats.models, options=list(min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
-  #MG <- gvisGauge(stats.models, options=list(min=0, max=stats[["europool_items"]]))
-  cat(value)
+  
+  M <- gvisPieChart(stats.models, options=list(
+                                    title=paste(value, ": relative models distribution", sep="")))
+  
+  MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
   %>  
   <%= M$html$chart %> 
   <%= MG$html$chart %> 
