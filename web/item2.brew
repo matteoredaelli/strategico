@@ -109,9 +109,6 @@ if (!is.null(GET$eval)) {
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
                 <input type="submit" name="show" value="Search">
                 </form>
-      <p>
-     <br /><br /><br />
-      </p>
 				</article>
 							</div>
 						</div>
@@ -163,9 +160,6 @@ if (!is.null(GET$eval)) {
       <%= M$html$chart %>
         
         <% } %>
-    <p>
-      <br /><br />
-    </p>
 				</article>
 							</div>
 						</div>
