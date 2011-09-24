@@ -21,6 +21,17 @@ db.channel <- DB.Connect()
 stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
 print(xtable(t(as.data.frame(stats))), type="html")
 
+%>
+  <table><tr>
+<%
+  for (value in GetValueNames(project.config$values)) {
+    cat("<td align=\"center\">")
+    cat(value)
+    cat("</td>")
+  }
+%>
+ </tr><tr> 
+<%
 for (value in GetValueNames(project.config$values)) {
   t.sum <- DB.GetTableNameSummary(project.name, value)
   stats.models <- Project.DB.GetStatistics.Models(project.name, value, db.channel)
@@ -29,12 +40,14 @@ for (value in GetValueNames(project.config$values)) {
                                     title=paste(value, ": relative models distribution", sep="")))
   
   MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
-  %>  
+  %>
+  <td>  
   <%= M$html$chart %> 
-  <%= MG$html$chart %> 
-<%
-}
-
+  <%= MG$html$chart %>
+  </td>
+<%}%>
+</tr></table>
+  
 DB.Close(db.channel) 
 %>
 
