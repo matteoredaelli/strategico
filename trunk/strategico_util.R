@@ -219,7 +219,7 @@ GetUniqueKeyValues <- function(project.name=NULL, project.items=NULL, project.co
     project.config <- Project.GetConfig(project.name=project.name)
 
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
-  sapply(keys, function(x) unique(project.items[[x]]))
+  sapply(keys, function(x) sort(unique(project.items[[x]])))
 }
 
 GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
