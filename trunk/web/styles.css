@@ -35,9 +35,9 @@ position: relative;
 width: 940px;
 height: 150px;
 margin: 0 auto;
-background-color: #494949;
-	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#494949), to(#b6d334), color-stop(.6,#788c1e));
-	background-image: -moz-linear-gradient(19% 75% 90deg, #b6d334, #788c1e, #494949 100%);
+background-color: #788c1e;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#494949), to(#cef0f8), color-stop(.6,#8597be));
+	background-image: -moz-linear-gradient(19% 75% 90deg, #cef0f8, #788c1e, #494949 100%);
 }
 
 #content {
@@ -51,8 +51,8 @@ overflow: hidden;
 footer {
 width: 940px;
 background-color: #494949;
-	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#b6d334), to(#494949), color-stop(.6,#788c1e));
-	background-image: -moz-linear-gradient(19% 75% 90deg, #494949, #788c1e, #b6d334 100%);
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#cef0f8), to(#494949), color-stop(.6,#8597be));
+	background-image: -moz-linear-gradient(19% 75% 90deg, #494949, #788c1e, #cef0f8 100%);
 color: #fff;
 margin: 0 auto;
 clear: both;
@@ -70,7 +70,7 @@ color:#ddd;
 }
 
 a:hover, a:active {
-color: #ddd;
+color: #ccc;
 }
 
 p {
@@ -96,7 +96,7 @@ padding-top: 20px;
 }
 
 header h1 a:link, header h1 a:visited {
-color: #B6D334;
+color: #02237b;
 font-size: 60px;
 text-decoration: none;
 }
@@ -129,6 +129,7 @@ right: 0px;
 
 article {
 padding: 0 30px 20px 30px;
+text-align: center;
 }
 
 article img {
@@ -163,7 +164,7 @@ text-shadow: 0px 3px 4px #555;
 article h3 {
 font-size: 24px;
 margin: 20px 0;
-color: #718224;
+color: #8597be;
 }
 
 .alignleft, img.alignleft {
