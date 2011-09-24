@@ -81,7 +81,6 @@ if (!is.null(GET$eval)) {
      GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
    }
   %>
-  <center>
 <!--
   ###############################################################################################################
   ## TAB Home
@@ -133,10 +132,6 @@ if (!is.null(GET$eval)) {
   %>
   <%= ML$html$chart %>
   <%} %>
-    <p>
-     <br /><br />
-    </p>
-
 				</article>
 							</div>
 						</div>
@@ -207,10 +202,6 @@ if (!is.null(GET$eval)) {
   %>
   <%= ML$html$chart %>
   <%} %>
-
-    <p>
-      <br /><br />
-    </p>
 				</article>
 							</div>
 						</div>
@@ -234,10 +225,7 @@ if (!is.null(GET$eval)) {
     pivot.results <- xtabs( V ~ PERIOD + model, i.results)
     print(xtable(pivot.results), type="html")
   }
-%>
-         <p>
-     <br /><br />
-      </p>                                                  
+%>                                              
 				</article>
 							</div>
 						</div>
@@ -269,7 +257,6 @@ if (!is.null(GET$eval)) {
     ##MST <- gvisTable(i.summary)#, options=list(width=400, height=270))
   %>
   <%}%>
-                                                     <p><br /><br /></p>
 				</article>
 							</div>
                                                </div>
@@ -294,10 +281,7 @@ if (!is.null(GET$eval)) {
                      }
                   %>
                     <input type="submit" name="setmodel" value="Set best model" />
-                </form>   
-                <p>
-                  <br /><br /><br />
-                </p> 
+                </form>    
 				</article>
 							</div>
 						</div>
@@ -309,19 +293,14 @@ if (!is.null(GET$eval)) {
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
-							<h2 class="title">Run</h2>
+							<h2 class="title">ReRun</h2>
                 <form method="GET">
                   <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
                   <input type="submit" name="eval" value="Run">
                 </form>        
-
-                <p>
-                  <br /><br />
-                </p>  
+ 
 				</article>
 							</div>
 						</div>
   
-
-  </center>
   <% ShowTemplate('footer') %>
