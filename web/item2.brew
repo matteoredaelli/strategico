@@ -245,8 +245,8 @@ if (!is.null(GET$eval)) {
     i.summary$Parameters <- NULL
     i.summary$id <- NULL
     rownames(i.summary) <- NULL
-    i.summary <- data.frame(name=colnames(i.summary), value=as.character(i.summary[1,]))
-    print(xtable(i.summary), type="html")
+    #i.summary <- data.frame(name=colnames(i.summary), value=i.summary[1,])
+    print(xtable(t(i.summary)), type="html")
     ##MST <- gvisTable(i.summary)#, options=list(width=400, height=270))
   %>
   <%}%>
