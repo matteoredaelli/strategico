@@ -36,8 +36,8 @@ width: 940px;
 height: 150px;
 margin: 0 auto;
 background-color: #8597be;
-	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#494949), to(#cef0f8), color-stop(.6,#8597be));
-	background-image: -moz-linear-gradient(19% 75% 90deg, #cef0f8, #8597be, #494949 100%);
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#494949), to(#8eb3cf), color-stop(.6,#8597be));
+	background-image: -moz-linear-gradient(19% 75% 90deg, #8eb3cf, #8597be, #494949 100%);
 }
 
 #content {

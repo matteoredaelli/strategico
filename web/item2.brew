@@ -6,22 +6,39 @@
  
   suppressPackageStartupMessages(library(googleVis))
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
-  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-  id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+
+  ##id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
   param <- ifelse(is.null(GET$param), "", GET$param)
   value <- ifelse(is.null(GET$value), "V1", GET$value)
- 
+  
+  ## loading project config
+
+  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
   source(file.path(strategico.home, "strategico_util.R"))
   project.config <- Project.GetConfig(project.name=project.name)
 
-  keys <- GetKeyNames(project.config$keys)
-  item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
-
   db.channel <- DB.Connect()
-  item.keys <- Item.GetKeys(project.name=project.name, id=id)
+
+  ## settings is or item.keys depending on which variables were passed in GET input
+
+  project.keys <- GetKeyNames(project.config$keys)
+  if (is.null(GET$KEY1)) {
+    id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+    item.keys <- Item.GetKeys(project.name=project.name, id=id)
+  } else {
+    for (k in project.keys)
+      GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+    item.keys <- as.character( unlist(GET[project.keys]))
+
+    id.result <- Item.GetIDs(project.name=project.name, keys=item.keys)
+    ##if (!is.na(id.result) & (!is.null(id.result)) & (length(id.result)>0) ) 
+    id <- as.numeric(id.result[1])
+  }
   keys.string <- ifelse(is.null(item.keys),
                         "",
                         paste(item.keys, collapse="-"))
+
+  item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
   Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
@@ -50,9 +67,6 @@
   item.hist <-           Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.all <-           Item.DB.GetNormalizedDataAndResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
- 
-  DB.Close(db.channel)
-  
   model.names <- unique(item.results$model)
   best.model <- as.character(item.summary[1,]$BestModel)
 
@@ -69,18 +83,6 @@ if (!is.null(GET$eval)) {
   }
 %>
 
-
-  <%
-   project.keys <- GetKeyNames(project.config$keys)
-   if (is.null(GET$KEY1)) {
-     keys.item1 <- Item.GetKeys(project.name=project.name, id=id)
-   for (k in project.keys)
-     GET[[k]]=keys.item1[k]
-   } else {
-   for (k in project.keys)
-     GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
-   }
-  %>
 <!--
   ###############################################################################################################
   ## TAB Home
@@ -92,13 +94,10 @@ if (!is.null(GET$eval)) {
         			<article>
 							<h2 class="title">Home</h2>
 
-  <%
-  keys.char <- as.character( unlist(GET[keys]))
-  %>
   <h3>Search by keys</h3>
                 <form method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildFormElement_keys(project.name=project.name, default=keys.char)%>
+                <%=BuildFormElement_keys(project.name=project.name, default=item.keys)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
                  <input type="submit" value="Search">
                 </form>
@@ -287,7 +286,7 @@ if (!is.null(GET$eval)) {
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
-							<h2 class="title">ReRun</h2>
+							<h2 class="title">Run</h2>
                 <form method="GET">
                   <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
                   <input type="submit" name="eval" value="Run">
@@ -296,5 +295,7 @@ if (!is.null(GET$eval)) {
 				</article>
 							</div>
 						</div>
+  
+  <% DB.Close(db.channel) %>
   
   <% ShowTemplate('footer') %>
