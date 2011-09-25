@@ -79,6 +79,7 @@ logger <- getLogger()
 MySource("strategico_project.R")
 MySource("strategico_item.R")
 MySource("strategico_db.R")
+MySource("strategico_period.R")
 MySource("strategico_web.R")
 
 AggregateItemData <- function(data, value) {
@@ -231,14 +232,6 @@ GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
   paste("V", 1:length(values), sep="")
 }
 
-.incSampleTime <- function(now, period.freq = 2, increment = 1) {
-  if (now[2] + increment - 1 <= period.freq - 1) 
-    now[2] = now[2] + increment
-  else now = c(now[1] + (now[2] - 1 + increment)%/%period.freq, 
-         ((now[2] + increment - 1)%%period.freq) + 1)
-  now
-}
-
 is.value <- function(value, project.name=NULL, project.config=NULL) {
   value %in% GetValueNames(project.name=project.name, project.config=project.config)
 }
@@ -264,41 +257,6 @@ Param.ToString <- function(param) {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
   gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=";")))
-}
-
-Period.BuildRange <- function(period.start, period.freq, n, shift=0) {
-  n.char <- nchar(period.freq)
-  sapply ((0+shift):(n+shift-1),
-          function(i) Period.ToString(.incSampleTime(now=period.start, period.freq = period.freq, increment = i),
-                                      n.char=n.char
-                                      )
-          )
-}
-
-Period.ToNumber <- function(period,period.freq=2){
-  if(is.numeric(period)) #un unico valore espresso in un vector di due elementi
-	return(sum((period-c(0,1))*c(period.freq,1))) else #un vector di stringhe ognuna contenente un period
-	return(sapply(period,function(per) sum((Period.FromString(per)-c(0,1))*c(period.freq,1))))
-  }
-
-Period.FromNumber <- function(period,period.freq=2){  return(c(period%/%period.freq,period%%period.freq+1))  }
-
-Period.FromString <- function (period.string) {
-  unlist(lapply(strsplit(period.string, "-"), as.numeric))
-}
-
-Period.ToString <- function (period, n.char=NULL, period.freq=2, sep="-") {
-  p1 <- period[1]
-  p2 <- as.character(period[2])
-  nchar.p2 <- nchar(p2)
-
-  if (is.null(n.char)) n.char <- nchar(period.freq)
-  
-  if (nchar.p2 < n.char) {
-    zeros <- paste(rep("0",n.char - nchar.p2), collapse="")
-    p2 <- paste(zeros, p2, collapse="", sep="")
-  }
-  paste(p1, p2, sep=sep)
 }
 
 SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {
