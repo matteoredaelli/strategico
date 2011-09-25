@@ -221,7 +221,7 @@ ltp.normalizeData <- function(product, range, NA2value=0,period.start,period.fre
   #i dati che arrivano gia' con un NA vengono rimpiazzati subito. se is.na(NA2value) non cambia nulla
   product[is.na(product),]=NA2value
   #trova l'effettiva data di partenza: minima data su product e minore di period.end 
-  period.start = Number.ToPeriod(
+  period.start = Period.FromNumber(
                     min(Period.ToNumber(period.end,period.freq), max(Period.ToNumber(period.start,period.freq),min(Period.ToNumber(rownames(product),period.freq)))),period.freq)
   n <- Period.ToNumber(period.end,period.freq)-Period.ToNumber(period.start,period.freq) +1
   
