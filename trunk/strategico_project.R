@@ -32,6 +32,33 @@ Project.FS.Empty <- function(project.name, recursive = TRUE) {
   }
 }
 
+Project.GetIDs <- function(keys, project.name, project.config=NULL, db.channel=NULL, project.items=NULL, keys.na.rm=FALSE) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+
+  if ("data_db" %in% project.config$save)
+    records <- Project.DB.GetIDs(keys=keys, project.name=project.name, db.channel=db.channel, keys.na.rm=keys.na.rm)
+  else
+    records <- Project.FS.GetIDs(keys=keys, project.name=project.name, project.items=project.items, keys.na.rm=keys.na.rm)
+ 
+  tot <- nrow(records)
+  if (tot == 0) {
+    logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
+    result = NA
+  } else {
+    result = records$id
+  }
+  result
+}
+
+Project.FS.GetIDs <- function(keys, project.name, project.items=NULL, keys.na.rm=FALSE) {
+  if (is.null(project.items))
+    project.items <- Project.GetItems(project.name=project.name)
+  
+  records = SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
+  subset(records, select=c("id"))
+}
+
 Project.GetItems <- function(project.name) {
   project.path <- Project.GetPath(project.name)
   filename <- file.path(project.path, "project_items.Rdata")

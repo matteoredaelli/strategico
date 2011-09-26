@@ -13,6 +13,8 @@
 
 ## Authors: L. Finos, M. Redaelli
 
+project.name <- "sample"
+
 test.050.Subset <- function() {
   project.data <- Project.GetData(project.name)
   s = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
@@ -194,6 +196,7 @@ test.00.GetFields <- function() {
               )
 }
 
+
 test.00.GetFieldsId <- function() {
   checkEquals(
               c(1,2),
@@ -238,8 +241,8 @@ test.GetUniqueKeyValues <- function() {
               length(uk)
               )
   checkEquals(
-              c("IT", "DE", "ES", "FR", "UK"),
-              as.vector(uk$KEY1)
+              c("DE", "ES", "FR", "IT", "UK"),
+              sort(as.vector(uk$KEY1))
               )
 }
 

@@ -28,26 +28,6 @@ test.035.Item.GetKeys <- function() {
   ##            ) 
 }
 
-test.035.Item.GetIDs <- function() {
-  project.items <- Project.GetItems(project.name)
-  
-  checkEquals(
-              c(2),
-              Item.GetIDs(keys=c("IT","CAR","ALFA"), project.items=project.items, keys.na.rm=FALSE)
-              )
-  checkEquals(
-              c(10),
-              Item.GetIDs(keys=c("IT","CAR",""), project.items=project.items, keys.na.rm=FALSE)
-              )
-  checkEquals(
-              c(16),
-              Item.GetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=FALSE)
-              )
-  checkEquals(
-              c(1, 2, 8, 10, 14, 16),
-              Item.GetIDs(keys=c("IT","",""), project.items=project.items, keys.na.rm=TRUE)
-              )
-}
 
 test.Item.GetData <- function() {
   project.data <- Project.GetData(project.name)
@@ -124,22 +104,22 @@ test.Item.GetRelativePath <- function() {
 test.Item.GetParent <- function() {
   checkEquals(
               10,
-              Item.GetParent(id=1, project.name=project.name)
+              Item.GetParent(id=1, project.name=project.name, db.channel=db.channel)
               )
   checkEquals(
               10,
-              Item.GetParent(keys=c('IT', 'CAR', 'ALFA'), project.name=project.name)
+              Item.GetParent(keys=c('IT', 'CAR', 'ALFA'), project.name=project.name, db.channel=db.channel)
               )
 }
 
 test.Item.GetChildren <- function() {
   checkEquals(
               c(3,4),
-              Item.GetChildren(id=11, project.name=project.name)
+              Item.GetChildren(id=11, project.name=project.name, db.channel=db.channel)
               )
   checkEquals(
               c(),
-              Item.GetChildren(id=1, project.name=project.name)
+              Item.GetChildren(id=1, project.name=project.name, db.channel=db.channel)
               )
 }
 
