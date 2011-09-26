@@ -191,22 +191,7 @@ Item.GetData <- function(project.name, project.data=NULL, project.config=NULL, p
   subset(result, rownames(result)  >=  string.period.start & rownames(result) <= string.period.end) 
 }
 
-Item.GetIDs <- function(keys, project.name=NULL, project.items=NULL, keys.na.rm=FALSE) {
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-  
-  records <- SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
-  tot <- nrow(records)
-  if (tot == 0) {
-    logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
-    result = NA
-  } else {
-    result = records$id
-  }
-  result
-}
-
-Item.GetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
+Item.GetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL, db.channel=NULL) {
   if (is.null(project.items))
     project.items <- Project.GetItems(project.name=project.name)
   
@@ -216,13 +201,13 @@ Item.GetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL)
   parent.key <- keys
   parent.key[length(keys)]=''
   
-  result <- Item.GetIDs(parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE)
+  result <- Project.GetIDs(keys=parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
   if (!is.na(result))
     result <- result[1]
 
   result
 }
-Item.GetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL) {
+Item.GetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL, db.channel=NULL) {
   if (is.null(project.items))
     project.items <- Project.GetItems(project.name=project.name)
   
@@ -230,7 +215,7 @@ Item.GetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NUL
     keys <- Item.GetKeys(id, project.name=project.name, project.items=project.items)
   
   ## TODO: now it could work only for keys with empty values at the end..."
-  id.list <- Item.GetIDs(keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE)
+  id.list <- Project.GetIDs(keys=keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE, db.channel=db.channel)
   result <- id.list[id.list != id]
   if (length(result)==0) {
     logger(WARN, paste("No children for ID=",

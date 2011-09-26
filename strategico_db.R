@@ -135,44 +135,6 @@ DB.RunSQLQuery <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user
   result
 }
 
-Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
-  
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
-
-  tablename = DB.GetTableNameSummary(project.name, value)
-  sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
-  items <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
-
-  tot <- nrow(items)
-  if (tot == 0 )
-    logger(WARN, "NO items found to be updated!")
-  else {
-    for( i in 1:tot) {
-      item <- items[i,]
-      logger(INFO, paste("Found ID=", items$id))
-      logger(INFO, paste("Param String:", item$Parameters))
-      
-      param <- Param.EvalString(as.character(item$Parameters))
-      Item.Eval(project.name=project.name, id=item$id, project.config=project.config,
-               value=value, param=param, db.channel=db.channel
-               )
-    } #end for
-  } #end if
-}
-
-Items.DB.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
-
-  tablename = DB.GetTableNameProjectItems(project.name)
-  sql_statement <- paste("select max(id) from ", tablename, sep="")
-  records <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
-
-  result <- as.integer(records[1,][1])
-
-  logger(DEBUG, paste("Max ID =", result))
-  result 
-}
-
 Item.DB.GetData <- function(project.name, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
                          keys.na.rm=TRUE, period.start=NULL, period.end=NULL, db.channel) {
 
@@ -281,6 +243,44 @@ Item.DB.GetSummaryModels <- function(project.name, value, id, db.channel) {
   Item.DB.GetRecords(project.name, id=id, key="item_id", tablename=tablename, db.channel=db.channel)
 }
 
+Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
+  
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+
+  tablename = DB.GetTableNameSummary(project.name, value)
+  sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
+  items <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+
+  tot <- nrow(items)
+  if (tot == 0 )
+    logger(WARN, "NO items found to be updated!")
+  else {
+    for( i in 1:tot) {
+      item <- items[i,]
+      logger(INFO, paste("Found ID=", items$id))
+      logger(INFO, paste("Param String:", item$Parameters))
+      
+      param <- Param.EvalString(as.character(item$Parameters))
+      Item.Eval(project.name=project.name, id=item$id, project.config=project.config,
+               value=value, param=param, db.channel=db.channel
+               )
+    } #end for
+  } #end if
+}
+
+Items.DB.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
+
+  tablename = DB.GetTableNameProjectItems(project.name)
+  sql_statement <- paste("select max(id) from ", tablename, sep="")
+  records <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+
+  result <- as.integer(records[1,][1])
+
+  logger(DEBUG, paste("Max ID =", result))
+  result 
+}
+
 Items.DB.SetBestModel <- function(project.name, value, id.list,
                                   model, db.channel) {
   str.id.list <- paste(id.list, collapse=",")
@@ -350,6 +350,13 @@ Project.DB.FixStructure <- function(project.name, values, db.channel) {
   DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)         
 }
 
+Project.DB.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
+  tablename = DB.GetTableNameProjectItems(project.name)
+  where.condition <- BuildFilterWithKeys(keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
+  sql_statement <- paste("select id from", tablename, "where", where.condition, sep=" ")
+  DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+}
+  
 Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)

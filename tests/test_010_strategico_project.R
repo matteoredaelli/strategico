@@ -111,3 +111,29 @@ test.Project.IsValidName <- function() {
               Project.IsValidName("missingproject")
               )
 }
+
+
+test.035.Project.GetIDs <- function() {
+  project.items <- Project.GetItems(project.name)
+
+  checkEquals(
+              Project.FS.GetIDs(project.name=project.name, keys=c("IT","",""))$id,
+              Project.DB.GetIDs(project.name=project.name, keys=c("IT","",""), db.channel=db.channel)$id
+              )
+  checkEquals(
+              c(2),
+              Project.GetIDs(keys=c("IT","CAR","ALFA"), project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+              )
+  checkEquals(
+              c(10),
+              Project.GetIDs(keys=c("IT","CAR",""), project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+              )
+  checkEquals(
+              c(16),
+              Project.GetIDs(keys=c("IT","",""), project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+              )
+  checkEquals(
+              c(1, 2, 8, 10, 14, 16),
+              Project.GetIDs(keys=c("IT","",""), project.name=project.name, project.items=project.items, keys.na.rm=TRUE, db.channel=db.channel)
+              )
+}
