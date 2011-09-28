@@ -48,6 +48,7 @@ for (value in GetValueNames(project.config$values)) {
 <%}%>
 </tr></table>
   
+<%
 DB.Close(db.channel) 
 %>
 
