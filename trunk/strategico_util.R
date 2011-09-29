@@ -18,10 +18,10 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-library("futile.logger")
-library(xtable)
-library(reshape)
-library(brew)
+suppressPackageStartupMessages(library("futile.logger"))
+suppressPackageStartupMessages(library(xtable))
+suppressPackageStartupMessages(library(reshape))
+suppressPackageStartupMessages(library(brew))
 
 Quit <- function (msg="", status=-1, save="no") {
   print(msg)
