@@ -62,7 +62,7 @@ library(hwriter)
 #options(Hverbose=FALSE, verbose=FALSE)
 suppressMessages(library(tseries, verbose=FALSE))
 suppressMessages(library(forecast))
-library(ast)
+suppressPackageStartupMessages(library(ast))
   
 ############## ltp()
 
