@@ -81,7 +81,19 @@ Project.GetConfig <- function(project.name) {
 Project.GetList <- function(projects.home = strategico.config$projects.home) {
   dir(projects.home)
 }
-                            
+  
+Project.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
+
+  tablename = DB.GetTableNameProjectItems(project.name)
+  sql_statement <- paste("select max(id) from ", tablename, sep="")
+  records <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+
+  result <- as.integer(records[1,][1])
+
+  logger(DEBUG, paste("Max ID =", result))
+  result 
+}
+                          
 Project.GetPath <- function(project.name, projects.home = strategico.config$projects.home) {
   file.path(projects.home, project.name)
 }
