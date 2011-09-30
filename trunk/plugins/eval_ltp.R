@@ -125,15 +125,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 
   data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
 
-  if ("data_db" %in% project.config$save) {
-    tablename = DB.GetTableNameNormalizedData(project.name, value)
-    DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
-  }
-  else
-    if ("data_csv" %in% project.config$save) {
-      write.csv(data.normalized, file = paste(output.path, "/item-data-norm-", value,".csv", sep = ""))
-    }
+  tablename = DB.GetTableNameNormalizedData(project.name, value)
+  DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                rownames=FALSE, addPK=FALSE, db.channel=db.channel)
   
   ## ###################################################################################
   ## Saving Summary Data
@@ -141,35 +135,25 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   
   if ("summary" %in% project.config$save) {
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
-        
+    
     if (!is.null(model$BestModel)) {
       summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
       summary.models$selected <- NULL
       summary.models = cbind(item_id=id, model=rownames(summary.models), summary.models)
      }
     
-    if  ("data_db" %in% project.config$save) {
-      ## TODO: fails if normalized data is empty
-      ## ./strategico.R --cmd eval_items --id.list 5 -n sample
-      tablename = DB.GetTableNameSummary(project.name, value)
-      DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+    ## TODO: fails if normalized data is empty
+    ## ./strategico.R --cmd eval_items --id.list 5 -n sample
+    tablename = DB.GetTableNameSummary(project.name, value)
+    DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
 
-      if (!is.null(model$BestModel)) {
-        tablename = DB.GetTableNameSummaryModels(project.name, value)
-        DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                      rownames=NULL, addPK=FALSE, db.channel=db.channel)
-      }
+    if (!is.null(model$BestModel)) {
+      tablename = DB.GetTableNameSummaryModels(project.name, value)
+      DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
     }
-    else
-      if ("data_csv" %in% project.config$save) {
-        write.table(file = paste(output.path, "/item-summary-", value, ".csv", sep = ""),
-                    onerow.summ, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
-        if (!is.null(model$BestModel)) 
-          write.table(file = paste(output.path, "/item-summary-models-", value, ".csv", sep = ""),
-                      summary.models, sep = ",", row.names = FALSE, quote = TRUE, col.names = FALSE)
-      }
   }
-  
+
   ## ###################################################################################
   ## Saving Predicted Data
   ## ###################################################################################
@@ -206,15 +190,10 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 
   colnames(result) <- "V"
 
-
-  if ("data_db" %in% project.config$save) {   
-    tablename = DB.GetTableNameResults(project.name, value)  
-    DB.ImportData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
-  }
-  else
-    if ("data_csv" %in% project.config$save) 
-      write.csv(x=data.predicted, file = paste(output.path, "/item-results.csv", sep = ""))  
+  tablename = DB.GetTableNameResults(project.name, value)  
+  DB.ImportData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+                rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+  
 
   if (!is.null(model$BestModel)) {
     ## ###################################################################################
@@ -233,6 +212,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   result
 }
+
 ##################################
  ltp.GetModels <- function(what=NULL) {
 	model=data.frame(id=c("lm", "arima","es", "trend", "mean","naive"),

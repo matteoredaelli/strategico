@@ -58,37 +58,11 @@ test.020.Project.ImportData <- function() {
   Project.ImportData(project.name=project.name, db.channel=db.channel)
   ## TODO Check if the new files have been created successfully 
 }
-
-test.030.Project.GetItems <- function() {
-  project.items <- Project.GetItems(project.name)
-  checkEquals(20,
-              nrow(project.items)
-              )
-  checkEquals(4,
-              ncol(project.items)
-              )
-}
-
   
 test.030.DB.GetTableSize <- function() {
   tablename <- DB.GetTableNameProjectItems("sample")
   checkEquals(20,
               DB.GetTableSize(tablename, db.channel=db.channel)
-              )
-}
-
-test.040.Project.GetData <- function() {
-  project.data <- Project.GetData(project.name)
-  
-  checkEquals(
-              c("KEY1", "KEY2", "KEY3", "PERIOD", "V1", "V2"),
-              colnames(project.data)
-              )
-  checkEquals(113,
-              nrow(project.data)
-              )
-  checkEquals(6,
-              ncol(project.data)
               )
 }
 
@@ -114,26 +88,21 @@ test.Project.IsValidName <- function() {
 
 
 test.035.Project.GetIDs <- function() {
-  project.items <- Project.GetItems(project.name)
 
   checkEquals(
-              Project.FS.GetIDs(project.name=project.name, keys=c("IT","",""))$id,
-              Project.DB.GetIDs(project.name=project.name, keys=c("IT","",""), db.channel=db.channel)$id
-              )
-  checkEquals(
               c(2),
-              Project.GetIDs(keys=c("IT","CAR","ALFA"), project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+              Project.GetIDs(keys=c("IT","CAR","ALFA"), project.name=project.name, keys.na.rm=FALSE, db.channel=db.channel)
               )
   checkEquals(
               c(10),
-              Project.GetIDs(keys=c("IT","CAR",""), project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+              Project.GetIDs(keys=c("IT","CAR",""), project.name=project.name, keys.na.rm=FALSE, db.channel=db.channel)
               )
   checkEquals(
               c(16),
-              Project.GetIDs(keys=c("IT","",""), project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+              Project.GetIDs(keys=c("IT","",""), project.name=project.name, keys.na.rm=FALSE, db.channel=db.channel)
               )
   checkEquals(
               c(1, 2, 8, 10, 14, 16),
-              Project.GetIDs(keys=c("IT","",""), project.name=project.name, project.items=project.items, keys.na.rm=TRUE, db.channel=db.channel)
+              Project.GetIDs(keys=c("IT","",""), project.name=project.name, keys.na.rm=TRUE, db.channel=db.channel)
               )
 }

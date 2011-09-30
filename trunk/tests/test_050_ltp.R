@@ -122,7 +122,7 @@ test.00.Item.EvalData.e2 <- function() {
 }
 
 test.00.Item.EvalData.e3 <- function() {
-  item.data <- Item.GetData(project.name, keys=c("","CAR"), value="V1")
+  item.data <- Item.GetData(project.name, keys=c("","CAR"), value="V1", db.channel=db.channel)
   e3 <- Item.EvalData(project.name=project.name, keys=c("","CAR"), value="V1",
                      project.config=project.config, db.channel=db.channel)
 
@@ -159,11 +159,6 @@ test.00.Item.EvalData.param <- function() {
   ## item.data = ...
   ## model = ltp(...)
   ## e fare qualche checkEquals tra i valori di model
-}
-
-test.Item.EvalData.ProjectData <- function() {
-  project.data=Project.GetData(project.name)
-  
 }
   
 test.00.EvalTSString <- function() {

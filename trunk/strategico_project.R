@@ -32,15 +32,22 @@ Project.FS.Empty <- function(project.name, recursive = TRUE) {
   }
 }
 
-Project.GetIDs <- function(keys, project.name, project.config=NULL, db.channel=NULL, project.items=NULL, keys.na.rm=FALSE) {
+Project.GetKeyValues <- function(key.name, project.name, db.channel) {
+  tablename = DB.GetTableNameProjectItems(project.name)
+  sql_statement <- paste("select distinct", key.name, "from", tablename, sep=" ")
+  records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+  levels(records[,1])
+}
+ 
+Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
 
-  if ("data_db" %in% project.config$save)
-    records <- Project.DB.GetIDs(keys=keys, project.name=project.name, db.channel=db.channel, keys.na.rm=keys.na.rm)
-  else
-    records <- Project.FS.GetIDs(keys=keys, project.name=project.name, project.items=project.items, keys.na.rm=keys.na.rm)
- 
+  tablename = DB.GetTableNameProjectItems(project.name)
+  where.condition <- BuildFilterWithKeys(keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
+  sql_statement <- paste("select id from", tablename, "where", where.condition, sep=" ")
+  records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+  
   tot <- nrow(records)
   if (tot == 0) {
     logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
@@ -49,30 +56,6 @@ Project.GetIDs <- function(keys, project.name, project.config=NULL, db.channel=N
     result = records$id
   }
   result
-}
-
-Project.FS.GetIDs <- function(keys, project.name, project.items=NULL, keys.na.rm=FALSE) {
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-  
-  records = SubsetByKeys(data=project.items, keys=keys, keys.na.rm=keys.na.rm)
-  subset(records, select=c("id"))
-}
-
-Project.GetItems <- function(project.name) {
-  project.path <- Project.GetPath(project.name)
-  filename <- file.path(project.path, "project_items.Rdata")
-  FileExistsOrQuit(filename)
-  load(filename)
-  project.items
-}
-
-Project.GetData <- function(project.name) {
-  project.path <- Project.GetPath(project.name)
-  filename <- file.path(project.path, "project_data.Rdata")
-  FileExistsOrQuit(filename)
-  load(filename)
-  project.data
 }
 
 Project.GetConfigFilename <- function(project.name) {
@@ -103,11 +86,9 @@ Project.GetPath <- function(project.name, projects.home = strategico.config$proj
   file.path(projects.home, project.name)
 }
 
-Project.GetStatistics <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
+Project.GetStatistics <-function(project.name, project.config=NULL, db.channel) {
   
-  stats.rdata <- Project.GetStatisticsRdata(project.name=project.name, project.config=project.config,
-                                           project.items=project.items, project.data=project.data)
-  
+  stats.rdata <- Project.GetStatisticsRdata(project.name=project.name, project.config=project.config)
   stats.db <- Project.GetStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
 
   stats <- list(fs=stats.rdata,
@@ -116,32 +97,14 @@ Project.GetStatistics <-function(project.name, project.config=NULL, project.item
   stats
 }
   
-Project.GetStatisticsRdata <-function(project.name, project.config=NULL, project.items=NULL, project.data=NULL) {
+Project.GetStatisticsRdata <-function(project.name, project.config=NULL) {
   if (is.null(project.config)) {
     project.config <- Project.GetConfig(project.name=project.name)
   }
-  if (is.null(project.items)) {
-    project.items <- Project.GetItems(project.name=project.name)
-  }
-  if (is.null(project.data)) {
-    project.data <- Project.GetData(project.name=project.name)
-  }
-  n.items    <- nrow(project.items)
-  n.data     <- nrow(project.data)
-  n.values   <- length(project.config$values)
-  levels     <- levels(project.data$PERIOD)
-  period.min <- min(levels)
-  period.max <- max(levels)
   
   stats <- list(
                 keys=paste(project.config$keys, collapse=","),
-                values=paste(project.config$values, collapse=","),
-                n.data=n.data,
-                n.items=n.items,
-                n.ts=n.items * n.values,
-                ts.length=n.data/n.items,
-                period.min=period.min,
-                period.max=period.max
+                values=paste(project.config$values, collapse=",")
                 )
   stats
 }
@@ -187,14 +150,8 @@ Project.ImportDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1",
 Project.IsValid <- function(project.name, db.channel) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
- 
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
 
-  if (is.null(project.data))
-    project.data <- Project.GetData(project.name=project.name)
-
-  ## TODO: check if project.data contains KEY1, KEY2, .. V1, ..
+  ## TODO:
   TRUE
 }
 
@@ -235,7 +192,6 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   }
   
   leaves <- unique(subset(project.data, select=key_fields) )
-  outfile <- paste(project.path, "project_items.Rdata", sep="/") 
   
   project.items=leaves
   if ("gitems" %in% project.config$save) {
@@ -256,43 +212,21 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
 
   ## adding ID column
   project.items <- cbind(id=1:nrow(project.items), project.items)
-  logger(WARN, paste("Saving Project Items to file", outfile))
-  save( project.items, file=outfile)
+  
+  tablename = DB.GetTableNameProjectItems(project.config$project.name)
+  ## preparing data for prymary key in DB  (id must be the rownames)
+  project.items.orig <- project.items
+  rownames(project.items) <- project.items$id
+  project.items$id <- NULL
+  
+  DB.ImportData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
+  
+  project.items <- project.items.orig
 
-  if ("data_csv" %in% project.config$save) {
-    outfile <- paste(project.path, "/project_items.csv", sep="")
-    logger(WARN, paste("Saving Project Items to file", outfile))
-    write.csv(project.items,
-              file=outfile,
-              row.names = FALSE
-              )
-  }
-  
-  ## SAVING PROJECT_DATA.RDATA
-  filename <- paste(project.path, "project_data.Rdata", sep="/")
-  logger(WARN, paste("Saving Project data to file", filename))
-  save(project.data, file=filename)
-  
-  if ("data_db" %in% project.config$save) {
-    tablename = DB.GetTableNameProjectItems(project.config$project.name)
-    ## preparing data for prymary key in DB  (id must be the rownames)
-    project.items.orig <- project.items
-    rownames(project.items) <- project.items$id
-    project.items$id <- NULL
-    
-    DB.ImportData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
-    
-    project.items <- project.items.orig
-
-    ## Putting item ID inside project.data
-    #project.data.db <- merge(project.items, project.data)
-    tablename = DB.GetTableNameProjectData(project.config$project.name)
-    ## preparing data for prymary key in DB  (id must be the rownames)  
-    DB.ImportData(project.data, tablename, id=NULL, rownames=NULL,
-                  addPK=FALSE, db.channel=db.channel)
-  }
- 
-  #print(key_fields)			
-  #.Project.Items.UpdateDataRecursively(project.path, project.data, keys=key_fields, values=NULL )
-  
+  ## Putting item ID inside project.data
+  ## project.data.db <- merge(project.items, project.data)
+  tablename = DB.GetTableNameProjectData(project.config$project.name)
+  ## preparing data for prymary key in DB  (id must be the rownames)  
+  DB.ImportData(project.data, tablename, id=NULL, rownames=NULL,
+                addPK=FALSE, db.channel=db.channel)
 } # end function

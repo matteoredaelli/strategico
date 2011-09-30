@@ -19,23 +19,16 @@
 ## created: 2011
 
 Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=NULL,
-                      project.config=NULL, project.items=NULL, project.data=NULL, db.channel) {
+                      project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
  
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-
-  if (is.null(project.data))
-    project.data <- Project.GetData(project.name=project.name)
-
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
 
   for (id in id.list) {
     Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
-             project.config=project.config, project.items=project.items,
-             project.data=project.data, db.channel=db.channel)
+             project.config=project.config, db.channel=db.channel)
   }
 }
 
@@ -52,36 +45,26 @@ Item.EmptyFS <- function(project.name, id, value=NULL, recursive = TRUE) {
 }
 
 Item.Eval <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
-                     project.config, project.items=NULL, project.data=NULL, db.channel) {
-
-  if (is.null(project.data))
-    project.data <- Project.GetData(project.name=project.name)
+                     project.config, db.channel) {
 
   for (i in 1:length(values)) {
     Item.EvalData(project.name=project.name, id=id, keys=keys, value=values[i], param=param,
-                 project.config=project.config, project.items=project.items,
-                 project.data=project.data, db.channel=db.channel)
+                 project.config=project.config, db.channel=db.channel)
   }
 }
 
 Item.EvalChildren <- function(project.name, id, keys=NULL, values, param=NULL,
-                     project.config, project.items=NULL, project.data=NULL, db.channel) {
-
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
+                     project.config, db.channel) {
   
-  if (is.null(project.data))
-    project.data <- Project.GetData(project.name=project.name)
-  
-  id.list <- Item.GetChildren(id=id, keys=keys, project.name=project.name, project.items=project.items)
+  id.list <- Item.GetChildren(id=id, keys=keys, project.name=project.name, db.channel=db.channel)
 
   if (!is.null(id.list))
     Items.Eval(project.name=project.name, id.list=id.list, values=values, param=param,
-              project.config=project.config, project.items=project.items, project.data=project.data, db.channel=db.channel)
+              project.config=project.config, db.channel=db.channel)
 }
 
 Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
-                         param=NULL, project.config, project.items=NULL, project.data=NULL, db.channel) {
+                         param=NULL, project.config, db.channel) {
   logger(INFO, "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
   logger(WARN, paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
@@ -95,14 +78,9 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
   }
   
   if (is.null(item.data))
-    if ("data_db" %in% project.config$save)
-          item.data <- Item.DB.GetData(project.name=project.name, project.items=project.items,
-                                       project.config=project.config, id=id, keys=keys,
-                                       value=value, db.channel=db.channel)
-    else
-      item.data <- Item.GetData(project.name=project.name, project.items=project.items,
-                                project.data=project.data, project.config=project.config,
-                                id=id, keys=keys, value=value)
+    item.data <- Item.GetData(project.name=project.name,
+                                 project.config=project.config, id=id, keys=keys,
+                                 value=value, db.channel=db.channel)
 
   if (is.null(item.data)) {
     logger(INFO, "Empty data: skipping prediction")
@@ -151,71 +129,41 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
   t(prediction)
 }
 
-
-
-Item.GetData <- function(project.name, project.data=NULL, project.config=NULL, project.items=NULL, id=NULL, keys=NULL, value="V1",
-                         keys.na.rm=TRUE, period.start=NULL, period.end=NULL) {
- 
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
-  
-  if (is.null(project.data))
-    project.data <- Project.GetData(project.name=project.name)
-  
-  if (is.null(keys)) {
-    if (is.null(project.items))
-      project.items <- Project.GetItems(project.name=project.name)
-    keys <- Item.GetKeys(id=id, project.name=project.name, project.items=project.items)
+Item.GetKeys <- function(id, project.name, db.channel) {
+  tablename = DB.GetTableNameProjectItems(project.name)
+  where.condition <- paste("id=", id, sep='')
+  sql_statement <- paste("select * from", tablename, "where", where.condition, sep=" ")
+  records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+  if (nrow(records) > 0) {
+    records$id <- NULL
+    result <- records[1,]
+  } else {
+    logger(WARN, paste("No Keys found for ID =", id))
+    result <- NULL
   }
-#    filtered.data <- SubsetByID(data=project.data, id=id)
-#  else
-  filtered.data <- SubsetByKeys(data=project.data, keys=keys, keys.na.rm=keys.na.rm)
-
-  if (is.null(filtered.data)) {
-    logger(INFO, "filtered data is NULL")
-    result = filtered.data
-  } else if (nrow(filtered.data) > 0)
-    result <- AggregateItemData(filtered.data, value=value)
-  else {
-    logger(INFO, "No rows: cannot aggregate data")
-    result = filtered.data
-  }
-  n.char <- nchar(project.config$period.freq)
-
-  if (is.null(period.start)) period.start <- project.config$period.start
-  if (is.null(period.end)) period.end <- project.config$period.end
-  
-  string.period.start <- Period.ToString(period.start, n.char=n.char)
-  string.period.end <- Period.ToString(period.end, n.char=n.char)
-
-  subset(result, rownames(result)  >=  string.period.start & rownames(result) <= string.period.end) 
+  result
 }
 
-Item.GetParent <- function(id, keys=NULL, project.name=NULL, project.items=NULL, db.channel=NULL) {
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-  
+Item.GetParent <- function(id, keys=NULL, project.name=NULL, db.channel) {
   if (is.null(keys))
-    keys <- Item.GetKeys(id, project.name=project.name, project.items=project.items)
+    keys <- Item.GetKeys(id, project.name=project.name, db.channel=db.channel)
 
   parent.key <- keys
   parent.key[length(keys)]=''
   
-  result <- Project.GetIDs(keys=parent.key, project.name=project.name, project.items=project.items, keys.na.rm=FALSE, db.channel=db.channel)
+  result <- Project.GetIDs(keys=parent.key, project.name=project.name, keys.na.rm=FALSE, db.channel=db.channel)
   if (!is.na(result))
     result <- result[1]
 
   result
 }
-Item.GetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NULL, db.channel=NULL) {
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-  
+
+Item.GetChildren <- function(id, keys=NULL, project.name=NULL, db.channel) {
   if (is.null(keys))
-    keys <- Item.GetKeys(id, project.name=project.name, project.items=project.items)
+    keys <- Item.GetKeys(id, project.name=project.name, db.channel=db.channel)
   
   ## TODO: now it could work only for keys with empty values at the end..."
-  id.list <- Project.GetIDs(keys=keys, project.name=project.name, project.items=project.items, keys.na.rm=TRUE, db.channel=db.channel)
+  id.list <- Project.GetIDs(keys=keys, project.name=project.name, keys.na.rm=TRUE, db.channel=db.channel)
   result <- id.list[id.list != id]
   if (length(result)==0) {
     logger(WARN, paste("No children for ID=",
@@ -225,22 +173,6 @@ Item.GetChildren <- function(id, keys=NULL, project.name=NULL, project.items=NUL
                        ")"
                        )
            )
-    result <- NULL
-  }
-  result
-}
-
-Item.GetKeys <- function(id, project.name=NULL, project.items=NULL) {
-  if (is.null(project.items))
-    project.items <- Project.GetItems(project.name=project.name)
-  
-  cmd <- "ds <- subset(project.items, id==__ID__, select=c(-id))"
-  cmd <- gsub("__ID__", id, cmd)
-  eval(parse(text = cmd))
-  if (nrow(ds) >0)
-    result <- as.matrix(ds)[1, ]
-  else {
-    logger(WARN, paste("No keys found for ID=", id))
     result <- NULL
   }
   result

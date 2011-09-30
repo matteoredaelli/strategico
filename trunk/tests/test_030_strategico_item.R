@@ -14,26 +14,18 @@
 ## Authors: L. Finos, M. Redaelli
 
 test.035.Item.GetKeys <- function() {
-  project.items <- Project.GetItems(project.name)
-  k1 <-     Item.GetKeys(project.name=project.name, id=5)
-  k1.bis <- Item.GetKeys(project.items=project.items, id=5)
+  k1 <-     Item.GetKeys(project.name=project.name, id=5, db.channel=db.channel)
   
   checkEquals(
-              k1,
-              k1.bis
-              )
-  ## checkEquals(
-  ##            c("ES", "MOTO", "DUCATI")
-  ##            k1[1,]
-  ##            ) 
+              c("ES", "MOTO", "DUCATI"),
+              k1[1,]
+              ) 
 }
 
 
 test.Item.GetData <- function() {
-  project.data <- Project.GetData(project.name)
-
-  i0 <-     Item.GetData(project.name=project.name, project.data=project.data, keys=c("ES","MOTO","DUCATI"), value="V1")
-  i0.bis <- Item.GetData(project.name=project.name, project.data=project.data, id=5, value="V1")
+  i0 <-     Item.GetData(project.name=project.name, keys=c("ES","MOTO","DUCATI"), value="V1", db.channel=db.channel)
+  i0.bis <- Item.GetData(project.name=project.name, id=5, value="V1", db.channel=db.channel)
 
   checkEquals(
               i0,
@@ -49,7 +41,7 @@ test.Item.GetData <- function() {
               )
 
   keys <- c("IT","CAR","")
-  i1 <- Item.GetData(project.name=project.name, project.data=project.data, keys=keys, value="V1")
+  i1 <- Item.GetData(project.name=project.name, keys=keys, value="V1", db.channel=db.channel)
   checkEquals(
               c(644.6, 646, 868, 501.2, 620, 290.3, 560, 680, 624.6, 311, 820, 250.6, 640, 440.6, 4560, 660),
               i1$V
@@ -59,19 +51,9 @@ test.Item.GetData <- function() {
                 "2007-1","2007-2","2008-1","2008-2","2009-1","2009-2","2010-1","2010-2"),
               rownames(i1)
               )
-  i1.db <- Item.DB.GetData(project.name=project.name, keys=keys, value="V1", db.channel=db.channel)
-  checkEquals(
-              rep(TRUE, length(rownames(i1))),
-              rownames(i1) == rownames(i1.db)
-              )
-  checkEquals(
-              rep(TRUE, length(i1$V)),
-              i1$V == i1.db$V
-              )
 
   keys=c("", "MOTO","DUCATI")
-  i2 <- Item.GetData(project.name=project.name, project.data=project.data, keys=keys, value="V1", period.end=c(2010,2))
-  i2.db <- Item.DB.GetData(project.name=project.name, keys=keys, value="V1", db.channel=db.channel)
+  i2 <- Item.GetData(project.name=project.name, keys=keys, value="V1", db.channel=db.channel)
   
   checkEquals(
               c(33, 5, 44, 36, 80, 0, 56, 0, 80, 43, 22, 24, 53),
@@ -80,14 +62,6 @@ test.Item.GetData <- function() {
   checkEquals(
               c("2001-2", "2002-2", "2003-1", "2003-2", "2004-1"),
               rownames(i2)[1:5]
-              )
-  checkEquals(
-              rep(TRUE, length(rownames(i2))),
-              rownames(i2) == rownames(i2.db)
-              )
-  checkEquals(
-              rep(TRUE, length(i2$V)),
-              i2$V == i2.db$V
               )
 }
 
