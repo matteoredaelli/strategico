@@ -228,12 +228,12 @@ Items.DB.SetBestModel <- function(project.name, value, id.list,
   DB.RunSQLQuery(sql_statement=str, db.channel=db.channel)
 }
 
-Project.DB.Empty <- function(project.name, project.config=NULL, db.channel) {
+Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
   }
 
-  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
+  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) DB.EmptyTable(x,db.channel))
 }
 
@@ -242,7 +242,7 @@ Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.cha
     project.config <- Project.GetConfig(project.name)
   }
   project.path <- Project.GetPath(project.name)
-  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
+  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) DB.ExportTable2Csv(tablename=x,
                                              db.channel=db.channel,
                                              output.file=file.path(project.path, paste(x, ".csv", sep="")),
@@ -257,7 +257,7 @@ Project.DBExportViews2Csv <- function(project.name, project.config=NULL, db.chan
     project.config <- Project.GetConfig(project.name)
   }
   project.path <- Project.GetPath(project.name)
-  tables <- Project.DB.GetViewNames(project.name=project.name, project.config=project.config)
+  tables <- Project.GetViewNames(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) DB.ExportTable2Csv(tablename=x,
                                              db.channel=db.channel,
                                              output.file=file.path(project.path, paste(x, ".csv", sep="")),
@@ -267,7 +267,7 @@ Project.DBExportViews2Csv <- function(project.name, project.config=NULL, db.chan
          )
 }
 
-Project.DB.FixStructure <- function(project.name, values, db.channel) {
+Project.FixStructure <- function(project.name, values, db.channel) {
   ## TODO: generalize tablenames..
   ## Add unique index on keys in project_items table: needed for speed and consistency
   sql <- c("alter table sample_items MODIFY id integer",
@@ -289,7 +289,7 @@ Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channe
     project.config <- Project.GetConfig(project.name)
   }
 
-  tables <- Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
+  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
   rows <- unlist(lapply(tables, function(x) DB.GetTableSize(x,db.channel)))
   
   stats <- as.list(rows)
@@ -304,13 +304,13 @@ Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channe
   stats
 }
 
-Project.DB.GetStatistics.Models <- function(project.name, value, db.channel) {  
+Project.GetStatistics.Models <- function(project.name, value, db.channel) {  
   t <- DB.GetTableNameSummary(project.name, value)
   sql <- paste("select BestModel, count(*) as tot from", t, "group by 1")
   DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
 }
 
-Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
+Project.GetTableNames <- function(project.name, project.config=NULL) {
   if(is.null(project.config)) 
     project.config <- Project.GetConfig(project.name)
 
@@ -333,7 +333,7 @@ Project.DB.GetTableNames <- function(project.name, project.config=NULL) {
 }
 
 
-Project.DB.GetViewNames <- function(project.name, project.config=NULL) {
+Project.GetViewNames <- function(project.name, project.config=NULL) {
   if(is.null(project.config)) 
     project.config <- Project.GetConfig(project.name)
 
@@ -349,7 +349,3 @@ Project.DB.GetViewNames <- function(project.name, project.config=NULL) {
   views
 }
 
-##input  da db. 
-Project.DB.ImportData <- function(project.name, db.name, db.user, db.pass, sql_statement) {
-  DB.RunSQLQuery(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
-}

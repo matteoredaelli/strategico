@@ -34,7 +34,7 @@ print(xtable(t(as.data.frame(stats))), type="html")
 <%
 for (value in GetValueNames(project.config$values)) {
   t.sum <- DB.GetTableNameSummary(project.name, value)
-  stats.models <- Project.DB.GetStatistics.Models(project.name, value, db.channel)
+  stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
   
   M <- gvisPieChart(stats.models, options=list(
                                     title=paste(value, ": relative models distribution", sep="")))
