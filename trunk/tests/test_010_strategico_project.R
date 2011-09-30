@@ -54,7 +54,7 @@ test.010.Project.GetConfig <- function() {
 
 test.020.Project.ImportData <- function() {
   ##Project.FS.Empty(project.name)
-  Project.DB.Empty(project.name, db.channel=db.channel)
+  Project.EmptyDB(project.name, db.channel=db.channel)
   Project.ImportData(project.name=project.name, db.channel=db.channel)
   ## TODO Check if the new files have been created successfully 
 }
@@ -66,12 +66,12 @@ test.030.DB.GetTableSize <- function() {
               )
 }
 
-test.Project.DB.GetTableNames <- function() {
+test.Project.GetTableNames <- function() {
    checkEquals(
                c("sample_data_raw", "sample_items",
                  "sample_data_norm_V1", "sample_results_V1", "sample_summary_V1", "sample_summary_models_V1",
                  "sample_data_norm_V2", "sample_results_V2", "sample_summary_V2", "sample_summary_models_V2"),
-               Project.DB.GetTableNames(project.name=project.name, project.config=project.config)
+               Project.GetTableNames(project.name=project.name, project.config=project.config)
                )
 }
 

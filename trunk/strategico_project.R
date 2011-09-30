@@ -142,6 +142,11 @@ Project.ImportData <- function(project.name, project.config=NULL, db.channel) {
   Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
 }
 
+##input  da db. 
+Project.ImportDataFromDB <- function(project.name, db.name, db.user, db.pass, sql_statement) {
+  DB.RunSQLQuery(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
+}
+
 ##input da da csv. 
 Project.ImportDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","KEY2"),
                                      timesKeys=c("YEAR","SEMESTER"), V=c("CORP")){ 

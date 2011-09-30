@@ -251,7 +251,7 @@ if (opt$cmd == "statistics") {
 ## empty.db
 #########################################################################
 if (opt$cmd == "empty.db") {
-  Project.DB.Empty(project.name=opt$project.name, db.channel=db.channel)
+  Project.EmptyDB(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
 
