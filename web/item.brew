@@ -42,7 +42,7 @@ item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
 
 db.channel <- DB.Connect()
 
-item.keys <- Item.GetKeys(project.name=project.name, id=id)
+item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
 
 if (!is.null(GET$setmodel) & !is.null(GET$model)) {
   Items.DB.SetBestModel(project.name=project.name, value=value, id=id,

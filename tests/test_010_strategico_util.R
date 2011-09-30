@@ -15,15 +15,6 @@
 
 project.name <- "sample"
 
-test.050.Subset <- function() {
-  project.data <- Project.GetData(project.name)
-  s = SubsetByKeys(project.data, keys=c("ES","MOTO","DUCATI"))
-
-  checkEquals(1,
-              nrow(s)
-              )
-}
-
 test.00.BuildFilterWithKeys <- function() {
   checkEquals(
               "KEY1=='IT' & KEY2=='101'", 
@@ -235,7 +226,7 @@ test.GetValueNames <- function() {
 }
 
 test.GetUniqueKeyValues <- function() {
-  uk <- GetUniqueKeyValues(project.name=project.name, project.config=project.config)
+  uk <- GetUniqueKeyValues(project.name=project.name, project.config=project.config, db.channel=db.channel)
   checkEquals(
               length(project.config$keys),
               length(uk)
