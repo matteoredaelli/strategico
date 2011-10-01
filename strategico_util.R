@@ -82,17 +82,7 @@ MySource("strategico_db.R")
 MySource("strategico_period.R")
 MySource("strategico_web.R")
 
-AggregateItemData <- function(data, value) {
-  options(na.action="na.omit")
 
-  d2 <- aggregate(data[[value]],  by=list(data[["PERIOD"]]),  FUN=sum, na.rm=TRUE)
-  names(d2) <- c('PERIOD', 'V')
-  rownames(d2) <- d2$PERIOD
-  d2$PERIOD <- NULL
-  d2
-}
-
-#UNUSED
 BuildFullKey <- function(keys, config.keys, fill.with="") {
   append(keys, rep(fill.with, length(config.keys) - length(keys)))
 }
