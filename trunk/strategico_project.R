@@ -18,7 +18,16 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-Project.FS.Empty <- function(project.name, recursive = TRUE) {
+Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+
+  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) DB.EmptyTable(x,db.channel))
+}
+
+Project.EmptyFS <- function(project.name, recursive = TRUE) {
   if (!Project.IsValidName(project.name)) {
     logger(WARN, paste("Project folder=", project.name, "doesn't exist"))
   } else {
@@ -236,7 +245,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   rownames(project.items) <- project.items$id
   project.items$id <- NULL
   
-  DB.ImportData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
+  DB.DeleteAndInsertData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
   
   project.items <- project.items.orig
 
@@ -244,6 +253,6 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## project.data.db <- merge(project.items, project.data)
   tablename = DB.GetTableNameProjectData(project.config$project.name)
   ## preparing data for prymary key in DB  (id must be the rownames)  
-  DB.ImportData(project.data, tablename, id=NULL, rownames=NULL,
+  DB.DeleteAndInsertData(project.data, tablename, id=NULL, rownames=NULL,
                 addPK=FALSE, db.channel=db.channel)
 } # end function
