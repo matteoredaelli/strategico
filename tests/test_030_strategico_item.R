@@ -18,7 +18,7 @@ test.035.Item.GetKeys <- function() {
   
   checkEquals(
               c("ES", "MOTO", "DUCATI"),
-              k1[1,]
+              k1
               ) 
 }
 

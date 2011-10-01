@@ -187,7 +187,7 @@ Item.GetKeys <- function(id, project.name, db.channel) {
   records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
   if (nrow(records) > 0) {
     records$id <- NULL
-    result <- records[1,]
+    result <- as.vector(as.matrix(records[1,]))
   } else {
     logger(WARN, paste("No Keys found for ID =", id))
     result <- NULL
