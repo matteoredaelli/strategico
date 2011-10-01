@@ -28,14 +28,17 @@ BuildHtmlElement_input <- function(label="", name, default, type="text", size=20
   str
 }
 
-BuildHtmlElement_select <- function(label, name, list.values, default=NULL) {
+BuildHtmlElement_select <- function(label, name, list.values, default="") {
   opt_template<- '<option value="_V_">_V_</option>'
   opt_selected_template<- '<option value="_V_" SELECTED>_V_</option>'
   optlist <- ""
-
-  if (is.null(default))
-    default <- list.values[1]
   
+  if ( is.null(default) | is.na(default) )
+    default <- ""
+
+  ## if ( (is.null(default)) | (default == "") )
+  ##  default <- list.values[1]
+
   for (v in list.values) {
     if (v==default)
       opt <- gsub("_V_", v, opt_selected_template)
@@ -68,11 +71,15 @@ BuildFormElement_keys <- function(db.channel, project.name=NULL, project.config=
     project.config <- Project.GetConfig(project.name=project.name)
   
   list.values <- GetUniqueKeyValues(project.name=project.name, project.config=project.config, db.channel=db.channel)
+  
+  if (is.null(default))
+    default <- sapply(list.values, function(x) x[1])
+  
   keys <- GetKeyNames(keys=NULL, project.name=project.name, project.config=project.config)
   result <- ""
   for (k in 1:length(keys)) 
     result <- paste(result,
-                    BuildHtmlElement_select(label=project.config$keys[k], name=keys[k], list.values=list.values[[k]], default=ifelse(is.null(default),NULL,default[k])),
+                    BuildHtmlElement_select(label=project.config$keys[k], name=keys[k], list.values=list.values[[k]], default=default[k]),
                     sep=sep)
   result
 }
