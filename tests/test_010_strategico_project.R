@@ -103,6 +103,6 @@ test.035.Project.GetIDs <- function() {
               )
   checkEquals(
               c(1, 2, 8, 10, 14, 16),
-              Project.GetIDs(keys=c("IT","",""), project.name=project.name, keys.na.rm=TRUE, db.channel=db.channel)
+              sort(Project.GetIDs(keys=c("IT","",""), project.name=project.name, keys.na.rm=TRUE, db.channel=db.channel))
               )
 }
