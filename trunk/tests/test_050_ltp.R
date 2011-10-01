@@ -76,7 +76,8 @@ test.00.Item.EvalData.e1 <- function() {
                          project.config=project.config, db.channel=db.channel)
 
   checkEquals(
-              c(5192, 1345, 5824, 1977, 6456, 2609, 7088, 3241),
+              ## arima
+              c(5237, 1390, 5913, 2066, 6590, 2743, 7266, 3419),
               as.vector(e1[1,])
               )
   checkEquals(
@@ -92,7 +93,7 @@ test.00.Item.EvalData.e1 <- function() {
                           project.config=project.config, db.channel=db.channel)
 
   checkEquals(
-              c(13553, 12228, 16187, 20338, 20887, 20824, 25595, 28372),
+              c(12884, 11943, 16293, 19824, 19676, 20669, 25494, 27098),
               as.vector(e11[1,])
               )
 }
@@ -203,7 +204,7 @@ test.00.EvalTSString <- function() {
   e3 <- EvalTSString(project.name,
                      ts.string="33,244,225,201,101,103,51,40,24,44,73,120,106",
                      ## ts.periods.string="2001-1,2001-2,2002-1,2002-2,2002-3,2003-1,2003-3,2004-1,2004-2,2005-1,2005-2,2005-3,2006-1,2006-3,2007-1,2007-2,2007-3,2008-1",
-                     period.start="2010-4", period.freq=12, project.config=project.config, db.channel=db.channel)
+                     period.start="2010-04", period.freq=12, project.config=project.config, db.channel=db.channel)
   checkEquals(
               c(5, 6, 7, 5, 6, 7, 5, 6),  # RANDOM... IT FAILS.....
               ##c(317, 298, 274, 174, 176, 124, 113, 97),
