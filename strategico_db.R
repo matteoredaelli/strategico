@@ -48,7 +48,7 @@ DB.EmptyTable <- function(tablename, db.channel) {
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
 }
 
-DB.ImportData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
+DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
                            rownames=FALSE, append=TRUE, addPK=FALSE, db.channel) {
   logger(DEBUG, paste("Saving data (deleting + inserting) to table", tablename))
   delete_sql <- paste("delete from", tablename)
@@ -170,7 +170,7 @@ Item.Db.SaveData <- function(id, data, tablename, db.channel) {
     ## primary KEY
     rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
  
-    DB.ImportData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+    DB.DeleteAndInsertData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                   rownames="id", addPK=TRUE, db.channel=db.channel)
   }
 }
@@ -226,15 +226,6 @@ Items.DB.SetBestModel <- function(project.name, value, id.list,
   str <- gsub("_IDLIST_", str.id.list, str)
 
   DB.RunSQLQuery(sql_statement=str, db.channel=db.channel)
-}
-
-Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
-  if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
-  }
-
-  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
-  lapply(tables, function(x) DB.EmptyTable(x,db.channel))
 }
 
 Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
@@ -330,22 +321,5 @@ Project.GetTableNames <- function(project.name, project.config=NULL) {
     tables <- append(tables, value.tables)
   }
   tables
-}
-
-
-Project.GetViewNames <- function(project.name, project.config=NULL) {
-  if(is.null(project.config)) 
-    project.config <- Project.GetConfig(project.name)
-
-  views <- c()
-  
-  for (value in GetValueNames(project.config$values)) {
-    value.tables <- c(
-                      DB.GetViewNameResults(project.name, value),
-                      DB.GetViewNameSummary(project.name, value)
-                      )
-    views <- append(views, value.tables)
-  }
-  views
 }
 

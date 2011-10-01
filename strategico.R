@@ -259,7 +259,7 @@ if (opt$cmd == "empty.db") {
 ## empty.fs
 #########################################################################
 if (opt$cmd == "empty.fs") {
-  Project.FS.Empty(project.name=opt$project.name)
+  Project.EmptyFS(project.name=opt$project.name)
   q(status=0)
 }
 

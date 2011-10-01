@@ -53,7 +53,7 @@ test.010.Project.GetConfig <- function() {
 }
 
 test.020.Project.ImportData <- function() {
-  ##Project.FS.Empty(project.name)
+  ##Project.EmptyFS(project.name)
   Project.EmptyDB(project.name, db.channel=db.channel)
   Project.ImportData(project.name=project.name, db.channel=db.channel)
   ## TODO Check if the new files have been created successfully 

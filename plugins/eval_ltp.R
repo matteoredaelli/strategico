@@ -126,7 +126,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
 
   tablename = DB.GetTableNameNormalizedData(project.name, value)
-  DB.ImportData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+  DB.DeleteAndInsertData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                 rownames=FALSE, addPK=FALSE, db.channel=db.channel)
   
   ## ###################################################################################
@@ -145,11 +145,11 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     ## TODO: fails if normalized data is empty
     ## ./strategico.R --cmd eval_items --id.list 5 -n sample
     tablename = DB.GetTableNameSummary(project.name, value)
-    DB.ImportData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
+    DB.DeleteAndInsertData(onerow.summ, tablename=tablename, id=id, rownames="id", addPK=TRUE, db.channel=db.channel)
 
     if (!is.null(model$BestModel)) {
       tablename = DB.GetTableNameSummaryModels(project.name, value)
-      DB.ImportData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+      DB.DeleteAndInsertData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                     rownames=NULL, addPK=FALSE, db.channel=db.channel)
     }
   }
@@ -191,7 +191,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   colnames(result) <- "V"
 
   tablename = DB.GetTableNameResults(project.name, value)  
-  DB.ImportData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
+  DB.DeleteAndInsertData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
                 rownames=FALSE, addPK=FALSE, db.channel=db.channel)
   
 
