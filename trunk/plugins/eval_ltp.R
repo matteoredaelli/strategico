@@ -112,22 +112,25 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## Saving Normalized Data
   ## ###################################################################################
     
-  data.normalized <- model$values[, , drop = FALSE]
-  if ( nrow(data.normalized) == 0) {
+  if ( nrow(model$values) == 0) {
     logger(WARN, "No records in normalized data. No saving to DB")
-    data.normalized <- NULL
-    return(1)
-  } 
+    normalized.data <- ""
+    normalized.period <- ""
+  } else {
+    normalized.data <- Vector.ToString(model$values$V)
+    normalized.periods <- Vector.ToString(rownames(model$values))
+  }
+    
   if (is.null(model$BestModel)) {
     logger(WARN, "Best model is null. No saving to DB")
     return(2)
   } 
 
-  data.normalized <- cbind(item_id=id, PERIOD=rownames(data.normalized), V=data.normalized)
-
-  tablename = DB.GetTableNameNormalizedData(project.name, value)
-  DB.DeleteAndInsertData(data=data.normalized, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+  
+  predicted.periods <-Period.BuildRange(period.start=project.config$period.end,
+                                          period.freq=project.config$period.freq,
+                                          n=param$n.ahead, shift=1)
+  str.predicted.periods <- Vector.ToString(predicted.periods)
   
   ## ###################################################################################
   ## Saving Summary Data
@@ -135,13 +138,18 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   
   if ("summary" %in% project.config$save) {
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
+    onerow.summ$normalizedPeriods <- normalized.periods
+    onerow.summ$normalizedData <- normalized.data
+    onerow.summ$predictedPeriods <- str.predicted.periods
     
     if (!is.null(model$BestModel)) {
       summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
-      summary.models$selected <- NULL
-      summary.models = cbind(item_id=id, model=rownames(summary.models), summary.models)
+      ##summary.models$selected <- NULL
+      str.prediced.data <- unlist(lapply(rownames(summary.models), function(m) Vector.ToString(model[[m]]$prediction)))
+      str.residuals.data <- unlist(lapply(rownames(summary.models), function(m) Vector.ToString(round(model[[m]]$Residuals,2))))
+      summary.models = cbind(item_id=id, model=rownames(summary.models), summary.models, predictedData=str.prediced.data, residuals=str.residuals.data)
      }
-    
+
     ## TODO: fails if normalized data is empty
     ## ./strategico.R --cmd eval_items --id.list 5 -n sample
     tablename = DB.GetTableNameSummary(project.name, value)
@@ -158,11 +166,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## Saving Predicted Data
   ## ###################################################################################
   logger(DEBUG, "Saving results for all models")
-  predictions.periods <-Period.BuildRange(period.start=project.config$period.end,
-                                          period.freq=project.config$period.freq,
-                                          n=param$n.ahead, shift=1)
+
   data.predicted <- NULL
-  prediction.null <- cbind(id, NA,PERIOD=predictions.periods, V=rep(0, param$n.ahead))
+  prediction.null <- cbind(id, NA,PERIOD=predicted.periods, V=rep(0, param$n.ahead))
   
   if (is.null(model$BestModel)) {
     logger(WARN, "NO BestModel found ;-(")
@@ -172,29 +178,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   else {
     logger(WARN, paste("Best Model is ", model$BestModel))
     result <- data.frame(model[[model$BestModel]]$prediction)
-    for (m in models.names) {
-      if (is.null(model[[m]]) | is.null(model[[m]]$prediction))
-        #data.predicted <- rbind(data.predicted, prediction.null)
-        logger(WARN, paste("No predictions for model", m, ": skipping it.."))
-      else {
-        model.predicted <- model[[m]]$prediction
-        model.predicted <- cbind(id, m, predictions.periods, model.predicted)  
-        data.predicted <- rbind(data.predicted, model.predicted) 
-      }
-    } # for
   }
-  data.predicted <- data.frame(data.predicted)
-
-  colnames(data.predicted) <- c("item_id", "model", "PERIOD", "V")
-  rownames(result) <- predictions.periods
-
-  colnames(result) <- "V"
-
-  tablename = DB.GetTableNameResults(project.name, value)  
-  DB.DeleteAndInsertData(data=data.predicted, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                rownames=FALSE, addPK=FALSE, db.channel=db.channel)
   
-
   if (!is.null(model$BestModel)) {
     ## ###################################################################################
     ## Creating Saving Images

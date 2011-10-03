@@ -130,6 +130,31 @@ Project.GetStatisticsRdata <-function(project.name, project.config=NULL) {
   stats
 }
 
+Project.GetStatistics.Models <- function(project.name, value, db.channel) {  
+  t <- DB.GetTableNameSummary(project.name, value)
+  sql <- paste("select BestModel, count(*) as tot from", t, "group by 1")
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+}
+
+Project.GetTableNames <- function(project.name, project.config=NULL) {
+  if(is.null(project.config)) 
+    project.config <- Project.GetConfig(project.name)
+
+  tables <- c(
+              DB.GetTableNameProjectData(project.name),
+              DB.GetTableNameProjectItems(project.name)
+              )
+
+  
+  for (value in GetValueNames(project.config$values)) {
+    value.tables <- c(
+                      DB.GetTableNameSummary(project.name, value),
+                      DB.GetTableNameSummaryModels(project.name, value)
+                      )
+    tables <- append(tables, value.tables)
+  }
+  tables
+}
 
 Project.GetUrl <- function(project.name, projects.url = strategico.config$projects.url) {
   paste(projects.url, project.name, sep="/")

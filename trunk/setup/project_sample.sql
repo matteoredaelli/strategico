@@ -18,33 +18,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Database: `strategico`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sample_data_norm_V1`
---
-
-CREATE TABLE IF NOT EXISTS `sample_data_norm_V1` (
-  `item_id` int(11) NOT NULL,
-  `PERIOD` varchar(20) NOT NULL,
-  `V` double default NULL,
-  PRIMARY KEY  (`item_id`,`PERIOD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sample_data_norm_V2`
---
-
-CREATE TABLE IF NOT EXISTS `sample_data_norm_V2` (
-  `item_id` int(11) NOT NULL,
-  `PERIOD` varchar(20) NOT NULL,
-  `V` double default NULL,
-  PRIMARY KEY  (`item_id`,`PERIOD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 -- --------------------------------------------------------
 
 --
@@ -79,34 +52,6 @@ CREATE TABLE IF NOT EXISTS `sample_items` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sample_results_V1`
---
-
-CREATE TABLE IF NOT EXISTS `sample_results_V1` (
-  `item_id` int(11) NOT NULL,
-  `model` varchar(20) NOT NULL default '',
-  `PERIOD` varchar(20) NOT NULL default '',
-  `V` double default NULL,
-  PRIMARY KEY  (`item_id`,`model`,`PERIOD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sample_results_V2`
---
-
-CREATE TABLE IF NOT EXISTS `sample_results_V2` (
-  `item_id` int(11) NOT NULL,
-  `model` varchar(20) NOT NULL default '',
-  `PERIOD` varchar(20) NOT NULL default '',
-  `V` double default NULL,
-  PRIMARY KEY  (`item_id`,`model`,`PERIOD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `sample_summary_models_V1`
 --
 
@@ -119,6 +64,8 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V1` (
   `ICwidth` varchar(20) default NULL,
   `maxJump` varchar(20) default NULL,
   `VarCoeff` varchar(20) default NULL,
+  `predictedData` varchar(1000) default NULL,
+  `residuals` varchar(1000) default NULL,
   PRIMARY KEY  (`item_id`,`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -137,6 +84,8 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
   `ICwidth` varchar(20) default NULL,
   `maxJump` varchar(20) default NULL,
   `VarCoeff` varchar(20) default NULL,
+  `predictedData` varchar(1000) default NULL,
+  `residuals` varchar(1000) default NULL,
   PRIMARY KEY  (`item_id`,`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -164,6 +113,9 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
   `Parameters` varchar(1000) default NULL,
   `ReturnCode` int(11) default NULL,
   `Run` int(11) default NULL,
+  `normalizedPeriods` varchar(1000) default NULL,
+  `normalizedData` varchar(2000) default NULL,
+  `predictedPeriods` varchar(1000) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -191,5 +143,8 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V2` (
   `Parameters` varchar(1000) default NULL,
   `ReturnCode` int(11) default NULL,
   `Run` int(11) default NULL,
+  `normalizedPeriods` varchar(1000) default NULL,
+  `normalizedData` varchar(2000) default NULL,
+  `predictedPeriods` varchar(1000) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

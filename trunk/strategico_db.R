@@ -64,10 +64,6 @@ DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbo
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
 }
 
-DB.GetTableNameResults <- function(project.name, value) {
-  paste(project.name, "results", value, sep="_")
-}
-
 DB.GetTableNameSummary <- function(project.name, value) {
   paste(project.name, "summary", value, sep="_")
 }
@@ -78,10 +74,6 @@ DB.GetTableNameSummaryModels <- function(project.name, value) {
 
 DB.GetTableNameProjectData <- function(project.name) {
   paste(project.name, "data_raw", sep="_")
-}
-
-DB.GetTableNameNormalizedData <- function(project.name, value) {
-  paste(project.name, "data_norm", value, sep="_")
 }
 
 DB.GetTableNameProjectItems <- function(project.name) {
@@ -100,15 +92,6 @@ DB.GetTableSize <- function(tablename, db.channel) {
   }
   result
 }
-
-DB.GetViewNameResults <- function(project.name, value) {
-  paste(project.name, "view", "results", value, sep="_")
-}
-
-DB.GetViewNameSummary <- function(project.name, value) {
-  paste(project.name, "view", "summary", value, sep="_")
-}
-
 
 DB.RunSQLQuery <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
   db.channel.old <- db.channel
@@ -149,11 +132,6 @@ Item.DB.GetNormalizedDataAndResults <- function(project.name, value, id, db.chan
   rbind(i.hist, i.results)
 }
 
-Item.DB.GetResults <- function(project.name, value, id, db.channel) {
-  tablename <- DB.GetTableNameResults(project.name, value=value)
-  Item.DB.GetRecords(project.name, key="item_id", id=id, tablename=tablename, db.channel=db.channel)
-}
-  
 Item.DB.GetRecords <- function(project.name, key="id", id, tablename, db.channel) {
   filter <- paste(key, "=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
@@ -176,8 +154,45 @@ Item.Db.SaveData <- function(id, data, tablename, db.channel) {
 }
 
 Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
-  tablename <- DB.GetTableNameNormalizedData(project.name, value=value)
-  Item.DB.GetRecords(project.name, id=id, key="item_id", tablename=tablename, db.channel=db.channel)
+  records <- Item.DB.GetSummary(project.name, value, id, db.channel) 
+if (nrow(records) == 0) {
+    result <- NULL
+  } else {
+    periods <- Vector.FromString(as.character(records$normalizedPeriods))
+    values <- Vector.FromString(as.character(records$normalizedData))
+    result <- data.frame(V=values)
+    rownames(result) <- periods
+  }
+  result
+}
+
+ltp.Item.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE) {
+
+  ## retreiving Results
+  
+  summary <- Item.DB.GetSummary(project.name, value, id, db.channel) 
+  if (nrow(summary) == 0) {
+    return(NULL)
+  } 
+  result <- list()
+
+  ## extracting normalized data
+  
+  periods <- Vector.FromString(as.character(summary$normalizedPeriods))
+  values <- Vector.FromString(as.character(summary$normalizedData))
+  result$normalized <- data.frame(V=values)
+  rownames(result$normalized) <- periods
+
+  ## extracting predicted periods
+  result$predicted.periods <- Vector.FromString(as.character(summary$predictedPeriods))
+
+  records$summary <- subset(summary, select=-c("normalizedPeriods", "
+  ## extracting
+  summary.models <- Item.DB.GetSummaryModels(project.name, value, id, db.channel) 
+  if (nrow(records) == 0) {
+    return(result)
+  } 
+  result
 }
 
 Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
@@ -294,32 +309,3 @@ Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channe
   }
   stats
 }
-
-Project.GetStatistics.Models <- function(project.name, value, db.channel) {  
-  t <- DB.GetTableNameSummary(project.name, value)
-  sql <- paste("select BestModel, count(*) as tot from", t, "group by 1")
-  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
-}
-
-Project.GetTableNames <- function(project.name, project.config=NULL) {
-  if(is.null(project.config)) 
-    project.config <- Project.GetConfig(project.name)
-
-  tables <- c(
-              DB.GetTableNameProjectData(project.name),
-              DB.GetTableNameProjectItems(project.name)
-              )
-
-  
-  for (value in GetValueNames(project.config$values)) {
-    value.tables <- c(
-                      DB.GetTableNameNormalizedData(project.name, value),
-                      DB.GetTableNameResults(project.name, value),
-                      DB.GetTableNameSummary(project.name, value),
-                      DB.GetTableNameSummaryModels(project.name, value)
-                      )
-    tables <- append(tables, value.tables)
-  }
-  tables
-}
-

@@ -323,3 +323,10 @@ SW.Contributors <- function() {"
 }
 
 SW.Version <- function() {"Release 1.2.0"}
+
+Vector.ToString <- function(values) {
+   paste(values, collapse=",")
+}
+Vector.FromString <- function(string) {
+  unlist(strsplit(string, ","))
+}
