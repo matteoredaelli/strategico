@@ -121,7 +121,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 	VarCoeff["Mean"] = Mean$VarCoeff
 	maxJump["Mean"] = Mean$maxJump
   }
-  if (("trend" %in% try.models)&(n >= 5 )) {
+  if (("trend" %in% try.models)&(n > 2*period.freq )) {
     logger(DEBUG, "Evaluating model trend...")
     Trend = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
@@ -133,7 +133,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 	VarCoeff["Trend"] = Trend$VarCoeff
 	maxJump["Trend"] = Trend$maxJump
   }
-  if (("lm" %in% try.models)&(n >= n.min )) {
+  if (("lm" %in% try.models)&(n >= max(n.min,period.freq*3) )) {
     logger(DEBUG, "Evaluating model lm...")
     Linear = mod.lm(product = product, n.ahead = n.ahead, 
       period.start = period.start, period.freq = period.freq, 
@@ -145,7 +145,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 	VarCoeff["Linear"] = Linear$VarCoeff
 	maxJump["Linear"] = Linear$maxJump
   }
-  if (("es" %in% try.models)&(n >= n.min )) {
+  if (("es" %in% try.models)&(n >= max(n.min,period.freq*3) )) {
     logger(DEBUG, "Evaluating model es...")
     ExpSmooth = mod.es(product = product, n.ahead = n.ahead, 
       period.freq = period.freq, period.start = period.start, 
@@ -156,7 +156,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
 	VarCoeff["ExpSmooth"] = ExpSmooth$VarCoeff 
 	maxJump["ExpSmooth"] = ifelse(is.null(ExpSmooth$maxJump), "", ExpSmooth$maxJump)
   }
-  if (("arima" %in% try.models)&(n >= n.min )) {
+  if (("arima" %in% try.models)&(n >= max(n.min,period.freq*3) )) {
     logger(DEBUG, "Evaluating model arima...")
     Arima = mod.arima(product=product,logtransform=logtransform,
       diff.sea=diff.sea,diff.trend=diff.trend,idDiff=idDiff,max.p=max.p,max.q=max.q,
