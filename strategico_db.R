@@ -168,6 +168,8 @@ if (nrow(records) == 0) {
 
 ltp.Item.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE) {
 
+  ## TODO ???????????????????????????????????????
+  ## Not finished!
   ## retreiving Results
   
   summary <- Item.DB.GetSummary(project.name, value, id, db.channel) 
@@ -186,7 +188,7 @@ ltp.Item.GetResults <- function(project.name, value, id, db.channel, only.best=F
   ## extracting predicted periods
   result$predicted.periods <- Vector.FromString(as.character(summary$predictedPeriods))
 
-  records$summary <- subset(summary, select=-c("normalizedPeriods", "
+  records$summary <- subset(summary, select=-c("normalizedPeriods"))
   ## extracting
   summary.models <- Item.DB.GetSummaryModels(project.name, value, id, db.channel) 
   if (nrow(records) == 0) {
