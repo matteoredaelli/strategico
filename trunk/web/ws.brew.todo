@@ -48,7 +48,8 @@ ts = gsub("\r", ",", ts)
 ts = gsub("\n", ",", ts)
 ts = gsub(" ", ",", ts)
 
-project.name <- paste("web", eval, sep="-")
+#project.name <- paste("web", eval, sep="-")
+project.name <- "sample"
 
 output_path = Item.GetUrl(project.name, id=id, value="V1")
 db.channel <- NULL

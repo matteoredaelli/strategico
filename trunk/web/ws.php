@@ -26,8 +26,9 @@
      // removing empty rows and spaces from the beginning and end
      $ts = trim($ts);
      $ts = str_replace(array("\r\n","\r","\n"), ",", $ts);
-     $project_name = "web-" .  $_GET['eval'];
-     $output_path = "../projects/" . $project_name . "/1200/". $id . "/V1";
+     #$project_name = "web-" .  $_GET['eval'];
+     $project_name = "sample";
+     $output_path = "/strategico/projects/" . $project_name . "/1200/". $id . "/V1";
 
      if (isset($_GET['submit'])) {
      $strategico_home = getenv("STRATEGICO_HOME");
