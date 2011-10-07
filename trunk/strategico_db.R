@@ -155,7 +155,7 @@ Item.Db.SaveData <- function(id, data, tablename, db.channel) {
 
 Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
   records <- Item.DB.GetSummary(project.name, value, id, db.channel) 
-if (nrow(records) == 0) {
+  if (nrow(records) == 0) {
     result <- NULL
   } else {
     periods <- Vector.FromString(as.character(records$normalizedPeriods))
@@ -172,7 +172,7 @@ ltp.Item.GetResults <- function(project.name, value, id, db.channel, only.best=F
   ## Not finished!
   ## retreiving Results
   
-  summary <- Item.DB.GetSummary(project.name, value, id, db.channel) 
+  summary <- Item.DB.GetSummary(project.name=project.name, value=value, id=id, db.channel=db.channel) 
   if (nrow(summary) == 0) {
     return(NULL)
   } 
@@ -188,12 +188,18 @@ ltp.Item.GetResults <- function(project.name, value, id, db.channel, only.best=F
   ## extracting predicted periods
   result$predicted.periods <- Vector.FromString(as.character(summary$predictedPeriods))
 
-  records$summary <- subset(summary, select=-c("normalizedPeriods"))
+  result$summary <- subset(summary, select=c(-normalizedPeriods))
   ## extracting
-  summary.models <- Item.DB.GetSummaryModels(project.name, value, id, db.channel) 
-  if (nrow(records) == 0) {
+  summary.models <- Item.DB.GetSummaryModels(project.name=project.name, value=value, id=id, db.channel=db.channel)
+  
+  if (nrow(summary.models) == 0) {
     return(result)
-  } 
+  }
+  predictions = as.data.frame(cast(summary.models, ~ model, value="predictedData"))
+  predictions$value = result$summary$predictedPeriods
+  colnames(predictions)[1] = "period"
+  result$predictions <- data.frame(sapply(predictions[1,], function(x) unlist(strsplit(as.character(x),","))))
+  
   result
 }
 
