@@ -20,7 +20,10 @@
   <?php
      // TODO: remove FIXED path for strategico scripts (now /apps/strategico)
      //       remove FIXED relative web path for projects path (../projects/
-     $id=rand(600001,600499);
+     if (isset($_GET['id']))
+        $id = $_GET['id'];
+     else
+        $id=rand(600001,600499);
      $ts = str_replace($_GET['decimals'], ".", $_GET['ts']);
      $ts = str_replace($_GET['thousands'], "", $ts);
      // removing empty rows and spaces from the beginning and end
@@ -28,7 +31,8 @@
      $ts = str_replace(array("\r\n","\r","\n"), ",", $ts);
      #$project_name = "web-" .  $_GET['eval'];
      $project_name = "sample";
-     $output_path = "/strategico/projects/" . $project_name . "/1200/". $id . "/V1";
+     $id_folder = intval( intval($id) / 500);
+     $output_path = "/strategico/projects/" . $project_name . "/" . $id_folder . "/". $id . "/V1";
 
      if (isset($_GET['submit'])) {
      $strategico_home = getenv("STRATEGICO_HOME");
