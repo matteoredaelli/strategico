@@ -1,7 +1,8 @@
+## -*- mode: R -*-
   <%
 
   setContentType("text/html")
-  RApacheOutputErrors(FALSE)
+  RApacheOutputErrors(TRUE)
   options(hverbose=FALSE,verbose=FALSE)
  
   suppressPackageStartupMessages(library(googleVis))
@@ -62,18 +63,15 @@
   ##  Retriving all results
   ########################################################################################
 
-  item.results <-        ltp.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 	
   model.names <- item.results$model
-  best.model <- ite,results$BestModel)
+  best.model <- as.character(item.results$summary[1,]$BestModel)
 
-  if (is.null(GET$eval) & is.data.frame(item.results$summary) & nrow(item.results$summary) == 1)
+  ##if ( is.null(GET$eval) & (!is.null(item.results$summary)) & nrow(item.results$summary) >0 ) {
+  if ( is.null(GET$eval) ) {
     param <- as.character(item.results$summary[1,]$Parameters)
-  %>
-
-  
-<% 
-if (!is.null(GET$eval)) {
+  } else {
   param <- Param.EvalString(param)
   Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param)
@@ -120,41 +118,10 @@ if (!is.null(GET$eval)) {
 
   <%
   if (nrow(item.results$predictions) > 0) {
-    ML <- gvisLineChart(data=as.data.frame(item.results$redictions))
+    ML <- gvisLineChart(data=data.frame(item.results$predictions))
   %>
   <%= ML$html$chart %>
   <%} %>
-				</article>
-							</div>
-						</div>
-  <!--
-  ###############################################################################################################
-  ## TAB Motion Chart
-  ###############################################################################################################
-  -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Motion Chart</h2>
-
- <%
-  if (nrow(item.all) > 0) {
-    i.all <- item.results$predictions
-    i.all$PERIOD <- as.numeric(sub("-","", i.all$PERIOD))
-  
-    M <- gvisMotionChart(data=i.all, idvar="model",
-                         timevar="PERIOD", chartid="item",
-                         options=list(
-                           ##gvis.editor="Editor",
-                           legend="bottom",
-                           width=800,
-                           height=600
-                           )
-                         )
-    %>
-      <%= M$html$chart %>
-        
-        <% } %>
 				</article>
 							</div>
 						</div>
