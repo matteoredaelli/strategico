@@ -195,9 +195,10 @@ ltp.Item.GetResults <- function(project.name, value, id, db.channel, only.best=F
   if (nrow(summary.models) == 0) {
     return(result)
   }
+  result$models <- summary.models$model
   predictions = as.data.frame(cast(summary.models, ~ model, value="predictedData"))
   predictions$value = result$summary$predictedPeriods
-  colnames(predictions)[1] = "period"
+  colnames(predictions)[1] = "PERIOD"
   result$predictions <- data.frame(sapply(predictions[1,], function(x) unlist(strsplit(as.character(x),","))))
   
   result

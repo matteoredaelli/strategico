@@ -61,17 +61,14 @@
   ########################################################################################
   ##  Retriving all results
   ########################################################################################
-  item.summary <-        Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.results <-        Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.hist <-           Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.all <-           Item.DB.GetNormalizedDataAndResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
-  model.names <- unique(item.results$model)
-  best.model <- as.character(item.summary[1,]$BestModel)
+  item.results <-        ltp.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+	
+  model.names <- item.results$model
+  best.model <- ite,results$BestModel)
 
-  if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
-    param <- as.character(item.summary[1,]$Parameters)
+  if (is.null(GET$eval) & is.data.frame(item.results$summary) & nrow(item.results$summary) == 1)
+    param <- as.character(item.results$summary[1,]$Parameters)
   %>
 
   
@@ -122,9 +119,8 @@ if (!is.null(GET$eval)) {
 							<h2 class="title">All Models</h2>
 
   <%
-  if (nrow(item.all) > 0) {
-    i.all.pivot <- as.data.frame(cast(item.all, PERIOD ~model, value="V"))
-    ML <- gvisLineChart(data=as.data.frame(i.all.pivot))
+  if (nrow(item.results$predictions) > 0) {
+    ML <- gvisLineChart(data=as.data.frame(item.results$redictions))
   %>
   <%= ML$html$chart %>
   <%} %>
@@ -143,7 +139,7 @@ if (!is.null(GET$eval)) {
 
  <%
   if (nrow(item.all) > 0) {
-    i.all <- item.all
+    i.all <- item.results$predictions
     i.all$PERIOD <- as.numeric(sub("-","", i.all$PERIOD))
   
     M <- gvisMotionChart(data=i.all, idvar="model",
@@ -190,8 +186,8 @@ if (!is.null(GET$eval)) {
 							<h2 class="title">BestModel <%=best.model%></h2>
 
   <%
-  if (nrow(item.all) > 0) {
-    ML <- gvisLineChart(data=subset(i.all.pivot, select=c("PERIOD", best.model)))
+  if (nrow(item.results$predictions) > 0) {
+    ML <- gvisLineChart(data=subset(item.results$predictions, select=c("PERIOD", best.model)))
   %>
   <%= ML$html$chart %>
   <%} %>
@@ -210,13 +206,8 @@ if (!is.null(GET$eval)) {
 							<h2 class="title">Predictions</h2>
                                                 
 <%
-  if (nrow(item.results) > 0) {
-    i.results <- item.results
-    i.results$id <- NULL
-    i.results$item_id <- NULL
-    rownames(i.results) <- NULL
-    pivot.results <- xtabs( V ~ PERIOD + model, i.results)
-    print(xtable(pivot.results), type="html")
+  if (nrow(item.results$predictions) > 0) {
+    print(xtable(item.results$predictions), type="html")
   }
 %>                                              
 				</article>
