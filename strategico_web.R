@@ -18,7 +18,8 @@
 ## authors: M. Redaelli
 ## created: 2011
 
-BuildHtmlElement_input <- function(label="", name, default, type="text", size=20) {
+BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
+  if(is.null(default) | is.na(default) | length(default)==0L) default <- ""
   str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" size="_SIZE_" />'
   str <- gsub("_LABEL_", label, str)
   str <- gsub("_NAME_", name, str)
