@@ -166,7 +166,7 @@ Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
   result
 }
 
-ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE) {
+ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE) {
 
   result <- list()
   
@@ -178,9 +178,10 @@ ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.bes
   ## extracting normalized data
   
   periods <- Vector.FromString(as.character(summary$normalizedPeriods))
-  values <- Vector.FromString(as.character(summary$normalizedData))
-  result$normalized <- data.frame(V=values)
-  rownames(result$normalized) <- periods
+  values <- as.numeric(Vector.FromString(as.character(summary$normalizedData)))
+  result$normalized <- data.frame(PERIOD=periods, V=values)
+  ##data.frame(apply(result$predictions, 2, as.numeric))
+  ##rownames(result$normalized) <- periods
 
   ## extracting predicted periods
   result$predictedPeriods <- Vector.FromString(as.character(summary$predictedPeriods))
@@ -199,6 +200,13 @@ ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.bes
   result$predictions <- data.frame(sapply(predictions[1,], function(x) unlist(strsplit(as.character(x),","))), stringsAsFactors=F)
   result$predictions <- data.frame(apply(result$predictions, 2, as.numeric))
   result$predictions <- data.frame(PERIOD=result$predictedPeriods, result$predictions)
+
+  if (full.ts) {
+    i.norm <- data.frame(rep(data.frame(V=values), length(result$models)))
+    colnames(i.norm) <- result$models
+    i.norm <- data.frame(PERIOD=periods, i.norm)
+    result$predictions <- rbind(i.norm, result$predictions)
+  }
   result
 }
 
