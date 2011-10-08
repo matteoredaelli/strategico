@@ -2,7 +2,7 @@
   <%
 
   setContentType("text/html")
-  RApacheOutputErrors(TRUE)
+  RApacheOutputErrors(FALSE)
   options(hverbose=FALSE,verbose=FALSE)
  
   suppressPackageStartupMessages(library(googleVis))
@@ -54,7 +54,7 @@
   ########################################################################################
   ##  Change Best model
   ########################################################################################
-  if (!is.null(GET$setmodel) & !is.null(GET$model)) {
+  if (!is.null(GET$setmodel) && !is.null(GET$model)) {
     Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
                         db.channel=db.channel, model=GET$model)
   }
@@ -68,9 +68,10 @@
   model.names <- item.results$model
   best.model <- as.character(item.results$summary[1,]$BestModel)
 
-  ##if ( is.null(GET$eval) & (!is.null(item.results$summary)) & nrow(item.results$summary) >0 ) {
-  if ( is.null(GET$eval) ) {
+  
+  if (is.null(GET$eval) ) {
     param <- as.character(item.results$summary[1,]$Parameters)
+    if(length(param) == 0L) param=""
   } else {
   param <- Param.EvalString(param)
   Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
@@ -106,26 +107,50 @@
 				</article>
 							</div>
 						</div>
+
+    <!--
+  ###############################################################################################################
+  ## TAB Run
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Run</h2>
+                <form method="GET">
+                  <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                  <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
+                  <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
+                  <input type="submit" name="eval" value="Run">
+                </form>        
+ 
+				</article>
+							</div>
+						</div>
+  
 <!--
   ###############################################################################################################
   ## TAB All Models
   ###############################################################################################################
 -->
+  <%
+  if ((!is.null(item.results$predictions)) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+  %>
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
 							<h2 class="title">All Models</h2>
 
   <%
-  if (nrow(item.results$predictions) > 0) {
     ML <- gvisLineChart(data=data.frame(item.results$predictions))
   %>
   <%= ML$html$chart %>
-  <%} %>
+    
 				</article>
 							</div>
 						</div>
-    <!--
+<%}%>
+  <!--
   ###############################################################################################################
   ## TAB Residuals
   ###############################################################################################################
@@ -147,75 +172,82 @@
   ## TAB best Model
   ###############################################################################################################
   -->
+  <%
+  if(!is.null(item.results$predictions) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+  %>
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
 							<h2 class="title">BestModel <%=best.model%></h2>
 
   <%
-  if (nrow(item.results$predictions) > 0) {
     ML <- gvisLineChart(data=subset(item.results$predictions, select=c("PERIOD", best.model)))
   %>
   <%= ML$html$chart %>
-  <%} %>
+
 				</article>
 							</div>
 						</div>
-  
+ <%}%> 
 <!--
   ###############################################################################################################
   ## TAB Predictions
   ###############################################################################################################
 -->
+<%
+  if(!is.null(item.results$predictions) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+%>
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
 							<h2 class="title">Predictions</h2>
                                                 
 <%
-  if (nrow(item.results$predictions) > 0) {
     print(xtable(item.results$predictions), type="html")
-  }
 %>                                              
 				</article>
 							</div>
 						</div>
-
+<%}%>
 <!--
   ###############################################################################################################
   ## TAB Summary
   ###############################################################################################################
 -->
+  
+<%
+  if(!is.null(item.results$summary.models) && is.data.frame(item.results$summary.models) && nrow(item.results$summary.models) > 0) {
+%>
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
 							<h2 class="title">Summary</h2>
   <%
-  if(nrow(item.summary.models) > 0) {
-    i.summary.models <- item.summary.models
+    i.summary.models <- item.results$summary.models
     i.summary.models$item_id <- NULL
     rownames(i.summary.models) <- NULL
     print(xtable(i.summary.models), type="html")
-    #MMT <- gvisTable(i.summary.models)# , options=list(width=500, height=170))
-  %>
-  <%
-    i.summary <- item.summary
-    i.summary$Parameters <- NULL
-    i.summary$id <- NULL
+
+    i.summary <- subset(item.results$summary, select=c(-id, -Parameters, -normalizedData, -predictedPeriods))
     rownames(i.summary) <- NULL
-    #i.summary <- data.frame(name=colnames(i.summary), value=i.summary[1,])
     print(xtable(t(i.summary)), type="html")
-    ##MST <- gvisTable(i.summary)#, options=list(width=400, height=270))
   %>
-  <%}%>
+
 				</article>
 							</div>
                                                </div>
+<%}%>
+  
 <!--
   ###############################################################################################################
   ## TAB Change Model
   ###############################################################################################################
 -->
+    
+<%
+  if(!is.null(model.names) && length(model.names) > 0) {
+%>
+
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
@@ -236,26 +268,12 @@
 				</article>
 							</div>
 						</div>
-  <!--
+<%}%>
+<!--
   ###############################################################################################################
-  ## TAB Run
+  ## Footer
   ###############################################################################################################
-  -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Run</h2>
-                <form method="GET">
-                  <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
-                  <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                  <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
-                  <input type="submit" name="eval" value="Run">
-                </form>        
- 
-				</article>
-							</div>
-						</div>
-  
+-->
   <% DB.Close(db.channel) %>
   
   <% ShowTemplate('footer') %>

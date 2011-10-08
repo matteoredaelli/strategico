@@ -168,16 +168,13 @@ Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
 
 ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE) {
 
-  ## TODO ???????????????????????????????????????
-  ## Not finished!
-  ## retreiving Results
+  result <- list()
   
   summary <- Item.DB.GetSummary(project.name=project.name, value=value, id=id, db.channel=db.channel) 
   if (nrow(summary) == 0) {
-    return(NULL)
-  } 
-  result <- list()
-
+    return(result)
+  }
+  
   ## extracting normalized data
   
   periods <- Vector.FromString(as.character(summary$normalizedPeriods))
@@ -195,6 +192,7 @@ ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.bes
   if (nrow(summary.models) == 0) {
     return(result)
   }
+  result$summary.models <- subset(summary.models, select=c(-predictedData, -residuals))
   result$models <- summary.models$model
   predictions = data.frame(cast(summary.models, ~ model, value="predictedData"), stringsAsFactors=F)
   predictions$value <- NULL
