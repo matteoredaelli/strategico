@@ -187,20 +187,35 @@ ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.bes
   result$predictedPeriods <- Vector.FromString(as.character(summary$predictedPeriods))
 
   result$summary <- subset(summary, select=c(-normalizedPeriods))
+
+  best.model <-  as.character(result$summary$BestModel)
+  
+  if (is.null(best.model)) {
+    return(result)
+  }
+  
   ## extracting
   summary.models <- Item.DB.GetSummaryModels(project.name=project.name, value=value, id=id, db.channel=db.channel)
   
   if (nrow(summary.models) == 0) {
     return(result)
   }
+
+  if(only.best) {
+      summary.models <- subset(summary.models, model==best.model)
+    }
+
   result$summary.models <- subset(summary.models, select=c(-predictedData, -residuals))
-  result$models <- summary.models$model
+  result$models <- as.vector(summary.models$model)
+ 
   predictions = data.frame(cast(summary.models, ~ model, value="predictedData"), stringsAsFactors=F)
+   
   predictions$value <- NULL
   result$predictions <- data.frame(sapply(predictions[1,], function(x) unlist(strsplit(as.character(x),","))), stringsAsFactors=F)
   result$predictions <- data.frame(apply(result$predictions, 2, as.numeric))
   result$predictions <- data.frame(PERIOD=result$predictedPeriods, result$predictions)
-
+  colnames(result$predictions)[-1] <- result$models
+           
   if (full.ts) {
     i.norm <- data.frame(rep(data.frame(V=values), length(result$models)))
     colnames(i.norm) <- result$models
