@@ -41,6 +41,20 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
   }
 }
 
+Project.ExportResults <- function(project.name, value, db.channel, id.list, file, full.ts=FALSE, sep=";", quote=FALSE) {
+  first.row <- TRUE
+  for( id in id.list) {
+    result <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
+                                     id=id, db.channel=db.channel,
+                                     only.best=TRUE, full.ts=full.ts)
+    if( !is.null(result$predictions)) {
+      write.table(data.frame(id=id, result$predictions), file=file, row.names=FALSE, append=!first.row, col.names=FALSE, sep=sep, quote=quote)
+      if (first.row)
+        first.row <- FALSE
+    }
+  }
+}
+
 Project.GetKeyValues <- function(key.name, project.name, db.channel) {
   tablename = DB.GetTableNameProjectItems(project.name)
   sql_statement <- paste("select distinct", key.name, "from", tablename, sep=" ")
