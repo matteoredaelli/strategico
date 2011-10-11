@@ -166,8 +166,11 @@ Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
   result
 }
 
-ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE) {
+Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE) {
+  ltp.Item.DB.GetResults(project.name=project.name, value=value, id=id, db.channel=db.channel, only.best=only.best, full.ts=full.ts)
+}
 
+ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE) {
   result <- list()
   
   summary <- Item.DB.GetSummary(project.name=project.name, value=value, id=id, db.channel=db.channel) 

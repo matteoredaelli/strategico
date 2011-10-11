@@ -45,6 +45,7 @@ spec <- c(
           'id.range', 'R', 1, "character",
           'eval.param', 'p', 1, "character",
           'item.values', 'v', 1, "character",
+          'file', 'F', 1, "character",
           'model', 'm', 1, "character",
           'runit', 'u', 0, "logical",
           'ts.freq', 'f', 1, "double",
@@ -157,8 +158,12 @@ id.list <- as.integer(id.list)
 #id.list <- id.list[id.list <= max.id]
 
 ## item.values could be could be V1 or V1,V2
-if (!is.null(opt$item.values))
+if (is.null(opt$item.values)) {
+  opt$item.values <- "V1"
+  logger(WARN, paste("Missing  item.values option: assuming item.values=", opt$item.value))
+} else {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
+}
 
 #########################################################################
 ## eval_children
@@ -271,6 +276,23 @@ if (opt$cmd == "export.db.csv") {
   Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
 }
+
+
+#########################################################################
+## export.results
+#########################################################################
+
+if (opt$cmd == "export.results.csv") {
+  if(is.null(opt$file)) {
+    opt$file <- file.path(Project.GetPath(opt$project.name), opt$cmd)
+    logger(WARN, paste("Missing file option: assuming file=", opt$file))
+  }
+  logger(DEBUG, paste("Saving data to file", opt$file))
+  Project.ExportResults(opt$project.name, value=opt$item.values[1], db.channel, id.list=id.list, file=opt$file)
+
+  q(status=0)
+}
+
 #########################################################################
 ## CMD import
 #########################################################################
@@ -298,7 +320,7 @@ if (opt$cmd == "set.best.model") {
   
   for (v in opt$item.values)
     Items.DB.SetBestModel(project.name=opt$project.name, id.list=opt$id.list,
-                       value=v, model=opt$model, db.channel=db.channel)
+                       value=opt$value, model=opt$model, db.channel=db.channel)
   q(status=0)
 }
 
