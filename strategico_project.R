@@ -59,7 +59,7 @@ Project.GetKeyValues <- function(key.name, project.name, db.channel) {
   tablename = DB.GetTableNameProjectItems(project.name)
   sql_statement <- paste("select distinct", key.name, "from", tablename, sep=" ")
   records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
-  levels(records[,1])
+  sort(records[,1])
 }
  
 Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
