@@ -61,7 +61,7 @@ library(hwriter)
 #library(tseries, quietly=TRUE) # works only for the latest R releases
 #options(Hverbose=FALSE, verbose=FALSE)
 suppressMessages(library(tseries, verbose=FALSE))
-suppressMessages(library(forecast))
+suppressMessages(library(forecast, verbose=FALSE))
 suppressPackageStartupMessages(library(ast))
   
 ############## ltp()
