@@ -1,5 +1,5 @@
-## -*- mode: R -*-
   <%
+## -*- mode: R -*-
 
   setContentType("text/html")
   RApacheOutputErrors(FALSE)
@@ -63,18 +63,18 @@
   ##  Retriving all results
   ########################################################################################
 
+  if (!is.null(GET$eval) ) {
+    param.r <- Param.EvalString(param)
+    Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
+           db.channel=db.channel, param=param.r)
+  }
+
   item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
   model.names <- item.results$model
   best.model <- as.character(item.results$summary[1,]$BestModel)
+  param <- as.character(item.results$summary[1,]$Parameters)
+  if(length(param) == 0L) param=""
   
-  if (is.null(GET$eval) ) {
-    param <- as.character(item.results$summary[1,]$Parameters)
-    if(length(param) == 0L) param=""
-  } else {
-  param <- Param.EvalString(param)
-  Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
-           db.channel=db.channel, param=param)
-  }
 %>
 
 <!--
