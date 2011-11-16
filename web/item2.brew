@@ -116,6 +116,7 @@
         			<article>
 							<h2 class="title">Run</h2>
                 <form method="GET">
+                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                   <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
                   <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
                   <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
