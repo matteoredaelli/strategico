@@ -69,7 +69,7 @@
            db.channel=db.channel, param=param.r)
   }
 
-  item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, residuals=TRUE)
   model.names <- item.results$model
   best.model <- as.character(item.results$summary[1,]$BestModel)
   param <- as.character(item.results$summary[1,]$Parameters)
@@ -199,9 +199,11 @@
         			<article>
 							<h2 class="title">Residuals</h2>
 
-    <p>
-      <br />TODO<br />
-    </p>
+  <%
+    ML <- gvisLineChart(data=data.frame(item.results$residuals))
+  %>
+  <%= ML$html$chart %>
+
 				</article>
 							</div>
 						</div>

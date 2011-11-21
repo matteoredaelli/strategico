@@ -59,9 +59,11 @@ DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbo
   ##logger(DEBUG, delete_sql)
   DB.RunSQLQuery(sql_statement=delete_sql, db.channel=db.channel)
 
-  logger(DEBUG, paste("Saving data to table", tablename))
-  sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
+  logger(DEBUG, paste("Saving data to table", tablename)) 
+ 
+sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
+
 }
 
 DB.GetTableNameSummary <- function(project.name, value) {
@@ -166,11 +168,11 @@ Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
   result
 }
 
-Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE) {
-  ltp.Item.DB.GetResults(project.name=project.name, value=value, id=id, db.channel=db.channel, only.best=only.best, full.ts=full.ts)
+Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE, residuals=FALSE) {
+  ltp.Item.DB.GetResults(project.name=project.name, value=value, id=id, db.channel=db.channel, only.best=only.best, full.ts=full.ts, residuals=residuals)
 }
 
-ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE) {
+ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE, residuals=FALSE) {
   result <- list()
   
   summary <- Item.DB.GetSummary(project.name=project.name, value=value, id=id, db.channel=db.channel) 
@@ -218,6 +220,17 @@ ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.bes
   result$predictions <- data.frame(apply(result$predictions, 2, as.numeric))
   result$predictions <- data.frame(PERIOD=result$predictedPeriods, result$predictions)
   colnames(result$predictions)[-1] <- result$models
+
+  if(residuals) {
+ 
+    residuals = data.frame(cast(summary.models, ~ model, value="residuals"), stringsAsFactors=F)
+   
+    residuals$value <- NULL
+    result$residuals <- data.frame(sapply(residuals[1,], function(x) unlist(strsplit(as.character(x),","))), stringsAsFactors=F)
+    result$residuals <- data.frame(apply(result$residuals, 2, as.numeric))
+    result$residuals <- data.frame(PERIOD=periods, result$residuals)
+    colnames(result$residuals)[-1] <- result$models
+  }
            
   if (full.ts) {
     i.norm <- data.frame(rep(data.frame(V=values), length(result$models)))
