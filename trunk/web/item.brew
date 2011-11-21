@@ -1,118 +1,158 @@
-<!-- -*- mode: R -*- -->
-  <!--
-  ## This program is fre esoftware: you can redistribute it and/or modify
-  ## it under the terms of the GNU General Public License as published by
-  ## the Free Software Foundation, either version 3 of the License, or
-  ## any later version.
-  ##
-  ## This program is distributed in the hope that it will be useful,
-  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ## GNU General Public License for more details.
-  ##
-  ## You should have received a copy of the GNU General Public License
-  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-  
   <%
-setContentType("text/html")
-#RApacheOutputErrors(TRUE)
-options(hverbose=FALSE,verbose=FALSE)
-%>
-  
-<html>
-<head>
-<title>Strategico: show item</title>
-</head>
-<body>
+## -*- mode: R -*-
 
+  setContentType("text/html")
+  RApacheOutputErrors(FALSE)
+  options(hverbose=FALSE,verbose=FALSE)
+ 
+  suppressPackageStartupMessages(library(googleVis))
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+
+  ##id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+  param <- ifelse(is.null(GET$param), "", GET$param)
+  value <- ifelse(is.null(GET$value), "V1", GET$value)
   
+  ## loading project config
+
+  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+  source(file.path(strategico.home, "strategico_util.R"))
+  project.config <- Project.GetConfig(project.name=project.name)
+
+  db.channel <- DB.Connect()
+
+  ## settings is or item.keys depending on which variables were passed in GET input
+
+  project.keys <- GetKeyNames(project.config$keys)
+  if (is.null(GET$KEY1)) {
+    id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+    item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
+  } else {
+    for (k in project.keys)
+      GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+    item.keys <- as.character( unlist(GET[project.keys]))
+
+    id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
+    ##if (!is.na(id.result) & (!is.null(id.result)) & (length(id.result)>0) ) 
+    id <- as.numeric(id.result[1])
+  }
+  keys.string <- ifelse(is.null(item.keys),
+                        "",
+                        paste(item.keys, collapse="-"))
+
+  item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
+
+  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=keys.string)
+  Sys.setenv(STRATEGICO_PROJECT_VALUE=value)
+  %>
+  
+  <% ShowTemplate('header')%>
+
   <%
-suppressPackageStartupMessages(library(googleVis))
-strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
-source(file.path(strategico.home, "strategico_util.R"))
-project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
-param <- ifelse(is.null(GET$param), "", GET$param)
-value <- ifelse(is.null(GET$value), "V1", GET$value)
-project.config <- Project.GetConfig(project.name=project.name)
 
-keys <- GetKeyNames(project.config$keys)
-item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
-
-db.channel <- DB.Connect()
-
-item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
-
-if (!is.null(GET$setmodel) & !is.null(GET$model)) {
-  Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
+  ########################################################################################
+  ##  Change Best model
+  ########################################################################################
+  if (!is.null(GET$setmodel) && !is.null(GET$model)) {
+    Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
                         db.channel=db.channel, model=GET$model)
   }
 
+  ########################################################################################
+  ##  Retriving all results
+  ########################################################################################
 
-item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
-item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
-item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  if (!is.null(GET$eval) ) {
+    param.r <- Param.EvalString(param)
+    Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
+           db.channel=db.channel, param=param.r)
+  }
 
-model.names <- unique(item.results$model)
-
-keys.string <- ifelse(is.null(item.keys),
-                      "",
-                      paste(item.keys, collapse=" - "))
-
-if (is.null(GET$eval) & is.data.frame(item.summary) & nrow(item.summary) == 1)
-  param <- as.character(item.summary[1,]$Parameters)
-%>
-  <center>
-    <h1><img src="http://www.r-project.org/Rlogo.jpg" />Strategico :: <%=project.name%> :: <%=keys.string%></h1>
-  </center>
-  <h2>Search</h2>
-                   <form action="search-item.brew" method="GET">
-  <input type="submit" name="search_item" value="Search by keys">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
-                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                </form>
+  item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  model.names <- item.results$model
+  best.model <- as.character(item.results$summary[1,]$BestModel)
+  param <- as.character(item.results$summary[1,]$Parameters)
+  if(length(param) == 0L) param=""
   
+%>
+
+<!--
+  ###############################################################################################################
+  ## TAB Home
+  ###############################################################################################################
+-->
+ 
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Home</h2>
+
+  <h3>Search by keys</h3>
                 <form method="GET">
-  <input type="submit" name="show" value="Search by ID">
+                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
+                <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                 <input type="submit" value="Search">
+                </form>
+  <h3>Search by ID</h3>
+                <form method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
-  <h2>Run</h2>
-                <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=120)%><br />
-                <input type="submit" name="eval" value="Run">
+                <input type="submit" name="show" value="Search">
                 </form>
+				</article>
+							</div>
+						</div>
 
-<% 
-if (!is.null(GET$eval)) {
-  param <- Param.EvalString(param)
-  Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
-           db.channel=db.channel, param=param)
-  }
-%>
+    <!--
+  ###############################################################################################################
+  ## TAB Run
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Run</h2>
+                <form method="GET">
+                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                  <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
+                  <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
+                  <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
+                  <input type="submit" name="eval" value="Run">
+                </form>        
+ 
+				</article>
+							</div>
+						</div>
   
-<h2>Results</h2>
-   <img src="<%=paste(item.path,"best_model.png",sep="/")%>" />
-  <img src="<%=paste(item.path,"all_models.png",sep="/")%>" />
-  
-                     <form action="item_motion_chart.brew" method="GET">
-  <input type="submit" name="view" value="Show motion chart">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
-                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                </form>
-<%
-if(nrow(item.summary.models) > 0) {
-  item.summary.models$item_id <- NULL
-  rownames(item.summary.models) <- NULL
-  #print(xtable(item.summary.models), type="html")
+<!--
+  ###############################################################################################################
+  ## TAB All Models
+  ###############################################################################################################
+-->
+  <%
+  if ((!is.null(item.results$predictions)) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+  %>
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">All Models</h2>
 
-  M <- gvisTable(item.summary.models, options=list(width=600, height=170))
-%>
-  <%= M$html$chart %>
+  <%
+    ML <- gvisLineChart(data=data.frame(item.results$predictions))
+  %>
+  <%= ML$html$chart %>
 
-               <form  method="GET">
+  <!--
+  ## TAB Change Model
+  -->
+    
+  <%
+    if(!is.null(model.names) && length(model.names) > 0) {
+  %>
+               <form method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
                 <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
@@ -123,32 +163,96 @@ if(nrow(item.summary.models) > 0) {
                      }
                   %>
                     <input type="submit" name="setmodel" value="Set best model" />
-                </form>
+                </form>    <br /><br />
+  <%}%>
+  <!--
+  ## Summary
+  -->
+  <%
+    if(!is.null(item.results$summary.models) && is.data.frame(item.results$summary.models) && nrow(item.results$summary.models) > 0) {
+  %>
 
+  <%
+    i.summary.models <- item.results$summary.models
+    i.summary.models$item_id <- NULL
+    rownames(i.summary.models) <- NULL
+    print(xtable(i.summary.models), type="html")
+
+    i.summary <- subset(item.results$summary, select=c(-id, -Parameters, -normalizedData, -predictedPeriods))
+    rownames(i.summary) <- NULL
+    print(xtable(t(i.summary)), type="html")
+  %>
+  <%}%>
+  
+    
+				</article>
+							</div>
+						</div>
+<%}%>
+  <!--
+  ###############################################################################################################
+  ## TAB Residuals
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Residuals</h2>
+
+    <p>
+      <br />TODO<br />
+    </p>
+				</article>
+							</div>
+						</div>
+  
+  <!--
+  ###############################################################################################################
+  ## TAB best Model
+  ###############################################################################################################
+  -->
+  <%
+  if(!is.null(item.results$predictions) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+  %>
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">BestModel <%=best.model%></h2>
+
+  <%
+    ML <- gvisLineChart(data=subset(item.results$predictions, select=c("PERIOD", best.model)))
+  %>
+  <%= ML$html$chart %>
+
+				</article>
+							</div>
+						</div>
+ <%}%> 
+<!--
+  ###############################################################################################################
+  ## TAB Predictions
+  ###############################################################################################################
+-->
 <%
-
-  item.summary$Parameters <- NULL
-  item.summary$id <- NULL
-  rownames(item.summary) <- NULL
-  item.summary <- as.data.frame(t(item.summary))
-  #colnames(item.summary) <- c("Key", "Value")
-  print(xtable(item.summary), type="html")
-  #M <- gvisTable(item.summary)#, options=list(width=400, height=270))
-
+  if(!is.null(item.results$predictions) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
 %>
-
-<h2>Results</h2>
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Predictions</h2>
+                                                
 <%
-  item.results$id <- NULL
-  item.results$item_id <- NULL
-  rownames(item.results) <- NULL
-  pivot.results <- xtabs( V ~ PERIOD + model, item.results)
-  print(xtable(pivot.results), type="html")
-}
-%>
-<%
-Sys.setenv(A = "test")
-ShowTemplate('footer')
-DB.Close(db.channel)
-%>
-
+    print(xtable(item.results$predictions), type="html")
+%>                                              
+				</article>
+							</div>
+						</div>
+<%}%>
+<!--
+  ###############################################################################################################
+  ## Footer
+  ###############################################################################################################
+-->
+  <% DB.Close(db.channel) %>
+  
+  <% ShowTemplate('footer') %>
