@@ -11,6 +11,8 @@
   ##id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
   param <- ifelse(is.null(GET$param), "", GET$param)
   value <- ifelse(is.null(GET$value), "V1", GET$value)
+  str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
+  skip.models <- unlist(strsplit(str.skip.models, ","))
   
   ## loading project config
 
@@ -70,8 +72,11 @@
   }
 
   item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, residuals=TRUE)
+  item.models <- colnames(item.results$predictions)
+  item.results$predictions <- subset(item.results$predictions, select=setdiff(item.models, skip.models))
   model.names <- item.results$model
   best.model <- as.character(item.results$summary[1,]$BestModel)
+  suggested.model <- as.character(item.results$summary[1,]$SuggestedModel)
   param <- as.character(item.results$summary[1,]$Parameters)
   if(length(param) == 0L) param=""
   
