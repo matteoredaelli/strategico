@@ -56,7 +56,7 @@ spec <- c(
           )
 
 opt = getopt( matrix(spec,ncol=4,byrow=TRUE))
-   
+
 #########################################################################
 ## check Environment & source startegico_util.R
 #########################################################################
@@ -298,7 +298,12 @@ if (opt$cmd == "export.results.csv") {
 #########################################################################
 
 if (opt$cmd == "import") {
-  Project.ImportData(project.name=opt$project.name, db.channel=db.channel)
+  if(is.null(opt$file)) {
+    f <- paste(opt$project.name, ".csv", sep="")
+    opt$file <- file.path(Project.GetPath(opt$project.name), f)
+    logger(WARN, paste("Missing file option: assuming file=", opt$file))
+  }
+  Project.ImportDataFromCSV(project.name=opt$project.name, db.channel=db.channel, filename=opt$file)
   q(status=0)
   
 }
