@@ -174,42 +174,18 @@ Project.GetUrl <- function(project.name, projects.url = strategico.config$projec
   paste(projects.url, project.name, sep="/")
 }
 
-Project.ImportData <- function(project.name, project.config=NULL, db.channel) {
+Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.channel, filename) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
 
-  project.R <- paste(project.name, ".R", sep="")
-  logger(DEBUG, paste("Sourcing file", project.R))
-  MySource(filename=project.R, file.path=GetPluginsPath())
-  
-  cmd <- paste(project.name,".importItemsData(project.name=project.name)", sep="")
-
-  logger(DEBUG, paste("Extracting data from the external source running command", cmd))
-  
-  result <- eval(parse(text = cmd))
+  logger(WARN, paste("Loading data from file", filename))
+  result=read.csv(filename,sep=",") 
   Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
 }
 
 ##input  da db. 
 Project.ImportDataFromDB <- function(project.name, db.name, db.user, db.pass, sql_statement) {
   DB.RunSQLQuery(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
-}
-
-##input da da csv. 
-Project.ImportDataFromCSV <- function(project.name, filename=NULL, KEY=c("KEY1","KEY2"),
-                                     timesKeys=c("YEAR","SEMESTER"), V=c("CORP")){ 
-
-  ##restituisce una list (itemList) con una ts per ogni elemento. 
-  ##names(itemList) è una parola composta dai valori assunti nei campi indicati da keys. separatore "[" 
-  ##torna utile in seguito, nelle creazioni degli output dell'analisi
-  
-  if (is.null(filename)) filename=file.choose()
-  data=read.csv(filename,sep=",") 
-  
-  if(length(timesKeys)>1) data$PERIOD=paste(data[,timesKeys[1]],data[,timesKeys[2]],sep="-")
-  else data$PERIOD=data[,timesKeys]
-
-  result <- data[,c(KEY,"PERIOD",V)]
 }
 
 Project.IsValid <- function(project.name, db.channel) {
