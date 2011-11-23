@@ -45,7 +45,8 @@ DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=
 
 DB.EmptyTable <- function(tablename, db.channel) {
   sql_statement <- paste("truncate", tablename)
-  DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+  try(DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel))
+  logger(DEBUG, .Last.value) 
 }
 
 DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
@@ -61,13 +62,17 @@ DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbo
 
   logger(DEBUG, paste("Saving data to table", tablename)) 
  
-sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
+  sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
           append=append, verbose=verbose, addPK=addPK, fast=FALSE)
 
 }
 
 DB.GetTableNameSummary <- function(project.name, value) {
   paste(project.name, "summary", value, sep="_")
+}
+
+DB.GetTableNameResults <- function(project.name, value) {
+  paste(project.name, "results", value, sep="_")
 }
 
 DB.GetTableNameSummaryModels <- function(project.name, value) {
