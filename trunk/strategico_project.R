@@ -41,9 +41,10 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
   }
 }
 
-Project.ExportResults <- function(project.name, value, db.channel, id.list, file, full.ts=FALSE, sep=";", quote=FALSE) {
+Project.ExportResults <- function(project.name, value, db.channel, file, full.ts=FALSE, sep=";", quote=FALSE) {
   first.row <- TRUE
-  for( id in id.list) {
+  max.id <- Project.GetMaxID(project.name=project.name, db.channel=db.channel)
+  for( id in 1:max.id) {
     result <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
                                      id=id, db.channel=db.channel,
                                      only.best=TRUE, full.ts=full.ts)
