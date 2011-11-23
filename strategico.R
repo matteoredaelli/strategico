@@ -288,7 +288,7 @@ if (opt$cmd == "export.results.csv") {
     logger(WARN, paste("Missing file option: assuming file=", opt$file))
   }
   logger(DEBUG, paste("Saving data to file", opt$file))
-  Project.ExportResults(opt$project.name, value=opt$item.values[1], db.channel, id.list=id.list, file=opt$file)
+  Project.ExportResults(opt$project.name, value=opt$item.values[1], db.channel, file=opt$file)
 
   q(status=0)
 }
