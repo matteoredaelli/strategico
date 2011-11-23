@@ -283,13 +283,22 @@ if (opt$cmd == "export.db.csv") {
 #########################################################################
 
 if (opt$cmd == "export.results.csv") {
+  value=opt$item.values[1] 
   if(is.null(opt$file)) {
-    opt$file <- file.path(Project.GetPath(opt$project.name), opt$cmd)
-    logger(WARN, paste("Missing file option: assuming file=", opt$file))
+    name <- paste(opt$project.name, "-results-", value, ".csv", sep="")
+    opt$file <- file.path(Project.GetPath(opt$project.name), name)
+    logger(WARN, paste("Missing file option: assuming file =", opt$file))
   }
   logger(DEBUG, paste("Saving data to file", opt$file))
-  Project.ExportResults(opt$project.name, value=opt$item.values[1], db.channel, file=opt$file)
+  Project.ExportResultsCSV(opt$project.name, value=value, db.channel, file=opt$file)
 
+  q(status=0)
+}
+
+if (opt$cmd == "export.results.db") {
+  value=opt$item.values[1]
+  logger(DEBUG, "Saving data to the database")
+  Project.ExportResultsDB(opt$project.name, value=value, db.channel=db.channel)
   q(status=0)
 }
 
