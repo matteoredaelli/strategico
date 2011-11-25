@@ -70,7 +70,7 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
                 period.freq=2,increment=1, xreg.lm = NA,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=1,max.Q=0, 
                 xreg.arima = NULL,idDiff=FALSE,idLog=FALSE, stationary.arima = FALSE, period.start = c(1997, 1),
                 period.end=c(2010,1), NA2value = 3, range = c(3, Inf), n.min = 15, stepwise = TRUE, formula.right.lm = NULL, negTo0 = TRUE, toInteger = TRUE,
-				naive.values="last") {
+				naive.values="last",naive.ifConstantLastValues=2) {
   
 #####################################
   ## ATTENZIONE normalizedata: ho sistemato la mia versione a funziona
@@ -90,6 +90,16 @@ ltp <- function(product, try.models, rule = "BestAIC", rule.noMaxOver = Inf, n.a
   
   if(idLog) logtransform = IDlog(product,period.start)
   
+  # CHecking if the latest values are constant...
+  tot.points <- nrow(product)
+  last.value <- product[tot.points,]
+  ##if(all(product[(nrow(product)-naive.ifConstantLastValues+1):nrow(product),]==0)){
+  if(all(product[(tot.points-naive.ifConstantLastValues+1):tot.points,] == last.value)){
+    msg <- paste("The latest", naive.ifConstantLastValues, "historical data are constant (see param naive.ifConstantLastValues): predictions will be constant (value=", last.value, ") and naive model will be forced!")
+    logger(WARN, msg)
+    try.models="naive"
+    naive.values=last.value
+  }
   if (is.null(try.models)) 
     try.models = ltp.GetModels("id")
 
