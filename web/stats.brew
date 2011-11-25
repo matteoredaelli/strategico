@@ -16,12 +16,17 @@ source(file.path(strategico.home, "strategico_util.R"))
 
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 project.config <- Project.GetConfig(project.name)
+%>
 
+<h1>Project: <%=project.name%></h1>
+<h2>DB tables rows</h2>
+  <%
 db.channel <- DB.Connect()
 stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
 print(xtable(t(as.data.frame(stats))), type="html")
 
 %>
+  <h2>Predictions</h2>
   <table><tr>
 <%
   for (value in GetValueNames(project.config$values)) {
