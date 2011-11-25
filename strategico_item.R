@@ -19,6 +19,7 @@
 ## created: 2011
 
 Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=NULL,
+                      period.start=NULL, period.end=NULL,
                       project.config=NULL, db.channel) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
@@ -28,6 +29,7 @@ Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=
 
   for (id in id.list) {
     Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
+             period.start=period.start, period.end=period.end, 
              project.config=project.config, db.channel=db.channel)
   }
 }
@@ -45,25 +47,30 @@ Item.EmptyFS <- function(project.name, id, value=NULL, recursive = TRUE) {
 }
 
 Item.Eval <- function(project.name, id=NULL, keys=NULL, values, param=NULL,
+                     period.start=NULL, period.end=NULL,
                      project.config, db.channel) {
 
   for (i in 1:length(values)) {
     Item.EvalData(project.name=project.name, id=id, keys=keys, value=values[i], param=param,
+                 period.start=period.start, period.end=period.end, 
                  project.config=project.config, db.channel=db.channel)
   }
 }
 
 Item.EvalChildren <- function(project.name, id, keys=NULL, values, param=NULL,
+                     period.start=NULL, period.end=NULL,
                      project.config, db.channel) {
   
   id.list <- Item.GetChildren(id=id, keys=keys, project.name=project.name, db.channel=db.channel)
 
   if (!is.null(id.list))
     Items.Eval(project.name=project.name, id.list=id.list, values=values, param=param,
+              period.start=period.start, period.end=period.end, 
               project.config=project.config, db.channel=db.channel)
 }
 
-Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, value,
+Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
+                         period.start=NULL, period.end=NULL, value,
                          param=NULL, project.config, db.channel) {
   logger(INFO, "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
   logger(WARN, paste("Project=", project.name, " Loading item ID=", id,
@@ -80,6 +87,7 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL, valu
   if (is.null(item.data))
     item.data <- Item.GetData(project.name=project.name,
                                  project.config=project.config, id=id, keys=keys,
+                                 period.start=period.start, period.end=period.end,
                                  value=value, db.channel=db.channel)
 
   if (is.null(item.data)) {
