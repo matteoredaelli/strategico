@@ -35,9 +35,9 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
     logger(INFO, paste("Deleting project path:", project.path))
     unlink(project.path, recursive=recursive)
     
-    project.path <- paste(Project.GetPath(project.name), "/project*", sep="")
-    logger(INFO, paste("Deleting project files:", project.path))
-    unlink(project.path)
+    ##project.path <- paste(Project.GetPath(project.name), "/project*", sep="")
+    ##logger(INFO, paste("Deleting project files:", project.path))
+    ##unlink(project.path)
   }
 }
 
@@ -105,14 +105,14 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
 }
 
 Project.GetConfigFilename <- function(project.name) {
-  paste("p_", project.name, ".config", sep="")
+  paste(project.name, ".conf", sep="")
 }
 
 Project.GetConfig <- function(project.name) {
-  etc.path <- GetEtcPath()
   plugins.path <- GetPluginsPath()
-  filename <- file.path(etc.path, Project.GetConfigFilename(project.name))
+  project.path <- Project.GetPath(project.name)
   
+  filename <- file.path(project.path, Project.GetConfigFilename(project.name))
   FileExistsOrQuit(filename)
   ## sourcing project.config file
   source(filename)
@@ -131,13 +131,11 @@ Project.GetList <- function(projects.home = strategico.config$projects.home) {
 Project.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
 
   tablename = DB.GetTableNameProjectItems(project.name)
-  sql_statement <- paste("select max(id) from ", tablename, sep="")
-  records <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
+  sql_statement <- paste("select max(0 + id) from ", tablename, sep="")
+  tot <- DB.GetTableSize(tablename,db.channel)
 
-  result <- as.integer(records[1,][1])
-
-  logger(DEBUG, paste("Max ID =", result))
-  result 
+  logger(DEBUG, paste("Max ID =", tot))
+  tot
 }
                           
 Project.GetPath <- function(project.name, projects.home = strategico.config$projects.home) {
