@@ -95,7 +95,7 @@ DB.GetTableSize <- function(tablename, db.channel) {
     result <- as.integer(records[1][1])
   else {
     logger(ERROR, paste("cannot count rows of table", tablename))
-    result <- "cannot retreive"
+    result <- 0
   }
   result
 }
@@ -356,7 +356,8 @@ Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channe
   for (value in GetValueNames(project.config$values)) {
     ## adding % of predictions
     t.sum <- DB.GetTableNameSummary(project.name, value)
-    stats[[paste("perc_predictions", value, sep= "_")]] <- stats[[t.sum]] / stats[[t.items]] * 100
+    stats[[paste("perc_predictions", value, sep= "_")]] <- 0
+    try(stats[[paste("perc_predictions", value, sep= "_")]] <- stats[[t.sum]] / stats[[t.items]] * 100)
   }
   stats
 }
