@@ -146,21 +146,27 @@ id.list <- c()
 if (!is.null(opt$id.list))
   id.list <- unlist(strsplit(opt$id.list, ","), as.numeric)
 
-if (!is.null(opt$id.range))
+if (!is.null(opt$id.range)) 
   id.list <- append(id.list, StrToRange(opt$id.range))
 
-id.list <- as.integer(id.list)
 
-## removing IDs > max id
-#max.id <- Project.GetMaxID(opt$project.name, db.channel=db.channel)
-#wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
-#logger(WARN, paste("Skipping the following too high ids:", wrong.id))
-#id.list <- id.list[id.list <= max.id]
+max.id <- Project.GetMaxID(opt$project.name, db.channel=db.channel)
+
+if (is.null(id.list)) {
+  logger(INFO, "Missing id.range and id.list: assuming all item IDs:")
+  id.list <- 1:max.id
+} else {
+  id.list <- as.integer(id.list)
+  ## removing IDs > max id
+  wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
+  logger(WARN, paste("Skipping (if any) the following too high ids:", wrong.id))
+  id.list <- id.list[id.list <= max.id]
+}
 
 ## item.values could be could be V1 or V1,V2
 if (is.null(opt$item.values)) {
   opt$item.values <- "V1"
-  logger(WARN, paste("Missing  item.values option: assuming item.values=", opt$item.value))
+  logger(INFO, paste("Missing  item.values option: assuming item.values=", opt$item.value))
 } else {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
 }
@@ -186,10 +192,6 @@ if (opt$cmd == "eval.children") {
 #########################################################################
 
 if (opt$cmd == "eval.items") {
-
-  if (is.null(id.list))
-    UsageAndQuit("Missing parameter id.list or id.range")
-
 
   Items.Eval(project.name=opt$project.name, 
              id.list=id.list, values=opt$item.values,
