@@ -547,7 +547,7 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
 			pred = naive.values
 		} else if(naive.values=="lastPeriod"){
 			pred = y[(length(y)-period.freq)+(1:period.freq)] ## se length(y)<period.freq il risultato perde senso
-			naive.values=rep(pred[(length(y)-period.freq)+(period.freq:1)],length.out=length(y))[length(y):1]
+			naive.values=rep(pred[(length(y)-period.freq)+(period.freq:1)-1],length.out=length(y))[length(y):1]
 		}   
 	} else pred = naive.values 
   
