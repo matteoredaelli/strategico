@@ -577,7 +577,7 @@ mod.naive <- function(product, n.ahead, period.start, period.freq, period.end, l
   # m[1:(length(pred.modnaive)+period.freq)]=c(y[nrow(y):(nrow(y)-period.freq+1),],pred.modnaive)
   # m=apply(m,2,mean,na.rm=TRUE)
   # sdJumps = sd(m[-1]/m[-length(m)])
-  res = y-pred.modnaive                              
+  res = y-naive.values                            
   lista.naive = list(ts.product = y, model = naive.values, prediction = pred.modnaive, 
     IC = IC.pred.modnaive, AIC = naive.AIC, R2 = naive.R2, IC.width = ic.delta, maxJump=maxJump,  VarCoeff=VarCoeff, Residuals = res)
  lista.naive
