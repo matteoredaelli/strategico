@@ -42,19 +42,19 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
 }
 
 Project.ExportResultsCSV <- function(project.name, value, db.channel, file, full.ts=FALSE, sep=";", quote=FALSE) {
-    results <- Project.GetResults(project.name=project.name, value=value, db.channel=db.channel, full.ts=full.ts) 
-    write.table(results, file=file, row.names=FALSE, append=FALSE, col.names=FALSE, sep=sep, quote=quote)
+  first.row <- TRUE
+  max.id <- Project.GetMaxID(project.name=project.name, db.channel=db.channel)
+  for( id in 1:max.id) {
+    result <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
+                                     id=id, db.channel=db.channel,
+                                     only.best=TRUE, full.ts=full.ts)
+    if( !is.null(result$predictions)) {
+      write.table(data.frame(id=id, result$predictions), file=file, row.names=FALSE, append=!first.row, col.names=FALSE, sep=sep, quote=quote)
+      if (first.row)
+        first.row <- FALSE
+    }
+  }
 }
-
-Project.ExportResultsDB <- function(project.name, value, db.channel, full.ts=FALSE, append=TRUE, verbose=FALSE, fast=TRUE) {
-    results <- Project.GetResults(project.name=project.name, value=value, db.channel=db.channel, full.ts=full.ts) 
-    tablename <- DB.GetTableNameResults(project.name, value)
-    DB.EmptyTable(tablename=tablename, db.channel=db.channel) 
-    sqlSave(db.channel, data.frame(results), tablename=tablename, rownames=FALSE,
-          append=append, verbose=verbose, addPK=FALSE, fast=fast)
-}
-
-
 
 Project.GetResults <- function(project.name, value, db.channel, full.ts=FALSE) {
   ##tablename <- DB.GetTableNameSummary(project.name, value)
