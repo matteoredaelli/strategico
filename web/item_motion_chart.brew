@@ -16,7 +16,7 @@
   
   <%
 setContentType("text/html")
-RApacheOutputErrors(TRUE)
+RApacheOutputErrors(FALSE)
 options(hverbose=FALSE,verbose=FALSE)
 
 %>
@@ -28,7 +28,6 @@ options(hverbose=FALSE,verbose=FALSE)
   
   <%
   
-#library(googleVis)
 suppressPackageStartupMessages(library(googleVis))
 
 strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
@@ -39,30 +38,17 @@ id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
 value <- ifelse(is.null(GET$value), "V1", GET$value)
 
 db.channel <- DB.Connect()
-item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
-item.hist <- Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
 DB.Close(db.channel)
 
-if (nrow(item.hist) > 0) {
-  item.hist$item_id <- NULL
-  item.hist$PERIOD <- as.numeric(sub("-","", item.hist$PERIOD))
-  
-  ##now I want to get all models and add the same historical data for each model (ie duplicating item.hist)..
-  ##plugin.path <- GetPluginsPath()
-  ##source(file.path(plugin.path, "eval_ltp.R"))
-  ##MySource(filename="eval_ltp.R", file.path=GetPluginsPath())
-  ##model.names <- ltp.GetModels("name")
+  if ((!is.null(item.results$predictions)) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
 
-  model.names <- unique(item.results$model)
-  nrow <- nrow(item.hist)
-  repeted.models <- unlist(lapply(model.names, function(x) rep(x,nrow)))
 
-  item.hist <- data.frame(model=repeted.models, item.hist)
-  
-  item.results$item_id <- NULL
-  item.results$PERIOD <- as.numeric(sub("-","", item.results$PERIOD))
+  item.all = item.results$predictions
+  item.all$item_id <- NULL
+  item.all$PERIOD <- as.numeric(sub("-","", item.all$PERIOD))
 
-  item.all = rbind(item.hist, item.results)
   M <- gvisMotionChart(data=item.all, idvar="model",
                        timevar="PERIOD", chartid="item",
                        options=list(
