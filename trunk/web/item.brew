@@ -1,14 +1,7 @@
   <%
 ## -*- mode: R -*-
+  brew( "/var/www/strategico/web/common.brew")
 
-  setContentType("text/html")
-  RApacheOutputErrors(FALSE)
-  options(hverbose=FALSE,verbose=FALSE)
- 
-  suppressPackageStartupMessages(library(googleVis))
-  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
-
-  ##id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
   param <- ifelse(is.null(GET$param), "", GET$param)
   value <- ifelse(is.null(GET$value), "V1", GET$value)
   str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
@@ -17,10 +10,7 @@
   ## loading project config
 
   project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-  source(file.path(strategico.home, "strategico_util.R"))
   project.config <- Project.GetConfig(project.name=project.name)
-
-  db.channel <- DB.Connect()
 
   ## settings is or item.keys depending on which variables were passed in GET input
 
