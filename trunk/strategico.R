@@ -334,7 +334,7 @@ if (opt$cmd == "set.best.model") {
     UsageAndQuit("Missing parameter model")
   
   for (v in opt$item.values)
-    Items.DB.SetBestModel(project.name=opt$project.name, id.list=opt$id.list,
+    Items.DB.SetBestModel(project.name=opt$project.name, id.list=id.list,
                        value=v, model=opt$model, db.channel=db.channel)
   q(status=0)
 }
