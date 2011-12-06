@@ -108,11 +108,25 @@ Project.GetConfigFilename <- function(project.name) {
   paste(project.name, ".conf", sep="")
 }
 
+Project.GetConfigFullPathFilename <- function(project.name) {
+  project.path <- Project.GetPath(project.name)
+  filename <- file.path(project.path, Project.GetConfigFilename(project.name))
+}
+
+Project.GetDataFilename <- function(project.name) {
+  paste(project.name, ".csv", sep="")
+}
+
+Project.GetDataFullPathFilename <- function(project.name) {
+  project.path <- Project.GetPath(project.name)
+  filename <- file.path(project.path, Project.GetDataFilename(project.name))
+}
+
 Project.GetConfig <- function(project.name) {
   plugins.path <- GetPluginsPath()
   project.path <- Project.GetPath(project.name)
   
-  filename <- file.path(project.path, Project.GetConfigFilename(project.name))
+  filename <- Project.GetConfigFullPathFilename(project.name)
   FileExistsOrQuit(filename)
   ## sourcing project.config file
   source(filename)
