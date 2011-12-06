@@ -210,9 +210,12 @@ Project.GetUrl <- function(project.name, projects.url = strategico.config$projec
   paste(projects.url, project.name, sep="/")
 }
 
-Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.channel, filename) {
+Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.channel, filename=NULL) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
+
+  if (is.null(filename))
+    filename <- Project.GetDataFullPathFilename(project.name=project.name)
 
   logger(WARN, paste("Loading data from file", filename))
   result=read.csv(filename,sep=",") 
