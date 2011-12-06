@@ -335,7 +335,7 @@ if (opt$cmd == "set.best.model") {
   
   for (v in opt$item.values)
     Items.DB.SetBestModel(project.name=opt$project.name, id.list=opt$id.list,
-                       value=opt$value, model=opt$model, db.channel=db.channel)
+                       value=v, model=opt$model, db.channel=db.channel)
   q(status=0)
 }
 

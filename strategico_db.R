@@ -50,7 +50,7 @@ DB.EmptyTable <- function(tablename, db.channel) {
 }
 
 DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
-                           rownames=FALSE, append=TRUE, addPK=FALSE, db.channel) {
+                           rownames=FALSE, append=TRUE, addPK=FALSE, fast=TRUE, db.channel) {
   logger(DEBUG, paste("Saving data (deleting + inserting) to table", tablename))
   delete_sql <- paste("delete from", tablename)
   
@@ -63,7 +63,7 @@ DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbo
   logger(DEBUG, paste("Saving data to table", tablename)) 
  
   sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
-          append=append, verbose=verbose, addPK=addPK, fast=FALSE)
+          append=append, verbose=verbose, addPK=addPK, fast=fast)
 
 }
 
@@ -292,6 +292,22 @@ Items.DB.SetBestModel <- function(project.name, value, id.list,
   str <- gsub("_IDLIST_", str.id.list, str)
 
   DB.RunSQLQuery(sql_statement=str, db.channel=db.channel)
+
+  tablename = DB.GetTableNameResults(project.name, value)
+
+  for (id in id.list) {
+    id.results <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
+                                         id=id, db.channel=db.channel, only.best=TRUE,
+                                         full.ts=FALSE, residuals=FALSE)
+
+   result <- data.frame(id=id, id.results$predictions)
+   colnames(result) <- c("id", "PERIOD", "V")
+
+   DB.DeleteAndInsertData(data=result, tablename=tablename, id=id, id.name="id", append=TRUE,
+                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+
+    
+  }
 }
 
 Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
