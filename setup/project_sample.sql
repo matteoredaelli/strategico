@@ -24,6 +24,8 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Table structure for table `sample_data_raw`
 --
 
+
+DROP TABLE IF EXISTS `sample_data_raw`;
 CREATE TABLE IF NOT EXISTS `sample_data_raw` (
   `KEY1` varchar(20) NOT NULL default '',
   `KEY2` varchar(20) NOT NULL default '',
@@ -40,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `sample_data_raw` (
 -- Table structure for table `sample_items`
 --
 
+DROP TABLE IF EXISTS `sample_items`;
 CREATE TABLE IF NOT EXISTS `sample_items` (
   `id` int(11) NOT NULL,
   `KEY1` varchar(20) default NULL,
@@ -55,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `sample_items` (
 -- Table structure for table `sample_summary_models_V1`
 --
 
+DROP TABLE IF EXISTS `sample_summary_models_V1`;
 CREATE TABLE IF NOT EXISTS `sample_summary_models_V1` (
   `item_id` int(11) NOT NULL,
   `model` varchar(20) NOT NULL,
@@ -75,6 +79,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V1` (
 -- Table structure for table `sample_summary_models_V2`
 --
 
+DROP TABLE IF EXISTS `sample_summary_models_V2`;
 CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
   `item_id` int(11) NOT NULL,
   `model` varchar(20) NOT NULL,
@@ -95,6 +100,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
 -- Table structure for table `sample_summary_V1`
 --
 
+DROP TABLE IF EXISTS `sample_summary_V1`;
 CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
   `id` int(11) NOT NULL,
   `BestModel` varchar(20) default NULL,
@@ -125,6 +131,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
 -- Table structure for table `sample_summary_V2`
 --
 
+DROP TABLE IF EXISTS `sample_summary_V2`;
 CREATE TABLE IF NOT EXISTS `sample_summary_V2` (
   `id` int(11) NOT NULL,
   `BestModel` varchar(20) default NULL,

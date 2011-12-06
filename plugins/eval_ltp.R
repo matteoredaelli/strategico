@@ -102,18 +102,23 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## ###################################################################################
   ##__##logger(DEBUG, "Saving results for all models")
 
-  data.predicted <- NULL
-  prediction.null <- cbind(id, NA,PERIOD=predicted.periods, V=rep(0, param$n.ahead))
   
   if (is.null(model@BestModel)) {
     ##__##logger(WARN, "NO BestModel found ;-(")
-    result <- data.frame(rep(0, param$n.ahead))
-    data.predicted <- prediction.null
+    data.predicted <- data.frame(V=rep(0, param$n.ahead))
   }
   else {
     ##__##logger(WARN, paste("Best Model is ", model@BestModel))
-    result <- data.frame(model@models[[model@BestModel]]$prediction)
+    data.predicted <- data.frame(V=model@models[[model@BestModel]]$prediction)
   }
+
+  result <- cbind(id, PERIOD=predicted.periods, data.predicted)
+  colnames(result) <- c("id", "PERIOD", "V")
+
+   tablename = DB.GetTableNameResults(project.name, value)  
+   DB.DeleteAndInsertData(data=result, tablename=tablename, id=id, id.name="id", append=TRUE,
+                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+
   
   if (!is.null(model@BestModel)) {
     ## ###################################################################################
