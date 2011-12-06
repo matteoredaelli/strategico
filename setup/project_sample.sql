@@ -36,6 +36,22 @@ CREATE TABLE IF NOT EXISTS `sample_data_raw` (
   PRIMARY KEY  (`KEY1`,`KEY2`,`KEY3`,`PERIOD`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `sample_results_V1`;
+CREATE TABLE IF NOT EXISTS `sample_results_V1` (
+  `id` int(11) NOT NULL,
+  `PERIOD` varchar(20) NOT NULL default '',
+  `V` double default NULL,
+  PRIMARY KEY  (`id`,`PERIOD`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `sample_results_V2`;
+CREATE TABLE IF NOT EXISTS `sample_results_V2` (
+  `id` int(11) NOT NULL,
+  `PERIOD` varchar(20) NOT NULL default '',
+  `V` double default NULL,
+  PRIMARY KEY  (`id`,`PERIOD`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- --------------------------------------------------------
 
 --
