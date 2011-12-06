@@ -310,8 +310,7 @@ if (opt$cmd == "export.results.db") {
 
 if (opt$cmd == "import") {
   if(is.null(opt$file)) {
-    f <- paste(opt$project.name, ".csv", sep="")
-    opt$file <- file.path(Project.GetPath(opt$project.name), f)
+    opt$file <- Project.GetDataFullPathFilename(opt$project.name)
     logger(WARN, paste("Missing file option: assuming file=", opt$file))
   }
   Project.ImportDataFromCSV(project.name=opt$project.name, db.channel=db.channel, filename=opt$file)
