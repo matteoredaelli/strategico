@@ -18,23 +18,28 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-library(RODBC)
+library(RMySQL)
 
 DB.Connect <- function(db.name=strategico.config$db.name
                       ,db.user=strategico.config$db.user
                       ,db.pass=strategico.config$db.pass
-                      #,db.case=strategico.config$db.case
+                      ,db.host=strategico.config$db.host
                       ) {
-  db.channel <- odbcConnect(db.name, db.user, db.pass, believeNRows=FALSE) #, case=db.case)
+  db.channel <- dbConnect(MySQL(),
+                          user=db.user,
+                          password=db.pass,
+                          dbname=db.name,
+                          host=db.host)
 
-  if( db.channel == -1)
-    Quit("Cannot connect to DB")
-  
+  ## TODO how to check a connection with RMySQL?
+  ##if( db.channel == -1)
+  ##  Quit("Cannot connect to DB")
+
   db.channel
 }
 
 DB.Close <- function(db.channel) {
-  odbcClose(db.channel)
+  dbDisconnect(db.channel)
 }
 
 DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=",") {
@@ -50,7 +55,7 @@ DB.EmptyTable <- function(tablename, db.channel) {
 }
 
 DB.DeleteAndInsertData <- function(data, tablename, id.name="item_id", id=NULL, verbose=FALSE,
-                           rownames=FALSE, append=TRUE, addPK=FALSE, fast=TRUE, db.channel) {
+                                   append=TRUE, db.channel) {
   logger(DEBUG, paste("Saving data (deleting + inserting) to table", tablename))
   delete_sql <- paste("delete from", tablename)
   
@@ -62,8 +67,8 @@ DB.DeleteAndInsertData <- function(data, tablename, id.name="item_id", id=NULL, 
 
   logger(DEBUG, paste("Saving data to table", tablename)) 
  
-  sqlSave(db.channel, data.frame(data), tablename=tablename, rownames=rownames,
-          append=append, verbose=verbose, addPK=addPK, fast=fast)
+  dbWriteTable(db.channel, value=data.frame(data), name=tablename, row.names=F,
+          append=append)
 
 }
 
@@ -104,27 +109,11 @@ DB.GetTableSize <- function(tablename, db.channel) {
   result
 }
 
-DB.RunSQLQuery <- function(sql_statement, db.channel=NULL, db.name=NULL, db.user=NULL, db.pass=NULL) {
-  db.channel.old <- db.channel
-  if(is.null(db.channel)) {
-    if(is.null(db.name))
-      db.channel <- DB.Connect()
-    else
-      db.channel <- DB.Connect(db.name=db.name, db.user=db.user, db.pass=db.pass)
-  }
-
+DB.RunSQLQuery <- function(sql_statement, db.channel) {
   for (statement in sql_statement) {
     logger(DEBUG, paste("Running SQL:", statement))
-    result <- sqlQuery(db.channel, statement)
-    ## checking return code
-    ##if (is.numeric(result) & result == -1) {
-    ##  logget(INFO, odbcGetErrMsg(db.channel))
-    ##  odbcClearError(db.channel)
-    ##}
-
-  }
-  if(is.null(db.channel.old)) {
-    odbcClose(db.channel)
+    result <- dbGetQuery(conn=db.channel, statement)
+    logger(DEBUG, paste("Done running SQL:", statement))
   }
   result
 }
@@ -156,11 +145,9 @@ Item.Db.SaveData <- function(id, data, tablename, db.channel) {
   } else {
     data = cbind(item_id=id, data)
     data$PERIOD = rownames(data)
-    ## primary KEY
-    rownames(data) <- paste(data$item_id, data$PERIOD, sep="_")
  
-    DB.DeleteAndInsertData(data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                  rownames="id", addPK=TRUE, db.channel=db.channel)
+    DB.DeleteAndInsertData(data, tablename=tablename, id=id,
+                           id.name="item_id", append=TRUE, db.channel=db.channel)
   }
 }
 

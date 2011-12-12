@@ -284,22 +284,21 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## project.items <- rbind(project.items, allvalues.keys)
 
   ## adding ID column
-  project.items <- cbind(id=1:nrow(project.items), project.items)
-  
+  project.items <- cbind(item_id=1:nrow(project.items), project.items)
+ 
   tablename = DB.GetTableNameProjectItems(project.config$project.name)
   ## preparing data for prymary key in DB  (id must be the rownames)
   project.items.orig <- project.items
-  rownames(project.items) <- project.items$id
-  project.items$id <- NULL
-  
-  DB.DeleteAndInsertData(project.items, tablename, id=NULL, rownames="item_id", addPK=TRUE, db.channel=db.channel)
+  DB.EmptyTable(tablename, db.channel)
+  logger(WARN, "Saving project items")
+  dbWriteTable(value=project.items, name=tablename, conn=db.channel, append=T, row.names=FALSE)
   
   project.items <- project.items.orig
 
   ## Putting item ID inside project.data
   ## project.data.db <- merge(project.items, project.data)
   tablename = DB.GetTableNameProjectData(project.config$project.name)
-  ## preparing data for prymary key in DB  (id must be the rownames)  
-  DB.DeleteAndInsertData(project.data, tablename, id=NULL, rownames=NULL,
-                addPK=FALSE, db.channel=db.channel)
+  DB.EmptyTable(tablename, db.channel)
+  logger(WARN, "Saving project data")
+  dbWriteTable(value=project.data, name=tablename, conn=db.channel, append=T, row.names=FALSE)
 } # end function

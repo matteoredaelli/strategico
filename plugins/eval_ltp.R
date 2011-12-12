@@ -54,7 +54,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     normalized.data <- data.frame(item_id=id, PERIOD=rownames(model@values), V=model@values$V)
     tablename = DB.GetTableNameNormalizedData(project.name, value)
     DB.DeleteAndInsertData(normalized.data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
+                           db.channel=db.channel)
   }
     
   if (is.null(model@BestModel)) {
@@ -81,12 +81,12 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     ## TODO: fails if normalized data is empty
     ## ./strategico.R --cmd eval_items --id.list 5 -n sample
     tablename = DB.GetTableNameSummary(project.name, value)
-    DB.DeleteAndInsertData(onerow.summ, tablename=tablename, id=id, rownames="item_id", addPK=TRUE, db.channel=db.channel)
+    DB.DeleteAndInsertData(onerow.summ, tablename=tablename, id=id, db.channel=db.channel)
 
     if (!is.null(model@BestModel)) {
       tablename = DB.GetTableNameSummaryModels(project.name, value)
-      DB.DeleteAndInsertData(summary.models, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                    rownames=NULL, addPK=FALSE, db.channel=db.channel)
+      DB.DeleteAndInsertData(summary.models, tablename=tablename, id=id, append=TRUE,
+                             db.channel=db.channel)
     }
   }
 
@@ -124,8 +124,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 
    if (!is.null(results)) {
      tablename = DB.GetTableNameResults(project.name, value)  
-     DB.DeleteAndInsertData(data=results, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
+     DB.DeleteAndInsertData(data=results, tablename=tablename, id=id, append=TRUE,
+                            db.channel=db.channel)
    }
   
   if (!is.null(model@BestModel)) {

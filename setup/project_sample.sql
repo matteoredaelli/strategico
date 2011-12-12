@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V1` (
   `formula` varchar(50) default NULL,
   `R2` varchar(20) default NULL,
   `AIC` varchar(20) default NULL,
-  `ICwidth` varchar(20) default NULL,
+  `IC_width` varchar(20) default NULL,
   `maxJump` varchar(20) default NULL,
   `VarCoeff` varchar(20) default NULL,
   PRIMARY KEY  (`item_id`,`model`)
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
   `formula` varchar(50) default NULL,
   `R2` varchar(20) default NULL,
   `AIC` varchar(20) default NULL,
-  `ICwidth` varchar(20) default NULL,
+  `IC_width` varchar(20) default NULL,
   `maxJump` varchar(20) default NULL,
   `VarCoeff` varchar(20) default NULL,
   PRIMARY KEY  (`item_id`,`model`)
