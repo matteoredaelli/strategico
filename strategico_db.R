@@ -40,7 +40,7 @@ DB.Close <- function(db.channel) {
 DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=",") {
   sql_statement <- paste("select * from", tablename)
   records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
-  write.table(records, file=output.file, sep=sep, dec=dec)
+  write.table(records, file=output.file, sep=sep, dec=dec, row.names=FALSE)
 }
 
 DB.EmptyTable <- function(tablename, db.channel) {
@@ -49,7 +49,7 @@ DB.EmptyTable <- function(tablename, db.channel) {
   logger(DEBUG, .Last.value) 
 }
 
-DB.DeleteAndInsertData <- function(data, tablename, id.name="id", id=NULL, verbose=FALSE,
+DB.DeleteAndInsertData <- function(data, tablename, id.name="item_id", id=NULL, verbose=FALSE,
                            rownames=FALSE, append=TRUE, addPK=FALSE, fast=TRUE, db.channel) {
   logger(DEBUG, paste("Saving data (deleting + inserting) to table", tablename))
   delete_sql <- paste("delete from", tablename)
@@ -81,6 +81,10 @@ DB.GetTableNameSummaryModels <- function(project.name, value) {
 
 DB.GetTableNameProjectData <- function(project.name) {
   paste(project.name, "data_raw", sep="_")
+}
+
+DB.GetTableNameNormalizedData <- function(project.name, value) {
+  paste(project.name, "data_norm", value, sep="_")
 }
 
 DB.GetTableNameProjectItems <- function(project.name) {
@@ -161,89 +165,15 @@ Item.Db.SaveData <- function(id, data, tablename, db.channel) {
 }
 
 Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
-  records <- Item.DB.GetSummary(project.name, value, id, db.channel) 
-  if (nrow(records) == 0) {
-    result <- NULL
-  } else {
-    periods <- Vector.FromString(as.character(records$normalizedPeriods))
-    values <- Vector.FromString(as.character(records$normalizedData))
-    result <- data.frame(V=values)
-    rownames(result) <- periods
-  }
-  result
+  tablename <- DB.GetTableNameNormalizedData(project.name, value=value)
+  Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
-Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE, residuals=FALSE) {
-  ltp.Item.DB.GetResults(project.name=project.name, value=value, id=id, db.channel=db.channel, only.best=only.best, full.ts=full.ts, residuals=residuals)
-}
-
-ltp.Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=FALSE, full.ts=TRUE, residuals=FALSE) {
-  result <- list()
-  
-  summary <- Item.DB.GetSummary(project.name=project.name, value=value, id=id, db.channel=db.channel) 
-  if (nrow(summary) == 0) {
-    return(result)
-  }
-  
-  ## extracting normalized data
-  
-  periods <- Vector.FromString(as.character(summary$normalizedPeriods))
-  values <- as.numeric(Vector.FromString(as.character(summary$normalizedData)))
-  result$normalized <- data.frame(PERIOD=periods, V=values)
-  ##data.frame(apply(result$predictions, 2, as.numeric))
-  ##rownames(result$normalized) <- periods
-
-  ## extracting predicted periods
-  result$predictedPeriods <- Vector.FromString(as.character(summary$predictedPeriods))
-
-  result$summary <- subset(summary, select=c(-normalizedPeriods))
-
-  best.model <-  as.character(result$summary$BestModel)
-  
-  if (is.null(best.model)) {
-    return(result)
-  }
-  
-  ## extracting
-  summary.models <- Item.DB.GetSummaryModels(project.name=project.name, value=value, id=id, db.channel=db.channel)
-  
-  if (nrow(summary.models) == 0) {
-    return(result)
-  }
-
-  if(only.best) {
-      summary.models <- subset(summary.models, model==best.model)
-    }
-
-  result$summary.models <- subset(summary.models, select=c(-predictedData, -residuals))
-  result$models <- as.vector(summary.models$model)
- 
-  predictions = data.frame(cast(summary.models, ~ model, value="predictedData"), stringsAsFactors=F)
-   
-  predictions$value <- NULL
-  result$predictions <- data.frame(sapply(predictions[1,], function(x) unlist(strsplit(as.character(x),","))), stringsAsFactors=F)
-  result$predictions <- data.frame(apply(result$predictions, 2, as.numeric))
-  result$predictions <- data.frame(PERIOD=result$predictedPeriods, result$predictions)
-  colnames(result$predictions)[-1] <- result$models
-
-  if(residuals) {
- 
-    residuals = data.frame(cast(summary.models, ~ model, value="residuals"), stringsAsFactors=F)
-   
-    residuals$value <- NULL
-    result$residuals <- data.frame(sapply(residuals[1,], function(x) unlist(strsplit(as.character(x),","))), stringsAsFactors=F)
-    result$residuals <- data.frame(apply(result$residuals, 2, as.numeric))
-    result$residuals <- data.frame(PERIOD=periods, result$residuals)
-    colnames(result$residuals)[-1] <- result$models
-  }
-           
-  if (full.ts) {
-    i.norm <- data.frame(rep(data.frame(V=values), length(result$models)))
-    colnames(i.norm) <- result$models
-    i.norm <- data.frame(PERIOD=periods, i.norm)
-    result$predictions <- rbind(i.norm, result$predictions)
-  }
-  result
+Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=TRUE) {
+  tablename <- DB.GetTableNameResults(project.name, value=value)
+  if (only.best)
+    tablename <- paste("v_", tablename)
+  Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
 Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
@@ -270,11 +200,11 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
   else {
     for( i in 1:tot) {
       item <- items[i,]
-      logger(INFO, paste("Found ID=", items$id))
+      logger(INFO, paste("Found ID=", items$item_id))
       logger(INFO, paste("Param String:", item$Parameters))
       
       param <- Param.EvalString(as.character(item$Parameters))
-      Item.Eval(project.name=project.name, id=item$id, project.config=project.config,
+      Item.Eval(project.name=project.name, id=item$item_id, project.config=project.config,
                value=value, param=param, db.channel=db.channel
                )
     } #end for
@@ -292,22 +222,6 @@ Items.DB.SetBestModel <- function(project.name, value, id.list,
   str <- gsub("_IDLIST_", str.id.list, str)
 
   DB.RunSQLQuery(sql_statement=str, db.channel=db.channel)
-
-  tablename = DB.GetTableNameResults(project.name, value)
-
-  for (id in id.list) {
-    id.results <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
-                                         id=id, db.channel=db.channel, only.best=TRUE,
-                                         full.ts=FALSE, residuals=FALSE)
-
-   result <- data.frame(id=id, id.results$predictions)
-   colnames(result) <- c("id", "PERIOD", "V")
-
-   DB.DeleteAndInsertData(data=result, tablename=tablename, id=id, id.name="id", append=TRUE,
-                  rownames=FALSE, addPK=FALSE, db.channel=db.channel)
-
-    
-  }
 }
 
 Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {

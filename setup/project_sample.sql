@@ -38,18 +38,36 @@ CREATE TABLE IF NOT EXISTS `sample_data_raw` (
 
 DROP TABLE IF EXISTS `sample_results_V1`;
 CREATE TABLE IF NOT EXISTS `sample_results_V1` (
-  `id` int(11) NOT NULL,
-  `PERIOD` varchar(20) NOT NULL default '',
+  `item_id` int(11) not NULL,
+  `model` varchar(20) not NULL,
+  `PERIOD` varchar(20) not NULL,
   `V` double default NULL,
-  PRIMARY KEY  (`id`,`PERIOD`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY  (`item_id`, `model`, `PERIOD`)
+) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `sample_results_V2`;
 CREATE TABLE IF NOT EXISTS `sample_results_V2` (
-  `id` int(11) NOT NULL,
+  `item_id` int(11) not NULL,
+  `model` varchar(20) not NULL,
+  `PERIOD` varchar(20) not NULL,
+  `V` double default NULL,
+  PRIMARY KEY  (`item_id`, `model`, `PERIOD`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `sample_data_norm_V1`;
+CREATE TABLE IF NOT EXISTS `sample_data_norm_V1` (
+  `item_id` int(11) NOT NULL,
   `PERIOD` varchar(20) NOT NULL default '',
   `V` double default NULL,
-  PRIMARY KEY  (`id`,`PERIOD`)
+  PRIMARY KEY  (`item_id`, `PERIOD`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `sample_data_norm_V2`;
+CREATE TABLE IF NOT EXISTS `sample_data_norm_V2` (
+  `item_id` int(11) NOT NULL,
+  `PERIOD` varchar(20) NOT NULL default '',
+  `V` double default NULL,
+  PRIMARY KEY  (`item_id`, `PERIOD`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -60,11 +78,11 @@ CREATE TABLE IF NOT EXISTS `sample_results_V2` (
 
 DROP TABLE IF EXISTS `sample_items`;
 CREATE TABLE IF NOT EXISTS `sample_items` (
-  `id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
   `KEY1` varchar(20) default NULL,
   `KEY2` varchar(20) default NULL,
   `KEY3` varchar(20) default NULL,
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY  (`item_id`),
   UNIQUE KEY `KEY1` (`KEY1`,`KEY2`,`KEY3`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -78,14 +96,12 @@ DROP TABLE IF EXISTS `sample_summary_models_V1`;
 CREATE TABLE IF NOT EXISTS `sample_summary_models_V1` (
   `item_id` int(11) NOT NULL,
   `model` varchar(20) NOT NULL,
-  `formula` varchar(20) default NULL,
+  `formula` varchar(50) default NULL,
   `R2` varchar(20) default NULL,
   `AIC` varchar(20) default NULL,
   `ICwidth` varchar(20) default NULL,
   `maxJump` varchar(20) default NULL,
   `VarCoeff` varchar(20) default NULL,
-  `predictedData` varchar(1000) default NULL,
-  `residuals` varchar(1000) default NULL,
   PRIMARY KEY  (`item_id`,`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -99,14 +115,12 @@ DROP TABLE IF EXISTS `sample_summary_models_V2`;
 CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
   `item_id` int(11) NOT NULL,
   `model` varchar(20) NOT NULL,
-  `formula` varchar(20) default NULL,
+  `formula` varchar(50) default NULL,
   `R2` varchar(20) default NULL,
   `AIC` varchar(20) default NULL,
   `ICwidth` varchar(20) default NULL,
   `maxJump` varchar(20) default NULL,
   `VarCoeff` varchar(20) default NULL,
-  `predictedData` varchar(1000) default NULL,
-  `residuals` varchar(1000) default NULL,
   PRIMARY KEY  (`item_id`,`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -118,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_models_V2` (
 
 DROP TABLE IF EXISTS `sample_summary_V1`;
 CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
-  `id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
   `BestModel` varchar(20) default NULL,
   `Points` int(11) default NULL,
   `NotZeroPoints` int(11) default NULL,
@@ -135,10 +149,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
   `Parameters` varchar(1000) default NULL,
   `ReturnCode` int(11) default NULL,
   `Run` int(11) default NULL,
-  `normalizedPeriods` varchar(1000) default NULL,
-  `normalizedData` varchar(2000) default NULL,
-  `predictedPeriods` varchar(1000) default NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -149,7 +160,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V1` (
 
 DROP TABLE IF EXISTS `sample_summary_V2`;
 CREATE TABLE IF NOT EXISTS `sample_summary_V2` (
-  `id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
   `BestModel` varchar(20) default NULL,
   `Points` int(11) default NULL,
   `NotZeroPoints` int(11) default NULL,
@@ -166,10 +177,7 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V2` (
   `Parameters` varchar(1000) default NULL,
   `ReturnCode` int(11) default NULL,
   `Run` int(11) default NULL,
-  `normalizedPeriods` varchar(1000) default NULL,
-  `normalizedData` varchar(2000) default NULL,
-  `predictedPeriods` varchar(1000) default NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create or replace view v_sample_results_V1 as
@@ -179,9 +187,10 @@ select
   r.V
 from
   sample_items i inner join 
-  sample_results_V1 r on (i.id = r.id)
+  sample_summary_V1 s on (i.item_id = s.item_id) inner join 
+  sample_results_V1 r on (s.item_id = r.item_id and s.BestModel = r.model)
 order by
-  i.id,
+  i.item_id,
   r.PERIOD
 ;
 
@@ -192,10 +201,10 @@ select
   r.V
 from
   sample_items i inner join
-  sample_results_V2 r on (i.id = r.id)
+  sample_summary_V2 s on (i.item_id = s.item_id) inner join
+  sample_results_V2 r on (s.item_id = r.item_id and s.BestModel = r.model)
 order by
-  i.id,
+  i.item_id,
   r.PERIOD
 ;
-
 
