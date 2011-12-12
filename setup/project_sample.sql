@@ -171,3 +171,31 @@ CREATE TABLE IF NOT EXISTS `sample_summary_V2` (
   `predictedPeriods` varchar(1000) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create or replace view v_sample_results_V1 as
+select
+  i.*,
+  r.PERIOD,
+  r.V
+from
+  sample_items i inner join 
+  sample_results_V1 r on (i.id = r.id)
+order by
+  i.id,
+  r.PERIOD
+;
+
+create or replace view v_sample_results_V2 as
+select
+  i.*,
+  r.PERIOD,
+  r.V
+from
+  sample_items i inner join
+  sample_results_V2 r on (i.id = r.id)
+order by
+  i.id,
+  r.PERIOD
+;
+
+
