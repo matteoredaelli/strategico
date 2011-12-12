@@ -41,41 +41,15 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
   }
 }
 
-Project.ExportResultsCSV <- function(project.name, value, db.channel, file, full.ts=FALSE, sep=";", quote=FALSE) {
-  first.row <- TRUE
-  max.id <- Project.GetMaxID(project.name=project.name, db.channel=db.channel)
-  for( id in 1:max.id) {
-    result <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
-                                     id=id, db.channel=db.channel,
-                                     only.best=TRUE, full.ts=full.ts)
-    if( !is.null(result$predictions)) {
-      write.table(data.frame(id=id, result$predictions), file=file, row.names=FALSE, append=!first.row, col.names=FALSE, sep=sep, quote=quote)
-      if (first.row)
-        first.row <- FALSE
-    }
-  }
+Project.ExportResultsCSV <- function(project.name, value, db.channel, file, sep=";", quote=FALSE) {
+  results <- Project.GetResults(project.name=project.name, value=value, db.channel=db.channel)
+  write.table(results, file=file, row.names=FALSE, append=false, col.names=TRUE, sep=sep, quote=quote)
 }
 
-Project.GetResults <- function(project.name, value, db.channel, full.ts=FALSE) {
-  ##tablename <- DB.GetTableNameSummary(project.name, value)
-  ##sql_statement <- paste("select id from", tablename)
-  ##id.list <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
-  id.max <- Project.GetMaxID(project.name=project.name, db.channel=db.channel)
-  results <- NULL
-  ##for( id.row in id.list) {
-  for( id in 1:id.max) {
-    ##id <- as.numeric(id.row)
-    result <- ltp.Item.DB.GetResults(project.name=project.name, value=value,
-                                     id=id, db.channel=db.channel,
-                                     only.best=TRUE, full.ts=full.ts)
-    if( !is.null(result$predictions)) {
-      res <- cbind(id=id, result$predictions)
-      results <- rbind(results, res)
-    }
-  }
-  if (!is.null(results))
-    colnames(results) <- c("id", "PERIOD", value)
-  results
+Project.GetResults <- function(project.name, value, db.channel) {
+  tablename <- paste("v_", DB.GetTableNameResults(project.name, value), sep='_')
+  sql_statement <- paste("select * from", tablename)
+  DB.RunSQLQuery(sql_statement, db.channel=db.channel)
 }
 
 Project.GetKeyValues <- function(key.name, project.name, db.channel) {
@@ -206,6 +180,21 @@ Project.GetTableNames <- function(project.name, project.config=NULL) {
   tables
 }
 
+Project.GetViewNames <- function(project.name, project.config=NULL) {
+  if(is.null(project.config)) 
+    project.config <- Project.GetConfig(project.name)
+
+  tables <- c() 
+  
+  for (value in GetValueNames(project.config$values)) {
+    value.tables <- c(
+                      paste("v_", DB.GetTableNameResults(project.name, value), sep="")
+                      )
+    tables <- append(tables, value.tables)
+  }
+  tables
+}
+
 Project.GetUrl <- function(project.name, projects.url = strategico.config$projects.url) {
   paste(projects.url, project.name, sep="/")
 }
@@ -299,7 +288,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   rownames(project.items) <- project.items$id
   project.items$id <- NULL
   
-  DB.DeleteAndInsertData(project.items, tablename, id=NULL, rownames="id", addPK=TRUE, db.channel=db.channel)
+  DB.DeleteAndInsertData(project.items, tablename, id=NULL, rownames="item_id", addPK=TRUE, db.channel=db.channel)
   
   project.items <- project.items.orig
 

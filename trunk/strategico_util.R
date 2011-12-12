@@ -257,7 +257,7 @@ SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {
 }
 
 SubsetByID <- function(data, id) {
-  cmd <- "subset(data, id==__ID__)"
+  cmd <- "subset(data, item_id==__ID__)"
   cmd <- gsub("__ID__", id, cmd)
   eval(parse(text = cmd))
 }

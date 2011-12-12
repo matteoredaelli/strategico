@@ -190,11 +190,11 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
 
 Item.GetKeys <- function(id, project.name, db.channel) {
   tablename = DB.GetTableNameProjectItems(project.name)
-  where.condition <- paste("id=", id, sep='')
+  where.condition <- paste("item_id=", id, sep='')
   sql_statement <- paste("select * from", tablename, "where", where.condition, sep=" ")
   records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
   if (nrow(records) > 0) {
-    records$id <- NULL
+    records$item_id <- NULL
     result <- as.vector(as.matrix(records[1,]))
   } else {
     logger(WARN, paste("No Keys found for ID =", id))
