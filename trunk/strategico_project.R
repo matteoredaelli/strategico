@@ -101,6 +101,7 @@ Project.GetConfig <- function(project.name) {
   project.path <- Project.GetPath(project.name)
   
   filename <- Project.GetConfigFullPathFilename(project.name)
+  logger(DEBUG, paste("Reading config file", filename))
   FileExistsOrQuit(filename)
   ## sourcing project.config file
   source(filename)
@@ -113,7 +114,10 @@ Project.GetConfig <- function(project.name) {
 }
 
 Project.GetList <- function(projects.home = strategico.config$projects.home) {
-  dir(projects.home)
+  logger(DEBUG, paste("Projects in", projects.home, ":"))
+  projects <- dir(projects.home)
+  logger(DEBUG, projects)
+  projects
 }
   
 Project.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
