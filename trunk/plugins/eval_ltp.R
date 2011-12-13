@@ -72,16 +72,14 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   
   if ("summary" %in% project.config$save) {
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
-    
+    onerow.summ <- cbind(item_id=id, onerow.summ)
+    tablename = DB.GetTableNameSummary(project.name, value)
+    DB.DeleteAndInsertData(onerow.summ, tablename=tablename, id=id, db.channel=db.channel)
+
     if (!is.null(model@BestModel)) {
       summary.models <- data.frame(ltp.GetModelsComparisonTable(model))
       summary.models = cbind(item_id=id, model=rownames(summary.models), summary.models)
      }
-
-    ## TODO: fails if normalized data is empty
-    ## ./strategico.R --cmd eval_items --id.list 5 -n sample
-    tablename = DB.GetTableNameSummary(project.name, value)
-    DB.DeleteAndInsertData(onerow.summ, tablename=tablename, id=id, db.channel=db.channel)
 
     if (!is.null(model@BestModel)) {
       tablename = DB.GetTableNameSummaryModels(project.name, value)
