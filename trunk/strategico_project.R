@@ -65,7 +65,7 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
 
   tablename = DB.GetTableNameProjectItems(project.name)
   where.condition <- BuildFilterWithKeys(keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
-  sql_statement <- paste("select id from", tablename, "where", where.condition, sep=" ")
+  sql_statement <- paste("select item_id from", tablename, "where", where.condition, sep=" ")
   records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
   
   tot <- nrow(records)
