@@ -18,6 +18,13 @@
 ## authors: M. Redaelli
 ## created: 2011
 
+setContentType("text/html")
+##RApacheOutputErrors(FALSE)
+options(hverbose=FALSE,verbose=FALSE)
+suppressPackageStartupMessages(library(googleVis))
+db.channel <- DB.Connect()
+
+
 BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
   if(is.null(default) | is.na(default) | length(default)==0L) default <- ""
   str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" size="_SIZE_" />'
@@ -100,4 +107,11 @@ GetWebTemplatesHome <- function() {
 ShowTemplate <- function(template.name) {
   template.file <- paste(template.name, '.brew', sep='')
   brew(file.path(GetWebTemplatesHome(), template.file))
+}
+
+WebSource <- function(name) {
+  newname <- paste(name, "R", sep=".")
+  folder <- file.path(GetTemplatesHome(), "web")
+  filename <- file.path(folder, newname)
+  source(filename)
 }

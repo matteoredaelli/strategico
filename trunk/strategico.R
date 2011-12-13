@@ -100,7 +100,6 @@ if (opt$cmd == "runit") {
   
   project.name <- "sample"
   project.config <- Project.GetConfig(project.name)
-  db.channel <- DB.Connect()
 
   test.suite <- defineTestSuite("StrategicoTestSuite",
                               dirs = paste(GetStrategicoHome(), "tests", sep="/"),
@@ -125,13 +124,6 @@ if (!Project.IsValidName(opt$project.name))
   UsageAndQuit( paste("Unknown project name=", opt$project.name))
 
 project.config <- Project.GetConfig(opt$project.name)
-
-#########################################################################
-## Opening DB connection
-#########################################################################
-
-# TODO: check if connection fails
-db.channel <- DB.Connect()
 
 #########################################################################
 ## Normalizing options
@@ -241,6 +233,16 @@ if (opt$cmd == "eval.ts") {
                period.start.string=opt$ts.start,
                period.freq=opt$ts.freq, param=param, project.config=project.config, db.channel=db.channel
              )
+  q(status=0)
+}
+
+
+#########################################################################
+## create.db
+#########################################################################
+if (opt$cmd == "create.db") {
+  ##TODO
+  ##/create-tables-ltp.sh opt$project.name localost r strategicodev
   q(status=0)
 }
 

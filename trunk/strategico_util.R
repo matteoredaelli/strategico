@@ -80,8 +80,6 @@ MySource("strategico_project.R")
 MySource("strategico_item.R")
 MySource("strategico_db.R")
 MySource("strategico_period.R")
-MySource("strategico_web.R")
-
 
 BuildFullKey <- function(keys, config.keys, fill.with="") {
   append(keys, rep(fill.with, length(config.keys) - length(keys)))
@@ -330,3 +328,6 @@ Vector.ToString <- function(values) {
 Vector.FromString <- function(string) {
   unlist(strsplit(string, ","))
 }
+
+db.channel <- DB.Connect()
+
