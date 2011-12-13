@@ -39,12 +39,10 @@
 	<header><!-- header -->
 		<div id="headerlogo"><img src="images/yourlogo.png" alt="" /></div>
 		<h1><a href="#">Strategico <span class="alternate">2.0</span></a></h1>
-		<h2><%=paste(
-                         paste("Project", Sys.getenv("STRATEGICO_PROJECT_NAME")), 
-                         paste("Item id=", Sys.getenv("STRATEGICO_PROJECT_ITEM_ID"), 
-			       ", KEY=", Sys.getenv("STRATEGICO_PROJECT_ITEM_KEY"), ", Value=", Sys.getenv("STRATEGICO_PROJECT_VALUE"), sep=""), 
-                         sep="<br />")
-                    %>
+		<h2>
+                    <a href="projects.brew">Projects</a> ::
+                    <a href=project.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>><%=Sys.getenv("STRATEGICO_PROJECT_NAME")%></a>
+                </h2>
 
 	</header><!-- end of header -->
 	

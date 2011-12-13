@@ -329,5 +329,3 @@ Vector.FromString <- function(string) {
   unlist(strsplit(string, ","))
 }
 
-db.channel <- DB.Connect()
-

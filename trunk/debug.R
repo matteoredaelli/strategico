@@ -41,8 +41,6 @@ if (strategico.path == "")
 
 source(file.path(strategico.path, "strategico_util.R"))	
 
-db.channel <- DB.Connect()
-
 project.name <- "sample"
 project.config <- Project.GetConfig(project.name)
 value="V1"
