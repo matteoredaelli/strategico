@@ -157,7 +157,7 @@ Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
 }
 
 Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=TRUE) {
-  tablename <- DB.GetTableNameResults(project.name, value=value)
+  tablename <- DB.GetTableNameResults(project.name=project.name, value=value)
   if (only.best)
     tablename <- paste("v_", tablename)
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
@@ -170,7 +170,7 @@ Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
 
 Item.DB.GetSummaryModels <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameSummaryModels(project.name, value=value)
-  Item.DB.GetRecords(project.name, id=id, key="item_id", tablename=tablename, db.channel=db.channel)
+  Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
 Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
