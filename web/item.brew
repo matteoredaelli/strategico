@@ -61,17 +61,19 @@
            db.channel=db.channel, param=param.r)
   }
 
-  item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, residuals=TRUE)
-  item.models <- colnames(item.results$predictions)
-  item.results$predictions <- subset(item.results$predictions, select=setdiff(item.models, skip.models))
-  model.names <- item.results$model
-  best.model <- as.character(item.results$summary[1,]$BestModel)
-  suggested.model <- as.character(item.results$summary[1,]$SuggestedModel)
-  param <- as.character(item.results$summary[1,]$Parameters)
+  item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  ##item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.models <- unique(item.summary.models$model)
+  best.model <- as.character(item.summary[1,]$BestModel)
+  suggested.model <- as.character(item.summary[1,]$SuggestedModel)
+  param <- as.character(item.summary[1,]$Parameters)
   if(length(param) == 0L) param=""
   
 %>
 
+  <% DB.Close(db.channel) %>
+  
 <!--
   ###############################################################################################################
   ## TAB Home
@@ -136,7 +138,7 @@
 							<h2 class="title">All Models</h2>
 
   <%
-    ML <- gvisLineChart(data=data.frame(item.results$predictions))
+    ML <- gvisLineChart(data=data.frame(item.results))
   %>
   <%= ML$html$chart %>
 
@@ -250,6 +252,4 @@
   ## Footer
   ###############################################################################################################
 -->
-  <% DB.Close(db.channel) %>
-  
   <% ShowTemplate('footer') %>

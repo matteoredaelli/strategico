@@ -1,4 +1,6 @@
-
+<%
+   DB.Close(db.channel)
+%>
 					</div>
 				</div>
 			</section><!-- end of #content -->

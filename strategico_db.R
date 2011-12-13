@@ -25,7 +25,7 @@ DB.Connect <- function(db.name=strategico.config$db.name
                       ,db.pass=strategico.config$db.pass
                       ,db.host=strategico.config$db.host
                       ) {
-  db.channel <- dbConnect(MySQL(),
+  db.channel <- dbConnect(MySQL(max.con = 1),
                           user=db.user,
                           password=db.pass,
                           dbname=db.name,
@@ -118,8 +118,8 @@ DB.RunSQLQuery <- function(sql_statement, db.channel) {
   result
 }
 
-Item.DB.GetNormalizedDataAndResults <- function(project.name, value, id, db.channel) {
-  i.results <-        Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+Item.DB.GetNormalizedDataAndResults <- function(project.name, value, id, db.channel, only.best=TRUE) {
+  i.results <-        Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=only.best)
   i.hist <-           Item.DB.GetNormalizedData(project.name=project.name, id=id, db.channel=db.channel, value=value)
   i.hist$item_id <- NULL
   i.results$item_id <- NULL
@@ -132,7 +132,7 @@ Item.DB.GetNormalizedDataAndResults <- function(project.name, value, id, db.chan
   rbind(i.hist, i.results)
 }
 
-Item.DB.GetRecords <- function(project.name, key="id", id, tablename, db.channel) {
+Item.DB.GetRecords <- function(project.name, key="item_id", id, tablename, db.channel) {
   filter <- paste(key, "=", id, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
@@ -159,7 +159,7 @@ Item.DB.GetNormalizedData <- function(project.name, value, id, db.channel) {
 Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=TRUE) {
   tablename <- DB.GetTableNameResults(project.name=project.name, value=value)
   if (only.best)
-    tablename <- paste("v_", tablename)
+    tablename <- paste("v", tablename, sep="_")
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 

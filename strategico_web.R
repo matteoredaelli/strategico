@@ -22,8 +22,6 @@ setContentType("text/html")
 ##RApacheOutputErrors(FALSE)
 options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
-db.channel <- DB.Connect()
-
 
 BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
   if(is.null(default) | is.na(default) | length(default)==0L) default <- ""
