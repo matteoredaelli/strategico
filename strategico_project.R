@@ -73,7 +73,7 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
     logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
     result = NA
   } else {
-    result = records$id
+    result = records$item_id
   }
   result
 }

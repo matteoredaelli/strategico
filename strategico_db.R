@@ -130,8 +130,10 @@ Item.DB.GetNormalizedDataAndResults <- function(project.name, value, id, db.chan
   rbind(i.hist, i.results)
 }
 
-Item.DB.GetRecords <- function(project.name, key="item_id", id, tablename, db.channel) {
-  filter <- paste(key, "=", id, sep="")
+Item.DB.GetRecords <- function(project.name, key="item_id", id.list, tablename, db.channel) {
+  id.string <- paste(as.vector(id.list), collapse="','", sep="")
+  id.string <- paste("('",id.string, "')", sep="")
+  filter <- paste(key, " in ", id.string, sep="")
   sql_statement <- paste("select * from", tablename, "where", filter, sep=" ")
   DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
 }
@@ -163,6 +165,12 @@ Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=TR
 
 Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameSummary(project.name, value=value)
+  Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
+}
+
+Item.DB.GetVSummary <- function(project.name, value, id, db.channel) {
+  tablename <- DB.GetTableNameSummary(project.name, value=value)
+  tablename <- paste("v_", tablename, sep="")
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 

@@ -10,9 +10,9 @@
 	<meta charset="utf-8" />
 	<title>Strategico :: 
               <%=paste(
-                   paste("Project", Sys.getenv("STRATEGICO_PROJECT_NAME")), 
-                   paste("Item", Sys.getenv("STRATEGICO_PROJECT_ITEM_KEY")), 
-                   paste("Value", Sys.getenv("STRATEGICO_PROJECT_VALUE")), 
+                   Sys.getenv("STRATEGICO_PROJECT_NAME"), 
+                   Sys.getenv("STRATEGICO_PROJECT_ITEM_ID"), 
+                   Sys.getenv("STRATEGICO_PROJECT_VALUE"), 
                    sep=" :: ")
               %>
         </title>
@@ -42,6 +42,8 @@
 		<h2>
                     <a href="project.brew">Projects</a> ::
                     <a href=project.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>><%=Sys.getenv("STRATEGICO_PROJECT_NAME")%></a>
+                    <a href=items.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>>Items</a>
+                    <a href=item.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>&id=<%=Sys.getenv("STRATEGICO_PROJECT_ITEM_ID")%>&value=<%=Sys.getenv("STRATEGICO_PROJECT_VALUE")%>><%=Sys.getenv("STRATEGICO_PROJECT_ITEM_ID")%></a>
                 </h2>
 
 	</header><!-- end of header -->
