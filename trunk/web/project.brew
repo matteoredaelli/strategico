@@ -151,14 +151,9 @@ for (value in GetValueNames(project.config$values)) {
                                                 <div class="panel">
                                                         <div class="panel-wrapper">
                                 <article>
-                                                        <h2 class="title">Search items</h2>
+                                                        <h2 class="title"><a href=items.brew?project=<%=project.name%>>Search items</a></h2>
 
-                <form method="GET">
-                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
-                  <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                 <input type="submit" value="Search" />
-                </form>
+  
                                 </article>
                                                         </div>
                                                 </div>

@@ -18,6 +18,8 @@
   item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
+  Sys.setenv(STRATEGICO_PROJECT_VALUE=value)
   %>
   
   <% ShowTemplate('header')%>
