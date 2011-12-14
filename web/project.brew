@@ -3,7 +3,7 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
-
+  WebSource("project")
 
   if( !is.null(POST$project))
     GET$project <- POST$project
@@ -29,7 +29,19 @@
     }
   }
 
-  ## settings is or item.keys depending on which variables were passed in GET input
+  if (!is.null(POST$import.db)) {
+    ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
+    cmd <- file.path(strategico.home, "strategico.R")
+    cmd <- paste(cmd,"--cmd import -n", project.name)
+    system(cmd, wait=FALSE)
+  }
+
+  if (!is.null(POST$empty.db)) {
+    #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
+    cmd <- file.path(strategico.home, "strategico.R")
+    cmd <- paste(cmd,"--cmd empty.DB -n", project.name)
+    system(cmd, wait=FALSE)
+  }
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
   Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=" ")
@@ -38,6 +50,7 @@
   %>
   
   <% ShowTemplate('header')%>
+
     <!--
   ###############################################################################################################
   ## TAB Home Change Project
@@ -71,7 +84,7 @@
                   Config File <input type="file" name="config.file" /><br />
                   Data File <input type="file" name="data.file" /><br />
                 <input type="submit" name="upload.files" value="Upload files"/><br />
-                <input type="submit" name="upload.data" value="Upload Items"/><br />
+                <input type="submit" name="import.db" value="Import to DB"/><br />
                 <input type="submit" name="run" value="Run"/><br />
                 <input type="submit" name="empty.db" value="Empty DB"/>
                 </form>
