@@ -25,7 +25,7 @@ DB.Connect <- function(db.name=strategico.config$db.name
                       ,db.pass=strategico.config$db.pass
                       ,db.host=strategico.config$db.host
                       ) {
-  db.channel <- dbConnect(MySQL(max.con = 1),
+  db.channel <- dbConnect(MySQL(max.con = 50),
                           user=db.user,
                           password=db.pass,
                           dbname=db.name,
@@ -203,7 +203,7 @@ Items.DB.SetBestModel <- function(project.name, value, id.list,
   str.id.list <- paste(id.list, collapse=",")
   logger(DEBUG, paste("Setting bestmodel=", model, " for id.list=", str.id.list, sep=""))
   tablename <- DB.GetTableNameSummary(project.name, value=value)
-  str <- "update _TABLENAME_ set BestModel='_MODEL_' where id in (_IDLIST_)"
+  str <- "update _TABLENAME_ set BestModel='_MODEL_' where item_id in (_IDLIST_)"
   str <- gsub("_TABLENAME_", tablename, str)
   str <- gsub("_MODEL_", model, str)
   str <- gsub("_IDLIST_", str.id.list, str)
