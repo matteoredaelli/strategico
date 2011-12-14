@@ -1,42 +1,23 @@
   <%
 ## -*- mode: R -*-
-  brew( "/var/www/strategico/web/common.brew")
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+  MySource("strategico_web.R")
+  WebSource("project")
+
+  #db.channel <- DB.Connect()
 
   param <- ifelse(is.null(GET$param), "", GET$param)
   value <- ifelse(is.null(GET$value), "V1", GET$value)
   str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
   skip.models <- unlist(strsplit(str.skip.models, ","))
   
-  ## loading project config
-
-  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-  project.config <- Project.GetConfig(project.name=project.name)
-
   ## settings is or item.keys depending on which variables were passed in GET input
 
-  project.keys <- GetKeyNames(project.config$keys)
-  if (is.null(GET$KEY1)) {
-    id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
-    item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
-  } else {
-    for (k in project.keys)
-      GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
-    item.keys <- as.character( unlist(GET[project.keys]))
-
-    id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
-    ##if (!is.na(id.result) & (!is.null(id.result)) & (length(id.result)>0) ) 
-    id <- as.numeric(id.result[1])
-  }
-  keys.string <- ifelse(is.null(item.keys),
-                        "",
-                        paste(item.keys, collapse="-"))
-
-  item.path <- Item.GetUrl(project.name=project.name, id=id, value=value)
+  id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+  item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=keys.string)
-  Sys.setenv(STRATEGICO_PROJECT_VALUE=value)
   %>
   
   <% ShowTemplate('header')%>
@@ -52,17 +33,29 @@
   }
 
   ########################################################################################
-  ##  Retriving all results
+  ##  Run
   ########################################################################################
-
   if (!is.null(GET$eval) ) {
     param.r <- Param.EvalString(param)
     Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param.r)
   }
 
-  item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  ##item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+  ########################################################################################
+  ##  Retriving all results
+  ########################################################################################
+
+  item.results <- Item.DB.GetNormalizedDataAndResults(project.name=project.name,
+                                                      id=id, db.channel=db.channel,
+                                                      value=value, only.best=FALSE)
+  item.results$item_id <- NULL
+  item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+
+  item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
+  item.results.best$item_id <- NULL
+
+  item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.models <- unique(item.summary.models$model)
   best.model <- as.character(item.summary[1,]$BestModel)
@@ -70,10 +63,10 @@
   param <- as.character(item.summary[1,]$Parameters)
   if(length(param) == 0L) param=""
   
+  #DB.Close(db.channel)
+
 %>
 
-  <% DB.Close(db.channel) %>
-  
 <!--
   ###############################################################################################################
   ## TAB Home
@@ -85,19 +78,11 @@
         			<article>
 							<h2 class="title">Home</h2>
 
-  <h3>Search by keys</h3>
-                <form method="GET">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
-                <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                 <input type="submit" value="Search">
-                </form>
-  <h3>Search by ID</h3>
                 <form method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
                 <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                <input type="submit" name="show" value="Search">
+                <input type="submit" name="show" value="Search" />
                 </form>
 				</article>
 							</div>
@@ -108,52 +93,75 @@
   ## TAB Run
   ###############################################################################################################
   -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Run</h2>
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Run</h2>
                 <form method="GET">
                   <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                   <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
                   <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
                   <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
-                  <input type="submit" name="eval" value="Run">
-                </form>        
- 
-				</article>
-							</div>
-						</div>
-  
+                  <input type="submit" name="eval" value="Run" />
+                </form>
+
+                                </article>
+                                                        </div>
+                                                </div>
+
+  <!--
+  ###############################################################################################################
+  ## TAB best Model
+  ###############################################################################################################
+  -->
+  <%
+  if(!is.null(item.results) && is.data.frame(item.results) && nrow(item.results) > 0) {
+  %>
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">BestModel <%=best.model%></h2>
+
+  <%
+    ML <- gvisLineChart(data=subset(item.results, model== best.model, select=c("PERIOD", "V")))
+  %>
+  <%= ML$html$chart %>
+
+                                </article>
+                                                        </div>
+                                                </div>
+ <%}%>
+
 <!--
   ###############################################################################################################
   ## TAB All Models
   ###############################################################################################################
 -->
   <%
-  if ((!is.null(item.results$predictions)) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+  if ((!is.null(item.results)) && is.data.frame(item.results) && nrow(item.results) > 0) {                 
   %>
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">All Models</h2>
-
-  <%
-    ML <- gvisLineChart(data=data.frame(item.results))
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Choose Model</h2>
+  
+  <% 
+    ML <- gvisLineChart(data=data.frame(item.results.pivot))
   %>
   <%= ML$html$chart %>
 
   <!--
   ## TAB Change Model
   -->
-    
+
   <%
-    if(!is.null(model.names) && length(model.names) > 0) {
+    if(!is.null(item.models) && length(item.models) > 0) {
   %>
                <form method="GET">
                 <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
                 <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
                 <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                  <% for (model in model.names) { 
+                  <% for (model in item.models) {
                        str <- paste(BuildHtmlElement_input(name="model", default=model, type="radio"),
                          model, " ", sep="")
                        cat(str)
@@ -161,92 +169,34 @@
                   %>
                     <input type="submit" name="setmodel" value="Set best model" />
                 </form>    <br /><br />
-  <%}%>
+
+
+ <%}%>
+                           
   <!--
   ## Summary
   -->
   <%
-    if(!is.null(item.results$summary.models) && is.data.frame(item.results$summary.models) && nrow(item.results$summary.models) > 0) {
+    if(!is.null(item.summary.models) && is.data.frame(item.summary.models) && nrow(item.summary.models) > 0) {
+	    i.summary.models <- item.summary.models
+	    i.summary.models$item_id <- NULL
+	    rownames(i.summary.models) <- NULL
+	    print(xtable(i.summary.models), type="html")
+
+	    i.summary <- subset(item.summary, select=c(-item_id, -Parameters))
+	    rownames(i.summary) <- NULL
+	    print(xtable(t(i.summary)), type="html")
+    }
   %>
 
-  <%
-    i.summary.models <- item.results$summary.models
-    i.summary.models$item_id <- NULL
-    rownames(i.summary.models) <- NULL
-    print(xtable(i.summary.models), type="html")
 
-    i.summary <- subset(item.results$summary, select=c(-id, -Parameters, -normalizedData, -predictedPeriods))
-    rownames(i.summary) <- NULL
-    print(xtable(t(i.summary)), type="html")
-  %>
-  <%}%>
-  
-    
-				</article>
-							</div>
-						</div>
-<%}%>
-  <!--
-  ###############################################################################################################
-  ## TAB Residuals
-  ###############################################################################################################
-  -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Residuals</h2>
+                                </article>
+                                                        </div>
+                                                </div>
+ <%}%>
 
-  <%
-    ML <- gvisLineChart(data=data.frame(item.results$residuals))
-  %>
-  <%= ML$html$chart %>
 
-				</article>
-							</div>
-						</div>
-  
-  <!--
-  ###############################################################################################################
-  ## TAB best Model
-  ###############################################################################################################
-  -->
-  <%
-  if(!is.null(item.results$predictions) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
-  %>
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">BestModel <%=best.model%></h2>
 
-  <%
-    ML <- gvisLineChart(data=subset(item.results$predictions, select=c("PERIOD", best.model)))
-  %>
-  <%= ML$html$chart %>
-
-				</article>
-							</div>
-						</div>
- <%}%> 
-<!--
-  ###############################################################################################################
-  ## TAB Predictions
-  ###############################################################################################################
--->
-<%
-  if(!is.null(item.results$predictions) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
-%>
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Predictions</h2>
-                                                
-<%
-    print(xtable(item.results$predictions), type="html")
-%>                                              
-				</article>
-							</div>
-						</div>
-<%}%>
 <!--
   ###############################################################################################################
   ## Footer

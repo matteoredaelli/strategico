@@ -1,0 +1,149 @@
+  <%
+## -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+  MySource("strategico_web.R")
+
+
+  if( !is.null(POST$project))
+    GET$project <- POST$project
+  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+  project.path <- Project.GetPath(project.name)
+
+
+
+  if (!is.null(POST$upload.files)) {
+    destination.path <- Project.GetPath(project.name)
+    dir.create(destination.path, showWarnings = FALSE)
+
+    if (!is.null(FILES$config.file)) {
+        destination.file <- file.path(destination.path, paste(project.name, ".conf", sep=""))
+        file.copy(FILES$config.file$tmp_name, destination.file, overwrite=TRUE)
+        Sys.chmod(destination.file, "777")
+    }
+
+    if (!is.null(FILES$data.file)) {
+        destination.file <- file.path(destination.path, paste(project.name, ".csv", sep=""))
+        file.copy(FILES$data.file$tmp_name, destination.file, overwrite=TRUE)
+        Sys.chmod(destination.file, "777")
+    }
+  }
+
+  ## settings is or item.keys depending on which variables were passed in GET input
+
+  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=" ")
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=" ")
+  Sys.setenv(STRATEGICO_PROJECT_VALUE=" ")
+  %>
+  
+  <% ShowTemplate('header')%>
+    <!--
+  ###############################################################################################################
+  ## TAB Home Change Project
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Select project</h2>
+
+                <form method="GET" >
+                  <%=BuildHtmlElement_input(name="project", default=project.name, type="text")%><br />
+                <input type="submit" name="set_project" />
+                </form>
+
+				</article>
+							</div>
+						</div>
+    <!--
+  ###############################################################################################################
+  ## TAB Run
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Run</h2>
+
+                <form enctype="multipart/form-data" method="POST" >
+                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
+                  Config File <input type="file" name="config.file" /><br />
+                  Data File <input type="file" name="data.file" /><br />
+                <input type="submit" name="upload.files" value="Upload files"/><br />
+                <input type="submit" name="upload.data" value="Upload Items"/><br />
+                <input type="submit" name="run" value="Run"/><br />
+                <input type="submit" name="empty.db" value="Empty DB"/>
+                </form>
+
+				</article>
+							</div>
+						</div>
+
+    <!--
+  ###############################################################################################################
+  ## TAB Status
+  ###############################################################################################################
+  -->
+  						<div class="panel">
+							<div class="panel-wrapper">	
+        			<article>
+							<h2 class="title">Status</h2>
+
+Project name=<%=project.name%>
+<br />Config file <%=project.name%>.conf ...
+<%
+ filename.project.config <- file.path(project.path, Project.GetConfigFilename(project.name))
+ 
+ if( !file.exists(filename.project.config)) {
+  cat("missing!")
+ } else {
+  cat("ok")
+  WebSource("project")
+%>
+
+<br />Data file <%=project.name%>.csv ...
+<%
+ filename.project.csv <- file.path(project.path, paste(project.name, ".csv", sep=""))
+ 
+ if( !file.exists(filename.project.csv)) {
+  cat("missing!")
+ } else {
+  cat("ok")
+ }
+
+  ## loading project config
+  project.config <- Project.GetConfig(project.name=project.name)
+
+ ## show project stats
+
+stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
+print(xtable(t(as.data.frame(stats))), type="html")
+
+for (value in GetValueNames(project.config$values)) {
+  t.sum <- DB.GetTableNameSummary(project.name, value)
+  stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
+%>
+  <h3><%=value%> predictions</h3>
+<% 
+  print(xtable(t(as.data.frame(stats.models))), type="html")
+  if (nrow(stats.models) > 1) {
+    M <- gvisPieChart(stats.models, options=list(
+                                    title=paste(value, ": relative models distribution", sep="")))
+    MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
+%>
+  <%= M$html$chart %> 
+  <%= MG$html$chart %>
+<%
+  }
+}}
+%>
+				</article>
+							</div>
+						</div>
+<!--
+  ###############################################################################################################
+  ## Footer
+  ###############################################################################################################
+-->
+  <% ShowTemplate('footer') %>
