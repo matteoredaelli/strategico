@@ -32,14 +32,14 @@
   if (!is.null(POST$import.db)) {
     ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
     cmd <- file.path(strategico.home, "strategico.R")
-    cmd <- paste(cmd,"--cmd import -n", project.name)
+    cmd <- paste(strategico.config$R.command, cmd,"--cmd import -n", project.name)
     system(cmd, wait=FALSE)
   }
 
   if (!is.null(POST$empty.db)) {
     #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
     cmd <- file.path(strategico.home, "strategico.R")
-    cmd <- paste(cmd,"--cmd empty.DB -n", project.name)
+    cmd <- paste(strategico.config$R.command, cmd,"--cmd empty.db -n", project.name)
     system(cmd, wait=FALSE)
   }
 

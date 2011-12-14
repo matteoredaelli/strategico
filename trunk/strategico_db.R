@@ -67,6 +67,7 @@ DB.DeleteAndInsertData <- function(data, tablename, id.name="item_id", id=NULL, 
  
   dbWriteTable(db.channel, value=data.frame(data), name=tablename, row.names=F,
           append=append)
+  logger(DEBUG, paste("Done saving data (deleting + inserting) to table", tablename))
 
 }
 

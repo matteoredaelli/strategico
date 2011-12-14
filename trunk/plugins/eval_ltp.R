@@ -46,22 +46,24 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## Saving Normalized Data
   ## ###################################################################################
     
+  logger(DEBUG, "Normalized data:")
+  logger(DEBUG, model@values)
   if ( nrow(model@values) == 0) {
     ##__##logger(WARN, "No records in normalized data. No saving to DB")
     skip=TRUE
   } else {
     normalized.data <- data.frame(item_id=id, PERIOD=rownames(model@values), V=model@values$V)
     tablename = DB.GetTableNameNormalizedData(project.name, value)
-    DB.DeleteAndInsertData(normalized.data, tablename=tablename, id=id, id.name="item_id", append=TRUE,
-                           db.channel=db.channel)
+    DB.DeleteAndInsertData(normalized.data, tablename=tablename, id=id, db.channel=db.channel)
   }
     
   if (is.null(model@BestModel)) {
-    ##__##logger(WARN, "Best model is null. No saving to DB")
+    logger(WARN, "Best model is null. No saving to DB")
     return(2)
   } 
 
   
+  logger(DEBUG, "Calculating the predicted periods")
   predicted.periods <-Period.BuildRange(period.start=project.config$period.end,
                                           period.freq=project.config$period.freq,
                                           n=param$n.ahead, shift=1)
@@ -70,6 +72,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## ###################################################################################
   
   if ("summary" %in% project.config$save) {
+    logger(DEBUG, "Calculating the onerow.summ table")
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
     onerow.summ <- cbind(item_id=id, onerow.summ)
     tablename = DB.GetTableNameSummary(project.name, value)
