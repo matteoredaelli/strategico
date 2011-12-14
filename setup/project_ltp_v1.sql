@@ -77,7 +77,7 @@ select
 from
   projectname_items i inner join 
   projectname_summary_V1 s on (i.item_id = s.item_id) inner join 
-  projectname_results_V1 r on (s.item_id = r.item_id and s.BestModel = r.model)
+  projectname_results_V1 r on (s.item_id = r.item_id and s.SuggestedModel = r.model)
 order by
   i.item_id,
   r.PERIOD
