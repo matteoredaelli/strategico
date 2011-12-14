@@ -18,8 +18,6 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-library(RMySQL)
-
 DB.Connect <- function(db.name=strategico.config$db.name
                       ,db.user=strategico.config$db.user
                       ,db.pass=strategico.config$db.pass
