@@ -40,7 +40,7 @@
 		<div id="headerlogo"><img src="images/yourlogo.png" alt="" /></div>
 		<h1><a href="#">Strategico <span class="alternate">2.0</span></a></h1>
 		<h2>
-                    <a href="projects.brew">Projects</a> ::
+                    <a href="project.brew">Projects</a> ::
                     <a href=project.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>><%=Sys.getenv("STRATEGICO_PROJECT_NAME")%></a>
                 </h2>
 
