@@ -1,0 +1,62 @@
+  <%
+## -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+  MySource("strategico_web.R")
+  WebSource("project")
+
+  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+  value <- ifelse(is.null(GET$value), "V1", GET$value)
+
+
+ if (is.null(GET$KEY1)) {
+    id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+    item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
+  } else {
+    for (k in project.keys)
+      GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+    item.keys <- as.character( unlist(GET[project.keys]))
+
+    id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
+    ##if (!is.na(id.result) & (!is.null(id.result)) & (length(id.result)>0) ) 
+    id <- as.numeric(id.result[1])
+  }
+
+
+  ## settings is or item.keys depending on which variables were passed in GET input
+
+  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=" ")
+  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=" ")
+  Sys.setenv(STRATEGICO_PROJECT_VALUE=" ")
+  %>
+  
+  <% ShowTemplate('header')%>
+
+<!--
+  ###############################################################################################################
+  ## TAB Search Items
+  ###############################################################################################################
+-->
+
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Search items</h2>
+
+                <form method="GET">
+                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
+                  <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                 <input type="submit" value="Search" />
+                </form>
+                                </article>
+                                                        </div>
+                                                </div>
+
+<!--
+  ###############################################################################################################
+  ## Footer
+  ###############################################################################################################
+-->
+  <% ShowTemplate('footer') %>
