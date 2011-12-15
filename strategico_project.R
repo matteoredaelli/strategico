@@ -175,6 +175,7 @@ Project.GetTableNames <- function(project.name, project.config=NULL) {
   
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
+                      DB.GetTableNameResiduals(project.name, value),
                       DB.GetTableNameResults(project.name, value),
                       DB.GetTableNameSummary(project.name, value),
                       DB.GetTableNameSummaryModels(project.name, value)
@@ -280,12 +281,13 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## TODO adding a row with all keys equal to ''
   ## useful as default value for web forms
   ## not added beacuse KEY1 becomes NA...
-  ## allvalues.keys <- rep('', length(key_fields))
-  ## project.items <- rbind(project.items, allvalues.keys)
+  ##allvalues.keys <- rep("", length(key_fields))
+  ##project.items <- rbind(allvalues.keys, project.items)
 
   ## adding ID column
   project.items <- cbind(item_id=1:nrow(project.items), project.items)
  
+
   tablename = DB.GetTableNameProjectItems(project.config$project.name)
   ## preparing data for prymary key in DB  (id must be the rownames)
   project.items.orig <- project.items

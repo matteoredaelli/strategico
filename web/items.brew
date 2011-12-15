@@ -80,7 +80,7 @@
                                                         <h2 class="title">Show items</h2>
 <%
   Table <- gvisTable(items.summary, options=list(width=700, height=300))
-  ##print(xtable(items.summary), type="html")
+  print(xtable(items.summary), type="html")
 %>
   <%= Table$html$chart %>
 

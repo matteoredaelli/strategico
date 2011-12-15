@@ -11,6 +11,7 @@
   project.path <- Project.GetPath(project.name)
 
 
+  cmd.strategico <- paste("/usr/bin/sbatch", file.path(strategico.home, "strategico.R"))
 
   if (!is.null(POST$upload.files)) {
     destination.path <- Project.GetPath(project.name)
@@ -31,16 +32,16 @@
 
   if (!is.null(POST$import.db)) {
     ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
-    cmd <- file.path(strategico.home, "strategico.R")
-    cmd <- paste(strategico.config$R.command, cmd,"--cmd import -n", project.name)
-    system(cmd, wait=FALSE)
+    cmd <- paste(cmd.strategico, "--cmd import -n", project.name)
+    cat(cmd)
+    system(cmd, wait=TRUE, intern=TRUE)
   }
 
   if (!is.null(POST$empty.db)) {
     #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
-    cmd <- file.path(strategico.home, "strategico.R")
-    cmd <- paste(strategico.config$R.command, cmd,"--cmd empty.db -n", project.name)
-    system(cmd, wait=FALSE)
+    cmd <- paste(cmd.strategico, "--cmd empty.db -n", project.name)
+    cat(cmd)
+    system(cmd, wait=FALSE, intern=TRUE)
   }
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
