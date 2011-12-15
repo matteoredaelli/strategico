@@ -2,3 +2,6 @@ db.channel <- DB.Connect()
 project.name <- ifelse(is.null(GET$project), "sample", GET$project)
 project.config <- Project.GetConfig(project.name=project.name)
 project.keys <- GetKeyNames(project.config$keys)
+project.path <- Project.GetPath(project.name)
+
+strategico.command <- paste(strategico.config$strategico.command, "-n", project.name)
