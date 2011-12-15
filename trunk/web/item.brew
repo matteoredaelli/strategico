@@ -53,6 +53,7 @@
                                                       value=value, only.best=FALSE)
   item.results$item_id <- NULL
   item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+  item.results.pivot <- data.frame(item.results.pivot)
 
   item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
   item.results.best$item_id <- NULL
@@ -148,7 +149,7 @@
                                                         <h2 class="title">Choose Model</h2>
   
   <% 
-    ML <- gvisLineChart(data=data.frame(item.results.pivot))
+    ML <- gvisLineChart(data=item.results.pivot)
   %>
   <%= ML$html$chart %>
 
@@ -191,14 +192,34 @@
     }
   %>
 
-
                                 </article>
                                                         </div>
                                                 </div>
  <%}%>
 
+<!--
+  ###############################################################################################################
+  ## TAB Results
+  ###############################################################################################################
+-->
+  <%
+  if ((!is.null(item.results)) && is.data.frame(item.results) && nrow(item.results) > 0) {                 
+  %>
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Results</h2>
+  
+ <%
+  Table <- gvisTable(item.results.pivot, options=list(width=700, height=500))
+  ##print(xtable(item.results.pivot), type="html")
+ %>
+  <%= Table$html$chart %>
 
-
+                                </article>
+                                                        </div>
+                                                </div>
+ <%}%>
 <!--
   ###############################################################################################################
   ## Footer

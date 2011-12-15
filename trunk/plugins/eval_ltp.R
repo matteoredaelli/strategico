@@ -22,6 +22,7 @@
 suppressPackageStartupMessages(library(ast))
 suppressPackageStartupMessages(library(ltp))
 
+#source("/opt/strategico/plugins/ltpTemp.r")
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
     model <- ltp(product = item.data, rule=param$rule, ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
@@ -52,7 +53,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     ##__##logger(WARN, "No records in normalized data. No saving to DB")
     skip=TRUE
   } else {
-    normalized.data <- data.frame(item_id=id, PERIOD=rownames(model@values), V=model@values$V)
+    normalized.periods <- rownames(model@values)
+    normalized.data <- data.frame(item_id=id, PERIOD=normalized.periods, V=model@values$V)
     tablename = DB.GetTableNameNormalizedData(project.name, value)
     DB.DeleteAndInsertData(normalized.data, tablename=tablename, id=id, db.channel=db.channel)
   }
@@ -102,29 +104,51 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
   else {
     logger(WARN, paste("Best Model is ", model@BestModel))
-    results <- NULL
+    all.results <- NULL
+    all.residuals <- NULL
     for (m in names(model@models)) {
-      logger(DEBUG, paste("Retreiving results for model", m))
+      logger(DEBUG, paste("Retreiving results and residuals for model", m))
       predictions <- as.vector(model@models[[m]]$prediction)
+      residuals <- as.vector(model@models[[m]]$Residuals)
+
       if (length(predictions) == 0) {
        logger(WARN, paste("No predictions for model", m, ".Skipping it"))
       } else {
-
         model.results <- data.frame(
            item_id=id,
            model=m,
            PERIOD=predicted.periods,
            V=predictions)
-        results <- rbind(results, model.results) 
+        all.results <- rbind(all.results, model.results) 
       }
-    }
-  }
 
-  colnames(results) <- c("item_id", "model", "PERIOD", "V")
+      if (length(residuals) == 0) {
+       logger(WARN, paste("No residuals for model", m, ".Skipping it"))
+      ##} else if (length(residuals) != length(normalized.periods)) {
+      ## logger(WARN, paste("Different number of residuals for model", m, ".Skipping it"))
+      } else {
+        model.residuals <- data.frame(
+           item_id=id,
+           model=m,
+           PERIOD=normalized.periods,
+           V=trunc(residuals, 1))
+        all.residuals <- rbind(all.residuals, model.residuals) 
+      }
+    } ## end for model
+  } ## end if
 
-   if (!is.null(results)) {
+
+   if (!is.null(all.results)) {
+     colnames(all.results) <- c("item_id", "model", "PERIOD", "V")
      tablename = DB.GetTableNameResults(project.name, value)  
-     DB.DeleteAndInsertData(data=results, tablename=tablename, id=id, append=TRUE,
+     DB.DeleteAndInsertData(data=all.results, tablename=tablename, id=id, append=TRUE,
+                            db.channel=db.channel)
+   }
+
+   if (!is.null(all.residuals)) {
+     colnames(all.residuals) <- c("item_id", "model", "PERIOD", "V")
+     tablename = DB.GetTableNameResiduals(project.name, value)  
+     DB.DeleteAndInsertData(data=all.residuals, tablename=tablename, id=id, append=TRUE,
                             db.channel=db.channel)
    }
   

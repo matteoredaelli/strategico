@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `projectname_results_V1` (
   `PERIOD` varchar(20) not NULL,
   `V` double default NULL,
   PRIMARY KEY  (`item_id`, `model`, `PERIOD`)
-) ENGINE=MyIsam DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `projectname_data_norm_V1`;
 CREATE TABLE IF NOT EXISTS `projectname_data_norm_V1` (
@@ -24,6 +24,15 @@ CREATE TABLE IF NOT EXISTS `projectname_data_norm_V1` (
   PRIMARY KEY  (`item_id`, `PERIOD`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+DROP TABLE IF EXISTS `projectname_residuals_V1`;
+CREATE TABLE IF NOT EXISTS `projectname_residuals_V1` (
+  `item_id` int(11) not NULL,
+  `model` varchar(20) not NULL,
+  `PERIOD` varchar(20) not NULL,
+  `V` double default NULL,
+  PRIMARY KEY  (`item_id`, `model`, `PERIOD`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 --
 -- Table structure for table `projectname_summary_models_V1`
 --

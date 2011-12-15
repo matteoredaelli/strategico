@@ -75,6 +75,10 @@ DB.GetTableNameSummary <- function(project.name, value) {
   paste(project.name, "summary", value, sep="_")
 }
 
+DB.GetTableNameResiduals <- function(project.name, value) {
+  paste(project.name, "residuals", value, sep="_")
+}
+
 DB.GetTableNameResults <- function(project.name, value) {
   paste(project.name, "results", value, sep="_")
 }
