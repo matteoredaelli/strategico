@@ -166,7 +166,7 @@ if (is.null(id.list)) {
 
 ## item.values could be could be V1 or V1,V2
 if (is.null(opt$item.values)) {
-  opt$item.values <- "V1"
+  opt$item.values <- GetValueNames(project.name=opt$project.name, project.config=project.config) 
   logger(INFO, paste("Missing  item.values option: assuming item.values=", opt$item.value))
 } else {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
