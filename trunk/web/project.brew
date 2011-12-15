@@ -1,17 +1,12 @@
   <%
 ## -*- mode: R -*-
+  if( !is.null(POST$project))
+    GET$project <- POST$project
+
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
   WebSource("project")
-
-  if( !is.null(POST$project))
-    GET$project <- POST$project
-  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
-  project.path <- Project.GetPath(project.name)
-
-
-  cmd.strategico <- paste("/usr/bin/sbatch", file.path(strategico.home, "strategico.R"))
 
   if (!is.null(POST$upload.files)) {
     destination.path <- Project.GetPath(project.name)
@@ -32,16 +27,25 @@
 
   if (!is.null(POST$import.db)) {
     ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
-    cmd <- paste(cmd.strategico, "--cmd import -n", project.name)
+    cmd <- paste(strategico.command, "--cmd import")
     cat(cmd)
-    system(cmd, wait=TRUE, intern=TRUE)
+    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    cat(rc)
   }
 
   if (!is.null(POST$empty.db)) {
     #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
-    cmd <- paste(cmd.strategico, "--cmd empty.db -n", project.name)
+    cmd <- paste(strategico.command, "--cmd empty.db")
     cat(cmd)
-    system(cmd, wait=FALSE, intern=TRUE)
+    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    cat(rc)
+  }
+
+  if (!is.null(POST$run)) {
+    cmd <- paste(strategico.command, "--cmd eval.items")
+    cat(cmd)
+    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    cat(rc)
   }
 
   Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
@@ -140,8 +144,9 @@ for (value in GetValueNames(project.config$values)) {
 %>
   <h3><%=value%> predictions</h3>
 <% 
-  print(xtable(t(as.data.frame(stats.models))), type="html")
+  stats.models <- as.data.frame(stats.models)
   if (nrow(stats.models) > 1) {
+    print(xtable(t(stats.models)), type="html")
     M <- gvisPieChart(stats.models, options=list(
                                     title=paste(value, ": relative models distribution", sep="")))
     MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
