@@ -28,22 +28,28 @@
   if (!is.null(POST$import.db)) {
     ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
     cmd <- paste(strategico.command, "--cmd import")
-    cat(cmd)
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
 
   if (!is.null(POST$empty.db)) {
     #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
+    cmd <- paste(strategico.command, "--cmd empty.fs")
+    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    cat(rc)
     cmd <- paste(strategico.command, "--cmd empty.db")
-    cat(cmd)
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
 
   if (!is.null(POST$run)) {
     cmd <- paste(strategico.command, "--cmd eval.items")
-    cat(cmd)
+    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    cat(rc)
+  }
+
+  if (!is.null(POST$export.csv)) {
+    cmd <- paste(strategico.command, "--cmd export.results.csv")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
@@ -88,9 +94,10 @@
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                   Config File <input type="file" name="config.file" /><br />
                   Data File <input type="file" name="data.file" /><br />
-                <input type="submit" name="upload.files" value="Upload files"/><br />
-                <input type="submit" name="import.db" value="Import to DB"/><br />
+                <input type="submit" name="upload.files" value="Upload CSV"/><br />
+                <input type="submit" name="import.db" value="Import CSV to DB"/><br />
                 <input type="submit" name="run" value="Run"/><br />
+                <input type="submit" name="export.csv" value="Export CSV"/>
                 <input type="submit" name="empty.db" value="Empty DB"/>
                 </form>
 
