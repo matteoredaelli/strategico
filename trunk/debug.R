@@ -46,4 +46,5 @@ project.config <- Project.GetConfig(project.name)
 value="V1"
 id=1
 
+db.channel <- DB.Connect()
 

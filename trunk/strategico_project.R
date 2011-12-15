@@ -34,6 +34,9 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
     project.path <- paste(Project.GetPath(project.name), "/[0-9]*", sep="")
     logger(INFO, paste("Deleting project path:", project.path))
     unlink(project.path, recursive=recursive)
+    project.path <- paste(Project.GetPath(project.name), "/*results*.csv", sep="")
+    logger(INFO, paste("Deleting project files:", project.path))
+    unlink(project.path, recursive=FALSE)
     
     ##project.path <- paste(Project.GetPath(project.name), "/project*", sep="")
     ##logger(INFO, paste("Deleting project files:", project.path))
@@ -42,12 +45,17 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
 }
 
 Project.ExportResultsCSV <- function(project.name, value, db.channel, file, sep=";", quote=FALSE) {
+  if(is.null(file)) {
+    name <- paste(project.name, "-results-", value, ".csv", sep="")
+    file <- file.path(Project.GetPath(project.name), name)
+    logger(WARN, paste("Missing file option: assuming file =", file))
+  }
   results <- Project.GetResults(project.name=project.name, value=value, db.channel=db.channel)
-  write.table(results, file=file, row.names=FALSE, append=false, col.names=TRUE, sep=sep, quote=quote)
+  write.table(results, file=file, row.names=FALSE, append=FALSE, col.names=TRUE, sep=sep, quote=quote)
 }
 
 Project.GetResults <- function(project.name, value, db.channel) {
-  tablename <- paste("v_", DB.GetTableNameResults(project.name, value), sep='_')
+  tablename <- paste("v_", DB.GetTableNameResults(project.name, value), sep='')
   sql_statement <- paste("select * from", tablename)
   DB.RunSQLQuery(sql_statement, db.channel=db.channel)
 }
