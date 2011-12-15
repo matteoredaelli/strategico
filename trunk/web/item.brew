@@ -58,6 +58,11 @@
   item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
   item.results.best$item_id <- NULL
 
+  item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.residuals$item_id <- NULL
+  item.residuals.pivot <- cast(item.residuals, PERIOD ~ model, df=TRUE, value="V")
+  item.residuals.pivot <- data.frame(item.residuals.pivot)
+
   item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
   item.models <- unique(item.summary.models$model)
@@ -215,6 +220,29 @@
   ##print(xtable(item.results.pivot), type="html")
  %>
   <%= Table$html$chart %>
+
+                                </article>
+                                                        </div>
+                                                </div>
+ <%}%>
+
+<!--
+  ###############################################################################################################
+  ## TAB Residuals
+  ###############################################################################################################
+-->
+  <%
+  if ((!is.null(item.residuals)) && is.data.frame(item.residuals) && nrow(item.residuals) > 0) {                 
+  %>
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Residuals</h2>
+  
+  <% 
+    ML <- gvisLineChart(data=item.residuals.pivot)
+  %>
+  <%= ML$html$chart %>
 
                                 </article>
                                                         </div>

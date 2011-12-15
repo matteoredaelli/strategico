@@ -168,6 +168,11 @@ Item.DB.GetResults <- function(project.name, value, id, db.channel, only.best=TR
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
+Item.DB.GetResiduals <- function(project.name, value, id, db.channel) {
+  tablename <- DB.GetTableNameResiduals(project.name, value=value)
+  Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
+}
+
 Item.DB.GetSummary <- function(project.name, value, id, db.channel) {
   tablename <- DB.GetTableNameSummary(project.name, value=value)
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
