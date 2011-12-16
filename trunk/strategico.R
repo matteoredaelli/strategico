@@ -134,6 +134,18 @@ if (!Project.IsValidName(opt$project.name))
 
 project.config <- Project.GetConfig(opt$project.name)
 
+
+#########################################################################
+## create.db.tables
+#########################################################################
+
+if (opt$cmd == "create.db.tables") {
+
+  Project.CreateDBTables(project.name=opt$project.name, 
+                         project.config=project.config, db.channel=db.channel)
+  q(status=0)
+}
+
 #########################################################################
 ## Normalizing options
 #########################################################################
@@ -171,7 +183,6 @@ if (is.null(opt$item.values)) {
 } else {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
 }
-
 #########################################################################
 ## eval_children
 #########################################################################

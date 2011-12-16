@@ -18,6 +18,29 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
+Project.CreateDBTables <- function(project.name, project.config=NULL, db.channel=db.channel) {
+  sql.file <- Project.BuildSQLscript(project.name=project.name, project.config=project.config)
+  a <- read.table(sql.file, sep="$")
+  sql <- paste(a[,1], collapse=" ")
+  mysql <- strsplit(sql, ";")
+  sapply(mysql, function(s) DB.RunSQLQuery(sql_statement=s, db.channel=db.channel))
+}
+
+Project.BuildSQLscript <- function(project.name, project.config=NULL) {
+  logger(WARN, "Generating SQL script")
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+  project.keys <- GetKeyNames(project.name=project.name, project.config=project.config)
+  project.values <- GetValueNames(project.name=project.name, project.config=project.config)
+  input.file <- file.path(GetTemplatesHome(), paste("project-sql-", "ltp", ".brew", sep=""))
+  logger(WARN, paste("Template file =", input.file))
+  output.file <- file.path(Project.GetPath(project.name), paste(project.name, ".sql", sep=""))
+  logger(WARN, paste("Target/SQL file =", output.file))
+  brew(input.file, output=output.file)
+  output.file
+}
+
 Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
