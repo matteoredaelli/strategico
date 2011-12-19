@@ -136,14 +136,101 @@ project.config <- Project.GetConfig(opt$project.name)
 
 
 #########################################################################
-## create.db.tables
+## create.db
 #########################################################################
 
-if (opt$cmd == "create.db.tables") {
+if (opt$cmd == "create.db") {
 
-  Project.CreateDBTables(project.name=opt$project.name, 
+  Project.CreateDB(project.name=opt$project.name, 
                          project.config=project.config, db.channel=db.channel)
   q(status=0)
+}
+
+
+#########################################################################
+## create.db
+#########################################################################
+if (opt$cmd == "create.db") {
+  ##TODO
+  ##/create-tables-ltp.sh opt$project.name localost r strategicodev
+  q(status=0)
+}
+
+#########################################################################
+## statistics
+#########################################################################
+
+if (opt$cmd == "statistics") {
+  stats <- Project.GetStatistics(project.name=opt$project.name, db.channel=db.channel)
+  print(t(as.data.frame(stats)))
+  q(status=0)
+}
+
+#########################################################################
+## drop.db
+#########################################################################
+if (opt$cmd == "drop.db") {
+  Project.DropDB(project.name=opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
+
+#########################################################################
+## empty.db
+#########################################################################
+if (opt$cmd == "empty.db") {
+  Project.EmptyDB(project.name=opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
+
+#########################################################################
+## empty.fs
+#########################################################################
+if (opt$cmd == "empty.fs") {
+  Project.EmptyFS(project.name=opt$project.name)
+  q(status=0)
+}
+
+########################################################################
+## export.db.csv
+#########################################################################
+if (opt$cmd == "export.db.csv") {
+  Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
+  Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
+
+
+#########################################################################
+## export.results
+#########################################################################
+
+if (opt$cmd == "export.results.csv") {
+  for (value in opt$item.values) {
+    logger(WARN, paste("Saving", value, "results to CSV file"))
+    Project.ExportResultsCSV(opt$project.name, value=value, db.channel=db.channel, file=opt$file)
+  }
+  q(status=0)
+}
+
+if (opt$cmd == "export.results.db") {
+  value=opt$item.values[1]
+  logger(DEBUG, "Saving data to the database")
+  Project.ExportResultsDB(opt$project.name, value=value, db.channel=db.channel)
+  q(status=0)
+}
+
+#########################################################################
+## CMD import
+#########################################################################
+
+if (opt$cmd == "import") {
+  if(is.null(opt$file)) {
+    opt$file <- Project.GetDataFullPathFilename(opt$project.name)
+    logger(WARN, paste("Missing file option: assuming file=", opt$file))
+  }
+  Project.ImportDataFromCSV(project.name=opt$project.name, db.channel=db.channel, filename=opt$file)
+  q(status=0)
+  
 }
 
 #########################################################################
@@ -255,86 +342,6 @@ if (opt$cmd == "eval.ts") {
              )
   q(status=0)
 }
-
-
-#########################################################################
-## create.db
-#########################################################################
-if (opt$cmd == "create.db") {
-  ##TODO
-  ##/create-tables-ltp.sh opt$project.name localost r strategicodev
-  q(status=0)
-}
-
-#########################################################################
-## statistics
-#########################################################################
-
-if (opt$cmd == "statistics") {
-  stats <- Project.GetStatistics(project.name=opt$project.name, db.channel=db.channel)
-  print(t(as.data.frame(stats)))
-  q(status=0)
-}
-
-#########################################################################
-## empty.db
-#########################################################################
-if (opt$cmd == "empty.db") {
-  Project.EmptyDB(project.name=opt$project.name, db.channel=db.channel)
-  q(status=0)
-}
-
-#########################################################################
-## empty.fs
-#########################################################################
-if (opt$cmd == "empty.fs") {
-  Project.EmptyFS(project.name=opt$project.name)
-  q(status=0)
-}
-
-########################################################################
-## export.db.csv
-#########################################################################
-if (opt$cmd == "export.db.csv") {
-  Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
-  Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
-  q(status=0)
-}
-
-
-#########################################################################
-## export.results
-#########################################################################
-
-if (opt$cmd == "export.results.csv") {
-  for (value in opt$item.values) {
-    logger(WARN, paste("Saving", value, "results to CSV file"))
-    Project.ExportResultsCSV(opt$project.name, value=value, db.channel=db.channel, file=opt$file)
-  }
-  q(status=0)
-}
-
-if (opt$cmd == "export.results.db") {
-  value=opt$item.values[1]
-  logger(DEBUG, "Saving data to the database")
-  Project.ExportResultsDB(opt$project.name, value=value, db.channel=db.channel)
-  q(status=0)
-}
-
-#########################################################################
-## CMD import
-#########################################################################
-
-if (opt$cmd == "import") {
-  if(is.null(opt$file)) {
-    opt$file <- Project.GetDataFullPathFilename(opt$project.name)
-    logger(WARN, paste("Missing file option: assuming file=", opt$file))
-  }
-  Project.ImportDataFromCSV(project.name=opt$project.name, db.channel=db.channel, filename=opt$file)
-  q(status=0)
-  
-}
-
 #########################################################################
 ## CMD set.best.model
 #########################################################################

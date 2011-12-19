@@ -18,7 +18,7 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-Project.CreateDBTables <- function(project.name, project.config=NULL, db.channel=db.channel) {
+Project.CreateDB <- function(project.name, project.config=NULL, db.channel=db.channel) {
   sql.file <- Project.BuildSQLscript(project.name=project.name, project.config=project.config)
   a <- read.table(sql.file, sep="$")
   sql <- paste(a[,1], collapse=" ")
@@ -39,6 +39,16 @@ Project.BuildSQLscript <- function(project.name, project.config=NULL) {
   logger(WARN, paste("Target/SQL file =", output.file))
   brew(input.file, output=output.file)
   output.file
+}
+
+Project.DropDB <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+
+  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
+  lapply(tables, function(x) DB.DropTable(x,db.channel))
+  lapply(tables, function(x) DB.DropView(x,db.channel))
 }
 
 Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
@@ -208,6 +218,7 @@ Project.GetTableNames <- function(project.name, project.config=NULL) {
   
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
+                      DB.GetTableNameNormalizedData(project.name, value),
                       DB.GetTableNameResiduals(project.name, value),
                       DB.GetTableNameResults(project.name, value),
                       DB.GetTableNameSummary(project.name, value),
@@ -226,7 +237,8 @@ Project.GetViewNames <- function(project.name, project.config=NULL) {
   
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
-                      paste("v_", DB.GetTableNameResults(project.name, value), sep="")
+                      paste("v_", DB.GetTableNameResults(project.name, value), sep=""),
+                      paste("v_", DB.GetTableNameSummary(project.name, value), sep="")
                       )
     tables <- append(tables, value.tables)
   }
