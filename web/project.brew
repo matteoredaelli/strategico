@@ -27,7 +27,7 @@
 
 
   if (!is.null(POST$import.db)) {
-    Project.CreateDBTables(project.name=project.name, 
+    Project.CreateDB(project.name=project.name, 
                          project.config=project.config, db.channel=db.channel)
     ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
     cmd <- paste(strategico.command, "--cmd import")
@@ -202,7 +202,7 @@ Project name=<%=project.name%>
  ## show project stats
 
 stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
-##print(xtable(t(as.data.frame(stats))), type="html")
+print(xtable(t(as.data.frame(stats))), type="html")
 
 for (value in GetValueNames(project.config$values)) {
   t.sum <- DB.GetTableNameSummary(project.name, value)

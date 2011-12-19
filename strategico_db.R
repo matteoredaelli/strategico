@@ -52,6 +52,22 @@ DB.EmptyTable <- function(tablename, db.channel) {
   logger(DEBUG, .Last.value) 
 }
 
+DB.DropTable <- function(tablename, db.channel) {
+  DB.Drop(tablename, db.channel, object="table")
+}
+
+DB.DropView <- function(tablename, db.channel) {
+  DB.Drop(tablename, db.channel, object="view")
+}
+
+DB.Drop <- function(tablename, db.channel, object="table") {
+  logger(DEBUG, paste("Dropping", object, tablename, "...")) 
+  sql_statement <- paste("drop", object, tablename)
+  try(DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel))
+  logger(DEBUG, .Last.value) 
+}
+
+
 DB.DeleteAndInsertData <- function(data, tablename, id.name="item_id", id=NULL, verbose=FALSE,
                                    append=TRUE, db.channel) {
   logger(DEBUG, paste("Saving data (deleting + inserting) to table", tablename))
