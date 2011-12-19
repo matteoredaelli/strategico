@@ -6,6 +6,7 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
+  WebSource("project")
 
   if (!is.null(POST$upload.files)) {
     destination.path <- Project.GetPath(project.name)
@@ -24,7 +25,6 @@
     }
   }
 
-  WebSource("project")
 
   if (!is.null(POST$import.db)) {
     Project.CreateDBTables(project.name=project.name, 
@@ -91,22 +91,79 @@
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
-							<h2 class="title">Run</h2>
+							<h2 class="title">Upload CSV</h2>
 
                 <form enctype="multipart/form-data" method="POST" >
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                   Config File <input type="file" name="config.file" /><br />
                   Data File <input type="file" name="data.file" /><br />
                 <input type="submit" name="upload.files" value="Upload CSV"/><br />
-                <input type="submit" name="import.db" value="Import CSV to DB"/><br />
-                <input type="submit" name="run" value="Run"/><br />
-                <input type="submit" name="export.csv" value="Export CSV"/>
-                <input type="submit" name="empty.db" value="Empty DB"/>
                 </form>
 
 				</article>
 							</div>
 						</div>
+
+    <!--                                                
+  ###############################################################################################################
+  ## TAB Import to DB                                         
+  ###############################################################################################################
+  -->           
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Import to DB</h2>
+
+                <form enctype="multipart/form-data" method="POST" >
+                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
+                <input type="submit" name="import.db" value="Import CSV to DB"/><br />
+                </form>
+
+                                </article>
+                                                        </div>
+                                                </div>
+
+    <!--
+  ###############################################################################################################
+  ## TAB Run
+  ###############################################################################################################
+  -->           
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Run</h2>
+
+                <form enctype="multipart/form-data" method="POST" >
+                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
+                <input type="submit" name="run" value="Run"/><br />
+                </form>
+
+                                </article>
+                                                        </div>
+                                                </div>
+
+
+    <!--
+  ###############################################################################################################
+  ## TAB Export
+  ###############################################################################################################
+  -->                                           
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>               
+                                                        <h2 class="title">Export CSV</h2>
+                
+                <form enctype="multipart/form-data" method="POST" >
+                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
+                <input type="submit" name="export.csv" value="Export CSV"/>
+                <input type="submit" name="empty.db" value="Empty DB"/>
+                </form>
+
+                                </article>
+                                                        </div>
+                                                </div>
+
+
 
     <!--
   ###############################################################################################################
