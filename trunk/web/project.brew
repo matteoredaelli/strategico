@@ -6,7 +6,6 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
-  WebSource("project")
 
   if (!is.null(POST$upload.files)) {
     destination.path <- Project.GetPath(project.name)
@@ -24,6 +23,8 @@
         Sys.chmod(destination.file, "777")
     }
   }
+
+  WebSource("project")
 
   if (!is.null(POST$import.db)) {
     Project.CreateDBTables(project.name=project.name, 
@@ -126,7 +127,6 @@ Project name=<%=project.name%>
   cat("missing!")
  } else {
   cat("ok")
-  WebSource("project")
 %>
 
 <br />Data file <%=project.name%>.csv ...
@@ -145,7 +145,7 @@ Project name=<%=project.name%>
  ## show project stats
 
 stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
-print(xtable(t(as.data.frame(stats))), type="html")
+##print(xtable(t(as.data.frame(stats))), type="html")
 
 for (value in GetValueNames(project.config$values)) {
   t.sum <- DB.GetTableNameSummary(project.name, value)
@@ -164,7 +164,7 @@ for (value in GetValueNames(project.config$values)) {
   <%= MG$html$chart %>
 <%
   }
-}}
+}
 %>
 				</article>
 							</div>
@@ -186,6 +186,9 @@ for (value in GetValueNames(project.config$values)) {
                                                         </div>
                                                 </div>
 
+<%
+}
+%>
 <!--
   ###############################################################################################################
   ## Footer

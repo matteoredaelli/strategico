@@ -127,20 +127,22 @@ Project.GetDataFullPathFilename <- function(project.name) {
   filename <- file.path(project.path, Project.GetDataFilename(project.name))
 }
 
-Project.GetConfig <- function(project.name) {
+Project.GetConfig <- function(project.name, quit=FALSE) {
   plugins.path <- GetPluginsPath()
   project.path <- Project.GetPath(project.name)
   
   filename <- Project.GetConfigFullPathFilename(project.name)
   logger(DEBUG, paste("Reading config file", filename))
-  FileExistsOrQuit(filename)
+  if (file.exists(filename)) {
   ## sourcing project.config file
-  source(filename)
-
-  eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
-  MySource(filename=eval.file, file.path=plugins.path)
+    source(filename)
+    eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
+    MySource(filename=eval.file, file.path=plugins.path)
  
-  ##append(project.config, strategico.config)
+    ##append(project.config, strategico.config)
+  } else {
+    project.config <- NULL
+  }
   project.config
 }
 
