@@ -30,10 +30,10 @@ Quit <- function (msg="", status=-1, save="no") {
   q(status=status)
 }
 
-FileExistsOrQuit <- function (filename, msg="", status=10){
+FileExistsOrQuit <- function (filename, msg="", status=10, quit=TRUE){
   if (!file.exists(filename)) {
     print( paste("File", filename, "not found!"))
-    Quit(msg=msg, status=status)   
+    if (quit) Quit(msg=msg, status=status)   
   }
 }
 
