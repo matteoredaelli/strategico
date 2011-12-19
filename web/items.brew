@@ -64,6 +64,7 @@
                   <%=BuildFormElement_value(project.name=project.name, default=value)%>
                  <input type="submit" value="Search" />
                 </form>
+<br /><br />Go to item <b><a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>><%=id%></a></b>
                                 </article>
                                                         </div>
                                                 </div>
@@ -77,10 +78,11 @@
                                                 <div class="panel">
                                                         <div class="panel-wrapper">
                                 <article>
-                                                        <h2 class="title">Show items</h2>
+                                                        <h2 class="title">Children items</h2>
+  
 <%
   Table <- gvisTable(items.summary, options=list(width=700, height=300))
-  print(xtable(items.summary), type="html")
+  ##print(xtable(items.summary), type="html")
 %>
   <%= Table$html$chart %>
 
