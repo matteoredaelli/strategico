@@ -7,7 +7,7 @@
 
 			<footer>
 				<br />
-				<p>Powered by <a href="http://code.google.com/p/strategico/">Strategico</a></p>
+				<p><a href=<%=strategico.config$projects.url%>/>Browse projects</a> | Powered by <a href="http://code.google.com/p/strategico/">Strategico</a></p>
 				<br />
 			</footer>
 	
