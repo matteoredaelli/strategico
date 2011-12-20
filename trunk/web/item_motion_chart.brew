@@ -38,7 +38,7 @@ id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
 value <- ifelse(is.null(GET$value), "V1", GET$value)
 
 db.channel <- DB.Connect()
-item.results <- ltp.Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
 
 DB.Close(db.channel)
 
