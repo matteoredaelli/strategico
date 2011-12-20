@@ -77,7 +77,7 @@
 
                 <form method="GET" >
                   <%=BuildHtmlElement_input(name="project", default=project.name, type="text")%><br />
-                <input type="submit" name="set_project" />
+                <input type="submit" name="set_project" value="select"/>
                 </form>
 
 				</article>
@@ -91,13 +91,13 @@
   						<div class="panel">
 							<div class="panel-wrapper">	
         			<article>
-							<h2 class="title">Upload CSV</h2>
+							<h2 class="title">Upload Files</h2>
 
                 <form enctype="multipart/form-data" method="POST" >
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                   Config File <input type="file" name="config.file" /><br />
-                  Data File <input type="file" name="data.file" /><br />
-                <input type="submit" name="upload.files" value="Upload CSV"/><br />
+                  CSV Data File <input type="file" name="data.file" /><br />
+                <input type="submit" name="upload.files" value="Upload file(s)"/><br />
                 </form>
 
 				</article>

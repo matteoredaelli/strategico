@@ -5,9 +5,7 @@
   MySource("strategico_web.R")
   WebSource("project")
 
-  project.name <- ifelse(is.null(GET$project), "sample", GET$project)
   value <- ifelse(is.null(GET$value), "V1", GET$value)
-
 
  if (is.null(GET$KEY1)) {
     id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
@@ -25,17 +23,6 @@
   }
   
   id.children <- c(id, id.children)
-  items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
-  items.summary$id <- paste("<a href=item.brew?project=",project.name, "&id=", items.summary$item_id, "&value=",value, ">",items.summary$item_id,"</a>", sep="")
-  items.summary <- subset(items.summary, 
-                          select=c(-MeanPredictedRatioMeanValues, -item_id,
-                                   -SdPredictedRatioSdValues,
-                                   ##-BestAICNoOutRangeExclude, -Points, -MeanPredicted, -MeanValues,
-                                   -BestICNoOutRangeExclude, -model, -KEY1, -LastNotEqualValues
-                                  )
-                         )
-  
-  rownames(items.summary) <- NULL
 
   ## settings is or item.keys depending on which variables were passed in GET input
 
@@ -46,6 +33,36 @@
   %>
   
   <% ShowTemplate('header')%>
+
+<!--
+  ###############################################################################################################
+  ## TAB Item
+  ###############################################################################################################
+-->
+
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>
+                                                        <h2 class="title">Item <%=id%></h2>
+
+See item <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>>details</a>
+
+<%
+  children.results <- Item.DB.GetResults(project.name=project.name, value=value, id=id.children, db.channel=db.channel, only.best=TRUE) 
+  children.results <- data.frame(children.results)
+
+  if (!is.na(children.results) && ! is.null(children.results) && nrow(children.results>0)) {
+    children.results$item_id <- paste("Item", children.results$item_id) 
+    children.results.pivot <- cast(children.results, PERIOD ~ item_id, df=TRUE, value="V")
+    ML <- gvisLineChart(data=data.frame(children.results.pivot))
+%>
+  <%= ML$html$chart %>
+<%
+  } 
+%>
+                                </article>
+                                                        </div>
+                                                </div>
 
 <!--
   ###############################################################################################################
@@ -64,7 +81,6 @@
                   <%=BuildFormElement_value(project.name=project.name, default=value)%>
                  <input type="submit" value="Search" />
                 </form>
-<br /><br />Go to item <b><a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>><%=id%></a></b>
                                 </article>
                                                         </div>
                                                 </div>
@@ -78,14 +94,31 @@
                                                 <div class="panel">
                                                         <div class="panel-wrapper">
                                 <article>
-                                                        <h2 class="title">Children items</h2>
+                                                        <h2 class="title">Sub items</h2>
   
 <%
-  Table <- gvisTable(items.summary, options=list(width=700, height=300))
-  ##print(xtable(items.summary), type="html")
+  items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
+  items.summary <- data.frame(items.summary)
+
+  if (!is.na(items.summary) && ! is.null(items.summary) && nrow(items.summary) > 0) {
+    items.summary$id <- paste("<a href=item.brew?project=",project.name, "&id=", items.summary$item_id, "&value=",value, ">",items.summary$item_id,"</a>", sep="")
+    items.summary <- subset(items.summary, 
+                          select=c(-MeanPredictedRatioMeanValues, -item_id,
+                                   -SdPredictedRatioSdValues,
+                                   ##-BestAICNoOutRangeExclude, -Points, -MeanPredicted, -MeanValues,
+                                   -BestICNoOutRangeExclude, -model, -KEY1, -LastNotEqualValues
+                                  )
+                         )
+  
+    rownames(items.summary) <- NULL
+    Table <- gvisTable(items.summary, options=list(width=700, height=300))
+    ##print(xtable(items.summary), type="html")
 %>
   <%= Table$html$chart %>
 
+<%
+  }
+%>
                                 </article>
                                                         </div>
                                                 </div>

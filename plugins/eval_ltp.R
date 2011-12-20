@@ -24,6 +24,7 @@ suppressPackageStartupMessages(library(ltp))
 
 #source("/opt/strategico/plugins/ltpTemp.r")
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
+  logger(INFO, paste("Running function", project.config$eval.function, "for item if", id))
     model <- ltp(product = item.data, rule=param$rule, ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = project.config$period.freq, 
@@ -39,7 +40,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 
   if ("model" %in% project.config$save) {
     filename <- paste(output.path, "/model.RData", sep = "")
-    ##__##logger(DEBUG, paste("Saving Model to file", filename))
+    logger(DEBUG, paste("Saving Model to file", filename))
     save(file=filename, model)
   }
 
@@ -123,7 +124,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       }
 
       if (length(residuals) == 0) {
-       logger(WARN, paste("No residuals for model", m, ".Skipping it"))
+       logger(DEBUG, paste("No residuals for model", m, ".Skipping it"))
       ##} else if (length(residuals) != length(normalized.periods)) {
       ## logger(WARN, paste("Different number of residuals for model", m, ".Skipping it"))
       } else {

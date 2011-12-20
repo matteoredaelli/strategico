@@ -41,8 +41,8 @@
 		<h1><a href="#">Strategico <span class="alternate">2.0</span></a></h1>
 		<h2>
                     <a href="project.brew">Projects</a> ::
-                    <a href=project.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>><%=Sys.getenv("STRATEGICO_PROJECT_NAME")%></a>
-                    <a href=items.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>>Items</a>
+                    <a href=project.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>><%=Sys.getenv("STRATEGICO_PROJECT_NAME")%></a> ::
+                    <a href=items.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>>Items</a> ::
                     <a href=item.brew?project=<%=Sys.getenv("STRATEGICO_PROJECT_NAME")%>&id=<%=Sys.getenv("STRATEGICO_PROJECT_ITEM_ID")%>&value=<%=Sys.getenv("STRATEGICO_PROJECT_VALUE")%>><%=Sys.getenv("STRATEGICO_PROJECT_ITEM_ID")%></a>
                 </h2>
 

@@ -66,7 +66,8 @@ clear: both;
 }
 
 a:link, a:visited {
-color:#ddd;
+//* matteo color:#ddd; */
+color: #02237b;
 }
 
 a:hover, a:active {
