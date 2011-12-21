@@ -53,8 +53,8 @@
      echo $result;
      echo "<br />";
      echo "<br />";
-     $link = $output_path . "/report.html";
-     echo "Goto <a href=\"" . $link . "\">Report</a> page (if generated) or <a href=\"" . $output_path . "\">folder</a> page";
+     $link = "item.brew?project=" .  $project_name . "&id=" . $id;
+     echo "Goto <a href=\"" . $link . "\">Report</a> page or <a href=\"" . $output_path . "\">folder</a> page";
      } else
      echo "no post submit";
      ?>
