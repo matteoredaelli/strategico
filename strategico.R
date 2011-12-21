@@ -135,6 +135,13 @@ if (!Project.IsValidName(opt$project.name))
 project.config <- Project.GetConfig(opt$project.name)
 
 
+## item.values could be could be V1 or V1,V2
+if (is.null(opt$item.values)) {
+  opt$item.values <- GetValueNames(project.name=opt$project.name, project.config=project.config) 
+  logger(INFO, paste("Missing  item.values option: assuming item.values=", opt$item.value))
+} else {
+  opt$item.values <- unlist(strsplit(opt$item.values, ","))
+}
 #########################################################################
 ## create.db
 #########################################################################
@@ -261,14 +268,6 @@ if (is.null(id.list)) {
   wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
   logger(WARN, paste("Skipping (if any) the following too high ids:", wrong.id))
   id.list <- id.list[id.list <= max.id]
-}
-
-## item.values could be could be V1 or V1,V2
-if (is.null(opt$item.values)) {
-  opt$item.values <- GetValueNames(project.name=opt$project.name, project.config=project.config) 
-  logger(INFO, paste("Missing  item.values option: assuming item.values=", opt$item.value))
-} else {
-  opt$item.values <- unlist(strsplit(opt$item.values, ","))
 }
 #########################################################################
 ## eval_children
