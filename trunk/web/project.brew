@@ -6,7 +6,6 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
-  WebSource("project")
 
   if (!is.null(POST$upload.files)) {
     destination.path <- Project.GetPath(project.name)
@@ -25,6 +24,7 @@
     }
   }
 
+  WebSource("project")
 
   if (!is.null(POST$import.db)) {
     Project.CreateDB(project.name=project.name, 
