@@ -64,7 +64,7 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
   if (!Project.IsValidName(project.name)) {
     logger(WARN, paste("Project folder=", project.name, "doesn't exist"))
   } else {
-    project.path <- paste(Project.GetPath(project.name), "/[0-9]*", sep="")
+    project.path <- paste(Project.GetPath(project.name), "/", sep="")
     logger(INFO, paste("Deleting project path:", project.path))
     unlink(project.path, recursive=recursive)
     project.path <- paste(Project.GetPath(project.name), "/*results*.csv", sep="")
