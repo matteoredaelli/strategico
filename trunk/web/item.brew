@@ -161,6 +161,7 @@
                                 <article>
                                                         <h2 class="title">Choose Model</h2>
   
+  See the item <a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a>
   <% 
     ML <- gvisLineChart(data=item.results.pivot)
   %>
