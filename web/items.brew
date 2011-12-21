@@ -36,36 +36,6 @@
 
 <!--
   ###############################################################################################################
-  ## TAB Item
-  ###############################################################################################################
--->
-
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Item <%=id%></h2>
-
-See item <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>>details</a>
-
-<%
-  children.results <- Item.DB.GetResults(project.name=project.name, value=value, id=id.children, db.channel=db.channel, only.best=TRUE) 
-  children.results <- data.frame(children.results)
-
-  if (!is.na(children.results) && ! is.null(children.results) && nrow(children.results>0)) {
-    children.results$item_id <- paste("Item", children.results$item_id) 
-    children.results.pivot <- cast(children.results, PERIOD ~ item_id, df=TRUE, value="V")
-    ML <- gvisLineChart(data=data.frame(children.results.pivot))
-%>
-  <%= ML$html$chart %>
-<%
-  } 
-%>
-                                </article>
-                                                        </div>
-                                                </div>
-
-<!--
-  ###############################################################################################################
   ## TAB Search Items
   ###############################################################################################################
 -->
@@ -81,6 +51,8 @@ See item <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>
                   <%=BuildFormElement_value(project.name=project.name, default=value)%>
                  <input type="submit" value="Search" />
                 </form>
+<br /><br /> See item <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>>details</a>
+
                                 </article>
                                                         </div>
                                                 </div>
