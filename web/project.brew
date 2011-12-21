@@ -38,12 +38,12 @@
     cat(rc)
   }
 
-  if (!is.null(POST$empty.db)) {
+  if (!is.null(POST$drop.project)) {
     #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
     cmd <- paste(strategico.command, "--cmd empty.fs")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
-    cmd <- paste(strategico.command, "--cmd empty.db")
+    cmd <- paste(strategico.command, "--cmd drop.db")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
@@ -159,7 +159,26 @@
                 <form enctype="multipart/form-data" method="POST" >
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                 <input type="submit" name="export.csv" value="Export CSV"/>
-                <input type="submit" name="empty.db" value="Empty DB"/>
+                </form>
+
+                                </article>
+                                                        </div>
+                                                </div>
+
+
+    <!--
+  ###############################################################################################################
+  ## TAB Drop
+  ###############################################################################################################
+  -->                                           
+                                                <div class="panel">
+                                                        <div class="panel-wrapper">
+                                <article>               
+                                                        <h2 class="title">Drop</h2>
+                
+                <form enctype="multipart/form-data" method="POST" >
+                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
+                <input type="submit" name="drop.project" value="Drop Project"/>
                 </form>
 
                                 </article>
