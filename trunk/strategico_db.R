@@ -117,7 +117,7 @@ DB.GetTableNameProjectItems <- function(project.name) {
 
 DB.GetTableSize <- function(tablename, db.channel) {
   sql_statement <- paste("select count(*) from", tablename)
-  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+  records <- try(DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel))
   ## TODO: check if the table doen't exist
   if ( is.data.frame(records) )
     result <- as.integer(records[1][1])
@@ -131,7 +131,7 @@ DB.GetTableSize <- function(tablename, db.channel) {
 DB.RunSQLQuery <- function(sql_statement, db.channel) {
   for (statement in sql_statement) {
     logger(DEBUG, paste("Running SQL:", statement))
-    result <- dbGetQuery(conn=db.channel, statement)
+    result <- try(dbGetQuery(conn=db.channel, statement))
     logger(DEBUG, paste("Done running SQL:", statement))
   }
   result
