@@ -23,8 +23,7 @@
         file.copy(FILES$data.file$tmp_name, destination.file, overwrite=TRUE)
         Sys.chmod(destination.file, "777")
     }
-    Project.CreateDB(project.name=project.name, 
-                         project.config=project.config, db.channel=db.channel)
+    project.config <- Project.GetConfig(project.name=project.name)
     Project.CreateDB(project.name=project.name, 
                          project.config=project.config, db.channel=db.channel)
   }
@@ -201,7 +200,6 @@ Project name=<%=project.name%>
  }
 
   ## loading project config
-  project.config <- Project.GetConfig(project.name=project.name)
 
  ## show project stats
 
