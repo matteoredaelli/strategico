@@ -264,10 +264,10 @@ if (is.null(id.list)) {
   id.list <- 1:max.id
 } else {
   id.list <- as.integer(id.list)
-  ## removing IDs > max id
-  wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
-  logger(WARN, paste("Skipping (if any) the following too high ids:", wrong.id))
-  id.list <- id.list[id.list <= max.id]
+  ## removing IDs > max id   not good for ws.html
+  ##wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
+  ##logger(WARN, paste("Skipping (if any) the following too high ids:", wrong.id))
+  ##id.list <- id.list[id.list <= max.id]
 }
 #########################################################################
 ## eval_children
