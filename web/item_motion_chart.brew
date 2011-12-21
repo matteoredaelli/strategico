@@ -38,16 +38,19 @@ id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
 value <- ifelse(is.null(GET$value), "V1", GET$value)
 
 db.channel <- DB.Connect()
-item.results <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value)
+item.results <- Item.DB.GetNormalizedDataAndResults(project.name=project.name,
+                                                      id=id, db.channel=db.channel,
+                                                      value=value, only.best=FALSE)
 
 DB.Close(db.channel)
 
-  if ((!is.null(item.results$predictions)) && is.data.frame(item.results$predictions) && nrow(item.results$predictions) > 0) {
+  if ((!is.null(item.results)) && is.data.frame(item.results) && nrow(item.results) > 0) {
 
-
-  item.all = item.results$predictions
+  ##item.all <-  cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+  item.all <- data.frame(item.results)
   item.all$item_id <- NULL
   item.all$PERIOD <- as.numeric(sub("-","", item.all$PERIOD))
+  rownames(item.all) <- NULL
 
   M <- gvisMotionChart(data=item.all, idvar="model",
                        timevar="PERIOD", chartid="item",
