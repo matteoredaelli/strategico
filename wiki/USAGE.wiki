@@ -7,11 +7,11 @@ You can run Strategico.R using Rscript command or (for windows users) something 
 R --slave --no-save --no-restore --no-environ --silent --args --cmd runit < strategico.R
 }}}
 
-
 == Import data from external sources ==
 
 {{{
-Rscript strategico.R --project.name=sample --cmd=import
+Rscript strategico.R --project.name=sample --cmd=create.db
+Rscript strategico.R --project.name=sample --cmd=import.db
 }}}
 
 == Empty filesystem ==
@@ -35,6 +35,7 @@ Rscript strategico.R --cmd empty.db -n sample
 ./strategico.R --cmd eval.children -n sample --id.list "16"
 
 }}}
+
 == Eval/Run engine (dbsummary records/items with Run=1) ==
 {{{
 ./strategico.R --project.name=sample --cmd=eval.items.from.db -v V1
@@ -48,7 +49,7 @@ Rscript strategico.R --cmd empty.db -n sample
 == Export DB to CSV ==
 
 {{{
-./strategico.R --cmd export.db.csv -n sample
+./strategico.R --cmd export.db -n sample
 }}}
 
 == Runit ==
