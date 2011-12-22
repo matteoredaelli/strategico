@@ -198,9 +198,9 @@ if (opt$cmd == "empty.fs") {
 }
 
 ########################################################################
-## export.db.csv
+## export.db
 #########################################################################
-if (opt$cmd == "export.db.csv") {
+if (opt$cmd == "export.db") {
   Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
   Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
@@ -214,7 +214,7 @@ if (opt$cmd == "export.db.csv") {
 if (opt$cmd == "export.results.csv") {
   for (value in opt$item.values) {
     logger(WARN, paste("Saving", value, "results to CSV file"))
-    Project.ExportResultsCSV(opt$project.name, value=value, db.channel=db.channel, file=opt$file)
+    Project.ExportResultsCSV(opt$project.name, project.config=project.config, value=value, db.channel=db.channel, file=opt$file)
   }
   q(status=0)
 }
@@ -227,15 +227,15 @@ if (opt$cmd == "export.results.db") {
 }
 
 #########################################################################
-## CMD import
+## CMD import.db
 #########################################################################
 
-if (opt$cmd == "import") {
+if (opt$cmd == "import.db") {
   if(is.null(opt$file)) {
     opt$file <- Project.GetDataFullPathFilename(opt$project.name)
     logger(WARN, paste("Missing file option: assuming file=", opt$file))
   }
-  Project.ImportDataFromCSV(project.name=opt$project.name, db.channel=db.channel, filename=opt$file)
+  Project.ImportDataFromCSV(project.name=opt$project.name, project.config=project.config, db.channel=db.channel, filename=opt$file)
   q(status=0)
   
 }

@@ -77,14 +77,19 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
   }
 }
 
-Project.ExportResultsCSV <- function(project.name, value, db.channel, file, sep=";", quote=FALSE) {
+Project.ExportResultsCSV <- function(project.name, project.config=NULL, value, db.channel, file) {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
   if(is.null(file)) {
     name <- paste(project.name, "-results-", value, ".csv", sep="")
     file <- file.path(Project.GetPath(project.name), name)
     logger(WARN, paste("Missing file option: assuming file =", file))
   }
   results <- Project.GetResults(project.name=project.name, value=value, db.channel=db.channel)
-  write.table(results, file=file, row.names=FALSE, append=FALSE, col.names=TRUE, sep=sep, quote=quote)
+  write.table(results, file=file, row.names=FALSE, append=FALSE, 
+              col.names=TRUE, sep=project.config$csv.sep, 
+              dec=project.config$csv.dec, quote=TRUE)
 }
 
 Project.GetResults <- function(project.name, value, db.channel) {
@@ -257,7 +262,7 @@ Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.chan
     filename <- Project.GetDataFullPathFilename(project.name=project.name)
 
   logger(WARN, paste("Loading data from file", filename))
-  result=read.csv(filename,sep=",") 
+  result=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
   Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
 }
 
