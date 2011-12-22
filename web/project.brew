@@ -33,7 +33,7 @@
     Project.CreateDB(project.name=project.name, 
                          project.config=project.config, db.channel=db.channel)
     ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
-    cmd <- paste(strategico.command, "--cmd import")
+    cmd <- paste(strategico.command, "--cmd import.db")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
@@ -55,7 +55,7 @@
   }
 
   if (!is.null(POST$export.csv)) {
-    cmd <- paste(strategico.command, "--cmd export.results.csv")
+    cmd <- paste(strategico.command, "--cmd export.db")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
