@@ -13,7 +13,7 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/futile.logger utile.logger]
  * [http://cran.r-project.org/web/packages/reshape/ reshape]
  * [http://cran.r-project.org/web/packages/hwriter/index.html hwriter]
- * [http://cran.r-project.org/web/packages/RODBC/index.html RODBC library]
+ * [http://cran.r-project.org/web/packages/RMySQL/index.html RMySQL library]
  * [http://cran.r-project.org/web/packages/forecast/index.html Forecast library] that requires fracdiff and tseries
  * [http://cran.r-project.org/web/packages/R2HTML/index.html R2HTML library]
  * [http://cran.r-project.org/web/packages/RUnit/index.html runit]
@@ -57,36 +57,6 @@ Under Linux you could add
 }}}
 
 in your /etc/profile or $HOME/.bashrc
-
-== ODBC ==
-
-To configure a database, for linux users, you should have something like
-
-{{{
-
-  File  /etc/odbcinst.ini 
-
-[MySQL]
-Description     = MySQL driver
-Driver          = /usr/lib/odbc/libmyodbc.so
-Setup           = /usr/lib/odbc/libodbcmyS.so
-
-
- /etc/odbc.ini
-
-[STRATEGICO]
-Driver       = MySQL
-Description  = MySQL ODBC 3.51 Driver DSN
-Server       = localhost
-Port         =
-User         = r
-Password     = r
-Database     = strategico
-Option       = 3   
-Socket
-
-}}}
-
 
 == Database ==
 
