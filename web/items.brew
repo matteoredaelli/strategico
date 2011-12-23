@@ -62,23 +62,24 @@
   ## TAB Results Items
   ###############################################################################################################
 -->
+<%
+  items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
+  items.summary <- data.frame(items.summary)
 
+  if (!is.na(items.summary) && ! is.null(items.summary) && nrow(items.summary) > 1) {
+%>
                                                 <div class="panel">
                                                         <div class="panel-wrapper">
                                 <article>
                                                         <h2 class="title">Sub items</h2>
   
 <%
-  items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
-  items.summary <- data.frame(items.summary)
-
-  if (!is.na(items.summary) && ! is.null(items.summary) && nrow(items.summary) > 0) {
     items.summary$id <- paste("<a href=item.brew?project=",project.name, "&id=", items.summary$item_id, "&value=",value, ">",items.summary$item_id,"</a>", sep="")
     items.summary <- subset(items.summary, 
                           select=c(-MeanPredictedRatioMeanValues, -item_id,
                                    -SdPredictedRatioSdValues,
-                                   ##-BestAICNoOutRangeExclude, -Points, -MeanPredicted, -MeanValues,
-                                   -BestICNoOutRangeExclude, -model, -KEY1, -LastNotEqualValues
+                                   ##-BestAICNoOutRangeExclude, -Points, 
+                                   -BestICNoOutRangeExclude, -LastNotEqualValues
                                   )
                          )
   
@@ -87,14 +88,14 @@
     ##print(xtable(items.summary), type="html")
 %>
   <%= Table$html$chart %>
-
-<%
-  }
-%>
                                 </article>
                                                         </div>
                                                 </div>
 
+
+<%
+  }
+%>
 <!--
   ###############################################################################################################
   ## Footer
