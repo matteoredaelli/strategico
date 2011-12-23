@@ -78,7 +78,7 @@
         			<article>
 							<h2 class="title">Select project</h2>
 
-                <form method="GET" >
+                <form method="GET" action="#2">
                   <%=BuildHtmlElement_input(name="project", default=project.name, type="text")%><br />
                 <input type="submit" name="set_project" value="select"/>
                 </form>
@@ -96,7 +96,7 @@
         			<article>
 							<h2 class="title">Upload Files</h2>
 
-                <form enctype="multipart/form-data" method="POST" >
+                <form enctype="multipart/form-data" method="POST" action="#3">
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                   Config File <input type="file" name="config.file" /><br />
                   CSV Data File <input type="file" name="data.file" /><br />
@@ -117,7 +117,7 @@
                                 <article>
                                                         <h2 class="title">Import to DB</h2>
 
-                <form enctype="multipart/form-data" method="POST" >
+                <form enctype="multipart/form-data" method="POST" action="#4">
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                 <input type="submit" name="import.db" value="Import CSV to DB"/><br />
                 </form>
@@ -136,7 +136,7 @@
                                 <article>
                                                         <h2 class="title">Run</h2>
 
-                <form enctype="multipart/form-data" method="POST" >
+                <form enctype="multipart/form-data" method="POST" action="#5">
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
                 <input type="submit" name="run" value="Run"/><br />
                 </form>
@@ -221,7 +221,9 @@ Project name=<%=project.name%>
   ## loading project config
 
  ## show project stats
-
+%>
+  <h3>Project Tables rows</h3>
+<%
 stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
 print(xtable(t(as.data.frame(stats))), type="html")
 
@@ -232,7 +234,7 @@ for (value in GetValueNames(project.config$values)) {
   <h3><%=value%> predictions</h3>
 <% 
   stats.models <- as.data.frame(stats.models)
-  if (nrow(stats.models) > 1) {
+  if (nrow(stats.models) > 0) {
     print(xtable(t(stats.models)), type="html")
     M <- gvisPieChart(stats.models, options=list(
                                     title=paste(value, ": relative models distribution", sep="")))
