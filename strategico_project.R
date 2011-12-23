@@ -48,7 +48,9 @@ Project.DropDB <- function(project.name, project.config=NULL, db.channel) {
 
   tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
   lapply(tables, function(x) DB.DropTable(x,db.channel))
-  lapply(tables, function(x) DB.DropView(x,db.channel))
+
+  views <- Project.GetViewNames(project.name=project.name, project.config=project.config)
+  lapply(views, function(x) DB.DropView(x,db.channel))
 }
 
 Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
@@ -143,20 +145,28 @@ Project.GetDataFullPathFilename <- function(project.name) {
 }
 
 Project.GetConfig <- function(project.name, quit=FALSE) {
+  default.project.config <- file.path(GetEtcPath(), "project.config")
+  logger(DEBUG, paste("Reading config file", default.project.config))
+  source(default.project.config)
+
   plugins.path <- GetPluginsPath()
-  project.path <- Project.GetPath(project.name)
+  ##project.path <- Project.GetPath(project.name)
   
   filename <- Project.GetConfigFullPathFilename(project.name)
   logger(DEBUG, paste("Reading config file", filename))
-  if (file.exists(filename)) {
-  ## sourcing project.config file
-    source(filename)
-    eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
-    MySource(filename=eval.file, file.path=plugins.path)
- 
-    ##append(project.config, strategico.config)
+  if (!file.exists(filename)) {
+    logger(WARN, paste("... missing config file", filename))
   } else {
-    project.config <- NULL
+    try(source(filename))
+  }
+  eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
+  eval.file <- file.path(GetPluginsPath(), eval.file)
+  logger(DEBUG, paste("Reading eval file", eval.file))
+  if (! file.exists(eval.file)) {
+    logger(INFO, paste("... missing eval file", eval.file))
+    logger(INFO, "You MUST add it!!!!!!!!!!!!!!!!!!! and quit right now...")
+  } else {
+    try(source(eval.file))
   }
   project.config
 }
