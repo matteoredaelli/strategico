@@ -162,6 +162,15 @@ if (opt$cmd == "statistics") {
 }
 
 #########################################################################
+## drop
+#########################################################################
+if (opt$cmd == "drop") {
+  Project.DropDB(project.name=opt$project.name, db.channel=db.channel)
+  Project.EmptyDB(project.name=opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
+
+#########################################################################
 ## drop.db
 #########################################################################
 if (opt$cmd == "drop.db") {
@@ -186,9 +195,9 @@ if (opt$cmd == "empty.fs") {
 }
 
 ########################################################################
-## export.db
+## export.csv
 #########################################################################
-if (opt$cmd == "export.db") {
+if (opt$cmd == "export.csv") {
   Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
   Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
   q(status=0)
@@ -220,7 +229,7 @@ if (opt$cmd == "import.csv") {
 }
 
 #########################################################################
-## export.results
+## normalizing values
 #########################################################################
 
 ## item.values could be V1 or V1,V2
@@ -229,21 +238,6 @@ if (is.null(opt$item.values)) {
   logger(INFO, paste("Missing item.values option: assuming item.values=", opt$item.value))
 } else {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
-}
-
-if (opt$cmd == "export.results.csv") {
-  for (value in opt$item.values) {
-    logger(WARN, paste("Saving", value, "results to CSV file"))
-    Project.ExportResultsCSV(opt$project.name, project.config=project.config, value=value, db.channel=db.channel, file=opt$file)
-  }
-  q(status=0)
-}
-
-if (opt$cmd == "export.results.db") {
-  value=opt$item.values[1]
-  logger(DEBUG, "Saving data to the database")
-  Project.ExportResultsDB(opt$project.name, value=value, db.channel=db.channel)
-  q(status=0)
 }
 
 
