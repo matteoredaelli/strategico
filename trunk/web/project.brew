@@ -55,7 +55,7 @@
   }
 
   if (!is.null(POST$export.csv)) {
-    cmd <- paste(strategico.command, "--cmd export.db")
+    cmd <- paste(strategico.command, "--cmd export.csv")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
