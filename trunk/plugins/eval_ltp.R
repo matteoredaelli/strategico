@@ -22,15 +22,19 @@
 suppressPackageStartupMessages(library(ast))
 suppressPackageStartupMessages(library(ltp))
 
-#source("/opt/strategico/plugins/ltpTemp.r")
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
-  logger(INFO, paste("Running function", project.config$eval.function, "for item if", id))
-    model <- ltp(product = item.data, rule=param$rule, ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
+  logger(INFO, paste("Running function", project.config$eval.function, "for item id", id))
+  model <- ltp(product = item.data, rule=param$rule,
+               ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = project.config$period.freq, 
-               period.start = project.config$period.start, period.end = project.config$period.end,diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE , increment=1 ,idDiff = FALSE, idLog = FALSE,
-               formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,logtransform=param$logtransform, negTo0=param$negTo0,naive.values=param$naive.values)
-
+               period.start = project.config$period.start, period.end = project.config$period.end,
+               diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE,
+               increment=1 ,idDiff = FALSE, idLog = FALSE,
+               formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,
+               logtransform=param$logtransform, negTo0=param$negTo0,
+               naive.values=param$naive.values,
+               naive.ifConstantLastValues=param$naive.ifConstantLastValues)
 
   models.names <- ltp.GetModels("name")
 
@@ -104,7 +108,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     results <- NULL
   }
   else {
-    logger(WARN, paste("Best Model is ", model@BestModel))
+    logger(INFO, paste("Best Model is ", model@BestModel))
     all.results <- NULL
     all.residuals <- NULL
     for (m in names(model@models)) {
