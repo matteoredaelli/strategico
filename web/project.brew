@@ -29,11 +29,11 @@
   }
 
 
-  if (!is.null(POST$import.db)) {
+  if (!is.null(POST$import.csv)) {
     Project.CreateDB(project.name=project.name, 
                          project.config=project.config, db.channel=db.channel)
-    ##Project.ImportDataFromCSV(project.name=project.name, db.channel=db.channel)
-    cmd <- paste(strategico.command, "--cmd import.db")
+    ##Project.ImportFromCSV(project.name=project.name, db.channel=db.channel)
+    cmd <- paste(strategico.command, "--cmd import.csv")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
@@ -98,8 +98,8 @@
 
                 <form enctype="multipart/form-data" method="POST" action="#3">
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                  Config File <input type="file" name="config.file" /><br />
                   CSV Data File <input type="file" name="data.file" /><br />
+                  Config File <input type="file" name="config.file" /><br />
                 <input type="submit" name="upload.files" value="Upload file(s)"/><br />
                 </form>
 
@@ -119,7 +119,7 @@
 
                 <form enctype="multipart/form-data" method="POST" action="#4">
                   <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                <input type="submit" name="import.db" value="Import CSV to DB"/><br />
+                <input type="submit" name="import.csv" value="Import CSV to DB"/><br />
                 </form>
 
                                 </article>

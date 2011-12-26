@@ -125,7 +125,7 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
   logger(DEBUG, paste("Param= ", Param.ToString(param)))
   
   directory = Item.GetPath(project.name, id, value)
-  dir.create(directory, showWarnings = FALSE, recursive = TRUE)
+  ##dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   
   EvalFunction <- paste(project.config$eval.function,".Item.EvalDataByValue(project.name=project.name, id=id, item.data=item.data,
     value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
