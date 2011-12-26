@@ -171,6 +171,20 @@ Project.GetConfig <- function(project.name, quit=FALSE) {
   project.config
 }
 
+Project.GetKeys <- function(project.name=NULL, project.config=NULL) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+ 
+  BuildKeyNames(project.config$keys, na.rm=FALSE) 
+}
+
+Project.GetValues <- function(project.name=NULL, project.config=NULL) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+ 
+  GetValueNames(values=project.config$values) 
+}
+
 Project.GetList <- function(projects.home = strategico.config$projects.home) {
   logger(DEBUG, paste("Projects in", projects.home, ":"))
   projects <- dir(projects.home)
@@ -273,7 +287,20 @@ Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.chan
 
   logger(WARN, paste("Loading data from file", filename))
   result=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
-  Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
+  logger(WARN, "CSV file header:")
+  csv.header <- colnames(result)
+  logger(WARN, paste(csv.header, collapse=", ", sep=" "))
+  project.keys <- Project.GetKeys(project.name, project.config=project.config)
+  project.values <- Project.GetValues(project.name, project.config=project.config)
+  expected.header <- c(project.keys, "PERIOD", project.values)
+  logger(DEBUG, "Expected file header:")
+  logger(DEBUG, paste(expected.header, collapse=", ", sep=" "))
+  if (length(csv.header) == length(expected.header) && all.equal(csv.header, expected.header)) {
+    logger(DEBUG, "CSV header is equal to expected csv file header: importing data...")
+    Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
+  } else {
+    logger(DEBUG, "Unexpected csv header: NO data will BE IMPORTED")
+  }
 }
 
 ##input  da db. 
