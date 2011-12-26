@@ -26,17 +26,104 @@ Project.CreateDB <- function(project.name, project.config=NULL, db.channel=db.ch
   sapply(mysql, function(s) DB.RunSQLQuery(sql_statement=s, db.channel=db.channel))
 }
 
+Project.CreateProjectConfig <- function(project.name, mailto='noname@localhost',
+                                       period.start, period.end, period.freq, n.ahead=6,
+                                       project.keys, project.values) {
+  logger(DEBUG, "Generating Project Config file")
+  input.file <- file.path(GetTemplatesHome(), paste("project-config.brew", sep=""))
+  logger(DEBUG, paste("Template file =", input.file))
+  output.file <- file.path(Project.GetPath(project.name), paste(project.name, ".conf", sep=""))
+  logger(DEBUG, paste("Target file =", output.file))
+  brew(input.file, output=output.file)
+  return(0)
+}
+
+
+Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n.ahead) {
+  
+  if (is.null(data) ) {
+    logger(ERROR, paste("No data found, no config file will be created for project", project.name))
+    return(1)
+  }
+  
+  if (nrow(data) < 2) {
+    logger(ERROR, paste("No rows found, no config file will be created for project", project.name))
+    return(2)
+  } 
+
+  header <- colnames(data)
+
+  period.field <- grep("^PERIOD$", header)
+  if (length(period.field) == 0) {
+    logger(ERROR, paste("No PERIOD field found, no config file will be created for project", project.name))
+    return(5)
+  }
+  
+  project.keys <- grep("^KEY\\d$", header, value=TRUE)
+  if (length(project.keys) == 0) {
+    logger(ERROR, paste("No KEY1,.. fields found, no config file will be created for project", project.name))
+    return(10)
+  }
+
+  key.numbers <- sort(as.numeric(gsub("KEY","", project.keys)))
+  if (!all(1:length(key.numbers) == key.numbers)) { 
+    logger(ERROR, paste("Missing/Invalid KEYx field, no config file will be created for project", project.name))
+    return(11)
+  }
+  logger(WARN, paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
+  
+  project.values <- grep("^V\\d$", header, value=TRUE)
+  if (length(project.values) == 0) {
+    logger(ERROR, paste("No V1,.. fields found, no config file will be created for project", project.name))
+    return(20)
+  }
+
+  value.numbers <- sort(as.numeric(gsub("V","", project.values)))
+  if (!all(1:length(value.numbers) == value.numbers)) { 
+    logger(ERROR, paste("Missing/Invalid Vx field, no config file will be created for project", project.name))
+    return(21)
+  }
+  logger(WARN, paste("Project Values are:", paste(project.values, collapse=", ", sep= "")))
+  
+  period.start.string <- min(as.character(data$PERIOD))
+  logger(WARN, paste("period.start =", period.start.string))
+  
+  period.start <- ltp::Period.FromString(period.start.string)
+
+  period.end.string <- max(as.character(data$PERIOD))
+  logger(WARN, paste("period.end =", period.end.string))
+  period.end <- ltp::Period.FromString(period.end.string)
+
+  if (period.start.string >= period.end.string) { 
+    logger(ERROR, paste("invalid periods: period.start must be lower than period.end", project.name))
+    return(22)
+  }
+  
+  period.freq <- as.integer(max(sapply(strsplit(as.character(data$PERIOD), "-"), function(x) as.integer(x[2]))))
+  if (period.freq < 1) { 
+    logger(ERROR, paste("invalid periods: period.freq (", period.freq, ") must be >= 1", project.name))
+    return(22)
+  }
+  logger(WARN, paste("period.freq =", period.freq))
+  
+  Project.CreateProjectConfig(project.name, mailto=mailto,
+                              period.start=period.start, period.end=period.end, period.freq=period.freq,
+                              n.ahead=n.ahead,
+                              project.keys=project.keys, project.values=project.values)
+ 
+}
+
 Project.BuildSQLscript <- function(project.name, project.config=NULL) {
-  logger(WARN, "Generating SQL script")
+  logger(DEBUG, "Generating SQL script")
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
   }
   project.keys <- GetKeyNames(project.name=project.name, project.config=project.config)
   project.values <- GetValueNames(project.name=project.name, project.config=project.config)
   input.file <- file.path(GetTemplatesHome(), paste("project-sql-", "ltp", ".brew", sep=""))
-  logger(WARN, paste("Template file =", input.file))
+  logger(DEBUG, paste("Template file =", input.file))
   output.file <- file.path(Project.GetPath(project.name), paste(project.name, ".sql", sep=""))
-  logger(WARN, paste("Target/SQL file =", output.file))
+  logger(DEBUG, paste("Target/SQL file =", output.file))
   brew(input.file, output=output.file)
   output.file
 }
@@ -113,7 +200,11 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
 
   tablename = DB.GetTableNameProjectItems(project.name)
   where.condition <- BuildFilterWithKeys(keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
-  sql_statement <- paste("select item_id from", tablename, "where", where.condition, sep=" ")
+  
+  if (!is.null(where.condition) && where.condition != "")
+    where.condition <- paste("where", where.condition, sep=" ")
+  
+  sql_statement <- paste("select item_id from", tablename, where.condition, sep=" ")
   records <- DB.RunSQLQuery(sql_statement, db.channel=db.channel)
   
   tot <- nrow(records)
@@ -145,8 +236,8 @@ Project.GetDataFullPathFilename <- function(project.name) {
 }
 
 Project.GetConfig <- function(project.name, quit=FALSE) {
-  default.project.config <- file.path(GetEtcPath(), "project.config")
-  logger(DEBUG, paste("Reading config file", default.project.config))
+  default.project.config <- file.path(strategico.config$projects.home, "project.config")
+  logger(DEBUG, paste("Reading default config file", default.project.config))
   source(default.project.config)
 
   plugins.path <- GetPluginsPath()
@@ -289,7 +380,8 @@ Project.GetUrl <- function(project.name, projects.url = strategico.config$projec
   paste(projects.url, project.name, sep="/")
 }
 
-Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.channel, filename=NULL) {
+  
+Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel, filename=NULL, mailto='nobody@localhost', n.ahead=6) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
 
@@ -297,18 +389,26 @@ Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.chan
     filename <- Project.GetDataFullPathFilename(project.name=project.name)
 
   logger(WARN, paste("Loading data from file", filename))
-  result=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
+  data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
   logger(WARN, "CSV file header:")
-  csv.header <- colnames(result)
+  csv.header <- colnames(data)
   logger(WARN, paste(csv.header, collapse=", ", sep=" "))
-  expected.header <- Project.GetExpectedCSVHeader(project.name=project.name, project.config=project.config)
-
-  if (length(csv.header) == length(expected.header) && all.equal(csv.header, expected.header)) {
-    logger(DEBUG, "CSV header is equal to expected csv file header: importing data...")
-    Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
-  } else {
-    logger(DEBUG, "Unexpected csv header: NO data will BE IMPORTED")
+  
+  result <- Project.CreateProjectConfigFromCSVData(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
+  if (result != 0) {
+    logger(INFO, "Something went wrong: not loaing data to DB")
+    return (result)
   }
+  ## reloading the new project config file
+  project.config <- Project.GetConfig(project.name=project.name)
+
+  ## creating DB tables
+  Project.CreateDB(project.name=project.name,
+                   project.config=project.config, db.channel=db.channel)
+
+  ## importing csv data to DB
+  Project.Items.UpdateData(project.name=project.name, project.data=data, db.channel=db.channel)
+  return (0)
 }
 
 ##input  da db. 

@@ -47,6 +47,8 @@ spec <- c(
           'item.values', 'v', 1, "character",
           'file', 'F', 1, "character",
           'model', 'm', 1, "character",
+          'mailto', 'M', 1, "character",
+          'ahead', 'a', 1, "character",
           'runit', 'u', 0, "logical",
           'ts.freq', 'f', 1, "double",
           'ts.string', 't', 1, "character",
@@ -123,25 +125,21 @@ if (opt$cmd == "runit") {
 }
 
 #########################################################################
-## Reading project.config
+## Reading project.name
 #########################################################################
 
 if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
+#########################################################################
+## Reading project.config
+#########################################################################
+
 if (!Project.IsValidName(opt$project.name))
-  UsageAndQuit( paste("Unknown project name=", opt$project.name))
+  UsageAndQuit( paste("Missing directory for project name=", opt$project.name))
 
 project.config <- Project.GetConfig(opt$project.name)
 
-
-## item.values could be could be V1 or V1,V2
-if (is.null(opt$item.values)) {
-  opt$item.values <- GetValueNames(project.name=opt$project.name, project.config=project.config) 
-  logger(INFO, paste("Missing  item.values option: assuming item.values=", opt$item.value))
-} else {
-  opt$item.values <- unlist(strsplit(opt$item.values, ","))
-}
 #########################################################################
 ## create.db
 #########################################################################
@@ -150,16 +148,6 @@ if (opt$cmd == "create.db") {
 
   Project.CreateDB(project.name=opt$project.name, 
                          project.config=project.config, db.channel=db.channel)
-  q(status=0)
-}
-
-
-#########################################################################
-## create.db
-#########################################################################
-if (opt$cmd == "create.db") {
-  ##TODO
-  ##/create-tables-ltp.sh opt$project.name localost r strategicodev
   q(status=0)
 }
 
@@ -208,8 +196,40 @@ if (opt$cmd == "export.db") {
 
 
 #########################################################################
+## CMD import.csv
+#########################################################################
+
+if (opt$cmd == "import.csv") {
+  if(is.null(opt$file)) {
+    opt$file <- Project.GetDataFullPathFilename(opt$project.name)
+    logger(WARN, paste("Missing file option: assuming file=", opt$file))
+  }
+  if(is.null(opt$ahead)) {
+    opt$ahead <- 6
+    logger(WARN, paste("Missing ahead option: assuming ahead=", opt$ahead))
+  }
+  if(is.null(opt$mailto)) {
+    opt$mailto <- "none"
+    logger(WARN, paste("Missing mailto option: assuming mailto=", opt$mailto))
+  }
+  Project.ImportFromCSV(project.name=opt$project.name, project.config=project.config, 
+                        db.channel=db.channel, filename=opt$file,
+                        mailto=opt$mailto, n.ahead=opt$ahead)
+  q(status=0)
+  
+}
+
+#########################################################################
 ## export.results
 #########################################################################
+
+## item.values could be V1 or V1,V2
+if (is.null(opt$item.values)) {
+  opt$item.values <- GetValueNames(project.name=opt$project.name, project.config=project.config) 
+  logger(INFO, paste("Missing item.values option: assuming item.values=", opt$item.value))
+} else {
+  opt$item.values <- unlist(strsplit(opt$item.values, ","))
+}
 
 if (opt$cmd == "export.results.csv") {
   for (value in opt$item.values) {
@@ -226,19 +246,6 @@ if (opt$cmd == "export.results.db") {
   q(status=0)
 }
 
-#########################################################################
-## CMD import.db
-#########################################################################
-
-if (opt$cmd == "import.db") {
-  if(is.null(opt$file)) {
-    opt$file <- Project.GetDataFullPathFilename(opt$project.name)
-    logger(WARN, paste("Missing file option: assuming file=", opt$file))
-  }
-  Project.ImportDataFromCSV(project.name=opt$project.name, project.config=project.config, db.channel=db.channel, filename=opt$file)
-  q(status=0)
-  
-}
 
 #########################################################################
 ## Normalizing options
