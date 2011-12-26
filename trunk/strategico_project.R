@@ -171,6 +171,17 @@ Project.GetConfig <- function(project.name, quit=FALSE) {
   project.config
 }
 
+Project.GetExpectedCSVHeader <- function(project.name=NULL, project.config=NULL) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+  
+  project.keys <- Project.GetKeys(project.name, project.config=project.config)
+  project.values <- Project.GetValues(project.name, project.config=project.config)
+  expected.header <- c(project.keys, "PERIOD", project.values)
+  logger(DEBUG, paste("Expected CSV Header:", paste(expected.header, collapse=", ", sep=" ")))
+  expected.header
+}
+  
 Project.GetKeys <- function(project.name=NULL, project.config=NULL) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
@@ -290,11 +301,8 @@ Project.ImportDataFromCSV <- function(project.name, project.config=NULL, db.chan
   logger(WARN, "CSV file header:")
   csv.header <- colnames(result)
   logger(WARN, paste(csv.header, collapse=", ", sep=" "))
-  project.keys <- Project.GetKeys(project.name, project.config=project.config)
-  project.values <- Project.GetValues(project.name, project.config=project.config)
-  expected.header <- c(project.keys, "PERIOD", project.values)
-  logger(DEBUG, "Expected file header:")
-  logger(DEBUG, paste(expected.header, collapse=", ", sep=" "))
+  expected.header <- Project.GetExpectedCSVHeader(project.name=project.name, project.config=project.config)
+
   if (length(csv.header) == length(expected.header) && all.equal(csv.header, expected.header)) {
     logger(DEBUG, "CSV header is equal to expected csv file header: importing data...")
     Project.Items.UpdateData(project.name=project.name, project.data=result, db.channel=db.channel)
