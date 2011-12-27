@@ -1,0 +1,27 @@
+## -*- mode: R -*-
+
+project.config$project.name='<%=project.name%>'
+project.config$mailto='<%=mailto%>'
+
+## +++++++++++++++++++++++++++++++++++++++
+## info for import / export CSV
+## +++++++++++++++++++++++++++++++++++++++
+project.config$csv.sep=';'
+project.config$csv.dec=','
+project.config$csv.quote='\"'
+
+## +++++++++++++++++++++++++++++++++++++++
+## period.
+## +++++++++++++++++++++++++++++++++++++++
+project.config$period.start=c(<%=paste(period.start, sep="", collapse=", ")%>)
+project.config$period.end=c(<%=paste(period.end, sep="", collapse=", ")%>)
+project.config$period.freq=<%=period.freq%>
+
+## +++++++++++++++++++++++++++++++++++++++
+## keys and values
+## +++++++++++++++++++++++++++++++++++++++
+project.config$keys=c('<%=paste(project.keys, collapse="', '", sep="")%>')
+project.config$values=c('paste(project.values, collapse="', '", sep="")%>')
+
+project.config$param$n.ahead=<%=n.ahead%>
+project.config$param$naive.ifConstantLastValues=project.config$period.freq

@@ -30,9 +30,9 @@ Project.CreateProjectConfig <- function(project.name, mailto='noname@localhost',
                                        period.start, period.end, period.freq, n.ahead=6,
                                        project.keys, project.values) {
   logger(DEBUG, "Generating Project Config file")
-  input.file <- file.path(GetTemplatesHome(), paste("project-config.brew", sep=""))
+  input.file <- file.path(GetTemplatesHome(), paste("project-config-ltp.brew", sep=""))
   logger(DEBUG, paste("Template file =", input.file))
-  output.file <- file.path(Project.GetPath(project.name), paste(project.name, ".conf", sep=""))
+  output.file <- Project.GetConfigFullPathFilename(project.name)
   logger(DEBUG, paste("Target file =", output.file))
   brew(input.file, output=output.file)
   return(0)
@@ -394,14 +394,20 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
   csv.header <- colnames(data)
   logger(WARN, paste(csv.header, collapse=", ", sep=" "))
   
-  result <- Project.CreateProjectConfigFromCSVData(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
-  if (result != 0) {
-    logger(INFO, "Something went wrong: not loaing data to DB")
-    return (result)
+  project.config.file <- Project.GetConfigFullPathFilename(project.name)
+  if (file.exists(project.config.file)) {
+    logger(WARN, paste("Config file", project.config.file, "already exists: I'll not create it"))
+  } else {
+    logger(WARN, paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
+    result <- Project.CreateProjectConfigFromCSVData(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
+    if (result != 0) {
+      logger(INFO, "Something went wrong: not loaing data to DB")
+      return (result)
+    }
+    ## reloading the new project config file
+    project.config <- Project.GetConfig(project.name=project.name)
   }
-  ## reloading the new project config file
-  project.config <- Project.GetConfig(project.name=project.name)
-
+  
   ## creating DB tables
   Project.CreateDB(project.name=project.name,
                    project.config=project.config, db.channel=db.channel)
