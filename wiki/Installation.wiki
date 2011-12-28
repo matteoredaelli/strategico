@@ -40,9 +40,6 @@ if you use the web application, install also
 
 Download strategico.zip from [http://code.google.com/p/strategico/downloads/list Download tab] and unzip it into a folder like /apps/strategico (Linux) or C:\strategico
 
-If you want to use a database, you have to 
- * (only linux) install unixodbc
- * mysql odbc driver
 
 = Configuration =
 
