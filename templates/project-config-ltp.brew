@@ -1,8 +1,10 @@
 ## -*- mode: R -*-
 
 project.config$project.name='<%=project.name%>'
+<% if (!is.null(mailto)) {
+%>
 project.config$mailto='<%=mailto%>'
-
+<%}%>
 ## +++++++++++++++++++++++++++++++++++++++
 ## info for import / export CSV
 ## +++++++++++++++++++++++++++++++++++++++

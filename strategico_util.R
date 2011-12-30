@@ -223,6 +223,17 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
   value %in% GetValueNames(project.name=project.name, project.config=project.config)
 }
 
+Strategico.Sendmail <- function(project.name, project.config=NULL, subject, body=" ", to=NULL) {
+  library(sendmailR)
+  if (is.null(to)) to <- project.config$mailto
+  if (!is.null(to)) {
+    logger(DEBUG, paste("Sending email to", to))
+    subject <- paste("strategico", project.name, subject, sep=" :: ")
+    sendmail(from=strategico.config$mail.from, to=to, subject=subject, body=body,
+             control=list(smtpServer=strategico.config$mail.smtp))
+  }
+}
+
 Param.EvalString <- function(param.string) {
   if (is.character(param.string)) {
     param.string <- gsub(";",",", param.string)
