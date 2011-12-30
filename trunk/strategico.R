@@ -218,12 +218,12 @@ if (opt$cmd == "import.csv") {
     logger(WARN, paste("Missing ahead option: assuming ahead=", opt$ahead))
   }
   if(is.null(opt$mailto)) {
-    opt$mailto <- "none"
-    logger(WARN, paste("Missing mailto option: assuming mailto=", opt$mailto))
+    logger(WARN, "Missing mailto option: no mail will be sent")
   }
   Project.ImportFromCSV(project.name=opt$project.name, project.config=project.config, 
                         db.channel=db.channel, filename=opt$file,
                         mailto=opt$mailto, n.ahead=opt$ahead)
+  Strategico.Sendmail(to=opt$mailto, subject=opt$cmd, project.name=opt$project.name)
   q(status=0)
   
 }
@@ -295,6 +295,7 @@ if (opt$cmd == "eval.items") {
   Items.Eval(project.name=opt$project.name, 
              id.list=id.list, values=opt$item.values,
              param=param, project.config=project.config, db.channel=db.channel)
+  Strategico.Sendmail(project.config=project.config, to=opt$mailto, subject=opt$cmd, project.name=opt$project.name)
   q(status=0)
 }
 
@@ -309,7 +310,7 @@ if (opt$cmd == "eval.items.from.db") {
   
   Items.DB.EvalFromSummary(project.name=opt$project.name, value=opt$item.values,
                            verbose=TRUE, project.config, db.channel=db.channel)
-  
+  Strategico.Sendmail(project.config=project.config, to=opt$mailto, subject=opt$cmd, project.name=opt$project.name)
   q(status=0)
 }
 

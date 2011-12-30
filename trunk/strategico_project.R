@@ -26,7 +26,7 @@ Project.CreateDB <- function(project.name, project.config=NULL, db.channel=db.ch
   sapply(mysql, function(s) DB.RunSQLQuery(sql_statement=s, db.channel=db.channel))
 }
 
-Project.CreateProjectConfig <- function(project.name, mailto='noname@localhost',
+Project.CreateProjectConfig <- function(project.name, mailto=NULL,
                                        period.start, period.end, period.freq, n.ahead=6,
                                        project.keys, project.values) {
   logger(DEBUG, "Generating Project Config file")
