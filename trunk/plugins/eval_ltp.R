@@ -23,7 +23,7 @@ suppressPackageStartupMessages(library(ast))
 suppressPackageStartupMessages(library(ltp))
 
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
-  logger(INFO, paste("Running function", project.config$eval.function, "for item id", id))
+  logger(INFO, paste("Running function", project.config$eval.function, "for item id =", id, "and value =", value))
   model <- ltp(product = item.data, rule=param$rule,
                ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 

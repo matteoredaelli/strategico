@@ -135,7 +135,7 @@ if ( is.null(opt$project.name) )
 ## Reading project.config
 #########################################################################
 
-if (!Project.IsValidName(opt$project.name))
+if (!Project.Exists(opt$project.name))
   UsageAndQuit( paste("Missing directory for project name=", opt$project.name))
 
 project.config <- Project.GetConfig(opt$project.name)

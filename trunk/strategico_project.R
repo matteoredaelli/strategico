@@ -150,7 +150,7 @@ Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
 }
 
 Project.EmptyFS <- function(project.name, recursive = TRUE) {
-  if (!Project.IsValidName(project.name)) {
+  if (!Project.Exists(project.name)) {
     logger(WARN, paste("Project folder=", project.name, "doesn't exist"))
   } else {
     project.path <- paste(Project.GetPath(project.name), "/", sep="")
@@ -290,7 +290,7 @@ Project.GetValues <- function(project.name=NULL, project.config=NULL) {
 Project.GetList <- function(projects.home = strategico.config$projects.home) {
   logger(DEBUG, paste("Projects in", projects.home, ":"))
   projects <- dir(projects.home)
-  logger(DEBUG, projects)
+  logger(DEBUG, paste(projects, collapse=", "))
   projects
 }
   
@@ -431,6 +431,10 @@ Project.IsValid <- function(project.name, db.channel) {
 }
 
 Project.IsValidName <- function(project.name) {
+  ! (project.name %in% c("strategico"))
+}
+
+Project.Exists <- function(project.name) {
   project.name %in% Project.GetList()
 }
 
