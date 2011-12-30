@@ -75,14 +75,14 @@ test.Project.GetTableNames <- function() {
                )
 }
 
-test.Project.IsValidName <- function() {
+test.Project.Exists <- function() {
   checkEquals(
               TRUE,
-              Project.IsValidName("sample")
+              Project.Exists("sample")
               )
   checkEquals(
               FALSE,
-              Project.IsValidName("missingproject")
+              Project.Exists("missingproject")
               )
 }
 
