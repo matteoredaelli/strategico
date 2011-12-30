@@ -18,11 +18,13 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-suppressPackageStartupMessages(library("futile.logger"))
+suppressPackageStartupMessages(library(logging))
+suppressPackageStartupMessages(library(xtable))
 suppressPackageStartupMessages(library(xtable))
 suppressPackageStartupMessages(library(reshape))
 suppressPackageStartupMessages(library(brew))
 suppressPackageStartupMessages(library(RMySQL))
+
 
 Quit <- function (msg="", status=-1, save="no") {
   print(msg)
@@ -74,8 +76,8 @@ MySource <- function(filename, file.path=NULL) {
 
 MySource(filename="strategico.config", file.path=GetEtcPath())
 
-config_logger(threshold = strategico.config$logger.threshold)
-logger <- getLogger()
+basicConfig()
+setLevel(strategico.config$logger.level)
 
 MySource("strategico_project.R")
 MySource("strategico_item.R")
@@ -156,7 +158,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
     if (length(ts.periods.tmp) == length(ts.values))
       ts.periods = ts.periods.tmp
     else
-      logger(WARN, "Skipping ts.periods string, not matching length with ts string")
+      logwarn( "Skipping ts.periods string, not matching length with ts string")
   }
   
 
@@ -227,7 +229,7 @@ Strategico.Sendmail <- function(project.name, project.config=NULL, subject, body
   library(sendmailR)
   if (is.null(to)) to <- project.config$mailto
   if (!is.null(to)) {
-    logger(DEBUG, paste("Sending email to", to))
+    logdebug( paste("Sending email to", to))
     subject <- paste("strategico", project.name, subject, sep=" :: ")
     sendmail(from=strategico.config$mail.from, to=to, subject=subject, body=body,
              control=list(smtpServer=strategico.config$mail.smtp))
@@ -259,7 +261,7 @@ Param.ToString <- function(param) {
 
 SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {
   filter <- BuildFilterWithKeys(keys, sep="==", collapse=" & ", na.rm=keys.na.rm)
-  logger(DEBUG, filter)
+  logdebug( filter)
   cmd <- "records <- subset(data, __FILTER__)"
   cmd <- gsub("__FILTER__", filter, cmd)
   eval(parse(text = cmd))
@@ -278,7 +280,7 @@ SubsetByID <- function(data, id) {
   else
     folder <- paste(project.path, paste(values,collapse="/"), sep="/")
 
-  logger(WARN, folder)
+  logwarn( folder)
   dir.create(folder, recursive = TRUE, showWarnings = FALSE)
 
   vals.names <- .GetFields(names(data),"value")

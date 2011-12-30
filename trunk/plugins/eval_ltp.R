@@ -23,7 +23,7 @@ suppressPackageStartupMessages(library(ast))
 suppressPackageStartupMessages(library(ltp))
 
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
-  logger(INFO, paste("Running function", project.config$eval.function, "for item id =", id, "and value =", value))
+  loginfo( paste("Running function", project.config$eval.function, "for item id =", id, "and value =", value))
   model <- ltp(product = item.data, rule=param$rule,
                ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
@@ -44,7 +44,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
 
   if ("model" %in% project.config$save) {
     filename <- paste(output.path, "/model.RData", sep = "")
-    logger(DEBUG, paste("Saving Model to file", filename))
+    logdebug( paste("Saving Model to file", filename))
     save(file=filename, model)
   }
 
@@ -52,10 +52,10 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## Saving Normalized Data
   ## ###################################################################################
     
-  logger(DEBUG, "Normalized data:")
-  logger(DEBUG, model@values)
+  logdebug( "Normalized data:")
+  logdebug( model@values)
   if ( nrow(model@values) == 0) {
-    ##__##logger(WARN, "No records in normalized data. No saving to DB")
+    ##__##logwarn( "No records in normalized data. No saving to DB")
     skip=TRUE
   } else {
     normalized.periods <- rownames(model@values)
@@ -65,12 +65,12 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   }
     
   if (is.null(model@BestModel)) {
-    logger(WARN, "Best model is null. No saving to DB")
+    logwarn( "Best model is null. No saving to DB")
     return(2)
   } 
 
   
-  logger(DEBUG, "Calculating the predicted periods")
+  logdebug( "Calculating the predicted periods")
   predicted.periods <-Period.BuildRange(period.start=project.config$period.end,
                                           period.freq=project.config$period.freq,
                                           n=param$n.ahead, shift=1)
@@ -79,7 +79,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## ###################################################################################
   
   if ("summary" %in% project.config$save) {
-    logger(DEBUG, "Calculating the onerow.summ table")
+    logdebug( "Calculating the onerow.summ table")
     onerow.summ = ltp.BuildOneRowSummary(id=id, model=model, param)
     onerow.summ <- cbind(item_id=id, onerow.summ)
     tablename = DB.GetTableNameSummary(project.name, value)
@@ -100,24 +100,24 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## ###################################################################################
   ## Saving Results Data
   ## ###################################################################################
-  logger(DEBUG, "Saving results for all models")
+  logdebug( "Saving results for all models")
 
   
   if (is.null(model@BestModel)) {
-    logger(WARN, "NO BestModel found ;-(")
+    logwarn( "NO BestModel found ;-(")
     results <- NULL
   }
   else {
-    logger(INFO, paste("Best Model is ", model@BestModel))
+    loginfo( paste("Best Model is ", model@BestModel))
     all.results <- NULL
     all.residuals <- NULL
     for (m in names(model@models)) {
-      logger(DEBUG, paste("Retreiving results and residuals for model", m))
+      logdebug( paste("Retreiving results and residuals for model", m))
       predictions <- as.vector(model@models[[m]]$prediction)
       residuals <- as.vector(model@models[[m]]$Residuals)
 
       if (length(predictions) == 0) {
-       logger(WARN, paste("No predictions for model", m, ".Skipping it"))
+       logwarn( paste("No predictions for model", m, ".Skipping it"))
       } else {
         model.results <- data.frame(
            item_id=id,
@@ -128,9 +128,9 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
       }
 
       if (length(residuals) == 0) {
-       logger(DEBUG, paste("No residuals for model", m, ".Skipping it"))
+       logdebug( paste("No residuals for model", m, ".Skipping it"))
       ##} else if (length(residuals) != length(normalized.periods)) {
-      ## logger(WARN, paste("Different number of residuals for model", m, ".Skipping it"))
+      ## logwarn( paste("Different number of residuals for model", m, ".Skipping it"))
       } else {
         model.residuals <- data.frame(
            item_id=id,
