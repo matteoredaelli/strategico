@@ -166,7 +166,7 @@ if (opt$cmd == "statistics") {
 #########################################################################
 if (opt$cmd == "drop") {
   Project.DropDB(project.name=opt$project.name, db.channel=db.channel)
-  Project.EmptyDB(project.name=opt$project.name, db.channel=db.channel)
+  Project.EmptyFS(project.name=opt$project.name)
   q(status=0)
 }
 
@@ -211,14 +211,14 @@ if (opt$cmd == "export.csv") {
 if (opt$cmd == "import.csv") {
   if(is.null(opt$file)) {
     opt$file <- Project.GetDataFullPathFilename(opt$project.name)
-    logger(WARN, paste("Missing file option: assuming file=", opt$file))
+    logwarn( paste("Missing file option: assuming file=", opt$file))
   }
   if(is.null(opt$ahead)) {
     opt$ahead <- 6
-    logger(WARN, paste("Missing ahead option: assuming ahead=", opt$ahead))
+    logwarn( paste("Missing ahead option: assuming ahead=", opt$ahead))
   }
   if(is.null(opt$mailto)) {
-    logger(WARN, "Missing mailto option: no mail will be sent")
+    logwarn( "Missing mailto option: no mail will be sent")
   }
   Project.ImportFromCSV(project.name=opt$project.name, project.config=project.config, 
                         db.channel=db.channel, filename=opt$file,
@@ -235,7 +235,7 @@ if (opt$cmd == "import.csv") {
 ## item.values could be V1 or V1,V2
 if (is.null(opt$item.values)) {
   opt$item.values <- GetValueNames(project.name=opt$project.name, project.config=project.config) 
-  logger(INFO, paste("Missing item.values option: assuming item.values=", opt$item.value))
+  loginfo( paste("Missing item.values option: assuming item.values=", opt$item.value))
 } else {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
 }
@@ -245,10 +245,10 @@ if (is.null(opt$item.values)) {
 ## Normalizing options
 #########################################################################
 
-logger(DEBUG, "checking parameter: eval.param")
+logdebug( "checking parameter: eval.param")
 param <- Param.EvalString(opt$eval.param)
 
-logger(DEBUG, "checking parameters: id.list and id.range")
+logdebug( "checking parameters: id.list and id.range")
 id.list <- c()
 
 if (!is.null(opt$id.list))
@@ -261,13 +261,13 @@ if (!is.null(opt$id.range))
 max.id <- Project.GetMaxID(opt$project.name, db.channel=db.channel)
 
 if (is.null(id.list)) {
-  logger(INFO, "Missing id.range and id.list: assuming all item IDs:")
+  loginfo( "Missing id.range and id.list: assuming all item IDs:")
   id.list <- 1:max.id
 } else {
   id.list <- as.integer(id.list)
   ## removing IDs > max id   not good for ws.html
   ##wrong.id <- paste(id.list[id.list > max.id], collapse=", ")
-  ##logger(WARN, paste("Skipping (if any) the following too high ids:", wrong.id))
+  ##logwarn( paste("Skipping (if any) the following too high ids:", wrong.id))
   ##id.list <- id.list[id.list <= max.id]
 }
 #########################################################################

@@ -36,12 +36,12 @@ Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=
 
 Item.EmptyFS <- function(project.name, id, value=NULL, recursive = TRUE) {
   if (is.na(id) | id < 0) {
-    logger(INFO, paste("Invalid ID=", id))
+    loginfo( paste("Invalid ID=", id))
   } else {
     project.path <- Project.GetPath(project.name)
     relative.path <- Item.GetRelativePath(id, value)
     item.path <- paste(project.path, relative.path, sep="/")
-    logger(INFO, paste("Deleting Item path:", item.path))
+    loginfo( paste("Deleting Item path:", item.path))
     unlink(item.path, recursive=recursive)
   }
 }
@@ -72,15 +72,15 @@ Item.EvalChildren <- function(project.name, id, keys=NULL, values, param=NULL,
 Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
                          period.start=NULL, period.end=NULL, value,
                          param=NULL, project.config, db.channel) {
-  logger(INFO, "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
-  logger(WARN, paste("Project=", project.name, " Loading item ID=", id,
+  loginfo( "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
+  logwarn( paste("Project=", project.name, " Loading item ID=", id,
                      " KEYS=", paste(keys,collapse=","), " ",
                      value, "=", project.config$values[value],
                      sep=""))
 
   if (!is.value(value, project.config=project.config)) {
     msg <- paste("Invalid value=", value, ". Skipping prediction") 
-    logger(ERROR, msg)
+    logerror( msg)
     return(NULL)
   }
   
@@ -91,26 +91,26 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
                                  value=value, db.channel=db.channel)
 
   if (is.null(item.data)) {
-    logger(INFO, "Empty data: skipping prediction")
+    loginfo( "Empty data: skipping prediction")
     return(NULL)
   }
   
-  logger(INFO, paste("TS length=", nrow(item.data)))
-  logger(DEBUG, item.data)
+  loginfo( paste("TS length=", nrow(item.data)))
+  logdebug( item.data)
 
   if (nrow(item.data)==0) {
-    logger(INFO, "Empty data: skipping prediction")
+    loginfo( "Empty data: skipping prediction")
     return(NULL)
   }
 
   n.char <- nchar(project.config$period.freq)
-  logger(INFO, paste("period.start=", Period.ToString(project.config$period.start, n.char=n.char),
+  loginfo( paste("period.start=", Period.ToString(project.config$period.start, n.char=n.char),
                      " period.freq=", project.config$period.freq,
                      " period.end=", Period.ToString(project.config$period.end, n.char=n.char),
                      sep=""))
   
   if (is.null(id)) {
-    logger(WARN, "ID is null, assigning a new value")
+    logwarn( "ID is null, assigning a new value")
     id <- Item.GetNewID()
   } else {
     id <- as.integer(id)
@@ -122,7 +122,7 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
   
   param <- Param.MergeWithDefault(project.config=project.config, param=param)
 
-  logger(DEBUG, paste("Param= ", Param.ToString(param)))
+  logdebug( paste("Param= ", Param.ToString(param)))
   
   directory = Item.GetPath(project.name, id, value)
   ##dir.create(directory, showWarnings = FALSE, recursive = TRUE)
@@ -131,9 +131,9 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
     value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
-  logger(DEBUG, "RESULTS:")
-  logger(DEBUG, rownames(prediction))
-  logger(DEBUG, prediction)
+  logdebug( "RESULTS:")
+  logdebug( rownames(prediction))
+  logdebug( prediction)
   t(prediction)
 }
 
@@ -144,7 +144,7 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
   
   if (is.null(keys) & is.null(id)) {
     msg <- "Cannot retrive Item data for missing ID and KEYS" 
-    logger(ERROR, msg)
+    logerror( msg)
     return(NULL)
   }
   
@@ -153,7 +153,7 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
 
   if (!is.value(value, project.config=project.config)) {
     msg <- paste("Invalid value=", value, ". No data to retreive") 
-    logger(ERROR, msg)
+    logerror( msg)
     return(NULL)
   }
 
@@ -163,7 +163,7 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
     ## now keys should not be null
      if (is.null(keys)) {
        msg <- paste("NO Keys NO data for id=", id) 
-       logger(ERROR, msg)
+       logerror( msg)
        return(NULL)
      }
   }
@@ -181,7 +181,7 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
   tablename <- DB.GetTableNameProjectData(project.name)
   sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
 
-  logger(DEBUG, sql_statement)
+  logdebug( sql_statement)
   records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
   rownames(records) <- records$period
   records$period <- NULL
@@ -197,7 +197,7 @@ Item.GetKeys <- function(id, project.name, db.channel) {
     records$item_id <- NULL
     result <- as.vector(as.matrix(records[1,]))
   } else {
-    logger(WARN, paste("No Keys found for ID =", id))
+    logwarn( paste("No Keys found for ID =", id))
     result <- NULL
   }
   result
@@ -225,7 +225,7 @@ Item.GetChildren <- function(id, keys=NULL, project.name=NULL, db.channel) {
   id.list <- Project.GetIDs(keys=keys, project.name=project.name, keys.na.rm=TRUE, db.channel=db.channel)
   result <- id.list[id.list != id]
   if (length(result)==0) {
-    logger(WARN, paste("No children for ID=",
+    logwarn( paste("No children for ID=",
                        id,
                        " (keys=",
                        paste(keys, collapse=" - "),

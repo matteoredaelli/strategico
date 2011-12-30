@@ -29,11 +29,11 @@ Project.CreateDB <- function(project.name, project.config=NULL, db.channel=db.ch
 Project.CreateProjectConfig <- function(project.name, mailto=NULL,
                                        period.start, period.end, period.freq, n.ahead=6,
                                        project.keys, project.values) {
-  logger(DEBUG, "Generating Project Config file")
+  logdebug( "Generating Project Config file")
   input.file <- file.path(GetTemplatesHome(), paste("project-config-ltp.brew", sep=""))
-  logger(DEBUG, paste("Template file =", input.file))
+  logdebug( paste("Template file =", input.file))
   output.file <- Project.GetConfigFullPathFilename(project.name)
-  logger(DEBUG, paste("Target file =", output.file))
+  logdebug( paste("Target file =", output.file))
   brew(input.file, output=output.file)
   return(0)
 }
@@ -42,12 +42,12 @@ Project.CreateProjectConfig <- function(project.name, mailto=NULL,
 Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n.ahead) {
   
   if (is.null(data) ) {
-    logger(ERROR, paste("No data found, no config file will be created for project", project.name))
+    logerror( paste("No data found, no config file will be created for project", project.name))
     return(1)
   }
   
   if (nrow(data) < 2) {
-    logger(ERROR, paste("No rows found, no config file will be created for project", project.name))
+    logerror( paste("No rows found, no config file will be created for project", project.name))
     return(2)
   } 
 
@@ -55,56 +55,56 @@ Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n
 
   period.field <- grep("^PERIOD$", header)
   if (length(period.field) == 0) {
-    logger(ERROR, paste("No PERIOD field found, no config file will be created for project", project.name))
+    logerror( paste("No PERIOD field found, no config file will be created for project", project.name))
     return(5)
   }
   
   project.keys <- grep("^KEY\\d$", header, value=TRUE)
   if (length(project.keys) == 0) {
-    logger(ERROR, paste("No KEY1,.. fields found, no config file will be created for project", project.name))
+    logerror( paste("No KEY1,.. fields found, no config file will be created for project", project.name))
     return(10)
   }
 
   key.numbers <- sort(as.numeric(gsub("KEY","", project.keys)))
   if (!all(1:length(key.numbers) == key.numbers)) { 
-    logger(ERROR, paste("Missing/Invalid KEYx field, no config file will be created for project", project.name))
+    logerror( paste("Missing/Invalid KEYx field, no config file will be created for project", project.name))
     return(11)
   }
-  logger(WARN, paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
+  logwarn( paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
   
   project.values <- grep("^V\\d$", header, value=TRUE)
   if (length(project.values) == 0) {
-    logger(ERROR, paste("No V1,.. fields found, no config file will be created for project", project.name))
+    logerror( paste("No V1,.. fields found, no config file will be created for project", project.name))
     return(20)
   }
 
   value.numbers <- sort(as.numeric(gsub("V","", project.values)))
   if (!all(1:length(value.numbers) == value.numbers)) { 
-    logger(ERROR, paste("Missing/Invalid Vx field, no config file will be created for project", project.name))
+    logerror( paste("Missing/Invalid Vx field, no config file will be created for project", project.name))
     return(21)
   }
-  logger(WARN, paste("Project Values are:", paste(project.values, collapse=", ", sep= "")))
+  logwarn( paste("Project Values are:", paste(project.values, collapse=", ", sep= "")))
   
   period.start.string <- min(as.character(data$PERIOD))
-  logger(WARN, paste("period.start =", period.start.string))
+  logwarn( paste("period.start =", period.start.string))
   
   period.start <- ltp::Period.FromString(period.start.string)
 
   period.end.string <- max(as.character(data$PERIOD))
-  logger(WARN, paste("period.end =", period.end.string))
+  logwarn( paste("period.end =", period.end.string))
   period.end <- ltp::Period.FromString(period.end.string)
 
   if (period.start.string >= period.end.string) { 
-    logger(ERROR, paste("invalid periods: period.start must be lower than period.end", project.name))
+    logerror( paste("invalid periods: period.start must be lower than period.end", project.name))
     return(22)
   }
   
   period.freq <- as.integer(max(sapply(strsplit(as.character(data$PERIOD), "-"), function(x) as.integer(x[2]))))
   if (period.freq < 1) { 
-    logger(ERROR, paste("invalid periods: period.freq (", period.freq, ") must be >= 1", project.name))
+    logerror( paste("invalid periods: period.freq (", period.freq, ") must be >= 1", project.name))
     return(22)
   }
-  logger(WARN, paste("period.freq =", period.freq))
+  logwarn( paste("period.freq =", period.freq))
   
   Project.CreateProjectConfig(project.name, mailto=mailto,
                               period.start=period.start, period.end=period.end, period.freq=period.freq,
@@ -114,16 +114,16 @@ Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n
 }
 
 Project.BuildSQLscript <- function(project.name, project.config=NULL) {
-  logger(DEBUG, "Generating SQL script")
+  logdebug( "Generating SQL script")
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
   }
   project.keys <- GetKeyNames(project.name=project.name, project.config=project.config)
   project.values <- GetValueNames(project.name=project.name, project.config=project.config)
   input.file <- file.path(GetTemplatesHome(), paste("project-sql-", "ltp", ".brew", sep=""))
-  logger(DEBUG, paste("Template file =", input.file))
+  logdebug( paste("Template file =", input.file))
   output.file <- file.path(Project.GetPath(project.name), paste(project.name, ".sql", sep=""))
-  logger(DEBUG, paste("Target/SQL file =", output.file))
+  logdebug( paste("Target/SQL file =", output.file))
   brew(input.file, output=output.file)
   output.file
 }
@@ -151,17 +151,17 @@ Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
 
 Project.EmptyFS <- function(project.name, recursive = TRUE) {
   if (!Project.Exists(project.name)) {
-    logger(WARN, paste("Project folder=", project.name, "doesn't exist"))
+    logwarn( paste("Project folder=", project.name, "doesn't exist"))
   } else {
     project.path <- paste(Project.GetPath(project.name), "/", sep="")
-    logger(INFO, paste("Deleting project path:", project.path))
+    loginfo( paste("Deleting project path:", project.path))
     unlink(project.path, recursive=recursive)
     project.path <- paste(Project.GetPath(project.name), "/*results*.csv", sep="")
-    logger(INFO, paste("Deleting project files:", project.path))
+    loginfo( paste("Deleting project files:", project.path))
     unlink(project.path, recursive=FALSE)
     
     ##project.path <- paste(Project.GetPath(project.name), "/project*", sep="")
-    ##logger(INFO, paste("Deleting project files:", project.path))
+    ##loginfo( paste("Deleting project files:", project.path))
     ##unlink(project.path)
   }
 }
@@ -173,7 +173,7 @@ Project.ExportResultsCSV <- function(project.name, project.config=NULL, value, d
   if(is.null(file)) {
     name <- paste(project.name, "-results-", value, ".csv", sep="")
     file <- file.path(Project.GetPath(project.name), name)
-    logger(WARN, paste("Missing file option: assuming file =", file))
+    logwarn( paste("Missing file option: assuming file =", file))
   }
   results <- Project.GetResults(project.name=project.name, value=value, db.channel=db.channel)
   write.table(results, file=file, row.names=FALSE, append=FALSE, 
@@ -209,7 +209,7 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
   
   tot <- nrow(records)
   if (tot == 0) {
-    logger(WARN, paste("No id found for KEYS", keys, sep=' ', collapse=','))
+    logwarn( paste("No id found for KEYS", keys, sep=' ', collapse=','))
     result = NA
   } else {
     result = records$item_id
@@ -237,25 +237,25 @@ Project.GetDataFullPathFilename <- function(project.name) {
 
 Project.GetConfig <- function(project.name, quit=FALSE) {
   default.project.config <- file.path(strategico.config$projects.home, "project.config")
-  logger(DEBUG, paste("Reading default config file", default.project.config))
+  logdebug( paste("Reading default config file", default.project.config))
   source(default.project.config)
 
   plugins.path <- GetPluginsPath()
   ##project.path <- Project.GetPath(project.name)
   
   filename <- Project.GetConfigFullPathFilename(project.name)
-  logger(DEBUG, paste("Reading config file", filename))
+  logdebug( paste("Reading config file", filename))
   if (!file.exists(filename)) {
-    logger(WARN, paste("... missing config file", filename))
+    logwarn( paste("... missing config file", filename))
   } else {
     try(source(filename))
   }
   eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
   eval.file <- file.path(GetPluginsPath(), eval.file)
-  logger(DEBUG, paste("Reading eval file", eval.file))
+  logdebug( paste("Reading eval file", eval.file))
   if (! file.exists(eval.file)) {
-    logger(INFO, paste("... missing eval file", eval.file))
-    logger(INFO, "You MUST add it!!!!!!!!!!!!!!!!!!! and quit right now...")
+    loginfo( paste("... missing eval file", eval.file))
+    loginfo( "You MUST add it!!!!!!!!!!!!!!!!!!! and quit right now...")
   } else {
     try(source(eval.file))
   }
@@ -269,7 +269,7 @@ Project.GetExpectedCSVHeader <- function(project.name=NULL, project.config=NULL)
   project.keys <- Project.GetKeys(project.name, project.config=project.config)
   project.values <- Project.GetValues(project.name, project.config=project.config)
   expected.header <- c(project.keys, "PERIOD", project.values)
-  logger(DEBUG, paste("Expected CSV Header:", paste(expected.header, collapse=", ", sep=" ")))
+  logdebug( paste("Expected CSV Header:", paste(expected.header, collapse=", ", sep=" ")))
   expected.header
 }
   
@@ -288,9 +288,9 @@ Project.GetValues <- function(project.name=NULL, project.config=NULL) {
 }
 
 Project.GetList <- function(projects.home = strategico.config$projects.home) {
-  logger(DEBUG, paste("Projects in", projects.home, ":"))
+  logdebug( paste("Projects in", projects.home, ":"))
   projects <- dir(projects.home)
-  logger(DEBUG, paste(projects, collapse=", "))
+  logdebug( paste(projects, collapse=", "))
   projects
 }
   
@@ -300,7 +300,7 @@ Project.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
   sql_statement <- paste("select max(0 + id) from ", tablename, sep="")
   tot <- DB.GetTableSize(tablename,db.channel)
 
-  logger(DEBUG, paste("Max ID =", tot))
+  logdebug( paste("Max ID =", tot))
   tot
 }
                           
@@ -388,20 +388,20 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
   if (is.null(filename))
     filename <- Project.GetDataFullPathFilename(project.name=project.name)
 
-  logger(WARN, paste("Loading data from file", filename))
+  logwarn( paste("Loading data from file", filename))
   data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
-  logger(WARN, "CSV file header:")
+  logwarn( "CSV file header:")
   csv.header <- colnames(data)
-  logger(WARN, paste(csv.header, collapse=", ", sep=" "))
+  logwarn( paste(csv.header, collapse=", ", sep=" "))
   
   project.config.file <- Project.GetConfigFullPathFilename(project.name)
   if (file.exists(project.config.file)) {
-    logger(WARN, paste("Config file", project.config.file, "already exists: I'll not create it"))
+    logwarn( paste("Config file", project.config.file, "already exists: I'll not create it"))
   } else {
-    logger(WARN, paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
+    logwarn( paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
     result <- Project.CreateProjectConfigFromCSVData(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
     if (result != 0) {
-      logger(INFO, "Something went wrong: not loaing data to DB")
+      loginfo( "Something went wrong: not loaing data to DB")
       return (result)
     }
     ## reloading the new project config file
@@ -445,14 +445,14 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
 ## creates item.Rdata e item-list
 Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   if (is.null(project.data)) {
-    logger(WARN, "Project data is empty: No records. Maybe there is something wrong. No data to import to DB/Rdata")
+    logwarn( "Project data is empty: No records. Maybe there is something wrong. No data to import to DB/Rdata")
     return(2)
   }
   rows <- nrow(project.data)
-  logger(WARN, paste("Found ", rows, "records!"))
+  logwarn( paste("Found ", rows, "records!"))
   
   if (rows == 0) {
-    logger(WARN, "No records. Maybe there is something wrong. No data to import to DB/Rdata")
+    logwarn( "No records. Maybe there is something wrong. No data to import to DB/Rdata")
     return(3)
   }
   project.path <- Project.GetPath(project.name)
@@ -474,7 +474,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   
   project.items=leaves
   if ("gitems" %in% project.config$save) {
-    logger(INFO, "Finding gitems")
+    loginfo( "Finding gitems")
     ## save also gitems (only key1 values, key1+key2 values, ...
     for (i in (ncol(leaves)):2){
       leaves[,i]=""
@@ -497,7 +497,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## preparing data for prymary key in DB  (id must be the rownames)
   project.items.orig <- project.items
   DB.EmptyTable(tablename, db.channel)
-  logger(WARN, "Saving project items")
+  logwarn( "Saving project items")
   dbWriteTable(value=project.items, name=tablename, conn=db.channel, append=T, row.names=FALSE)
   
   project.items <- project.items.orig
@@ -506,6 +506,6 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## project.data.db <- merge(project.items, project.data)
   tablename = DB.GetTableNameProjectData(project.config$project.name)
   DB.EmptyTable(tablename, db.channel)
-  logger(WARN, "Saving project data")
+  logwarn( "Saving project data")
   dbWriteTable(value=project.data, name=tablename, conn=db.channel, append=T, row.names=FALSE)
 } # end function

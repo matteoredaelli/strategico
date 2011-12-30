@@ -49,7 +49,7 @@ DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=
 DB.EmptyTable <- function(tablename, db.channel) {
   sql_statement <- paste("truncate", tablename)
   try(DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel))
-  logger(DEBUG, .Last.value) 
+  logdebug( .Last.value) 
 }
 
 DB.DropTable <- function(tablename, db.channel) {
@@ -61,29 +61,29 @@ DB.DropView <- function(tablename, db.channel) {
 }
 
 DB.Drop <- function(tablename, db.channel, object="table") {
-  logger(DEBUG, paste("Dropping", object, tablename, "...")) 
+  logdebug( paste("Dropping", object, tablename, "...")) 
   sql_statement <- paste("drop", object, tablename)
   try(DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel))
-  logger(DEBUG, .Last.value) 
+  logdebug( .Last.value) 
 }
 
 
 DB.DeleteAndInsertData <- function(data, tablename, id.name="item_id", id=NULL, verbose=FALSE,
                                    append=TRUE, db.channel) {
-  logger(DEBUG, paste("Saving data (deleting + inserting) to table", tablename))
+  logdebug( paste("Saving data (deleting + inserting) to table", tablename))
   delete_sql <- paste("delete from", tablename)
   
   if(!is.null(id)) 
     delete_sql<- paste(delete_sql, "where", id.name, "=", id, sep=" ")
 
-  ##logger(DEBUG, delete_sql)
+  ##logdebug( delete_sql)
   DB.RunSQLQuery(sql_statement=delete_sql, db.channel=db.channel)
 
-  logger(DEBUG, paste("Saving data to table", tablename)) 
+  logdebug( paste("Saving data to table", tablename)) 
  
   dbWriteTable(db.channel, value=data.frame(data), name=tablename, row.names=F,
           append=append)
-  logger(DEBUG, paste("Done saving data (deleting + inserting) to table", tablename))
+  logdebug( paste("Done saving data (deleting + inserting) to table", tablename))
 
 }
 
@@ -122,7 +122,7 @@ DB.GetTableSize <- function(tablename, db.channel) {
   if ( is.data.frame(records) )
     result <- as.integer(records[1][1])
   else {
-    logger(ERROR, paste("cannot count rows of table", tablename))
+    logerror( paste("cannot count rows of table", tablename))
     result <- 0
   }
   result
@@ -130,9 +130,9 @@ DB.GetTableSize <- function(tablename, db.channel) {
 
 DB.RunSQLQuery <- function(sql_statement, db.channel) {
   for (statement in sql_statement) {
-    logger(DEBUG, paste("Running SQL:", statement))
+    logdebug( paste("Running SQL:", statement))
     result <- try(dbGetQuery(conn=db.channel, statement))
-    logger(DEBUG, paste("Done running SQL:", statement))
+    logdebug( paste("Done running SQL:", statement))
   }
   result
 }
@@ -160,9 +160,9 @@ Item.DB.GetRecords <- function(project.name, key="item_id", id.list, tablename, 
 }
 
 Item.Db.SaveData <- function(id, data, tablename, db.channel) {
-  logger(INFO, paste("Saving data for ID=", id, "to table", tablename))
+  loginfo( paste("Saving data for ID=", id, "to table", tablename))
   if (nrow(data)==0) {
-    logger(WARN, paste("No data to be saved to", tablename)) 
+    logwarn( paste("No data to be saved to", tablename)) 
   } else {
     data = cbind(item_id=id, data)
     data$PERIOD = rownames(data)
@@ -215,12 +215,12 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
 
   tot <- nrow(items)
   if (tot == 0 )
-    logger(WARN, "NO items found to be updated!")
+    logwarn( "NO items found to be updated!")
   else {
     for( i in 1:tot) {
       item <- items[i,]
-      logger(INFO, paste("Found ID=", items$item_id))
-      logger(INFO, paste("Param String:", item$Parameters))
+      loginfo( paste("Found ID=", items$item_id))
+      loginfo( paste("Param String:", item$Parameters))
       
       param <- Param.EvalString(as.character(item$Parameters))
       Item.Eval(project.name=project.name, id=item$item_id, project.config=project.config,
@@ -233,7 +233,7 @@ Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project
 Items.DB.SetBestModel <- function(project.name, value, id.list,
                                   model, db.channel) {
   str.id.list <- paste(id.list, collapse=",")
-  logger(DEBUG, paste("Setting bestmodel=", model, " for id.list=", str.id.list, sep=""))
+  logdebug( paste("Setting bestmodel=", model, " for id.list=", str.id.list, sep=""))
   tablename <- DB.GetTableNameSummary(project.name, value=value)
   str <- "update _TABLENAME_ set BestModel='_MODEL_' where item_id in (_IDLIST_)"
   str <- gsub("_TABLENAME_", tablename, str)
