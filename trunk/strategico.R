@@ -46,6 +46,7 @@ spec <- c(
           'eval.param', 'p', 1, "character",
           'item.values', 'v', 1, "character",
           'file', 'F', 1, "character",
+          'logging', 'l', 1, "character",
           'model', 'm', 1, "character",
           'mailto', 'M', 1, "character",
           'ahead', 'a', 1, "character",
@@ -71,7 +72,11 @@ if (strategico.path == "") {
   print(paste("Environment STRATEGICO_HOME is not set! Assuming", strategico.path))
 }
 
-source(file.path(strategico.path, "strategico_util.R"))	
+source(file.path(strategico.path, "strategico_util.R"))
+
+if (!is.null(opt$logging)) {
+  setLevel(opt$logging)
+}
 
 #########################################################################
 ## version
