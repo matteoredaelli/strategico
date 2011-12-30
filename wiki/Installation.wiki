@@ -10,7 +10,7 @@ You need to install
 
 and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN] for a full list of R libraries):
  * [http://cran.r-project.org/web/packages/getopt getopt]
- * [http://cran.r-project.org/web/packages/futile.logger utile.logger]
+ * [http://cran.r-project.org/web/packages/logging logging]
  * [http://cran.r-project.org/web/packages/reshape/ reshape]
  * [http://cran.r-project.org/web/packages/hwriter/index.html hwriter]
  * [http://cran.r-project.org/web/packages/RMySQL/index.html RMySQL library]
@@ -20,6 +20,7 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/xtable/index.html xtable library]
  * [http://sirio.stat.unipd.it/index.php?id=libast ast library]
  * [http://cran.r-project.org/web/packages/brew/index.html brew]
+ * [http://cran.r-project.org/web/packages/sendmailR/index.html sendmailR]
 
 For Debian and Ubuntu some of the libraries are available via
 {{{
@@ -28,7 +29,7 @@ For Debian and Ubuntu some of the libraries are available via
 
 Otherwise you can use R command
 {{{
-  install.packages(c("getopt", "futile.logger", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew"), dependencies = TRUE)
+  install.packages(c("getopt", "logging", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew", "sendmailR"), dependencies = TRUE)
 }}}
 
 if you use the web application, install also 
