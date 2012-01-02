@@ -22,20 +22,16 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/brew/index.html brew]
  * [http://cran.r-project.org/web/packages/sendmailR/index.html sendmailR]
 
-For Debian and Ubuntu some of the libraries are available via
+You can install them with teh following R command
 {{{
-  apt-get install r-cran-xtable r-cran-runit r-cran-getopt r-cran-xtable r-cran-rodbc r-cran-tseries
+  install.packages(c("getopt", "logging", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew", "sendmailR", "googleVis", "RMySQL"), dependencies = TRUE)
+}}}
+
+For Debian and Ubuntu some of the libraries are available via apt-get command:
+{{{
+  apt-get install r-cran-xtable r-cran-runit r-cran-getopt r-cran-xtable r-cran-mysql r-cran-tseries
 }}} 
 
-Otherwise you can use R command
-{{{
-  install.packages(c("getopt", "logging", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew", "sendmailR"), dependencies = TRUE)
-}}}
-
-if you use the web application, install also 
-{{{
-  install.packages("googleVis")
-}}}
 
 = Installation =
 
