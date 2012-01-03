@@ -35,7 +35,7 @@
     param.r <- Param.EvalString(param)
     
   ##cmd <- paste(strategico.command, " --cmd eval.items --id.list=", id, " -v ", value, " --eval.param=\"", param, "\"", sep="")
-  ##  rc <- system(cmd, wait=TRUE, intern=TRUE)
+  ##  rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
   ##  cat(rc)
 
     Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,

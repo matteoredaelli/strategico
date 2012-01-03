@@ -26,4 +26,4 @@ project.config$keys=c('<%=paste(project.keys, collapse="', '", sep="")%>')
 project.config$values=c('<%=paste(project.values, collapse="', '", sep="")%>')
 
 project.config$param$n.ahead=<%=n.ahead%>
-project.config$param$naive.ifConstantLastValues=project.config$period.freq
+project.config$param$naive.ifConstantLastValues=min(2, project.config$period.freq)
