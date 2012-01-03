@@ -217,6 +217,10 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
   result
 }
 
+Project.ConfigFile.Exist <- function(project.name) {
+  file.exists(Project.GetConfigFullPathFilename(project.name))
+}
+
 Project.GetConfigFilename <- function(project.name) {
   paste(project.name, ".config", sep="")
 }
@@ -226,6 +230,10 @@ Project.GetConfigFullPathFilename <- function(project.name) {
   filename <- file.path(project.path, Project.GetConfigFilename(project.name))
 }
 
+Project.CSVFile.Exist <- function(project.name) {
+  file.exists(Project.GetCSVFullPathFilename(project.name))
+}
+  
 Project.GetCSVFilename <- function(project.name) {
   paste(project.name, ".csv", sep="")
 }
