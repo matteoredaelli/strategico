@@ -41,25 +41,25 @@
     cmd <- paste(strategico.command, "--cmd import.csv -a", n.ahead)
     if (!is.null(POST$mailto))
        cmd <- paste(cmd, "-M", POST$mailto)
-    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
     cat(rc)
   }
 
   if (!is.null(project.name) && !is.null(POST$run)) {
     cmd <- paste(strategico.command, "--cmd eval.items")
-    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
     cat(rc)
   }
 
   if (!is.null(project.name) && !is.null(POST$export.csv)) {
     cmd <- paste(strategico.command, "--cmd export.csv")
-    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
     cat(rc)
   }
 
   if (!is.null(project.name) && !is.null(POST$drop.project)) {
     cmd <- paste(strategico.command, "--cmd drop")
-    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
     cat(rc)
   }
 
