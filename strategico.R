@@ -215,7 +215,7 @@ if (opt$cmd == "export.csv") {
 
 if (opt$cmd == "import.csv") {
   if(is.null(opt$file)) {
-    opt$file <- Project.GetDataFullPathFilename(opt$project.name)
+    opt$file <- Project.GetCSVFullPathFilename(opt$project.name)
     logwarn( paste("Missing file option: assuming file=", opt$file))
   }
   if(is.null(opt$ahead)) {
