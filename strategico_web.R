@@ -33,9 +33,14 @@ project.path <-  NULL
 if(length(project.name) == 0)
   project.name <- NULL
 
-
+mail.to <- GET$mailto
 
 strategico.command <- strategico.config$strategico.command
+if(!is.null(project.name))
+  strategico.command <- gsub("__PROJECT_NAME__", project.name, strategico.command)
+
+if(!is.null(mail.to))
+  strategico.command <- gsub("__MAILTO__", mail.to, strategico.command)
 
 ##if (!is.null(POST) && !is.null(POST$project))
 ##  project.name <- POST$project
