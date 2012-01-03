@@ -1,30 +1,24 @@
-  <%
+<%
 ## -*- mode: R -*-
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
-  WebSource("project")
 
-  #db.channel <- DB.Connect()
+  page.title <- paste("<br />Item", GET$id)
+  page.sections	<- data.frame()
 
-  param <- ifelse(is.null(GET$param), "", GET$param)
-  value <- ifelse(is.null(GET$value), "V1", GET$value)
-  str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
-  skip.models <- unlist(strsplit(str.skip.models, ","))
+  if (is.null(GET)) GET=list()
+
+  if (!is.null(project.name) && !is.null(project.config) && !is.null(GET$id)) {
+    param <- ifelse(is.null(GET$param), "", GET$param)
+    value <- ifelse(is.null(GET$value), "V1", GET$value)
+    str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
+    skip.models <- unlist(strsplit(str.skip.models, ","))
   
   ## settings is or item.keys depending on which variables were passed in GET input
 
-  id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
-  item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
-
-  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
-  Sys.setenv(STRATEGICO_PROJECT_VALUE=value)
-  %>
-  
-  <% ShowTemplate('header')%>
-
-  <%
+    id <- as.numeric(GET$id)
+    item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
 
   ########################################################################################
   ##  Change Best model
@@ -39,10 +33,14 @@
   ########################################################################################
   if (!is.null(GET$eval) ) {
     param.r <- Param.EvalString(param)
+    
+  ##cmd <- paste(strategico.command, " --cmd eval.items --id.list=", id, " -v ", value, " --eval.param=\"", param, "\"", sep="")
+  ##  rc <- system(cmd, wait=TRUE, intern=TRUE)
+  ##  cat(rc)
+
     Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param.r)
   }
-
 
   ########################################################################################
   ##  Retriving all results
@@ -63,11 +61,6 @@
     item.results.best$item_id <- NULL
   }
 
-  if (!is.null(item.residuals) && nrow(item.residuals) > 0) {
-  item.residuals$item_id <- NULL
-  item.residuals.pivot <- cast(item.residuals, PERIOD ~ model, df=TRUE, value="V")
-  item.residuals.pivot <- data.frame(item.residuals.pivot)
-  }
   if (!is.null(item.summary) && nrow(item.summary) > 0) {
     item.models <- unique(item.summary.models$model)
     best.model <- as.character(item.summary[1,]$BestModel)
@@ -78,188 +71,107 @@
     param=""
   }
   if(length(param) == 0L) param=""
-  
-  #DB.Close(db.channel)
 
-%>
+  b1 <- paste('<form method="GET">', 
+              BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
+              BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4),
+              BuildFormElement_value(project.name=project.name, default=value),
+              '<input type="submit" name="show" value="Search"/><br />')
 
-<!--
-  ###############################################################################################################
-  ## TAB Home
-  ###############################################################################################################
--->
- 
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Home</h2>
+  page.sections <- data.frame(title="Search item", body=b1)
 
-                <form method="GET">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4)%>
-                <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                <input type="submit" name="show" value="Search" />
-                </form>
-				</article>
-							</div>
-						</div>
-
-    <!--
   ###############################################################################################################
   ## TAB Run
   ###############################################################################################################
-  -->
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Run</h2>
-                <form method="GET">
-                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                  <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
-                  <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                  <%=BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=80)%><br />
-                  <input type="submit" name="eval" value="Run" />
-                </form>
 
-                                </article>
-                                                        </div>
-                                                </div>
+  b20 <- paste(BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=50),
+               '<input type="submit" name="eval" value="Run" />')
+  page.sections <- rbind(page.sections, data.frame(title="Run", body=b20))
 
-  <!--
   ###############################################################################################################
-  ## TAB best Model
+  ## TAB Set Best Model
   ###############################################################################################################
-  -->
-  <%
-  if(!is.null(item.results) && is.data.frame(item.results) && nrow(item.results) > 0) {
-  %>
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">BestModel <%=best.model%></h2>
 
-  <%
-    ML <- gvisLineChart(data=subset(item.results, model== best.model, select=c("PERIOD", "V")))
-  %>
-  <%= ML$html$chart %>
-
-                                </article>
-                                                        </div>
-                                                </div>
- <%}%>
-
-<!--
-  ###############################################################################################################
-  ## TAB All Models
-  ###############################################################################################################
--->
-  <%
-  if ((!is.null(item.results)) && is.data.frame(item.results) && nrow(item.results) > 0) {                 
-  %>
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Choose Model</h2>
-  
-  See the item <a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a>
-  <% 
-    ML <- gvisLineChart(data=item.results.pivot)
-  %>
-  <%= ML$html$chart %>
-
-  <!--
-  ## TAB Change Model
-  -->
-
-  <%
-    if(!is.null(item.models) && length(item.models) > 0) {
-  %>
-               <form method="GET">
-                <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                <%=BuildHtmlElement_input(name="id", default=id, type="hidden")%>
-                <%=BuildHtmlElement_input(name="value", default=value, type="hidden")%>
-                  <% for (model in item.models) {
-                       str <- paste(BuildHtmlElement_input(name="model", default=model, type="radio"),
+  b100 <- ""
+  for (model in item.models) {
+      b100 <- paste(b100, 
+                    BuildHtmlElement_input(name="model", default=model, type="radio"),
                          model, " ", sep="")
-                       cat(str)
-                     }
-                  %>
+      }
+  b100 <- paste(b100, '
                     <input type="submit" name="setmodel" value="Set best model" />
-                </form>    <br /><br />
+                </form>')
+  page.sections <- rbind(page.sections, data.frame(title="Set Best", body=b100))
 
 
- <%}%>
-                           
-  <!--
-  ## Summary
-  -->
-  <%
-    if(!is.null(item.summary.models) && is.data.frame(item.summary.models) && nrow(item.summary.models) > 0) {
-	    i.summary.models <- item.summary.models
-	    i.summary.models$item_id <- NULL
-	    rownames(i.summary.models) <- NULL
-	    print(xtable(i.summary.models), type="html")
+  ###############################################################################################################
+  ## TAB Summary
+  ###############################################################################################################
 
-	    i.summary <- subset(item.summary, select=c(-item_id, -Parameters))
-	    rownames(i.summary) <- NULL
-	    print(xtable(t(i.summary)), type="html")
-    }
-  %>
+  if(!is.null(item.summary.models) && is.data.frame(item.summary.models) && nrow(item.summary.models) > 0) {
 
-                                </article>
-                                                        </div>
-                                                </div>
- <%}%>
+      i.summary.models <- item.summary.models
+      i.summary.models$item_id <- NULL
+      rownames(i.summary.models) <- NULL
+      ## print(xtable(i.summary.models), type="html")
+      T1 <- gvisTable(i.summary.models, options=list(width=700, height=250))      
+      b_T1 <- paste(capture.output(cat(T1$html$chart)), collapse="\n")
+    
+      i.summary <- subset(item.summary, select=c(-item_id, -Parameters))
+      rownames(i.summary) <- NULL
+      summary.new <- data.frame(f=colnames(i.summary), as.data.frame(t(i.summary)))
+      ##print(xtable(t(i.summary)), type="html")
+      T2 <- gvisTable(summary.new, options=list(width=700, height=510)) 
+      b_T2 <- paste(capture.output(cat(T2$html$chart)), collapse="\n")
 
-<!--
+      page.sections <- rbind(page.sections, data.frame(title="Summary", body=paste(b_T1, b_T2)))
+  }
+
+
+  if(!is.null(item.results) && is.data.frame(item.results) && nrow(item.results) > 0) {
+
+  ###############################################################################################################
+  ## TAB Show best Model
+  ###############################################################################################################
+
+    BM <- gvisLineChart(data=subset(item.results, model== best.model, select=c("PERIOD", "V")))
+    b_BM <- paste(capture.output(cat(BM$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title=paste("Best Model", best.model), body=b_BM))
+
+
+  ###############################################################################################################
+  ## TAB Show All Models
+  ###############################################################################################################
+
+    body <- paste('<a href=item_motion_chart.brew?project=', project.name, '&id=',id, '>motion chart</a>', sep="")
+    AM <- gvisLineChart(data=item.results.pivot)
+    b_AM <- paste(capture.output(cat(AM$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title="All Models", body=paste(body, b_AM)))
+
   ###############################################################################################################
   ## TAB Results
   ###############################################################################################################
--->
-  <%
-  if ((!is.null(item.results)) && is.data.frame(item.results) && nrow(item.results) > 0) {                 
-  %>
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Results</h2>
-  
- <%
-  Table <- gvisTable(item.results.pivot, options=list(width=700, height=500))
-  ##print(xtable(item.results.pivot), type="html")
- %>
-  <%= Table$html$chart %>
 
-                                </article>
-                                                        </div>
-                                                </div>
- <%}%>
+    TR <- gvisTable(item.results.pivot, options=list(width=700, height=500))
+    b_TR <- paste(capture.output(cat(TR$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title="Result table", body=b_TR))
 
-<!--
+  } ## item results not null
+
   ###############################################################################################################
   ## TAB Residuals
   ###############################################################################################################
--->
-  <%
-  if ((!is.null(item.residuals)) && is.data.frame(item.residuals) && nrow(item.residuals) > 0) {                 
-  %>
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Residuals</h2>
-  
-  <% 
-    ML <- gvisLineChart(data=item.residuals.pivot)
-  %>
-  <%= ML$html$chart %>
 
-                                </article>
-                                                        </div>
-                                                </div>
- <%}%>
-<!--
-  ###############################################################################################################
-  ## Footer
-  ###############################################################################################################
--->
-  <% ShowTemplate('footer') %>
+  if ((!is.null(item.residuals)) && is.data.frame(item.residuals) && nrow(item.residuals) > 0) { 
+    item.residuals$item_id <- NULL
+    item.residuals.pivot <- cast(item.residuals, PERIOD ~ model, df=TRUE, value="V")
+    item.residuals.pivot <- data.frame(item.residuals.pivot)
+    ML <- gvisLineChart(data=item.residuals.pivot)
+    b_ML <- paste(capture.output(cat(ML$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title="Residuals", body=b_ML))
+  }
+
+  }
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
+%>

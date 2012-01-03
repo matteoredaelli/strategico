@@ -1,0 +1,98 @@
+
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>Strategico :: <%=if (!is.null(project.name)) paste(project.name, ":: ")%><%=page.title%></title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+
+	<link rel="stylesheet" href="css/style.css">
+
+	<script src="js/libs/modernizr-2.0.6.min.js"></script>
+</head>
+<body>
+	<div id="header-container">
+		<header class="wrapper clearfix">
+			<h1 id="title">Strategico :: 
+                          <%=if (!is.null(project.name)) paste(project.name, "::")%>
+                          <%=page.title%>
+                        </h1>
+			<nav>
+				<ul>
+<% if(!is.null(project.name)) { %>
+					<li><a href="project.brew?project=<%=project.name%>">Home</a></li>
+                                        <li><a href="project-status.brew?project=<%=project.name%>">Status <%=project.name%> </a></li>
+                                        <li><a href="items.brew?project=<%=project.name%>">Results <%=project.name%> </a></li>
+<%} %>
+				</ul>
+			</nav>
+		</header>
+	</div>
+	<div id="main-container">
+		<div id="main" class="wrapper clearfix">
+		        <article>
+			  <!--
+				<header>
+					<h1><%=page.title%></h1> 
+					<p></p>
+				</header>
+			 -->
+				<%
+				   tot.sections <- nrow(page.sections)
+				   if (tot.sections > 0) for (i in 1:tot.sections) {
+				     section <- page.sections[i,]
+				%>
+				<section>
+					<a name="<%=as.character(section$title)%>"><h2><%=as.character(section$title) %></h2></a>
+					<%=as.character(section$body)%>
+				</section>
+		           <%} %>
+                        </article>
+			<aside>
+				<h3>Menu</h3>
+				<%
+				   if (tot.sections > 0) for (i in 1:tot.sections) {
+				     section <- page.sections[i,]
+				%>
+					<a href="#<%=as.character(section$title)%>"><%=as.character(section$title) %></a><br/>
+				<%} %>
+                                <hr /><a href=<%=strategico.config$projects.url%>/<%=project.name%> target="_blank"/>See project files</a>
+			</aside>			
+		</div> <!-- #main -->
+	</div> <!-- #main-container -->
+<%
+   DB.Close(db.channel)
+%>
+	<div id="footer-container">
+		<footer class="wrapper">
+			<!--<h3>Strategico</h3> -->
+                        Powered by <a href="http://code.google.com/p/strategico/">Strategico</a> and <a href="http://code.google.com/p/ltp/">Long Term Prediction</a> OpenSource projects.
+		</footer>
+	</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+
+<script src="js/script.js"></script>
+<script>
+	var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']]; // Change UA-XXXXX-X to be your site's ID
+	(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+	g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+	s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+<!--[if lt IE 7 ]>
+	<script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.2/CFInstall.min.js"></script>
+	<script>window.attachEvent("onload",function(){CFInstall.check({mode:"overlay"})})</script>
+<![endif]-->
+
+</body>
+</html>

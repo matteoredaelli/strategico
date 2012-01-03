@@ -1,277 +1,99 @@
-  <%
+<%
 ## -*- mode: R -*-
-  if( !is.null(POST$project))
-    GET$project <- POST$project
-
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
-  MySource("strategico_web.R")
-  WebSource("project")
 
-  if (!is.null(POST$upload.files)) {
+
+  if (!is.null(POST$project)) {
+    GET$project <- POST$project
+  }
+
+  MySource("strategico_web.R")
+
+  if (!is.null(POST$project)) {
+    project.name <- POST$project
+  }
+
+  page.title <- "home"
+  page.sections	<- data.frame()
+
+
+  if (!is.null(project.name) && !is.null(POST$upload.csv) && !is.null(FILES) && !is.null(FILES$csv.file)) {
     destination.path <- Project.GetPath(project.name)
     dir.create(destination.path, showWarnings = FALSE)
 
-    if (!is.null(FILES$config.file)) {
-        destination.file <- file.path(destination.path, paste(project.name, ".conf", sep=""))
-        file.copy(FILES$config.file$tmp_name, destination.file, overwrite=TRUE)
-        Sys.chmod(destination.file, "777")
-    }
-
-    if (!is.null(FILES$data.file)) {
-        destination.file <- file.path(destination.path, paste(project.name, ".csv", sep=""))
-        file.copy(FILES$data.file$tmp_name, destination.file, overwrite=TRUE)
-        Sys.chmod(destination.file, "777")
-    }
-    project.config <- Project.GetConfig(project.name=project.name)
-    Project.CreateDB(project.name=project.name, 
-                         project.config=project.config, db.channel=db.channel)
+    destination.file <- file.path(destination.path, paste(project.name, ".csv", sep=""))
+    file.copy(FILES$csv.file$tmp_name, destination.file, overwrite=TRUE)
+    Sys.chmod(destination.file, "777")
   }
 
+  if (!is.null(project.name) && !is.null(POST$upload.config) && !is.null(FILES) && !is.null(FILES$config.file)) {
+    destination.path <- Project.GetPath(project.name)
+    dir.create(destination.path, showWarnings = FALSE)
 
-  if (!is.null(POST$import.csv)) {
-    Project.CreateDB(project.name=project.name, 
-                         project.config=project.config, db.channel=db.channel)
-    ##Project.ImportFromCSV(project.name=project.name, db.channel=db.channel)
+    destination.file <- file.path(destination.path, paste(project.name, ".config", sep=""))
+    file.copy(FILES$config.file$tmp_name, destination.file, overwrite=TRUE)
+    Sys.chmod(destination.file, "777")
+  }
+
+  if (!is.null(project.name) && !is.null(POST$import.csv)) {
     cmd <- paste(strategico.command, "--cmd import.csv")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
 
-  if (!is.null(POST$drop.project)) {
-    #Project.EmptyDB(project.name=project.name, db.channel=db.channel)
-    cmd <- paste(strategico.command, "--cmd empty.fs")
-    rc <- system(cmd, wait=TRUE, intern=TRUE)
-    cat(rc)
-    cmd <- paste(strategico.command, "--cmd drop.db")
-    rc <- system(cmd, wait=TRUE, intern=TRUE)
-    cat(rc)
-  }
-
-  if (!is.null(POST$run)) {
+  if (!is.null(project.name) && !is.null(POST$run)) {
     cmd <- paste(strategico.command, "--cmd eval.items")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
 
-  if (!is.null(POST$export.csv)) {
+  if (!is.null(project.name) && !is.null(POST$export.csv)) {
     cmd <- paste(strategico.command, "--cmd export.csv")
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
 
-  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=" ")
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=" ")
-  Sys.setenv(STRATEGICO_PROJECT_VALUE=" ")
-  %>
-  
-  <% ShowTemplate('header')%>
-
-    <!--
-  ###############################################################################################################
-  ## TAB Home Change Project
-  ###############################################################################################################
-  -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Select project</h2>
-
-                <form method="GET" action="#2">
-                  <%=BuildHtmlElement_input(name="project", default=project.name, type="text")%><br />
-                <input type="submit" name="set_project" value="select"/>
-                </form>
-
-				</article>
-							</div>
-						</div>
-    <!--
-  ###############################################################################################################
-  ## TAB Upload
-  ###############################################################################################################
-  -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Upload Files</h2>
-
-                <form enctype="multipart/form-data" method="POST" action="#3">
-                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                  CSV Data File <input type="file" name="data.file" /><br />
-                  Config File <input type="file" name="config.file" /><br />
-                <input type="submit" name="upload.files" value="Upload file(s)"/><br />
-                </form>
-
-				</article>
-							</div>
-						</div>
-
-    <!--                                                
-  ###############################################################################################################
-  ## TAB Import to DB                                         
-  ###############################################################################################################
-  -->           
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Import to DB</h2>
-
-                <form enctype="multipart/form-data" method="POST" action="#4">
-                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                <input type="submit" name="import.csv" value="Import CSV to DB"/><br />
-                </form>
-
-                                </article>
-                                                        </div>
-                                                </div>
-
-    <!--
-  ###############################################################################################################
-  ## TAB Run
-  ###############################################################################################################
-  -->           
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Run</h2>
-
-                <form enctype="multipart/form-data" method="POST" action="#5">
-                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                <input type="submit" name="run" value="Run"/><br />
-                </form>
-
-                                </article>
-                                                        </div>
-                                                </div>
-
-
-    <!--
-  ###############################################################################################################
-  ## TAB Export
-  ###############################################################################################################
-  -->                                           
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>               
-                                                        <h2 class="title">Export CSV</h2>
-                
-                <form enctype="multipart/form-data" method="POST" >
-                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                <input type="submit" name="export.csv" value="Export CSV"/>
-                </form>
-
-                                </article>
-                                                        </div>
-                                                </div>
-
-
-    <!--
-  ###############################################################################################################
-  ## TAB Drop
-  ###############################################################################################################
-  -->                                           
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>               
-                                                        <h2 class="title">Drop</h2>
-                
-                <form enctype="multipart/form-data" method="POST" >
-                  <%=project.name%><%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%><br />
-                <input type="submit" name="drop.project" value="Drop Project"/>
-                </form>
-
-                                </article>
-                                                        </div>
-                                                </div>
-
-
-
-    <!--
-  ###############################################################################################################
-  ## TAB Status
-  ###############################################################################################################
-  -->
-  						<div class="panel">
-							<div class="panel-wrapper">	
-        			<article>
-							<h2 class="title">Status</h2>
-
-Project name=<%=project.name%>
-<br />Config file <%=project.name%>.conf ...
-<%
- filename.project.config <- file.path(project.path, Project.GetConfigFilename(project.name))
- 
- if( !file.exists(filename.project.config)) {
-  cat("missing!")
- } else {
-  cat("ok")
-%>
-
-<br />Data file <%=project.name%>.csv ...
-<%
- filename.project.csv <- file.path(project.path, paste(project.name, ".csv", sep=""))
- 
- if( !file.exists(filename.project.csv)) {
-  cat("missing!")
- } else {
-  cat("ok")
- }
-
-  ## loading project config
-
- ## show project stats
-%>
-  <h3>Project Tables rows</h3>
-<%
-stats <- Project.GetStatisticsDB(project.name, project.config=NULL, db.channel)
-print(xtable(t(as.data.frame(stats))), type="html")
-
-for (value in GetValueNames(project.config$values)) {
-  t.sum <- DB.GetTableNameSummary(project.name, value)
-  stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
-%>
-  <h3><%=value%> predictions</h3>
-<% 
-  stats.models <- as.data.frame(stats.models)
-  if (nrow(stats.models) > 0) {
-    print(xtable(t(stats.models)), type="html")
-    M <- gvisPieChart(stats.models, options=list(
-                                    title=paste(value, ": relative models distribution", sep="")))
-    MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats[[DB.GetTableNameProjectItems(project.name)]]))
-%>
-  <%= M$html$chart %> 
-  <%= MG$html$chart %>
-<%
+  if (!is.null(project.name) && !is.null(POST$drop.project)) {
+    cmd <- paste(strategico.command, "--cmd drop")
+    rc <- system(cmd, wait=TRUE, intern=TRUE)
+    cat(rc)
   }
-}
-%>
-				</article>
-							</div>
-						</div>
 
-<!--
-  ###############################################################################################################
-  ## TAB Search Items
-  ###############################################################################################################
--->
+  b1 <- '
+                <form enctype="multipart/form-data" method="POST">
+                   <input name="project" type="text" value="__PROJECT_NAME__" size="20" />'
 
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title"><a href=items.brew?project=<%=project.name%>>Search items</a></h2>
-
+  b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
   
-                                </article>
-                                                        </div>
-                                                </div>
+  b1 <- paste(b1, ' <input type="submit" name="set_project" value="Set project name"/><br />')
 
-<%
-}
+  page.sections <- data.frame(title="Select project", body=b1)
+
+  if (!is.null(project.name)) {
+    b10 <- '          <input type="file" name="csv.file" />  <input type="submit" name="upload.csv" value="Upload"/><br />'
+    page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
+               
+    b20 <-  '         <input type="file" name="config.file" />  <input type="submit" name="upload.config" value="Upload"/><br />'
+    page.sections <- rbind(page.sections, data.frame(title="Change Config file", body=b20))
+
+    b40 <- ' 
+                   <input type="submit" name="import.csv" value="Import CSV"/><br />'
+    page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b40))
+
+
+    b60 <- '                   <input type="submit" name="run" value="Run"/><br />'
+    page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
+
+
+    b80 <- '                   <input type="submit" name="export.csv" value="Export CSV"/><br />'
+    page.sections <- rbind(page.sections, data.frame(title="Export CSV", body=b80))
+
+
+    b100 <- '                   <input type="submit" name="drop.project" value="Drop project"/><br />
+                </form>'
+    page.sections <- rbind(page.sections, data.frame(title="Drop", body=b100))
+  }
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
 %>
-<!--
-  ###############################################################################################################
-  ## Footer
-  ###############################################################################################################
--->
-  <% ShowTemplate('footer') %>

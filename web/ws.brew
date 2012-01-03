@@ -88,5 +88,5 @@ if (!is.null(GET$submit)) {
 cat("no post submit")
 %>
 
-<% ShowTemplate('footer') %>
+<% BrewTemplate('footer') %>
 
