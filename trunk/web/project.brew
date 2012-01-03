@@ -37,7 +37,10 @@
   }
 
   if (!is.null(project.name) && !is.null(POST$import.csv)) {
-    cmd <- paste(strategico.command, "--cmd import.csv")
+    n.ahead <- ifelse(is.null(POST$n.ahead), 4, as.numeric(POST$n.ahead))
+    cmd <- paste(strategico.command, "--cmd import.csv -a", n.ahead)
+    if (!is.null(POST$mailto))
+       cmd <- paste(cmd, "-M", POST$mailto)
     rc <- system(cmd, wait=TRUE, intern=TRUE)
     cat(rc)
   }
@@ -62,7 +65,8 @@
 
   b1 <- '
                 <form enctype="multipart/form-data" method="POST">
-                   <input name="project" type="text" value="__PROJECT_NAME__" size="20" />'
+                   <input name="project" type="text" value="__PROJECT_NAME__" size="10" />
+        '
 
   b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
   
@@ -94,6 +98,8 @@
            <li>creates the database tables</li>
            <li>import CSV data to teh database</li>
         </ul>
+                   Mail Address: <input name="mailto" type="text" value="" size="20" /><br />
+                   Predicted points (n.ahead parameter): <input name="n.ahed" type="text" value="" size="1" /><br />
                    <input type="submit" name="import.csv" value="Import CSV"/><br />'
       page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b40))
     
