@@ -218,7 +218,7 @@ Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
 }
 
 Project.GetConfigFilename <- function(project.name) {
-  paste(project.name, ".conf", sep="")
+  paste(project.name, ".config", sep="")
 }
 
 Project.GetConfigFullPathFilename <- function(project.name) {
