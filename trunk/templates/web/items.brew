@@ -1,0 +1,9 @@
+                <form method="GET" >
+                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
+                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
+                  <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                 <input type="submit" value="Search" />
+                </form>
+<% if (!is.null(id)) { %>
+                <br /><br />Selected  item <%=paste(id, value)%> <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>>details</a>
+<% } %>

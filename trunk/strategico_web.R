@@ -23,6 +23,37 @@ setContentType("text/html")
 options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
 
+db.channel <- DB.Connect()
+
+project.name <- GET$project
+project.config <- NULL
+project.keys <- c()
+project.path <-  NULL
+
+if(length(project.name) == 0)
+  project.name <- NULL
+
+
+
+strategico.command <- strategico.config$strategico.command
+
+##if (!is.null(POST) && !is.null(POST$project))
+##  project.name <- POST$project
+
+if (!is.null(project.name)) {
+  project.config <- Project.GetConfig(project.name=project.name, quit=FALSE)
+  if (!is.null(project.config)) {
+    project.keys <- GetKeyNames(project.config$keys)
+  }
+
+  project.path <- Project.GetPath(project.name)
+  strategico.command <- paste(strategico.config$strategico.command, "-n", project.name)
+}
+
+id=GET$id
+value=ifelse(is.null(GET$value), "V1", GET$value)
+
+
 BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
   if(is.null(default) | is.na(default) | length(default)==0L) default <- ""
   str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" size="_SIZE_" />'
@@ -102,14 +133,10 @@ GetWebTemplatesHome <- function() {
   file.path(GetTemplatesHome(), "web")
 }
 
-ShowTemplate <- function(template.name) {
-  template.file <- paste(template.name, '.brew', sep='')
-  brew(file.path(GetWebTemplatesHome(), template.file))
+BrewTemplate <- function(template.name) {
+  template.filename <- paste(template.name, ".brew", sep="")
+  template.file <- file.path(GetWebTemplatesHome(), template.filename)
+  logwarn(paste("Rendering template",template.file, "..."))
+  brew(template.file)
 }
 
-WebSource <- function(name) {
-  newname <- paste(name, "R", sep=".")
-  folder <- file.path(GetTemplatesHome(), "web")
-  filename <- file.path(folder, newname)
-  source(filename)
-}

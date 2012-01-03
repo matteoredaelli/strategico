@@ -1,104 +1,68 @@
-  <%
+<%
 ## -*- mode: R -*-
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
-  WebSource("project")
 
-  value <- ifelse(is.null(GET$value), "V1", GET$value)
+  page.title <- "results"
+  page.sections	<- data.frame()
 
- if (is.null(GET$KEY1)) {
-    id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
-    id.children <- NULL
-    item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
-  } else {
-    for (k in project.keys)
-      GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
-    item.keys <- as.character( unlist(GET[project.keys]))
+  if (is.null(GET)) GET=list()
 
-    id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
-    ##if (!is.na(id.result) & (!is.null(id.result)) & (length(id.result)>0) ) 
-    id <- as.numeric(id.result[1])
-    id.children <- Item.GetChildren(id=id, project.name=project.name, db.channel=db.channel)
+  if (!is.null(project.name) && !is.null(project.config)) {
+
+     if (is.null(GET$KEY1)) {
+       id <- 1
+       id.children <- NULL
+       item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
+     } else {
+       for (k in project.keys)
+       GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+       item.keys <- as.character( unlist(GET[project.keys]))
+
+       id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
+
+       if (!is.null(id.result) && length(id.result)>0 ) {
+         id <- as.numeric(id.result[1])
+         id.children <- Item.GetChildren(id=id, project.name=project.name, db.channel=db.channel)
+       } else {
+         id <- NULL
+         id.children <- NULL
+       }
+     }
+  
+     id.children <- c(id, id.children)
+
+     template.file <- file.path(GetWebTemplatesHome(), "items.brew")
+     b1 <- paste(capture.output(brew(template.file)),  collapse="\n")
+     page.sections <- data.frame(title="Filters", body=b1)
+
+     if (!is.null(id)) { 
+	 items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
+	 items.summary <- data.frame(items.summary)
+
+	 if ( !is.null(items.summary) && nrow(items.summary) > 1) {
+	   items.summary$id <- paste("<a href=item.brew?project=",project.name, "&id=", items.summary$item_id, "&value=",value, ">",items.summary$item_id,"</a>", sep="")
+	  items.summary <- subset(items.summary, 
+			      select=c(-MeanPredictedRatioMeanValues, -item_id,
+				       -SdPredictedRatioSdValues,
+				       ##-BestAICNoOutRangeExclude, -Points, 
+				       -BestICNoOutRangeExclude, -LastNotEqualValues
+				      )
+			     )
+
+	  rownames(items.summary) <- NULL
+	  if (nrow(items.summary) > 1) {
+	    Table <- gvisTable(items.summary, options=list(width=700, height=300))
+	    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+	  }
+	  else {
+	    b_Table <- capture.output(print(xtable(items.summary), type="html"))
+	  }
+	  page.sections <- rbind(page.sections, data.frame(title="Results", body=b_Table))
+	 }
+     }
   }
-  
-  id.children <- c(id, id.children)
-
-  ## settings is or item.keys depending on which variables were passed in GET input
-
-  Sys.setenv(STRATEGICO_PROJECT_NAME=project.name)
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_ID=id)
-  Sys.setenv(STRATEGICO_PROJECT_ITEM_KEY=" ")
-  Sys.setenv(STRATEGICO_PROJECT_VALUE=value)
-  %>
-  
-  <% ShowTemplate('header')%>
-
-<!--
-  ###############################################################################################################
-  ## TAB Search Items
-  ###############################################################################################################
--->
-
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Search items</h2>
-
-                <form method="GET" >
-                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
-                  <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                 <input type="submit" value="Search" />
-                </form>
-<br /><br /> See item <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>>details</a>
-
-                                </article>
-                                                        </div>
-                                                </div>
-
-<!--
-  ###############################################################################################################
-  ## TAB Results Items
-  ###############################################################################################################
--->
-<%
-  items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
-  items.summary <- data.frame(items.summary)
-
-  if (!is.na(items.summary) && ! is.null(items.summary) && nrow(items.summary) > 1) {
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
 %>
-                                                <div class="panel">
-                                                        <div class="panel-wrapper">
-                                <article>
-                                                        <h2 class="title">Sub items</h2>
-  
-<%
-    items.summary$id <- paste("<a href=item.brew?project=",project.name, "&id=", items.summary$item_id, "&value=",value, ">",items.summary$item_id,"</a>", sep="")
-    items.summary <- subset(items.summary, 
-                          select=c(-MeanPredictedRatioMeanValues, -item_id,
-                                   -SdPredictedRatioSdValues,
-                                   ##-BestAICNoOutRangeExclude, -Points, 
-                                   -BestICNoOutRangeExclude, -LastNotEqualValues
-                                  )
-                         )
-  
-    rownames(items.summary) <- NULL
-    Table <- gvisTable(items.summary, options=list(width=700, height=300))
-    ##print(xtable(items.summary), type="html")
-%>
-  <%= Table$html$chart %>
-                                </article>
-                                                        </div>
-                                                </div>
-
-
-<%
-  }
-%>
-<!--
-  ###############################################################################################################
-  ## Footer
-  ###############################################################################################################
--->
-  <% ShowTemplate('footer') %>
