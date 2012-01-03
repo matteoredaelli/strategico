@@ -71,28 +71,47 @@
   page.sections <- data.frame(title="Select project", body=b1)
 
   if (!is.null(project.name)) {
-    b10 <- '          <input type="file" name="csv.file" />  <input type="submit" name="upload.csv" value="Upload"/><br />'
+    exists.csv <- Project.CSVFile.Exist(project.name) 
+    exists.config <- Project.ConfigFile.Exist(project.name) 
+
+    b10 <- 'The csv file must have:
+          <ul>
+           <li>column names KEY1, KEY2, ..., PERIOD, V1, ...</li>
+           <li>columns separated by ;</li> 
+           <li>decimals with .</li>         
+         </ul><br /><input type="file" name="csv.file" />  <input type="submit" name="upload.csv" value="Upload"/><br />'
     page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
-               
-    b20 <-  '         <input type="file" name="config.file" />  <input type="submit" name="upload.config" value="Upload"/><br />'
-    page.sections <- rbind(page.sections, data.frame(title="Change Config file", body=b20))
+            
+    if (exists.csv) {
+      b20 <-  'This step is optional because the config file will be generated automatically if missing<br />
+         <input type="file" name="config.file" />  <input type="submit" name="upload.config" value="Upload"/><br />'
+      page.sections <- rbind(page.sections, data.frame(title="Change Config file", body=b20))
 
-    b40 <- ' 
+
+      b40 <- 'This step 
+        <ul>
+           <li>creates the project config file if it does not exist</li>
+           <li>creates the database tables</li>
+           <li>import CSV data to teh database</li>
+        </ul>
                    <input type="submit" name="import.csv" value="Import CSV"/><br />'
-    page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b40))
+      page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b40))
+    
+      if (exists.config) {
+        b60 <- '                   <input type="submit" name="run" value="Run"/><br />'
+        page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
 
 
-    b60 <- '                   <input type="submit" name="run" value="Run"/><br />'
-    page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
+        b80 <- '                   <input type="submit" name="export.csv" value="Export CSV"/><br />'
+        page.sections <- rbind(page.sections, data.frame(title="Export CSV", body=b80))
 
-
-    b80 <- '                   <input type="submit" name="export.csv" value="Export CSV"/><br />'
-    page.sections <- rbind(page.sections, data.frame(title="Export CSV", body=b80))
-
+      } ## end exists.config
 
     b100 <- '                   <input type="submit" name="drop.project" value="Drop project"/><br />
                 </form>'
-    page.sections <- rbind(page.sections, data.frame(title="Drop", body=b100))
+    page.sections <- rbind(page.sections, data.frame(title=paste("Drop", project.name), body=b100))
+
+    } ## exists.csv
   }
   template.file <- file.path(GetWebTemplatesHome(), "page.brew")
   brew(template.file)
