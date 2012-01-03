@@ -22,7 +22,7 @@
     destination.path <- Project.GetPath(project.name)
     dir.create(destination.path, showWarnings = FALSE)
 
-    destination.file <- file.path(destination.path, paste(project.name, ".csv", sep=""))
+    destination.file <- Project.GetCSVFullPathFilename(project.name)
     file.copy(FILES$csv.file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
   }
@@ -31,7 +31,7 @@
     destination.path <- Project.GetPath(project.name)
     dir.create(destination.path, showWarnings = FALSE)
 
-    destination.file <- file.path(destination.path, paste(project.name, ".config", sep=""))
+    destination.file <- Project.GetConfigFullPathFilename(project.name)
     file.copy(FILES$config.file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
   }

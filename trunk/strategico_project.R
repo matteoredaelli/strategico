@@ -226,13 +226,13 @@ Project.GetConfigFullPathFilename <- function(project.name) {
   filename <- file.path(project.path, Project.GetConfigFilename(project.name))
 }
 
-Project.GetDataFilename <- function(project.name) {
+Project.GetCSVFilename <- function(project.name) {
   paste(project.name, ".csv", sep="")
 }
 
-Project.GetDataFullPathFilename <- function(project.name) {
+Project.GetCSVFullPathFilename <- function(project.name) {
   project.path <- Project.GetPath(project.name)
-  filename <- file.path(project.path, Project.GetDataFilename(project.name))
+  filename <- file.path(project.path, Project.GetCSVFilename(project.name))
 }
 
 Project.GetConfig <- function(project.name, quit=FALSE) {
@@ -386,7 +386,7 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
     project.config <- Project.GetConfig(project.name=project.name)
 
   if (is.null(filename))
-    filename <- Project.GetDataFullPathFilename(project.name=project.name)
+    filename <- Project.GetCSVFullPathFilename(project.name=project.name)
 
   logwarn( paste("Loading data from file", filename))
   data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
