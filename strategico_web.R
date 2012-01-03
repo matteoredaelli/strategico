@@ -33,7 +33,7 @@ project.path <-  NULL
 if(length(project.name) == 0)
   project.name <- NULL
 
-mail.to <- GET$mailto
+mail.to <- POST$mailto
 
 strategico.command <- strategico.config$strategico.command
 if(!is.null(project.name))
