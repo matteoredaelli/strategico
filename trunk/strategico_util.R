@@ -231,7 +231,7 @@ Strategico.Sendmail <- function(project.name, project.config=NULL, subject, body
   if (!is.null(to)) {
     logdebug( paste("Sending email to", to))
     subject <- paste("strategico", project.name, subject, sep=" :: ")
-    sendmail(from=strategico.config$mail.from, to=to, subject=subject, body=body,
+    sendmail(from=strategico.config$mail.from, to=to, subject=subject, msg=body,
              control=list(smtpServer=strategico.config$mail.smtp))
   }
 }
