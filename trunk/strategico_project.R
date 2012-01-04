@@ -303,10 +303,9 @@ Project.GetList <- function(projects.home = strategico.config$projects.home) {
 }
   
 Project.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
-
   tablename = DB.GetTableNameProjectItems(project.name)
-  sql_statement <- paste("select max(0 + id) from ", tablename, sep="")
-  tot <- DB.GetTableSize(tablename,db.channel)
+  ##sql_statement <- paste("select max(0 + id) from ", tablename, sep="")
+  tot <- DB.GetTableSize(tablename, db.channel)
 
   logdebug( paste("Max ID =", tot))
   tot
