@@ -25,7 +25,12 @@ suppressPackageStartupMessages(library(googleVis))
 
 db.channel <- DB.Connect()
 
+if (!is.null(POST$project))
+  GET$project <- POST$project
+
 project.name <- GET$project
+project.name <- Project.NormalizeName(project.name)
+
 project.config <- NULL
 project.keys <- c()
 project.path <-  NULL

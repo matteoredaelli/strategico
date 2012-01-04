@@ -517,3 +517,13 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   logwarn( "Saving project data")
   dbWriteTable(value=project.data, name=tablename, conn=db.channel, append=T, row.names=FALSE)
 } # end function
+
+
+Project.NormalizeName <- function(project.name=NULL) {
+ n <- ifelse (is.null(project.name), "changeme", project.name)
+ n <- substr(n, 1,10)
+ n <- tolower(n)
+ n <- gsub("[^a-z]", 'x', n)
+ n <- gsub('strategico', 'strategic0', n)
+ n
+}

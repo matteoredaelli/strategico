@@ -3,16 +3,7 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
 
-
-  if (!is.null(POST$project)) {
-    GET$project <- POST$project
-  }
-
   MySource("strategico_web.R")
-
-  if (!is.null(POST$project)) {
-    project.name <- POST$project
-  }
 
   page.title <- "home"
   page.sections	<- data.frame()
