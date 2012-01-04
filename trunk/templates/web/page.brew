@@ -23,8 +23,8 @@
 		<header class="wrapper clearfix">
 
 			<h1 id="title"><img src="images/R-logo.png" /> Strategico :: 
-                          <%=if (!is.null(project.name)) paste(project.name, "::")%>
-                          <%=page.title%>
+                          <%=if (!is.null(project.name)) paste(project.name)%>
+                          <!-- <%=page.title%> -->
                         </h1>
 			<nav>
 				<ul>
