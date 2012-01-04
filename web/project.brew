@@ -37,10 +37,22 @@
   }
 
   if (!is.null(project.name) && !is.null(POST$run)) {
-    cmd <- paste(strategico.command, "--cmd eval.items")
-    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
-    cat(rc)
-  }
+    cmd.base <- paste(strategico.command, "--cmd eval.items --id.range ")
+    ## running parallel jobs
+    maxid <- Project.GetMaxID(project.name, db.channel=db.channel)
+    if (maxid == 0) {
+       msg <- "no items found, cannot run..."
+    } else {
+      id.step <- as.integer(maxid / strategico.config$command.eval.jobs) + 1
+      start <- 1
+      for (c in 1:strategico.config$command.eval.jobs) {
+         end <- min(start + id.step, maxid)
+         cmd <- paste(cmd.base, start, ":", end, sep="")
+         rc <- system(cmd, wait=strategico.config$command.wait, intern=FALSE)
+         start <- end + 1
+      } #end for
+    }
+  } # end eval.items
 
   if (!is.null(project.name) && !is.null(POST$export.csv)) {
     cmd <- paste(strategico.command, "--cmd export.csv")

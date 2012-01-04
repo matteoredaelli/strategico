@@ -13,7 +13,7 @@ project.config$csv.dec=','
 project.config$csv.quote='\"'
 
 ## +++++++++++++++++++++++++++++++++++++++
-## period.
+## period
 ## +++++++++++++++++++++++++++++++++++++++
 project.config$period.start=c(<%=paste(period.start, sep="", collapse=", ")%>)
 project.config$period.end=c(<%=paste(period.end, sep="", collapse=", ")%>)
@@ -25,5 +25,8 @@ project.config$period.freq=<%=period.freq%>
 project.config$keys=c('<%=paste(project.keys, collapse="', '", sep="")%>')
 project.config$values=c('<%=paste(project.values, collapse="', '", sep="")%>')
 
+## +++++++++++++++++++++++++++++++++++++++
+## default ltp params
+## +++++++++++++++++++++++++++++++++++++++
 project.config$param$n.ahead=<%=n.ahead%>
-project.config$param$naive.ifConstantLastValues=min(2, project.config$period.freq)
+project.config$param$naive.ifConstantLastValues=<%=min(2, project.config$period.freq)%>
