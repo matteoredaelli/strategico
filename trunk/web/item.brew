@@ -1,13 +1,14 @@
 <%
 ## -*- mode: R -*-
+
+  project.name <- GET$project
+
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
 
   page.title <- paste("<br />Item", GET$id)
   page.sections	<- data.frame()
-
-  if (is.null(GET)) GET=list()
 
   if (!is.null(project.name) && !is.null(project.config) && !is.null(GET$id)) {
     param <- ifelse(is.null(GET$param), "", GET$param)

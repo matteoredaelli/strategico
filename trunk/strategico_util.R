@@ -225,6 +225,19 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
   value %in% GetValueNames(project.name=project.name, project.config=project.config)
 }
 
+Strategico.ExecCommand <- function(project.name, cmd, options="", mailto="", intern=TRUE, wait=strategico.config$command.wait) {
+  strategico.command <- strategico.config$strategico.command
+  strategico.command <- gsub("__PROJECT_NAME__", project.name, strategico.command)
+  strategico.command <- gsub("__CMD__", cmd, strategico.command)
+  if (!is.null(mailto))
+    strategico.command <- gsub("__MAILTO__", mailto, strategico.command)
+  strategico.command <- gsub("__OPTIONS__", options, strategico.command)
+  logwarn(paste("Running command:", strategico.command))
+  rc <- system(strategico.command, wait=wait, intern=intern)
+  logdebug(rc)
+  rc
+}
+
 Strategico.Sendmail <- function(project.name, project.config=NULL, subject, body=" ", to=NULL) {
   library(sendmailR)
   if (is.null(to)) to <- project.config$mailto

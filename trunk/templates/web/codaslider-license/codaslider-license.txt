@@ -1,1 +1,0 @@
-The coda slider uses the MIT-LICENSE. See that file for details.

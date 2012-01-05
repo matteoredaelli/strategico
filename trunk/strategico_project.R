@@ -519,7 +519,10 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
 
 
 Project.NormalizeName <- function(project.name=NULL) {
- n <- ifelse (is.null(project.name), "changeme", project.name)
+ ##n <- ifelse (is.null(project.name), "changeme", project.name)
+ if(is.null(project.name))
+   return("changeme")
+ n <- project.name
  n <- substr(n, 1,10)
  n <- tolower(n)
  n <- gsub("[^a-z]", 'x', n)

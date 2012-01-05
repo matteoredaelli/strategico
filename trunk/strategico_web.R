@@ -24,31 +24,14 @@ options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
 
 db.channel <- DB.Connect()
-
-if (!is.null(POST$project))
-  GET$project <- POST$project
-
-project.name <- GET$project
-project.name <- Project.NormalizeName(project.name)
-
+project.name <- Project.NormalizeName(project.name=COOKIES$strategico.project)
+##project.name <- COOKIES$strategico.project
 project.config <- NULL
 project.keys <- c()
 project.path <-  NULL
 
 if(length(project.name) == 0)
   project.name <- NULL
-
-mail.to <- POST$mailto
-
-strategico.command <- strategico.config$strategico.command
-if(!is.null(project.name))
-  strategico.command <- gsub("__PROJECT_NAME__", project.name, strategico.command)
-
-if(!is.null(mail.to))
-  strategico.command <- gsub("__MAILTO__", mail.to, strategico.command)
-
-##if (!is.null(POST) && !is.null(POST$project))
-##  project.name <- POST$project
 
 if (!is.null(project.name)) {
   project.config <- Project.GetConfig(project.name=project.name, quit=FALSE)
@@ -57,7 +40,7 @@ if (!is.null(project.name)) {
   }
 
   project.path <- Project.GetPath(project.name)
-  strategico.command <- paste(strategico.config$strategico.command, "-n", project.name)
+
 }
 
 id=GET$id
