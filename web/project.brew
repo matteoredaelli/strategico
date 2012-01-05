@@ -15,7 +15,6 @@
   page.title <- " "
   page.sections	<- data.frame()
 
-
   if (!is.null(project.name) && !is.null(POST$upload.file) && !is.null(FILES) && !is.null(FILES$project.file)) {
     destination.path <- Project.GetPath(project.name)
     logdebug(paste("Creating project folder", destination.path, "if it does not exists"))
@@ -47,7 +46,7 @@
       for (c in 1:strategico.config$command.eval.jobs) {
          end <- min(start + id.step, maxid)
          options <- paste(options.base, start, ":", end, sep="")
-         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, mailto=POST$mailto, intern=FALSE)
+         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", mailto=project.config$mailto, options=options, intern=FALSE)
          msg <- paste(msg, "<br />", msg.new)
          start <- end + 1
       } #end for
@@ -55,11 +54,11 @@
   } # end eval.items
 
   if (!is.null(project.name) && !is.null(POST$export.csv)) {
-    msg <- Strategico.ExecCommand(project.name, cmd="export.csv", options="", mailto=POST$mailto, intern=TRUE)
+    msg <- Strategico.ExecCommand(project.name, cmd="export.csv", options="", mailto=project.config$mailto, intern=TRUE)
   }
 
   if (!is.null(project.name) && !is.null(POST$drop.project)) {
-    msg <- Strategico.ExecCommand(project.name, cmd="drop", options="", mailto=POST$mailto, intern=TRUE)
+    msg <- Strategico.ExecCommand(project.name, cmd="drop", options="", mailto=project.config$mailto, intern=TRUE)
   }
 
   b1 <- '
