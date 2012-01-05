@@ -22,8 +22,8 @@
 	<div id="header-container">
 		<header class="wrapper clearfix">
 
-			<h1 id="title"><img src="images/R-logo.png" /> Strategico :: 
-                          <%=if (!is.null(project.name)) paste(project.name)%>
+			<h1 id="title"><img src="images/R-logo.png" /> Strategico 
+                          <%=if (!is.null(project.name)) paste("::", project.name)%>
                           <!-- <%=page.title%> -->
                         </h1>
 			<nav>
@@ -65,7 +65,7 @@
 				%>
 					<a href="#<%=as.character(section$title)%>"><%=as.character(section$title) %></a><br/>
 				<%} %>
-                                <hr /><a href=<%=strategico.config$projects.url%>/<%=project.name%> target="_blank"/>See project files</a>
+                                <hr /><a href=<%=strategico.config$projects.url%>/<%=ifelse(is.null(project.name), "", project.name)%> target="_blank"/>See project files</a>
 			</aside>			
 		</div> <!-- #main -->
 	</div> <!-- #main-container -->

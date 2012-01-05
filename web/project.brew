@@ -3,41 +3,39 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
 
+  if (!is.null(POST$set_project) && !is.null(POST$project)) {
+     setCookie(name='strategico.project',value=POST$project)
+  }
+
+  if (is.null(COOKIES$strategico.project))
+     setCookie(name='strategico.project',value="changeme")
+
   MySource("strategico_web.R")
 
-  page.title <- "home"
+  page.title <- " "
   page.sections	<- data.frame()
 
 
-  if (!is.null(project.name) && !is.null(POST$upload.csv) && !is.null(FILES) && !is.null(FILES$csv.file)) {
+  if (!is.null(project.name) && !is.null(POST$upload.file) && !is.null(FILES) && !is.null(FILES$project.file)) {
     destination.path <- Project.GetPath(project.name)
+    logdebug(paste("Creating project folder", destination.path, "if it does not exists"))
     dir.create(destination.path, showWarnings = FALSE)
+    Sys.chmod(destination.path, "777")
 
-    destination.file <- Project.GetCSVFullPathFilename(project.name)
-    file.copy(FILES$csv.file$tmp_name, destination.file, overwrite=TRUE)
-    Sys.chmod(destination.file, "777")
-  }
-
-  if (!is.null(project.name) && !is.null(POST$upload.config) && !is.null(FILES) && !is.null(FILES$config.file)) {
-    destination.path <- Project.GetPath(project.name)
-    dir.create(destination.path, showWarnings = FALSE)
-
-    destination.file <- Project.GetConfigFullPathFilename(project.name)
-    file.copy(FILES$config.file$tmp_name, destination.file, overwrite=TRUE)
+    destination.file <- file.path(destination.path, basename(FILES$project.file$name))
+    file.copy(FILES$project.file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
   }
 
   if (!is.null(project.name) && !is.null(POST$import.csv)) {
     n.ahead <- ifelse(is.null(POST$n.ahead), 4, as.numeric(POST$n.ahead))
-    cmd <- paste(strategico.command, "--cmd import.csv -a", n.ahead)
-    if (!is.null(POST$mailto))
-       cmd <- paste(cmd, "-M", POST$mailto)
-    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
-    cat(rc)
+    options <- paste("-a", n.ahead)
+
+    msg <- Strategico.ExecCommand(project.name, cmd="import.csv", options=options, mailto=POST$mailto, intern=TRUE)
   }
 
   if (!is.null(project.name) && !is.null(POST$run)) {
-    cmd.base <- paste(strategico.command, "--cmd eval.items --id.range ")
+    options.base <- "--id.range "
     ## running parallel jobs
     maxid <- Project.GetMaxID(project.name, db.channel=db.channel)
     if (maxid == 0) {
@@ -45,25 +43,23 @@
     } else {
       id.step <- as.integer(maxid / strategico.config$command.eval.jobs) + 1
       start <- 1
+      msg <- ""
       for (c in 1:strategico.config$command.eval.jobs) {
          end <- min(start + id.step, maxid)
-         cmd <- paste(cmd.base, start, ":", end, sep="")
-         rc <- system(cmd, wait=strategico.config$command.wait, intern=FALSE)
+         options <- paste(options.base, start, ":", end, sep="")
+         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, mailto=POST$mailto, intern=FALSE)
+         msg <- paste(msg, "<br />", msg.new)
          start <- end + 1
       } #end for
     }
   } # end eval.items
 
   if (!is.null(project.name) && !is.null(POST$export.csv)) {
-    cmd <- paste(strategico.command, "--cmd export.csv")
-    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
-    cat(rc)
+    msg <- Strategico.ExecCommand(project.name, cmd="export.csv", options="", mailto=POST$mailto, intern=TRUE)
   }
 
   if (!is.null(project.name) && !is.null(POST$drop.project)) {
-    cmd <- paste(strategico.command, "--cmd drop")
-    rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
-    cat(rc)
+    msg <- Strategico.ExecCommand(project.name, cmd="drop", options="", mailto=POST$mailto, intern=TRUE)
   }
 
   b1 <- '
@@ -86,20 +82,17 @@
            <li>column names KEY1, KEY2, ..., PERIOD, V1, ...</li>
            <li>columns separated by ;</li> 
            <li>decimals with .</li>         
-         </ul><br /><input type="file" name="csv.file" />  <input type="submit" name="upload.csv" value="Upload"/><br />'
+         </ul><br />
+       <input type="file" name="project.file" />  <input type="submit" name="upload.file" value="Upload"/><br />'
     page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
             
     if (exists.csv) {
-      b20 <-  'This step is optional because the config file will be generated automatically if missing<br />
-         <input type="file" name="config.file" />  <input type="submit" name="upload.config" value="Upload"/><br />'
-      page.sections <- rbind(page.sections, data.frame(title="Change Config file", body=b20))
-
 
       b40 <- 'This step 
         <ul>
            <li>creates the project config file if it does not exist</li>
            <li>creates the database tables</li>
-           <li>import CSV data to teh database</li>
+           <li>import CSV data to the database</li>
         </ul>
                    Mail Address: <input name="mailto" type="text" value="" size="20" /><br />
                    Predicted points (n.ahead parameter): <input name="n.ahed" type="text" value="" size="1" /><br />
