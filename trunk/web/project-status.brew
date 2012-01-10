@@ -1,7 +1,9 @@
 <%
 ## -*- mode: R -*-
 
-  project.name <- GET$project
+  if (!is.null(GET$project) ) {
+     setCookie(name="strategico.project",value=GET$project)
+  }
 
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))

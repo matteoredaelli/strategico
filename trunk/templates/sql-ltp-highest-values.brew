@@ -1,0 +1,18 @@
+<%
+ tot.keys <- length(project.keys)
+ last.key <- project.keys[tot.keys]
+%>
+
+select 
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>,
+  max(V) V
+FROM 
+  v_<%=project.name%>_results_<%=value%>
+where
+  <%=last.key%> != ''
+group by
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>
+order by V desc
+limit 30

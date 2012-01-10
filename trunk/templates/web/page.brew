@@ -1,3 +1,6 @@
+<%
+  project.name <- COOKIES$strategico.project
+%>
 
 <!doctype html>
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
@@ -17,21 +20,21 @@
 	<link rel="stylesheet" href="css/style.css">
 
 	<script src="js/libs/modernizr-2.0.6.min.js"></script>
+
 </head>
 <body>
 	<div id="header-container">
 		<header class="wrapper clearfix">
 
-			<h1 id="title"><img src="images/R-logo.png" /> Strategico 
+			<h1 id="title"><img src="images/R-logo.png" />Strategico 
                           <%=if (!is.null(project.name)) paste("::", project.name)%>
                           <!-- <%=page.title%> -->
                         </h1>
 			<nav>
 				<ul>
 <% if(!is.null(project.name)) { %>
-					<li><a href="project.brew?project=<%=project.name%>">Home</a></li>
-                                        <li><a href="project-status.brew?project=<%=project.name%>">Status <%=project.name%> </a></li>
-                                        <li><a href="items.brew?project=<%=project.name%>">Results <%=project.name%> </a></li>
+					<li><a href="project.brew">Run</a></li>
+                                        <li><a href="project-status.brew">Status</a></li>
 <%} %>
 				</ul>
 			</nav>

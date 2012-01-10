@@ -24,8 +24,12 @@ options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
 
 db.channel <- DB.Connect()
+strategico.tables <- dbListTables(db.channel)
+
+##project.name <- ifelse(exists("project.name"), project.name, COOKIES$strategico.project)
 project.name <- Project.NormalizeName(project.name=COOKIES$strategico.project)
-##project.name <- COOKIES$strategico.project
+##COOKIES$strategico.project <- project.name
+
 project.config <- NULL
 project.keys <- c()
 project.path <-  NULL

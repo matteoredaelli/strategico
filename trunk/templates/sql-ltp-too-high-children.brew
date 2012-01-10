@@ -1,0 +1,43 @@
+<%
+ tot.keys <- length(project.keys)
+ last.key <- project.keys[tot.keys]
+%>
+
+select 
+  k3.*, 
+  k2.item_id parent__id, 
+  k2.V as parent_V 
+from
+(
+SELECT 
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>,
+  max(V) V
+FROM 
+  v_<%=project.name%>_results_<%=value%>
+WHERE
+  <%=last.key%> != '' and
+  V > 0
+group by
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>
+) k3,
+(
+SELECT 
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>,
+  max(V) V
+FROM 
+  v_<%=project.name%>_results_<%=value%>
+WHERE
+  <%=project.keys[tot.keys-1]%> !='' and 
+  <%=last.key%>='' and
+  V > 0
+group by
+   item_id, <%= paste(project.keys, collapse=", ")%>
+) k2
+where 
+ <% for (k in project.keys[-tot.keys]) { %>
+ k2.<%=k%> = k3.<%=k%> and
+ <%}%>
+ k3.V > k2.V

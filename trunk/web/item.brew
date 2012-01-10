@@ -1,7 +1,11 @@
 <%
 ## -*- mode: R -*-
 
-  project.name <- GET$project
+  if (!is.null(GET$project) ) {
+     setCookie(name="strategico.project",value=GET$project)
+  }
+
+  ##project.name <- GET$project
 
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
@@ -19,7 +23,7 @@
   ## settings is or item.keys depending on which variables were passed in GET input
 
     id <- as.numeric(GET$id)
-    item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
+    item.keys <- try(Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel))
 
   ########################################################################################
   ##  Change Best model
@@ -50,9 +54,7 @@
   item.results <- Item.DB.GetNormalizedDataAndResults(project.name=project.name,
                                                       id=id, db.channel=db.channel,
                                                       value=value, only.best=FALSE)
-  item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
 
   if (!is.null(item.results) && nrow(item.results) > 0) {
     item.results$item_id <- NULL
@@ -60,6 +62,11 @@
     item.results.pivot <- data.frame(item.results.pivot)
     item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
     item.results.best$item_id <- NULL
+
+  item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
   }
 
   if (!is.null(item.summary) && nrow(item.summary) > 0) {
