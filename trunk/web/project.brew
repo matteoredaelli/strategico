@@ -106,8 +106,15 @@
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
       }
       if (exists.config) {
+
+        project.values <- Project.GetValues(project.name=name, project.config)
+
+        mylinks <- paste('<a href="suspicious-items.brew?value=', project.values, '">', project.values, '</a>', sep='')
+
         b70 <- 'Options:  
-               <a href="items.brew">browser</a> results,  see <a href="suspicious-items.brew">suspicious items</a>'
+               <a href="items.brew">browser</a> results,  see suspicious items (__LINKS__)'
+	b70 <- gsub("__LINKS__", paste(mylinks, collapse=",", sep=" "), b70)
+
 	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))
         b80 <- '                   <input type="submit" name="export.csv" value="Export CSV"/><br />'
         page.sections <- rbind(page.sections, data.frame(title="Export CSV", body=b80))
