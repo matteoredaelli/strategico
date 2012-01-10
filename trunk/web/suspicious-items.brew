@@ -24,8 +24,9 @@
 
        template.file <- file.path(GetTemplatesHome(), "sql-ltp-too-high-children.brew")
        sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+       logdebug(sql)
        records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
-
+ 
        if (nrow(records) > 1) {
          records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
 	 Table <- gvisTable(records, options=list(width=500, height=300))
@@ -38,7 +39,7 @@
        template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-values.brew")
        sql <- paste(capture.output(brew(template.file)),  collapse="\n")
        records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
-       cat(sql)
+       logdebug(sql)
 
        if (nrow(records) > 1) {
          records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
@@ -52,7 +53,7 @@
        template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-maxjump.brew")
        sql <- paste(capture.output(brew(template.file)),  collapse="\n")
        records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
-       cat(sql)
+       logdebug(sql)
 
        if (nrow(records) > 1) {
          records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
@@ -66,7 +67,7 @@
        template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-ratio-means.brew")
        sql <- paste(capture.output(brew(template.file)),  collapse="\n")
        records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
-       cat(sql)
+       logdebug(sql)
 
        if (nrow(records) > 1) {
          records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 

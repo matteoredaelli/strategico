@@ -41,3 +41,5 @@ where
  k2.<%=k%> = k3.<%=k%> and
  <%}%>
  k3.V > k2.V
+ORDER BY
+ k3.V DESC
