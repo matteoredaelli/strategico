@@ -1,0 +1,7 @@
+select 
+  *
+FROM 
+  v_<%=project.name%>_summary_<%=value%>
+order by 
+  maxJump desc
+limit 30

@@ -9,8 +9,6 @@ select
   max(V) V
 FROM 
   v_<%=project.name%>_results_<%=value%>
-where
-  <%=last.key%> != ''
 group by
   item_id,
   <%= paste(project.keys, collapse=", ")%>
