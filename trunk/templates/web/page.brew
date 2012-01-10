@@ -33,7 +33,7 @@
 			<nav>
 				<ul>
 <% if(!is.null(project.name)) { %>
-					<li><a href="project.brew">Run</a></li>
+					<li><a href="project.brew">Home</a></li>
                                         <li><a href="project-status.brew">Status</a></li>
 <%} %>
 				</ul>
