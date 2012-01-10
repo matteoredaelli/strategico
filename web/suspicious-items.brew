@@ -1,0 +1,58 @@
+<%
+## -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+
+  if (!is.null(GET$project) ) {
+     setCookie(name="strategico.project",value=GET$project)
+  }
+
+  ##project.name <- GET$project
+
+  MySource("strategico_web.R")
+
+  page.title <- "Suspicious Items"
+  page.sections	<- data.frame()
+
+  if (!is.null(project.name) && !is.null(project.config)) {
+
+     
+
+     project.values <- Project.GetValues(project.name, project.config=project.config)
+
+     for (value in project.values) {
+
+       ## too-high-children
+
+       template.file <- file.path(GetTemplatesHome(), "sql-ltp-too-high-children.brew")
+       sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+       records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+
+       if (nrow(records) > 1) {
+         records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+	 Table <- gvisTable(records, options=list(width=500, height=300))
+	 b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+ 	 page.sections <- rbind(page.sections, data.frame(title=paste("Too high predictions for", value), body=b_Table))
+       }
+
+       ## highest values
+
+       template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-values.brew")
+       sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+       records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+       cat(sql)
+
+       if (nrow(records) > 1) {
+         records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+	 Table <- gvisTable(records, options=list(width=500, height=300))
+	 b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+ 	 page.sections <- rbind(page.sections, data.frame(title=paste("Highest predictions for", value), body=b_Table))
+       }
+
+     } ## for
+
+
+  } #end if
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
+%>

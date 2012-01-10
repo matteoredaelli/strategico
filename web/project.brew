@@ -1,14 +1,13 @@
 <%
-## -*- mode: R -*-
+# -*- mode: R -*-
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
 
-  if (!is.null(POST$set_project) && !is.null(POST$project)) {
-     setCookie(name='strategico.project',value=POST$project)
+  if (!is.null(POST$set_project) ) {
+     setCookie(name="strategico.project",value=POST$project.name)
   }
 
-  if (is.null(COOKIES$strategico.project))
-     setCookie(name='strategico.project',value="changeme")
+  ##if (is.null(COOKIES$strategico.project))   setCookie(name="strategico.project",value="changeme")
 
   MySource("strategico_web.R")
 
@@ -33,7 +32,8 @@
     msg <- Strategico.ExecCommand(project.name, cmd="import.csv", options=options, mailto=POST$mailto, intern=TRUE)
   }
 
-  if (!is.null(project.name) && !is.null(POST$run)) {
+
+  if (!is.null(project.name) && !is.null(POST$run) &&  DB.GetTableNameProjectItems(project.name) %in% strategico.tables) {
     options.base <- "--id.range "
     ## running parallel jobs
     maxid <- Project.GetMaxID(project.name, db.channel=db.channel)
@@ -53,7 +53,7 @@
     }
   } # end eval.items
 
-  if (!is.null(project.name) && !is.null(POST$export.csv)) {
+  if (!is.null(project.name) && !is.null(POST$export.csv) && DB.GetTableNameProjectItems(project.name) %in% strategico.tables ) {
     msg <- Strategico.ExecCommand(project.name, cmd="export.csv", options="", mailto=project.config$mailto, intern=TRUE)
   }
 
@@ -62,19 +62,21 @@
   }
 
   b1 <- '
-                <form enctype="multipart/form-data" method="POST">
-                   <input name="project" type="text" value="__PROJECT_NAME__" size="10" />
+
+                <form method="POST">
+                   <input name="project.name" type="text" value="__PROJECT_NAME__" size="10" />
         '
 
   b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
   
-  b1 <- paste(b1, ' <input type="submit" name="set_project" value="Set project name"/><br />')
+  b1 <- paste(b1, ' <input type="submit" name="set_project" value="Set project name"/></form><br />')
 
   page.sections <- data.frame(title="Select project", body=b1)
 
   if (!is.null(project.name)) {
     exists.csv <- Project.CSVFile.Exist(project.name) 
     exists.config <- Project.ConfigFile.Exist(project.name) 
+    ##exists.tables <-DB.GetTableNameProjectItems(project.name) %in% strategico.tables
 
     b10 <- 'The csv file must have:
           <ul>
@@ -82,6 +84,7 @@
            <li>columns separated by ;</li> 
            <li>decimals with .</li>         
          </ul><br />
+       <form enctype="multipart/form-data" method="POST">
        <input type="file" name="project.file" />  <input type="submit" name="upload.file" value="Upload"/><br />'
     page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
             
@@ -101,8 +104,11 @@
       if (exists.config) {
         b60 <- '                   <input type="submit" name="run" value="Run"/><br />'
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
-
-
+      }
+      if (exists.config) {
+        b70 <- 'Options:  
+               <a href="items.brew">browser</a> results,  see <a href="suspicious-items.brew">suspicious items</a>'
+	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))
         b80 <- '                   <input type="submit" name="export.csv" value="Export CSV"/><br />'
         page.sections <- rbind(page.sections, data.frame(title="Export CSV", body=b80))
 

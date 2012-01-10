@@ -259,3 +259,7 @@ Item.GetUrl <- function(project.name, id, value=NULL) {
 Item.GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.config$id.dummies.to) {
   sample(from:to,1)
 }
+
+Item.AddLink <- function(project.name, value, id.list) {
+  paste("<a href=item.brew?project=",project.name, "&id=", id.list, "&value=",value, ">", id.list, "</a>", sep="")
+}
