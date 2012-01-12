@@ -20,7 +20,9 @@
     dir.create(destination.path, showWarnings = FALSE)
     Sys.chmod(destination.path, "777")
 
-    destination.file <- file.path(destination.path, basename(FILES$project.file$name))
+    ## TODO filename <- paste(project.name, file_ext(FILES$project.file$name), sep=".")
+    filename <- paste(project.name, "csv", sep=".")
+    destination.file <- file.path(destination.path, filename)
     file.copy(FILES$project.file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
   }
