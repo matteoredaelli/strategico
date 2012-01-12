@@ -92,7 +92,7 @@
   ## TAB Run
   ###############################################################################################################
 
-  b20 <- paste(BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=50),
+  b20 <- paste(BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=20),
                '<input type="submit" name="eval" value="Run" />')
   page.sections <- rbind(page.sections, data.frame(title="Run", body=b20))
 
