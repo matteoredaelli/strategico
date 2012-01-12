@@ -18,6 +18,7 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
+suppressPackageStartupMessages(library(tools))
 suppressPackageStartupMessages(library(logging))
 suppressPackageStartupMessages(library(xtable))
 suppressPackageStartupMessages(library(xtable))
