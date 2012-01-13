@@ -372,6 +372,7 @@ Project.GetViewNames <- function(project.name, project.config=NULL) {
     project.config <- Project.GetConfig(project.name)
 
   tables <- c() 
+  tables <- append(tables, paste("v", project.name, "results", sep="_"))
   
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
