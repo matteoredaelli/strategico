@@ -1,11 +1,7 @@
 <%
 ## -*- mode: R -*-
 
-  if (!is.null(GET$project) ) {
-     setCookie(name="strategico.project",value=GET$project)
-  }
-
-  ##project.name <- GET$project
+  project.name <- GET$project
 
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
@@ -94,7 +90,7 @@
 
   b20 <- paste(
                ##BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=60),
-               '<textarea name="param" rows="6" cols="50">',
+               '<textarea name="param" rows="6" cols="55">',
                param, '</textarea>',
                '<input type="submit" name="eval" value="Run" />')
   page.sections <- rbind(page.sections, data.frame(title="Run", body=b20))
