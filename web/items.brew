@@ -3,11 +3,7 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
 
-  if (!is.null(GET$project) ) {
-     setCookie(name="strategico.project",value=GET$project)
-  }
-
-  ##project.name <- GET$project
+  project.name <- GET$project
 
   MySource("strategico_web.R")
 
@@ -42,12 +38,13 @@
      b1 <- paste(capture.output(brew(template.file)),  collapse="\n")
      page.sections <- data.frame(title="Search", body=b1)
 
-     if (!is.null(id) && !is.null(item.keys)) { 
-	 items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
-	 items.summary <- data.frame(items.summary)
 
-	 if ( !is.null(items.summary) && nrow(items.summary) > 1) {
-          items.summary$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=items.summary$item_id) 
+##     if (!is.null(id) && !is.null(item.keys)) { 
+##	 items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
+##	 items.summary <- data.frame(items.summary)
+
+##	 if ( !is.null(items.summary) && nrow(items.summary) > 1) {
+##          items.summary$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=items.summary$item_id) 
 	  ##items.summary <- subset(items.summary, 
 	##		      select=c(-MeanPredictedRatioMeanValues, 
 	##			       -SdPredictedRatioSdValues,
@@ -56,18 +53,18 @@
 	##			      )
 	##		     )
 
-	  rownames(items.summary) <- NULL
-	  if (nrow(items.summary) > 1) {
-	    Table <- gvisTable(items.summary, options=list(width=700, height=300))
-	    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
-	  }
-	  else {
-	    b_Table <- capture.output(print(xtable(items.summary), type="html"))
-	  }
-	  page.sections <- rbind(page.sections, data.frame(title="Results", body=b_Table))
-	 }
-
-     } # null(id)
+##	  rownames(items.summary) <- NULL
+##	  if (nrow(items.summary) > 1) {
+##	    Table <- gvisTable(items.summary, options=list(width=700, height=300))
+##	    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+##	  }
+##	  else {
+##	    b_Table <- capture.output(print(xtable(items.summary), type="html"))
+##	  }
+##	  page.sections <- rbind(page.sections, data.frame(title="Results", body=b_Table))
+##	 }
+##
+##     } # null(id)
 
   }
   template.file <- file.path(GetWebTemplatesHome(), "page.brew")

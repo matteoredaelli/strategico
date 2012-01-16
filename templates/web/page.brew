@@ -1,7 +1,3 @@
-<%
-  project.name <- COOKIES$strategico.project
-%>
-
 <!doctype html>
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
@@ -33,8 +29,9 @@
 			<nav>
 				<ul>
 <% if(!is.null(project.name)) { %>
-					<li><a href="project.brew">Home</a></li>
-                                        <li><a href="project-status.brew">Status</a></li>
+					<li><a href="index.brew?">Home</a></li>
+					<li><a href="project.brew?project=<%=project.name%>"><%=project.name%></a></li>
+                                        <li><a href=<%=strategico.config$projects.url%> target="_blank">All projects</a></li>
 <%} %>
 				</ul>
 			</nav>

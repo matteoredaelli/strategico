@@ -1,0 +1,23 @@
+<%
+# -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+    
+  MySource("strategico_web.R")
+
+  page.title <- " "
+  page.sections	<- data.frame()
+
+  b1 <- '
+
+                <form method="GET" action="project.brew">
+                   <input name="project" type="text" value="" size="10" />
+        '
+
+  b1 <- paste(b1, ' <input type="submit" name="set" value="Select project"/></form><br />')
+
+  page.sections <- data.frame(title="Select project", body=b1)
+
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
+%>

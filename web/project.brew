@@ -2,12 +2,8 @@
 # -*- mode: R -*-
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
-
-  if (!is.null(POST$set_project) ) {
-     setCookie(name="strategico.project",value=POST$project.name)
-  }
-
-  ##if (is.null(COOKIES$strategico.project))   setCookie(name="strategico.project",value="changeme")
+    
+  project.name <- ifelse(is.null(POST$project), GET$project, POST$project)
 
   MySource("strategico_web.R")
 
@@ -63,31 +59,28 @@
     msg <- Strategico.ExecCommand(project.name, cmd="drop", options="", mailto=project.config$mailto, intern=TRUE)
   }
 
-  b1 <- '
-
-                <form method="POST">
-                   <input name="project.name" type="text" value="__PROJECT_NAME__" size="10" />
-        '
-
-  b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
-  
-  b1 <- paste(b1, ' <input type="submit" name="set_project" value="Set project name"/></form><br />')
-
-  page.sections <- data.frame(title="Select project", body=b1)
-
   if (!is.null(project.name)) {
+
+    b1 <- 'Project: __PROJECT_NAME__: see <a href="project-status.brew?project=__PROJECT_NAME__">status</a>'
+
+    b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
+    page.sections <- rbind(page.sections, data.frame(title="Status", body=b1))
+
     exists.csv <- Project.CSVFile.Exist(project.name) 
     exists.config <- Project.ConfigFile.Exist(project.name) 
     ##exists.tables <-DB.GetTableNameProjectItems(project.name) %in% strategico.tables
 
-    b10 <- 'The csv file must have:
+    b10 <- 'Project: __PROJECT_NAME__ <br />The csv file must have:
           <ul>
            <li>column names KEY1, KEY2, ..., PERIOD, V1, ...</li>
            <li>columns separated by ;</li> 
            <li>decimals with .</li>         
          </ul><br />
        <form enctype="multipart/form-data" method="POST">
+       <input name="project.name" type="hidden" value="__PROJECT_NAME__"	 size="10" /> 
        <input type="file" name="project.file" />  <input type="submit" name="upload.file" value="Upload"/><br />'
+
+    b10 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b10)
     page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
             
     if (exists.csv) {
@@ -111,10 +104,11 @@
 
         project.values <- Project.GetValues(project.name=name, project.config)
 
-        mylinks <- paste('<a href="suspicious-items.brew?value=', project.values, '">', project.values, '</a>', sep='')
+        mylinks <- paste('<a href="suspicious-items.brew?project=', project.name, '&value=', project.values, '">', project.values, '</a>', sep='')
 
         b70 <- 'Options:  
-               <a href="items.brew">browser</a> results,  see suspicious items (__LINKS__)'
+               <a href="items.brew?project=__PROJECT_NAME__">browser</a> results,  see suspicious items (__LINKS__)'
+	b70 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b70)
 	b70 <- gsub("__LINKS__", paste(mylinks, collapse=",", sep=" "), b70)
 
 	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))

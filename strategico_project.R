@@ -528,5 +528,6 @@ Project.NormalizeName <- function(project.name=NULL) {
  n <- tolower(n)
  n <- gsub("[^a-z0-9]", 'x', n)
  n <- gsub('strategico', 'strategic0', n)
+ n <- ifelse(n == "", "changeme", n)
  n
 }
