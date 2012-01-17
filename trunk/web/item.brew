@@ -7,9 +7,11 @@
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
 
+  item.models <- c()
+
   page.title <- paste("<br />Item", GET$id)
   page.sections	<- data.frame()
-
+  
   if (!is.null(project.name) && !is.null(project.config) && !is.null(GET$id)) {
     param <- ifelse(is.null(GET$param), "", GET$param)
     value <- ifelse(is.null(GET$value), "V1", GET$value)
@@ -18,7 +20,7 @@
   
   ## settings is or item.keys depending on which variables were passed in GET input
 
-    id <- as.numeric(GET$id)
+    id <- as.numeric(ifelse(is.null(GET$id), 1, GET$id))
     item.keys <- try(Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel))
 
   ########################################################################################
@@ -52,29 +54,6 @@
                                                       value=value, only.best=FALSE)
 
 
-  if (!is.null(item.results) && nrow(item.results) > 0) {
-    item.results$item_id <- NULL
-    item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
-    item.results.pivot <- data.frame(item.results.pivot)
-    item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
-    item.results.best$item_id <- NULL
-
-  item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
-  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
-
-  }
-
-  if (!is.null(item.summary) && nrow(item.summary) > 0) {
-    item.models <- unique(item.summary.models$model)
-    best.model <- as.character(item.summary[1,]$BestModel)
-    suggested.model <- as.character(item.summary[1,]$SuggestedModel)
-    param <- as.character(item.summary[1,]$Parameters)
-  } else {
-    best.model <- item.models <- suggested.model <- NULL
-    param=""
-  }
-  if(length(param) == 0L) param=""
 
   b1 <- paste('<form method="GET">', 
               BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
@@ -98,18 +77,41 @@
   ###############################################################################################################
   ## TAB Set Best Model
   ###############################################################################################################
+  if (!is.null(item.results) && nrow(item.results) > 0) {
+    item.results$item_id <- NULL
+    item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+    item.results.pivot <- data.frame(item.results.pivot)
+    item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
+    item.results.best$item_id <- NULL
 
-  b100 <- ""
-  for (model in item.models) {
+    item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
+    item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+    item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+    if (!is.null(item.summary) && nrow(item.summary) > 0) {
+      item.models <- unique(item.summary.models$model)
+      best.model <- as.character(item.summary[1,]$BestModel)
+      suggested.model <- as.character(item.summary[1,]$SuggestedModel)
+      param <- as.character(item.summary[1,]$Parameters)
+    } else {
+      best.model <- item.models <- suggested.model <- NULL
+      param=""
+    }
+    if(length(param) == 0L) param=""
+  
+
+  if(!is.null(item.models)  && length(item.models) > 1) {
+    b100 <- ""
+    for (model in item.models) {
       b100 <- paste(b100, 
                     BuildHtmlElement_input(name="model", default=model, type="radio"),
                          model, " ", sep="")
-      }
-  b100 <- paste(b100, '
+    }
+    b100 <- paste(b100, '
                     <input type="submit" name="setmodel" value="Set best model" />
                 </form>')
-  page.sections <- rbind(page.sections, data.frame(title="Set Best", body=b100))
-
+    page.sections <- rbind(page.sections, data.frame(title="Set Best", body=b100))
+  }
 
   ###############################################################################################################
   ## TAB Summary
@@ -179,6 +181,7 @@
   }
 
   }
+ } # if 
   template.file <- file.path(GetWebTemplatesHome(), "page.brew")
   brew(template.file)
 %>
