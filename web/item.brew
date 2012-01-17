@@ -8,7 +8,10 @@
   MySource("strategico_web.R")
 
   item.models <- c()
-
+  item.results <- data.frame()
+  item.summary <- data.frame()
+  item.summar.models <- data.frame()
+ 
   page.title <- paste("<br />Item", GET$id)
   page.sections	<- data.frame()
   
@@ -53,7 +56,28 @@
                                                       id=id, db.channel=db.channel,
                                                       value=value, only.best=FALSE)
 
+  if (!is.null(item.results) && nrow(item.results) > 0) {
+    item.results$item_id <- NULL
+    item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+    item.results.pivot <- data.frame(item.results.pivot)
+    item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
+    item.results.best$item_id <- NULL
 
+    item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
+    item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+    item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+    if (!is.null(item.summary) && nrow(item.summary) > 0) {
+      item.models <- unique(item.summary.models$model)
+      best.model <- as.character(item.summary[1,]$BestModel)
+      suggested.model <- as.character(item.summary[1,]$SuggestedModel)
+      param <- as.character(item.summary[1,]$Parameters)
+    } else {
+      best.model <- item.models <- suggested.model <- NULL
+      param=""
+    }
+    if(length(param) == 0L) param=""
+ }
 
   b1 <- paste('<form method="GET">', 
               BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
@@ -78,26 +102,6 @@
   ## TAB Set Best Model
   ###############################################################################################################
   if (!is.null(item.results) && nrow(item.results) > 0) {
-    item.results$item_id <- NULL
-    item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
-    item.results.pivot <- data.frame(item.results.pivot)
-    item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
-    item.results.best$item_id <- NULL
-
-    item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
-    item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
-    item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
-
-    if (!is.null(item.summary) && nrow(item.summary) > 0) {
-      item.models <- unique(item.summary.models$model)
-      best.model <- as.character(item.summary[1,]$BestModel)
-      suggested.model <- as.character(item.summary[1,]$SuggestedModel)
-      param <- as.character(item.summary[1,]$Parameters)
-    } else {
-      best.model <- item.models <- suggested.model <- NULL
-      param=""
-    }
-    if(length(param) == 0L) param=""
   
 
   if(!is.null(item.models)  && length(item.models) > 1) {
