@@ -65,7 +65,6 @@
 				%>
 					<a href="#<%=as.character(section$title)%>"><%=as.character(section$title) %></a><br/>
 				<%} %>
-                                <hr /><a href=<%=strategico.config$projects.url%>/<%=ifelse(is.null(project.name), "", project.name)%> target="_blank"/>See project files</a>
 			</aside>			
 		</div> <!-- #main -->
 	</div> <!-- #main-container -->
