@@ -60,6 +60,7 @@
     item.results$item_id <- NULL
     item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
     item.results.pivot <- data.frame(item.results.pivot)
+    rownames(item.results.pivot) <- NULL
     item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
     item.results.best$item_id <- NULL
 
@@ -127,17 +128,18 @@
       i.summary.models$item_id <- NULL
       rownames(i.summary.models) <- NULL
       ## print(xtable(i.summary.models), type="html")
-      T1 <- gvisTable(i.summary.models, options=list(width=700, height=250))      
-      b_T1 <- paste(capture.output(cat(T1$html$chart)), collapse="\n")
+      ##T1 <- gvisTable(i.summary.models, options=list(width=700, height=250))      
+      ##b_T1 <- paste(capture.output(cat(T1$html$chart)), collapse="\n")
+      b_T1 <- paste(capture.output(print(xtable(i.summary.models), type="html")), collapse="\n")
     
       i.summary <- subset(item.summary, select=c(-item_id, -Parameters))
       rownames(i.summary) <- NULL
-      summary.new <- data.frame(f=colnames(i.summary), as.data.frame(t(i.summary)))
-      ##print(xtable(t(i.summary)), type="html")
-      T2 <- gvisTable(summary.new, options=list(width=700, height=510)) 
-      b_T2 <- paste(capture.output(cat(T2$html$chart)), collapse="\n")
+      ##summary.new <- data.frame(f=colnames(i.summary), as.data.frame(t(i.summary)))
+      b_T2 <- paste(capture.output(print(xtable(t(i.summary)), type="html")), collapse="\n")
+      ##T2 <- gvisTable(summary.new, options=list(width=700, height=510)) 
+      ##b_T2 <- paste(capture.output(cat(T2$html$chart)), collapse="\n")
 
-      page.sections <- rbind(page.sections, data.frame(title="Summary", body=paste(b_T1, b_T2)))
+      page.sections <- rbind(page.sections, data.frame(title="Summary", body=paste(b_T1, b_T2, sep="<br />")))
   }
 
 
@@ -165,8 +167,9 @@
   ## TAB Results
   ###############################################################################################################
 
-    TR <- gvisTable(item.results.pivot, options=list(width=700, height=500))
-    b_TR <- paste(capture.output(cat(TR$html$chart)), collapse="\n")
+    b_TR <- paste(capture.output(print(xtable(item.results.pivot), type="html")), collapse="\n")
+    ##TR <- gvisTable(item.results.pivot, options=list(width=700, height=500))
+    ##b_TR <- paste(capture.output(cat(TR$html$chart)), collapse="\n")
     page.sections <- rbind(page.sections, data.frame(title="Result table", body=b_TR))
 
   } ## item results not null
