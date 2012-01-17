@@ -233,7 +233,7 @@ Strategico.ExecCommand <- function(project.name, cmd, options="", mailto="nobody
   if (!is.null(mailto))
     strategico.command <- gsub("__MAILTO__", mailto, strategico.command)
   strategico.command <- gsub("__OPTIONS__", options, strategico.command)
-  logwarn(paste("Running command:", strategico.command))
+  logdebug(paste("Running command:", strategico.command))
   rc <- system(strategico.command, wait=wait, intern=intern)
   logdebug(rc)
   rc
