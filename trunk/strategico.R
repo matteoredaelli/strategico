@@ -300,7 +300,7 @@ if (opt$cmd == "eval.items") {
   Items.Eval(project.name=opt$project.name, 
              id.list=id.list, values=opt$item.values,
              param=param, project.config=project.config, db.channel=db.channel)
-  Strategico.Sendmail(project.config=project.config, to=opt$mailto, subject=opt$cmd, project.name=opt$project.name)
+  Strategico.Sendmail(project.config=project.config, to=opt$mailto, subject=opt$cmd, project.name=opt$project.name, body="Finished")
   q(status=0)
 }
 
@@ -315,7 +315,7 @@ if (opt$cmd == "eval.items.from.db") {
   
   Items.DB.EvalFromSummary(project.name=opt$project.name, value=opt$item.values,
                            verbose=TRUE, project.config, db.channel=db.channel)
-  Strategico.Sendmail(project.config=project.config, to=opt$mailto, subject=opt$cmd, project.name=opt$project.name)
+  Strategico.Sendmail(project.config=project.config, to=opt$mailto, subject=opt$cmd, project.name=opt$project.name, body="Finished")
   q(status=0)
 }
 
