@@ -260,6 +260,11 @@ Item.GetNewID <- function(from=strategico.config$id.dummies.from, to=strategico.
   sample(from:to,1)
 }
 
-Item.AddLink <- function(project.name, value, id.list) {
-  paste("<a href=item.brew?project=",project.name, "&id=", id.list, "&value=",value, ">", id.list, "</a>", sep="")
+Item.AddLink <- function(project.name, value, id.list, new=TRUE) {
+  target <-ifelse(new,
+    ' target="_blank"',
+    ' ')
+  paste("<a href=item.brew?project=",project.name, "&id=", id.list, "&value=",value,
+    target,
+        ">", id.list, "</a>", sep="")
 }
