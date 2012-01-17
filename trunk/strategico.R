@@ -172,6 +172,7 @@ if (opt$cmd == "statistics") {
 if (opt$cmd == "drop") {
   Project.DropDB(project.name=opt$project.name, db.channel=db.channel)
   Project.EmptyFS(project.name=opt$project.name)
+  Strategico.Sendmail(to=opt$mailto, subject=opt$cmd, project.name=opt$project.name, body="Finished")
   q(status=0)
 }
 
@@ -205,6 +206,7 @@ if (opt$cmd == "empty.fs") {
 if (opt$cmd == "export.csv") {
   Project.DBExportTables2Csv(project.name=opt$project.name, db.channel=db.channel)
   Project.DBExportViews2Csv(project.name=opt$project.name, db.channel=db.channel)
+  Strategico.Sendmail(to=opt$mailto, subject=opt$cmd, project.name=opt$project.name, body="Finished")
   q(status=0)
 }
 
@@ -228,7 +230,7 @@ if (opt$cmd == "import.csv") {
   Project.ImportFromCSV(project.name=opt$project.name, project.config=project.config, 
                         db.channel=db.channel, filename=opt$file,
                         mailto=opt$mailto, n.ahead=opt$ahead)
-  Strategico.Sendmail(to=opt$mailto, subject=opt$cmd, project.name=opt$project.name)
+  Strategico.Sendmail(to=opt$mailto, subject=opt$cmd, project.name=opt$project.name, body="Finished")
   q(status=0)
   
 }
