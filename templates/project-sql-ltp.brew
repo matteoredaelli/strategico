@@ -116,6 +116,7 @@ order by
 
 create or replace view v_<%=project.name%>_summary_<%=value%> as
 select
+  sm.*,
   <%
     for (key in project.keys) {
   %>
@@ -130,8 +131,7 @@ select
   s.SdPredictedRatioSdValues,
   s.BestAICNoOutRangeExclude,
   s.BestICNoOutRangeExclude,
-  s.SuggestedModel,
-  sm.*
+  s.SuggestedModel
 from
   <%=project.name%>_items i inner join 
   <%=project.name%>_summary_<%=value%> s on (i.item_id = s.item_id) inner join 
@@ -165,6 +165,7 @@ select
   <%
     for (value in project.values[-1]) {
   %>
-    V1.item_id = <%=value%>.item_id
+    V1.item_id = <%=value%>.item_id and
+    V1.PERIOD = <%=value%>.PERIOD
   <%}%>
 ;
