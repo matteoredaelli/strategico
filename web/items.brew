@@ -25,14 +25,14 @@
 
        if (!is.null(id.result) && length(id.result)>0 ) {
          id <- as.numeric(id.result[1])
-         id.children <- Item.GetChildren(id=id, project.name=project.name, db.channel=db.channel)
+         ##id.children <- Item.GetChildren(id=id, project.name=project.name, db.channel=db.channel)
        } else {
          id <- NULL
          id.children <- NULL
        }
      }
   
-     id.children <- c(id, id.children)
+     ##id.children <- c(id, id.children)
 
      template.file <- file.path(GetWebTemplatesHome(), "items.brew")
      b1 <- paste(capture.output(brew(template.file)),  collapse="\n")
