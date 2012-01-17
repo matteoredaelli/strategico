@@ -254,7 +254,7 @@ Project.GetConfig <- function(project.name, quit=FALSE) {
   filename <- Project.GetConfigFullPathFilename(project.name)
   logdebug( paste("Reading config file", filename))
   if (!file.exists(filename)) {
-    logwarn( paste("... missing config file", filename))
+    logdebug( paste("... missing config file", filename))
   } else {
     try(source(filename))
   }
