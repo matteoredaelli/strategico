@@ -74,7 +74,7 @@
 	<div id="footer-container">
 		<footer class="wrapper">
 			<!--<h3>Strategico</h3> -->
-                        Powered by <a href="http://code.google.com/p/strategico/">Strategico</a> and <a href="http://code.google.com/p/ltp/">Long Term Prediction</a> OpenSource projects.
+                        Powered by <a href="http://code.google.com/p/strategico/">Strategico</a>,  <a href="http://code.google.com/p/ltp/">Long Term Prediction</a> and <a href="http://www.r-project.org/">R</a> OpenSource projects.
 		</footer>
 	</div>
 
