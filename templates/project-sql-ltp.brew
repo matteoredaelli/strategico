@@ -35,33 +35,6 @@ CREATE TABLE IF NOT EXISTS <%=project.name%>_items (
   ,<%=key%><%}%>)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create or replace view v_<%=project.name%>_results as
-select
-  <%
-    for (key in project.keys) {
-  %>
-  V1.<%=key%>,
-  <% } %>
-  V1.PERIOD
-  <%
-    for (value in project.values) {
-  %>
-  ,<%=value%>.V <%=value%>
-  <%}%>
-  FROM 
-     v_<%=project.name%>_results_V1 V1
-  <%
-    for (value in project.values[-1]) {
-  %>
-     ,v_<%=project.name%>_results_<%=value%> <%=value%>
-  <%}%>
-  WHERE 
-  <%
-    for (value in project.values[-1]) {
-  %>
-    V1.item_id = <%=value%>.item_id
-  <%}%>
-;
   <%
     for (value in project.values) {
   %>
@@ -167,3 +140,31 @@ order by
   i.item_id
 ;
 <% } # end for project.values%>
+
+create or replace view v_<%=project.name%>_results as
+select
+  <%
+    for (key in project.keys) {
+  %>
+  V1.<%=key%>,
+  <% } %>
+  V1.PERIOD
+  <%
+    for (value in project.values) {
+  %>
+  ,<%=value%>.V <%=value%>
+  <%}%>
+  FROM 
+     v_<%=project.name%>_results_V1 V1
+  <%
+    for (value in project.values[-1]) {
+  %>
+     ,v_<%=project.name%>_results_<%=value%> <%=value%>
+  <%}%>
+  WHERE 
+  <%
+    for (value in project.values[-1]) {
+  %>
+    V1.item_id = <%=value%>.item_id
+  <%}%>
+;
