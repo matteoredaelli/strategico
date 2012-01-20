@@ -10,16 +10,17 @@
   page.title <- " "
   page.sections	<- data.frame()
 
-  if (!is.null(project.name) && !is.null(POST$upload.file) && !is.null(FILES) && !is.null(FILES$project.file)) {
+  if (!is.null(project.name) && !is.null(POST$upload.file) && !is.null(FILES) && !is.null(FILES$project_file)) {
     destination.path <- Project.GetPath(project.name)
     logdebug(paste("Creating project folder", destination.path, "if it does not exists"))
     dir.create(destination.path, showWarnings = FALSE)
     Sys.chmod(destination.path, "777")
 
-    ## TODO filename <- paste(project.name, file_ext(FILES$project.file$name), sep=".")
-    filename <- paste(project.name, "csv", sep=".")
+    ## TODO
+    filename <- paste(project.name, file_ext(FILES$project_file$name), sep=".")
+    ##filename <- paste(project.name, "csv", sep=".")
     destination.file <- file.path(destination.path, filename)
-    file.copy(FILES$project.file$tmp_name, destination.file, overwrite=TRUE)
+    file.copy(FILES$project_file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
   }
 
@@ -78,7 +79,7 @@
          </ul><br />
        <form enctype="multipart/form-data" method="POST">
        <input name="project.name" type="hidden" value="__PROJECT_NAME__"	 size="10" /> 
-       <input type="file" name="project.file" />  <input type="submit" name="upload.file" value="Upload"/><br />'
+       <input type="file" name="project_file" />  <input type="submit" name="upload.file" value="Upload"/><br />'
 
     b10 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b10)
     page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
