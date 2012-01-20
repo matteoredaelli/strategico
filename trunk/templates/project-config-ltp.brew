@@ -28,6 +28,5 @@ project.config$values=c('<%=paste(project.values, collapse="', '", sep="")%>')
 ## +++++++++++++++++++++++++++++++++++++++
 ## default ltp params
 ## +++++++++++++++++++++++++++++++++++++++
-project.config$param=list()
 project.config$param$n.ahead=<%=max(1,n.ahead)%>
-project.config$param$naive.ifConstantLastValues=<%=max(2, project.config$period.freq)%>
+project.config$param$naive.ifConstantLastValues=<%=max(2, period.freq)%>
