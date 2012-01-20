@@ -8,9 +8,41 @@
   page.title <- " "
   page.sections	<- data.frame()
 
+%>
+
+
+
+<%
   b1 <- '
 
-                <form method="GET" action="project.brew">
+<script>
+  function validateForm()
+  {
+    var x=document.forms["select_project_form"]["project"].value;
+    if (x==null || x=="") {
+      alert("Project name must be filled out");
+      return false;
+    }
+    if (x==null || x=="") {
+      alert("project name must be filled out");
+      return false;
+    }
+
+    if (x.length > 10 ) {
+      alert("Project name must be not more than 10 fields");
+      return false;
+    }
+
+    var good_patt=new RegExp("^[a-z0-9]+$");
+    if (!good_patt.test(x)) {
+      alert("Project name must contain only lowercase letters and numbers");
+      return false;
+    }
+    return true;
+  }
+</script>
+
+                <form name="select_project_form" method="GET" action="project.brew" onsubmit="return validateForm()">
                    <input name="project" type="text" value="changeme" size="10" />
         '
 
