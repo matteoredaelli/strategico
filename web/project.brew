@@ -62,11 +62,6 @@
 
   if (!is.null(project.name)) {
 
-    b1 <- 'Project: __PROJECT_NAME__: see <a href="project-status.brew?project=__PROJECT_NAME__">status</a>'
-
-    b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
-    page.sections <- rbind(page.sections, data.frame(title="Status", body=b1))
-
     exists.csv <- Project.CSVFile.Exist(project.name) 
     exists.config <- Project.ConfigFile.Exist(project.name) 
     ##exists.tables <-DB.GetTableNameProjectItems(project.name) %in% strategico.tables
@@ -97,6 +92,10 @@
                    <input type="submit" name="import.csv" value="Import CSV"/><br />'
       page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b40))
     
+    b1 <- 'Project: __PROJECT_NAME__: see <a href="project-status.brew?project=__PROJECT_NAME__">status</a>'
+    b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
+    page.sections <- rbind(page.sections, data.frame(title="Status", body=b1))
+
       if (exists.config) {
         b60 <- '                   <input type="submit" name="run" value="Run"/><br />'
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
