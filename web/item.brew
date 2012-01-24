@@ -25,6 +25,8 @@
 
     id <- as.numeric(ifelse(is.null(GET$id), 1, GET$id))
     item.keys <- try(Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel))
+    ##item.keys <- ifelse(is.null(item.keys), c(), item.keys)
+    item.keys.string <- paste(item.keys, collapse="-", sep=",")
 
   ########################################################################################
   ##  Change Best model
@@ -80,7 +82,8 @@
     if(length(param) == 0L) param=""
  }
 
-  b1 <- paste('<form method="GET">', 
+  b1 <- paste(
+             '<form method="GET">', 
               BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
               BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4),
               BuildFormElement_value(project.name=project.name, default=value),
@@ -92,7 +95,8 @@
   ## TAB Run
   ###############################################################################################################
 
-  b20 <- paste(
+  b20 <- paste("Item Keys =",
+      item.keys.string,
                ##BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=60),
                '<textarea name="param" rows="6" cols="55">',
                param, '</textarea>',
