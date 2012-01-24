@@ -30,3 +30,4 @@ project.config$values=c('<%=paste(project.values, collapse="', '", sep="")%>')
 ## +++++++++++++++++++++++++++++++++++++++
 project.config$param$n.ahead=<%=max(1,n.ahead)%>
 project.config$param$naive.ifConstantLastValues=<%=max(2, period.freq)%>
+project.config$param$formula.right.lm='<%=ifelse(period.freq==1, "trend+trend2", "S*trend+S*trend2")%>'
