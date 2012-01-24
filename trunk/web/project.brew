@@ -112,9 +112,11 @@
 	b70 <- gsub("__LINKS__", paste(mylinks, collapse=",", sep=" "), b70)
 
 	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))
-        b80 <- paste('This step will export all results <a href=', 
-                     strategico.config$projects.url, '/', project.name, ' target="_blank">here</a>. ',
-                   '<input type="submit" name="export.csv" value="Export"/><br />', sep='')
+        b80 <- paste('Press button to export all results to CSV files.<br />',
+                     '<input type="submit" name="export.csv" value="Export"/>',
+                     '<br />After that you can <a href=', 
+                     strategico.config$projects.url, '/', project.name, ' target="_blank">download here</a> all CSV files. ',
+                     sep='')
         page.sections <- rbind(page.sections, data.frame(title="Export CSV", body=b80))
 
       } ## end exists.config
