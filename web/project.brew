@@ -112,7 +112,7 @@
 	b70 <- gsub("__LINKS__", paste(mylinks, collapse=",", sep=" "), b70)
 
 	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))
-        b80 <- paste('Press button to export all results to CSV files.<br />',
+        b80 <- paste('Press button to export project results to CSV files: ',
                      '<input type="submit" name="export.csv" value="Export"/>',
                      '<br />After that you can <a href=', 
                      strategico.config$projects.url, '/', project.name, ' target="_blank">download here</a> all CSV files. ',
@@ -121,7 +121,8 @@
 
       } ## end exists.config
 
-    b100 <- '                   <input type="submit" name="drop.project" value="Drop project"/><br />
+    b100 <- 'This step will delete this project (database tables and all files). Are you sure??
+                   <input type="submit" name="drop.project" value="Drop project"/><br />
                 </form>'
     page.sections <- rbind(page.sections, data.frame(title=paste("Drop", project.name), body=b100))
 
