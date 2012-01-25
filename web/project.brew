@@ -82,7 +82,7 @@
             
     if (exists.csv && exists.config) {
     
-        b60 <- 'Press run for starting forecasts job(s) for your project.<br />It can take from few seconds to hours:
+        b60 <- 'Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
                    <input type="submit" name="run" value="Run"/><br />'
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
 
