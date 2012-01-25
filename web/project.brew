@@ -10,27 +10,25 @@
   page.title <- " "
   page.sections	<- data.frame()
 
-  if (!is.null(project.name) && !is.null(POST$upload.file) && !is.null(FILES) && !is.null(FILES$project_file)) {
+  if (!is.null(project.name) && !is.null(POST$import.csv) && !is.null(FILES) && !is.null(FILES$project_file)) {
     destination.path <- Project.GetPath(project.name)
     logdebug(paste("Creating project folder", destination.path, "if it does not exists"))
     dir.create(destination.path, showWarnings = FALSE)
     Sys.chmod(destination.path, "777")
 
-    ## TODO
-    filename <- paste(project.name, file_ext(FILES$project_file$name), sep=".")
+    file.ext <- file_ext(FILES$project_file$name)
+    filename <- paste(project.name, file.ext, sep=".")
     ##filename <- paste(project.name, "csv", sep=".")
     destination.file <- file.path(destination.path, filename)
     file.copy(FILES$project_file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
+    
+    if (file.ext == 'csv') {
+      n.ahead <- ifelse(is.null(POST$nahead), 4, as.numeric(POST$nahead))
+      options <- paste("-a", n.ahead)
+      msg <- Strategico.ExecCommand(project.name, cmd="import.csv", options=options, mailto=POST$mailto, intern=TRUE)
+    }
   }
-
-  if (!is.null(project.name) && !is.null(POST$import.csv)) {
-    n.ahead <- ifelse(is.null(POST$nahead), 4, as.numeric(POST$nahead))
-    options <- paste("-a", n.ahead)
-
-    msg <- Strategico.ExecCommand(project.name, cmd="import.csv", options=options, mailto=POST$mailto, intern=TRUE)
-  }
-
 
   if (!is.null(project.name) && !is.null(POST$run) &&  DB.GetTableNameProjectItems(project.name) %in% strategico.tables) {
     options.base <- "--id.range "
@@ -66,7 +64,7 @@
     exists.config <- Project.ConfigFile.Exist(project.name) 
     ##exists.tables <-DB.GetTableNameProjectItems(project.name) %in% strategico.tables
 
-    b10 <- 'Project: __PROJECT_NAME__ <br />The csv file must have:
+    b10 <- 'The csv file must have:
           <ul>
            <li>column names KEY1, KEY2, ..., PERIOD, V1, ...</li>
            <li>columns separated by ;</li> 
@@ -74,41 +72,28 @@
          </ul><br />
        <form enctype="multipart/form-data" method="POST">
        <input name="project.name" type="hidden" value="__PROJECT_NAME__"	 size="10" /> 
-       <input type="file" name="project_file" />  <input type="submit" name="upload.file" value="Upload"/><br />'
+       File (csv or config): <input type="file" name="project_file" /><br /> 
+       Mail Address: <input name="mailto" type="text" value="" size="20" /><br />
+       Predicted points (n.ahead parameter): <input name="nahead" type="text" value="" size="1" /><br />
+       <input type="submit" name="import.csv" value="Import"/><br />'
 
     b10 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b10)
-    page.sections <- rbind(page.sections, data.frame(title="Upload CSV", body=b10))
+    page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b10))
             
-    if (exists.csv) {
-
-      b40 <- 'This step 
-        <ul>
-           <li>creates the project config file if it does not exist</li>
-           <li>creates the database tables</li>
-           <li>import CSV data to the database</li>
-        </ul>
-                   Mail Address: <input name="mailto" type="text" value="" size="20" /><br />
-                   Predicted points (n.ahead parameter): <input name="nahead" type="text" value="" size="1" /><br />
-                   <input type="submit" name="import.csv" value="Import CSV"/><br />'
-      page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b40))
+    if (exists.csv && exists.config) {
     
-    b1 <- '<a href="project-status.brew?project=__PROJECT_NAME__">Here</a> you can find some statistics about this project: database tables sizes and predictions distribution'
-    b1 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b1)
-    page.sections <- rbind(page.sections, data.frame(title="Status", body=b1))
-
-      if (exists.config) {
         b60 <- 'Press run for starting forecasts job(s) for your project.<br />It can take from few seconds to hours:
                    <input type="submit" name="run" value="Run"/><br />'
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
-      }
-      if (exists.config) {
 
         project.values <- Project.GetValues(project.name=name, project.config)
-
         mylinks <- paste('<a href="suspicious-items.brew?project=', project.name, '&value=', project.values, '">', project.values, '</a>', sep='')
 
-        b70 <- 'Options:  
-               <a href="items.brew?project=__PROJECT_NAME__">browser</a> results,  see suspicious items (__LINKS__)'
+        b70 <- 'Options:<ul>
+             <li>see <a href="project-status.brew?project=__PROJECT_NAME__">statistics</a></li>
+             <li><a href="items.brew?project=__PROJECT_NAME__">browser</a> results</li>
+             <li>suspicious items (__LINKS__)</li>
+            </ul>'
 	b70 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b70)
 	b70 <- gsub("__LINKS__", paste(mylinks, collapse=",", sep=" "), b70)
 
@@ -126,8 +111,6 @@
                    <input type="submit" name="drop.project" value="Drop project"/><br />
                 </form>'
     page.sections <- rbind(page.sections, data.frame(title=paste("Drop", project.name), body=b100))
-
-    } ## exists.csv
   }
   template.file <- file.path(GetWebTemplatesHome(), "page.brew")
   brew(template.file)
