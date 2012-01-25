@@ -25,9 +25,104 @@ project.config$period.freq=<%=period.freq%>
 project.config$keys=c('<%=paste(project.keys, collapse="', '", sep="")%>')
 project.config$values=c('<%=paste(project.values, collapse="', '", sep="")%>')
 
+## the following parameters are used by the eval funtion
+
 ## +++++++++++++++++++++++++++++++++++++++
-## default ltp params
+## try.models
 ## +++++++++++++++++++++++++++++++++++++++
+## models to fit for prediciton. possible models:
+## c('mean','trend','lm','es','arima','naive')
+
+project.config$param$try.models=<%=
+  ifelse(period.freq==1, 
+         "c('mean','trend','lm','es','naive')",
+         "c('mean','trend','lm','es','arima','naive')"
+  )%>
+
+## +++++++++++++++++++++++++++++++++++++++
+## n.ahead
+## +++++++++++++++++++++++++++++++++++++++
+## how many points will be predicted
 project.config$param$n.ahead=<%=max(1,n.ahead)%>
+
+
+project.config$param$range=c(-Inf,Inf)
+
+## +++++++++++++++++++++++++++++++++++++++
+## NA2value
+## +++++++++++++++++++++++++++++++++++++++
+## substitute NA2value to missing (NA) values 
+project.config$param$NA2value=0
+
+## +++++++++++++++++++++++++++++++++++++++
+## n.min
+## +++++++++++++++++++++++++++++++++++++++
+## minimum number of values to perform models
+## in try.models (naive if forced anyway)
+project.config$param$n.min=5
+
+## +++++++++++++++++++++++++++++++++++++++
+## naive.values
+## +++++++++++++++++++++++++++++++++++++++
+## possible values are:
+## -) last: the last value will be used for predictions
+## -) lastPeriod: the mean of the last period (2 semester, 
+##    12 month or so) will be used for predictions
+## -) a number to be forced as prediction.
+project.config$param$naive.values='lastPeriod'
+
+## +++++++++++++++++++++++++++++++++++++++
+## naive.ifConstantLastValues
+## +++++++++++++++++++++++++++++++++++++++
+## if yhe latest 'naive.ifConstantLastValues' historical data are constant
+## the naive model will be forces
+
 project.config$param$naive.ifConstantLastValues=<%=max(2, period.freq)%>
+
+## +++++++++++++++++++++++++++++++++++++++
+## logtransform
+## +++++++++++++++++++++++++++++++++++++++
+## locical: logtrasform data?
+project.config$param$logtransform=FALSE
+
+## +++++++++++++++++++++++++++++++++++++++
+## stepwise
+## +++++++++++++++++++++++++++++++++++++++
+## logical: performs stepwise selection of the best linear model?
+project.config$param$stepwise = TRUE
+
+## +++++++++++++++++++++++++++++++++++++++
+## formula.right.lm
+## +++++++++++++++++++++++++++++++++++++++
+## right part of the formula for linar model
 project.config$param$formula.right.lm='<%=ifelse(period.freq==1, "trend+trend2", "S*trend+S*trend2")%>'
+
+## +++++++++++++++++++++++++++++++++++++++
+## rule
+## +++++++++++++++++++++++++++++++++++++++
+## rule to select the best model. 
+## BestAIC and BestIC are the actual options.
+project.config$param$rule='BestAIC'
+
+## +++++++++++++++++++++++++++++++++++++++
+## rule.noMaxCVOver, rule.noMaxJumpOver
+## +++++++++++++++++++++++++++++++++++++++
+## exclude a candidate model if it has
+## coefficient of variance (CV) or
+## ratio among predicted and observed data (Jump)
+## greater or equal to :
+project.config$param$rule.noMaxCVOver=2
+project.config$param$rule.noMaxJumpOver=1000000
+
+## +++++++++++++++++++++++++++++++++++++++
+## negTo0
+## +++++++++++++++++++++++++++++++++++++++
+## if TRUE, the negative predicted data will be converted to 0
+project.config$param$negTo0=TRUE
+
+## +++++++++++++++++++++++++++++++++++++++
+## toInteger
+## +++++++++++++++++++++++++++++++++++++++
+## if TRUE, the historical data with decimals will be converted to integers
+project.config$param$toInteger=TRUE
+
