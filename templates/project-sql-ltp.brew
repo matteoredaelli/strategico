@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS <%=project.name%>_data_raw (
   <%
     for (key in project.keys) {
   %>
-  <%=key%> varchar(20) default NULL,
+  <%=key%> varchar(40) default NULL,
   <% } %>
   PERIOD varchar(20) default NULL,
   <%
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS <%=project.name%>_items (
   <%
     for (key in project.keys) {
   %>
-  <%=key%> varchar(20) default NULL,
+  <%=key%> varchar(40) default NULL,
   <% } %>
   PRIMARY KEY  (item_id),
   UNIQUE KEY (KEY1
