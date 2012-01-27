@@ -89,7 +89,7 @@
         b60 <- '<form  method="POST">
    <textarea name="param" rows="6" cols="60">__PARAM__</textarea><br />
                    Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
-                   <input type="submit" name="run" value="Run"/><br />'
+                   <input type="submit" name="run" value="Run"/><br /></form>'
 
         b60 <- gsub("__PARAM__", Param.ToString(project.config$param), b60)
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
@@ -107,7 +107,7 @@
 
 	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))
         b80 <- paste('Press button to export project results to CSV files: ',
-                     '<input type="submit" name="export.csv" value="Export"/>',
+                     '<form  method="POST"><input type="submit" name="export.csv" value="Export"/></form>',
                      '<br />After that you can <a href=', 
                      strategico.config$projects.url, '/', project.name, ' target="_blank">download here</a> all CSV files. ',
                      sep='')
@@ -116,6 +116,7 @@
       } ## end exists.config
 
     b100 <- 'This step will delete this project (database tables and all files). Are you sure??
+                <form  method="POST">
                    <input type="submit" name="drop.project" value="Drop project"/><br />
                 </form>'
     page.sections <- rbind(page.sections, data.frame(title=paste("Drop", project.name), body=b100))
