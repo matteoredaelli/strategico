@@ -20,7 +20,7 @@
 
 Project.CreateDB <- function(project.name, project.config=NULL, db.channel=db.channel) {
   sql.file <- Project.BuildSQLscript(project.name=project.name, project.config=project.config)
-  a <- read.table(sql.file, sep="$")
+  a <- read.table(sql.file, sep="$", quote="|||")
   sql <- paste(a[,1], collapse=" ")
   mysql <- strsplit(sql, ";")
   sapply(mysql, function(s) DB.RunSQLQuery(sql_statement=s, db.channel=db.channel))
@@ -138,6 +138,8 @@ Project.DropDB <- function(project.name, project.config=NULL, db.channel) {
 
   views <- Project.GetViewNames(project.name=project.name, project.config=project.config)
   lapply(views, function(x) DB.DropView(x,db.channel))
+  sql <- paste("delete from strategico_projects where name = '", project.name, "'", sep="")
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
 }
 
 Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
