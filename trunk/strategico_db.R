@@ -273,22 +273,21 @@ Project.DBExportViews2Csv <- function(project.name, project.config=NULL, db.chan
          )
 }
 
-Project.FixStructure <- function(project.name, values, db.channel) {
-  ## TODO: generalize tablenames..
-  ## Add unique index on keys in project_items table: needed for speed and consistency
-  sql <- c("alter table sample_items MODIFY id integer",
-           "alter table sample_results_V1 MODIFY item_id integer",
-           "alter table sample_results_V1 MODIFY KEY1 varchar(40)",
-           "alter table sample_results_V2 MODIFY item_id integer",
-           "alter table sample_results_V1 MODIFY id integer",
-           "alter table sample_results_V2 MODIFY id integer",
-           "alter table sample_summary_V1 MODIFY id integer",
-           "alter table sample_summary_V2 MODIFY id integer"
-  ## ALTER TABLE europool_dev_items ADD UNIQUE ( KEY1, KEY2, KEY3, KEY4);
-  ## ALTER TABLE europool_dev_results_V1 ADD INDEX ( item_id ) ;
-)
-  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)         
+Project.DB.AddOrUpdate <- function(project.name, db.channel, config="", params="") {
+  logdebug(paste("deleting record name=", project.name, "from strategico_projects table"))
+  sql <- "delete from strategico_projects where name='__PROJECT_NAME__'"
+  sql <- gsub("__PROJECT_NAME__", project.name, sql)
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+
+  logdebug(paste("adding record name=", project.name, "from strategico_projects table"))
+  sql <- 'insert into strategico_projects(name, config, params) values("__PROJECT_NAME__", "__CONFIG__", "__PARAMS__")'
+  logwarn(paste("config=", config))
+  sql <- gsub("__PROJECT_NAME__", project.name, sql)
+  sql <- gsub("__PARAMS__", params, sql)
+  sql <- gsub("__CONFIG__", config, sql)
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
 }
+
  
 Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {

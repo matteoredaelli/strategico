@@ -5,12 +5,6 @@ project.config$project.name='<%=project.name%>'
 %>
 project.config$mailto='<%=mailto%>'
 <%}%>
-## +++++++++++++++++++++++++++++++++++++++
-## info for import / export CSV
-## +++++++++++++++++++++++++++++++++++++++
-project.config$csv.sep=';'
-project.config$csv.dec=','
-project.config$csv.quote='\"'
 
 ## +++++++++++++++++++++++++++++++++++++++
 ## period

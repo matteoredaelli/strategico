@@ -1,3 +1,12 @@
+CREATE TABLE IF NOT EXISTS strategico_projects (
+  name varchar(15) NOT NULL,
+  owner varchar(30) default NULL,
+  PRIMARY KEY  (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE FROM strategico_projects WHERE name = '<%=project.name%>';
+INSERT INTO strategico_projects(name) VALUES('<%=project.name%>');
+
 DROP TABLE IF EXISTS <%=project.name%>_data_raw;
 CREATE TABLE IF NOT EXISTS <%=project.name%>_data_raw (
   <%
