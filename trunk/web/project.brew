@@ -31,12 +31,16 @@
   }
 
   if (!is.null(project.name) && !is.null(POST$run) &&  DB.GetTableNameProjectItems(project.name) %in% strategico.tables) {
-    options.base <- "--id.range "
+
+    options.base <- paste(" --eval.param=\"", POST$param, "\"", sep="")
+    options.base <- paste(options.base, "--id.range ")
+
     ## running parallel jobs
     maxid <- Project.GetMaxID(project.name, db.channel=db.channel)
     if (maxid == 0) {
        msg <- "no items found, cannot run..."
-    } else {
+    } else {    
+  ##
       id.step <- as.integer(maxid / strategico.config$command.eval.jobs) + 1
       start <- 1
       msg <- ""
@@ -75,15 +79,19 @@
        File (csv or config): <input type="file" name="project_file" /><br /> 
        Mail Address: <input name="mailto" type="text" value="" size="20" /><br />
        Predicted points (n.ahead parameter): <input name="nahead" type="text" value="" size="1" /><br />
-       <input type="submit" name="import.csv" value="Import"/><br />'
+       <input type="submit" name="import.csv" value="Import"/></form><br />'
 
     b10 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b10)
     page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b10))
             
     if (exists.csv && exists.config) {
     
-        b60 <- 'Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
+        b60 <- '<form  method="POST">
+   <textarea name="param" rows="6" cols="60">__PARAM__</textarea><br />
+                   Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
                    <input type="submit" name="run" value="Run"/><br />'
+
+        b60 <- gsub("__PARAM__", Param.ToString(project.config$param), b60)
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
 
         project.values <- Project.GetValues(project.name=name, project.config)

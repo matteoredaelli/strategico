@@ -270,7 +270,7 @@ Param.MergeWithDefault <- function(project.name=NULL, project.config=NULL, param
 Param.ToString <- function(param) {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
-  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=";")))
+  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse="; ")))
 }
 
 SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {
