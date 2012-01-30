@@ -1,0 +1,198 @@
+<%
+## -*- mode: R -*-
+
+  project.name <- GET$project
+
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+  MySource("strategico_web.R")
+
+  item.models <- c()
+  item.results <- data.frame()
+  item.summary <- data.frame()
+  item.summar.models <- data.frame()
+ 
+  page.title <- paste("<br />Item", GET$id)
+  page.sections	<- data.frame()
+  
+  if (!is.null(project.name) && !is.null(project.config) && !is.null(GET$id)) {
+    param <- ifelse(is.null(GET$param), "", GET$param)
+    value <- ifelse(is.null(GET$value), "V1", GET$value)
+    str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
+    skip.models <- unlist(strsplit(str.skip.models, ","))
+  
+  ## settings is or item.keys depending on which variables were passed in GET input
+
+    id <- as.numeric(ifelse(is.null(GET$id), 1, GET$id))
+    item.keys <- try(Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel))
+    ##item.keys <- ifelse(is.null(item.keys), c(), item.keys)
+    item.keys.string <- paste(item.keys, collapse="-", sep=",")
+
+  ########################################################################################
+  ##  Change Best model
+  ########################################################################################
+  if (!is.null(GET$setmodel) && !is.null(GET$model)) {
+    Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
+                        db.channel=db.channel, model=GET$model)
+  }
+
+  ########################################################################################
+  ##  Run
+  ########################################################################################
+  if (!is.null(GET$eval) ) {
+    param.r <- Param.EvalString(param)
+    
+  ##cmd <- paste(strategico.command, " --cmd eval.items --id.list=", id, " -v ", value, " --eval.param=\"", param, "\"", sep="")
+  ##  rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
+  ##  cat(rc)
+
+    Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
+           db.channel=db.channel, param=param.r)
+  }
+
+  ########################################################################################
+  ##  Retriving all results
+  ########################################################################################
+
+  item.results <- Item.DB.GetNormalizedDataAndResults(project.name=project.name,
+                                                      id=id, db.channel=db.channel,
+                                                      value=value, only.best=FALSE)
+
+  if (!is.null(item.results) && nrow(item.results) > 0) {
+    item.results$item_id <- NULL
+    item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+    item.results.pivot <- data.frame(item.results.pivot)
+    rownames(item.results.pivot) <- NULL
+    item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
+    item.results.best$item_id <- NULL
+
+    item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
+    item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+    item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+    if (!is.null(item.summary) && nrow(item.summary) > 0) {
+      item.models <- unique(item.summary.models$model)
+      best.model <- as.character(item.summary[1,]$BestModel)
+      suggested.model <- as.character(item.summary[1,]$SuggestedModel)
+      param <- as.character(item.summary[1,]$Parameters)
+    } else {
+      best.model <- item.models <- suggested.model <- NULL
+      param=""
+    }
+    if(length(param) == 0L) param=""
+ }
+
+  b1 <- paste(
+             '<form method="GET">', 
+              BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
+              BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4),
+              BuildFormElement_value(project.name=project.name, default=value),
+              '<input type="submit" name="show" value="Search"/><br />')
+
+  page.sections <- data.frame(title="Search item", body=b1)
+
+  ###############################################################################################################
+  ## TAB Run
+  ###############################################################################################################
+
+  b20 <- paste("Item Keys =",
+      item.keys.string,
+               ##BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=60),
+               '<textarea name="param" rows="6" cols="55">',
+               param, '</textarea>',
+               '<input type="submit" name="eval" value="Run" />')
+  page.sections <- rbind(page.sections, data.frame(title="Run", body=b20))
+
+  ###############################################################################################################
+  ## TAB Set Best Model
+  ###############################################################################################################
+  if (!is.null(item.results) && nrow(item.results) > 0) {
+  
+
+  if(!is.null(item.models)  && length(item.models) > 1) {
+    b100 <- ""
+    for (model in item.models) {
+      b100 <- paste(b100, 
+                    BuildHtmlElement_input(name="model", default=model, type="radio"),
+                         model, " ", sep="")
+    }
+    b100 <- paste(b100, '
+                    <input type="submit" name="setmodel" value="Set best model" />
+                </form>')
+    page.sections <- rbind(page.sections, data.frame(title="Set Best", body=b100))
+  }
+
+  ###############################################################################################################
+  ## TAB Summary
+  ###############################################################################################################
+
+  if(!is.null(item.summary.models) && is.data.frame(item.summary.models) && nrow(item.summary.models) > 0) {
+
+      i.summary.models <- item.summary.models
+      i.summary.models$item_id <- NULL
+      rownames(i.summary.models) <- NULL
+      ## print(xtable(i.summary.models), type="html")
+      ##T1 <- gvisTable(i.summary.models, options=list(width=700, height=250))      
+      ##b_T1 <- paste(capture.output(cat(T1$html$chart)), collapse="\n")
+      b_T1 <- paste(capture.output(print(xtable(i.summary.models), type="html")), collapse="\n")
+    
+      i.summary <- subset(item.summary, select=c(-item_id, -Parameters))
+      rownames(i.summary) <- NULL
+      ##summary.new <- data.frame(f=colnames(i.summary), as.data.frame(t(i.summary)))
+      b_T2 <- paste(capture.output(print(xtable(t(i.summary)), type="html")), collapse="\n")
+      ##T2 <- gvisTable(summary.new, options=list(width=700, height=510)) 
+      ##b_T2 <- paste(capture.output(cat(T2$html$chart)), collapse="\n")
+
+      page.sections <- rbind(page.sections, data.frame(title="Summary", body=paste(b_T1, b_T2, sep="<br />")))
+  }
+
+
+  if(!is.null(item.results) && is.data.frame(item.results) && nrow(item.results) > 0) {
+
+  ###############################################################################################################
+  ## TAB Show best Model
+  ###############################################################################################################
+
+    BM <- gvisLineChart(data=subset(item.results, model== best.model, select=c("PERIOD", "V")))
+    b_BM <- paste(capture.output(cat(BM$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title=paste("Best Model", best.model), body=b_BM))
+
+
+  ###############################################################################################################
+  ## TAB Show All Models
+  ###############################################################################################################
+
+    body <- paste('<a href=item_motion_chart.brew?project=', project.name, '&id=',id, '>motion chart</a>', sep="")
+    AM <- gvisLineChart(data=item.results.pivot)
+    b_AM <- paste(capture.output(cat(AM$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title="All Models", body=paste(body, b_AM)))
+
+  ###############################################################################################################
+  ## TAB Results
+  ###############################################################################################################
+
+    b_TR <- paste(capture.output(print(xtable(item.results.pivot), type="html")), collapse="\n")
+    ##TR <- gvisTable(item.results.pivot, options=list(width=700, height=500))
+    ##b_TR <- paste(capture.output(cat(TR$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title="Result table", body=b_TR))
+
+  } ## item results not null
+
+  ###############################################################################################################
+  ## TAB Residuals
+  ###############################################################################################################
+
+  if ((!is.null(item.residuals)) && is.data.frame(item.residuals) && nrow(item.residuals) > 0) { 
+    item.residuals$item_id <- NULL
+    item.residuals.pivot <- cast(item.residuals, PERIOD ~ model, df=TRUE, value="V")
+    item.residuals.pivot <- data.frame(item.residuals.pivot)
+    ML <- gvisLineChart(data=item.residuals.pivot)
+    b_ML <- paste(capture.output(cat(ML$html$chart)), collapse="\n")
+    page.sections <- rbind(page.sections, data.frame(title="Residuals", body=b_ML))
+  }
+
+  }
+ } # if 
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
+%>

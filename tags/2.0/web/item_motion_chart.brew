@@ -1,0 +1,69 @@
+<!-- -*- mode: R -*- -->
+  <!--
+  ## This program is fre esoftware: you can redistribute it and/or modify
+  ## it under the terms of the GNU General Public License as published by
+  ## the Free Software Foundation, either version 3 of the License, or
+  ## any later version.
+  ##
+  ## This program is distributed in the hope that it will be useful,
+  ## but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ## GNU General Public License for more details.
+  ##
+  ## You should have received a copy of the GNU General Public License
+  ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+  
+  <%
+setContentType("text/html")
+RApacheOutputErrors(FALSE)
+options(hverbose=FALSE,verbose=FALSE)
+
+%>
+  
+<html>
+  <title>Strategico - item - chart</title>
+<body>
+
+  
+  <%
+  
+suppressPackageStartupMessages(library(googleVis))
+
+strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+source(file.path(strategico.home, "strategico_util.R"))
+
+project.name <- ifelse(is.null(GET$project), "sample", GET$project)
+id <- ifelse(is.null(GET$id), 1, as.numeric(GET$id))
+value <- ifelse(is.null(GET$value), "V1", GET$value)
+
+db.channel <- DB.Connect()
+item.results <- Item.DB.GetNormalizedDataAndResults(project.name=project.name,
+                                                      id=id, db.channel=db.channel,
+                                                      value=value, only.best=FALSE)
+
+DB.Close(db.channel)
+
+  if ((!is.null(item.results)) && is.data.frame(item.results) && nrow(item.results) > 0) {
+
+  ##item.all <-  cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+  item.all <- data.frame(item.results)
+  item.all$item_id <- NULL
+  item.all$PERIOD <- as.numeric(sub("-","", item.all$PERIOD))
+  rownames(item.all) <- NULL
+
+  M <- gvisMotionChart(data=item.all, idvar="model",
+                       timevar="PERIOD", chartid="item",
+                       options=list(
+                         ##gvis.editor="Editor",
+                         legend="bottom",
+                         width=800,
+                         height=600
+                         )
+                       )
+%>
+<%= M$html$chart %>
+  <% } %>
+  </body>
+  </html>
+

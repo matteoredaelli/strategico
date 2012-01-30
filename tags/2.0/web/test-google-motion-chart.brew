@@ -1,0 +1,16 @@
+  
+  <%
+setContentType("text/html")
+RApacheOutputErrors(TRUE)
+options(hverbose=FALSE,verbose=FALSE)
+
+%>
+  
+<html>
+<body>
+<% library(googleVis) %>
+<% M <- gvisMotionChart(Fruits, idvar="Fruit",
+timevar="Year") %>
+<%= M$html$chart %>
+</body>
+</html>
