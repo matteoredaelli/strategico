@@ -400,8 +400,13 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
 
   logwarn( paste("Loading data from file", filename))
   data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
-  logwarn( "CSV file header:")
   csv.header <- colnames(data)
+
+  ## converting colnames to uppercase 
+  csv.header <- toupper(csv.header)
+  colnames(data) <- csv.header
+
+  logwarn( "CSV file header:")
   logwarn( paste(csv.header, collapse=", ", sep=" "))
   
   project.config.file <- Project.GetConfigFullPathFilename(project.name)
