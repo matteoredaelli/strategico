@@ -51,9 +51,16 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
     return(NULL)
   } 
 
-  header <- colnames(data)
+  csv.header <- colnames(data)
 
-  period.field <- grep("^PERIOD$", header)
+  ## converting colnames to uppercase 
+  csv.header <- toupper(csv.header)
+  colnames(data) <- csv.header
+
+  logwarn( "CSV file header:")
+  logwarn( paste(csv.header, collapse=", ", sep=" "))
+  
+  period.field <- grep("^PERIOD$", csv.header)
   if (length(period.field) == 0) {
     logerror( paste("No PERIOD field found, no config file will be created for project", project.name))
     return(NULL)
@@ -67,7 +74,7 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
 
   ## TODO: also rows with NA in one of KEYx column should be deleted
 
-  project.keys <- grep("^KEY\\d$", header, value=TRUE)
+  project.keys <- grep("^KEY\\d$", csv.header, value=TRUE)
   if (length(project.keys) == 0) {
     logerror( paste("No KEY1,.. fields found, no config file will be created for project", project.name))
     return(NULL)
@@ -80,7 +87,7 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
   }
   logwarn( paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
   
-  project.values <- grep("^V\\d$", header, value=TRUE)
+  project.values <- grep("^V\\d$", csv.header, value=TRUE)
   if (length(project.values) == 0) {
     logerror( paste("No V1,.. fields found, no config file will be created for project", project.name))
     return(NULL)
@@ -408,15 +415,6 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
 
   logwarn( paste("Loading data from file", filename))
   data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
-  csv.header <- colnames(data)
-
-  ## converting colnames to uppercase 
-  csv.header <- toupper(csv.header)
-  colnames(data) <- csv.header
-
-  logwarn( "CSV file header:")
-  logwarn( paste(csv.header, collapse=", ", sep=" "))
-  
   project.config.file <- Project.GetConfigFullPathFilename(project.name)
   logwarn( paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
   data <- Project.NormalizeInputDataAndCreateProjectConfig(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
