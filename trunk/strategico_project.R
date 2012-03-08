@@ -86,6 +86,11 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
     return(NULL)
   }
   logwarn( paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
+
+  logwarn("Removing strange characters from KEYs columns")
+  for (k in project.keys) {
+    data[,k] = gsub("[/'\"\\]", "", data[,k])
+  }
   
   project.values <- grep("^V\\d$", csv.header, value=TRUE)
   if (length(project.values) == 0) {
