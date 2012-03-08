@@ -39,16 +39,16 @@ Project.CreateProjectConfig <- function(project.name, mailto=NULL,
 }
 
 
-Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n.ahead) {
+Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data, mailto, n.ahead) {
   
   if (is.null(data) ) {
     logerror( paste("No data found, no config file will be created for project", project.name))
-    return(1)
+    return(NULL)
   }
   
   if (nrow(data) < 2) {
     logerror( paste("No rows found, no config file will be created for project", project.name))
-    return(2)
+    return(NULL)
   } 
 
   header <- colnames(data)
@@ -56,32 +56,40 @@ Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n
   period.field <- grep("^PERIOD$", header)
   if (length(period.field) == 0) {
     logerror( paste("No PERIOD field found, no config file will be created for project", project.name))
-    return(5)
+    return(NULL)
   }
   
+  logwarn("Removing rows with PERIOD not like [0-9]+-[0-9]+")
+  ## removing rows with PERIOD NOT LIKE "[0-9]+-[0-9]+"
+  ## sometimes the export from excel generates teh last row like ;;;;
+  ## and a NA value apperas in the period column
+  data <- data[grep("[0-9]+-[0-9]+", data$PERIOD),]
+
+  ## TODO: also rows with NA in one of KEYx column should be deleted
+
   project.keys <- grep("^KEY\\d$", header, value=TRUE)
   if (length(project.keys) == 0) {
     logerror( paste("No KEY1,.. fields found, no config file will be created for project", project.name))
-    return(10)
+    return(NULL)
   }
 
   key.numbers <- sort(as.numeric(gsub("KEY","", project.keys)))
   if (!all(1:length(key.numbers) == key.numbers)) { 
     logerror( paste("Missing/Invalid KEYx field, no config file will be created for project", project.name))
-    return(11)
+    return(NULL)
   }
   logwarn( paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
   
   project.values <- grep("^V\\d$", header, value=TRUE)
   if (length(project.values) == 0) {
     logerror( paste("No V1,.. fields found, no config file will be created for project", project.name))
-    return(20)
+    return(NULL)
   }
 
   value.numbers <- sort(as.numeric(gsub("V","", project.values)))
   if (!all(1:length(value.numbers) == value.numbers)) { 
     logerror( paste("Missing/Invalid Vx field, no config file will be created for project", project.name))
-    return(21)
+    return(NULL)
   }
   logwarn( paste("Project Values are:", paste(project.values, collapse=", ", sep= "")))
   
@@ -96,13 +104,13 @@ Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n
 
   if (period.start.string >= period.end.string) { 
     logerror( paste("invalid periods: period.start must be lower than period.end", project.name))
-    return(22)
+    return(NULL)
   }
   
   period.freq <- as.integer(max(sapply(strsplit(as.character(data$PERIOD), "-"), function(x) as.integer(x[2]))))
   if (period.freq < 1) { 
     logerror( paste("invalid periods: period.freq (", period.freq, ") must be >= 1", project.name))
-    return(22)
+    return(NULL)
   }
   logwarn( paste("period.freq =", period.freq))
   
@@ -110,7 +118,7 @@ Project.CreateProjectConfigFromCSVData <- function(project.name, data, mailto, n
                               period.start=period.start, period.end=period.end, period.freq=period.freq,
                               n.ahead=n.ahead,
                               project.keys=project.keys, project.values=project.values)
- 
+  data
 }
 
 Project.BuildSQLscript <- function(project.name, project.config=NULL) {
@@ -410,18 +418,15 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
   logwarn( paste(csv.header, collapse=", ", sep=" "))
   
   project.config.file <- Project.GetConfigFullPathFilename(project.name)
-  if (file.exists(project.config.file)) {
-    logwarn( paste("Config file", project.config.file, "already exists: I'll not create it"))
-  } else {
-    logwarn( paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
-    result <- Project.CreateProjectConfigFromCSVData(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
-    if (result != 0) {
-      loginfo( "Something went wrong: not loaing data to DB")
-      return (result)
-    }
-    ## reloading the new project config file
-    project.config <- Project.GetConfig(project.name=project.name)
+  logwarn( paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
+  data <- Project.NormalizeInputDataAndCreateProjectConfig(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
+  if (is.null(data)) {
+    loginfo( "Something went wrong: not loaing data to DB")
+    return (data)
   }
+
+  ## reloading the new project config file
+  project.config <- Project.GetConfig(project.name=project.name)
   
   ## creating DB tables
   Project.CreateDB(project.name=project.name,
