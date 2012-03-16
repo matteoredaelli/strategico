@@ -33,9 +33,9 @@
       return false;
     }
 
-    var good_patt=new RegExp("^[a-z0-9]+$");
+    var good_patt=new RegExp("^[a-z][a-z0-9]*$");
     if (!good_patt.test(x)) {
-      alert("Project name must contain only lowercase letters and numbers");
+      alert("Project name must contain only lowercase letters and numbers. The first character must be a letter");
       return false;
     }
     return true;
