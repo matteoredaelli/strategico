@@ -23,6 +23,12 @@
     file.copy(FILES$project_file$tmp_name, destination.file, overwrite=TRUE)
     Sys.chmod(destination.file, "777")
     
+    if (file.ext == 'zip') {
+      unzip(destination.file, exdir = destination.path)
+      ## if the csv file exists (was contained in the zip file and then unzipped)
+      if (Project.CSVFile.Exist(project.name))
+        file.ext = 'csv'
+    }
     if (file.ext == 'csv') {
       n.ahead <- ifelse(is.null(POST$nahead), 4, as.numeric(POST$nahead))
       options <- paste("-a", n.ahead)
