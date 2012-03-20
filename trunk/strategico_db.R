@@ -287,34 +287,3 @@ Project.DB.AddOrUpdate <- function(project.name, db.channel, config="", params="
   sql <- gsub("__CONFIG__", config, sql)
   DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
 }
-
- 
-Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
-  if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
-  }
-
-  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
-  rows <- unlist(lapply(tables, function(x) DB.GetTableSize(x,db.channel)))
-  
-  stats <- as.list(rows)
-  names(stats) <- tables
-
-  t.items <- DB.GetTableNameProjectItems(project.name)
-  t.data.raw <- DB.GetTableNameProjectData(project.name)
-  sql <- "SELECT min(_V_) _V__min, max(_V_) _V__max, avg(_V_) _V__mean, sum(_V_) _V__sum FROM __TABLE_DATA_RAW__"
-  sql <- gsub("__TABLE_DATA_RAW__", t.data.raw, sql)
-  for (value in GetValueNames(project.config$values)) {
-    ## adding % of predictions
-    t.sum <- DB.GetTableNameSummary(project.name, value)
-    stats[[paste("perc_predictions", value, sep= "_")]] <- 0
-    try(stats[[paste("perc_predictions", value, sep= "_")]] <- stats[[t.sum]] / stats[[t.items]] * 100)
-    sql.v <- gsub("_V_", value, sql)
-    records <- try(DB.RunSQLQuery(sql_statement=sql.v, db.channel=db.channel))
-    cols <- colnames(records)
-    if (nrow(records) == 1)
-      for (x in cols)
-         stats[[x]] <- records[1,x]
-  }
-  stats
-}
