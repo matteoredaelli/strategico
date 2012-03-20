@@ -339,24 +339,63 @@ Project.GetPath <- function(project.name, projects.home = strategico.config$proj
 
 Project.GetStatistics <-function(project.name, project.config=NULL, db.channel) {
   
-  stats.rdata <- Project.GetStatisticsRdata(project.name=project.name, project.config=project.config)
+  stats.rdata <- Project.GetStatisticsProjectData(project.name=project.name, project.config=project.config, db.channel=db.channel)
   stats.db <- Project.GetStatisticsDB(project.name=project.name, project.config=project.config, db.channel=db.channel)
 
-  stats <- list(fs=stats.rdata,
+  stats <- list(csv=stats.rdata,
                 db=stats.db
                 )
   stats
 }
   
-Project.GetStatisticsRdata <-function(project.name, project.config=NULL) {
-  if (is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name=project.name)
+Project.GetStatisticsProjectData <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
   }
+
+  t.items <- DB.GetTableNameProjectItems(project.name)
+  t.data.raw <- DB.GetTableNameProjectData(project.name)
+
+  tables <- c(t.items, t.data.raw)
+  rows <- unlist(lapply(tables, function(x) DB.GetTableSize(x,db.channel)))
   
-  stats <- list(
-                keys=paste(project.config$keys, collapse=","),
-                values=paste(project.config$values, collapse=",")
-                )
+  stats <- as.list(rows)
+  names(stats) <- tables
+
+  sql <- "SELECT min(_V_) _V__min, max(_V_) _V__max, avg(_V_) _V__mean, sum(_V_) _V__sum FROM __TABLE_DATA_RAW__"
+  sql <- gsub("__TABLE_DATA_RAW__", t.data.raw, sql)
+  for (value in GetValueNames(project.config$values)) {
+    sql.v <- gsub("_V_", value, sql)
+    records <- try(DB.RunSQLQuery(sql_statement=sql.v, db.channel=db.channel))
+    cols <- colnames(records)
+    if (nrow(records) == 1)
+      for (x in cols)
+         stats[[x]] <- records[1,x]
+  }
+  stats$keys <- paste(project.config$keys, collapse=",")
+  stats$values <- paste(project.config$values, collapse=",")
+  stats
+}
+
+Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
+  if(is.null(project.config)) {
+    project.config <- Project.GetConfig(project.name)
+  }
+
+  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
+  rows <- unlist(lapply(tables, function(x) DB.GetTableSize(x,db.channel)))
+  
+  stats <- as.list(rows)
+  names(stats) <- tables
+
+  t.items <- DB.GetTableNameProjectItems(project.name)
+  sql <- "SELECT min(_V_) _V__min, max(_V_) _V__max, avg(_V_) _V__mean, sum(_V_) _V__sum FROM __TABLE_DATA_RAW__"
+  for (value in GetValueNames(project.config$values)) {
+    ## adding % of predictions
+    t.sum <- DB.GetTableNameSummary(project.name, value)
+    stats[[paste("perc_predictions", value, sep= "_")]] <- 0
+    try(stats[[paste("perc_predictions", value, sep= "_")]] <- stats[[t.sum]] / stats[[t.items]] * 100)
+  }
   stats
 }
 

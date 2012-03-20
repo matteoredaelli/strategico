@@ -92,11 +92,14 @@
             
     if (exists.csv && exists.config) {
     
-        b60 <- '<form  method="POST">
+        b60 <- 'See (csv) imported data <a href="project-status.brew?project=__PROJECT_NAME__&stats=csv">statistics</a> <br />
+
+    <form  method="POST">
    <textarea name="param" rows="6" cols="60">__PARAM__</textarea><br />
                    Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
                    <input type="submit" name="run" value="Run"/><br /></form>'
 
+	b60 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b60)
         b60 <- gsub("__PARAM__", Param.ToString(project.config$param), b60)
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
 

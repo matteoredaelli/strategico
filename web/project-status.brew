@@ -13,7 +13,12 @@
   page.sections	<- data.frame()
 
   if (!is.null(project.name) && !is.null(project.config)) {
-     stats <- Project.GetStatisticsDB(project.name, project.config=project.config, db.channel)
+     GET$stats <- ifelse(is.null(GET$stats), "run", GET$stats ) 
+     if (GET$stats == "run")
+       stats <- Project.GetStatisticsDB(project.name, project.config=project.config, db.channel)
+     else
+       stats <- Project.GetStatisticsProjectData(project.name, project.config=project.config, db.channel)
+
      b1 <- paste(capture.output(print(xtable(t(as.data.frame(stats))), type="html")), collapse="\n")
      page.sections <- data.frame(title="Database", body=b1)
 
