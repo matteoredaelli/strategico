@@ -28,9 +28,9 @@ Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=
     values <- GetValueNames(project.config=project.config)
 
   for (id in id.list) {
-    Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
+    try(Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
              period.start=period.start, period.end=period.end, 
-             project.config=project.config, db.channel=db.channel)
+             project.config=project.config, db.channel=db.channel))
   }
 }
 
@@ -74,8 +74,8 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
                          param=NULL, project.config, db.channel) {
   loginfo( "++++++++++++++++++++++++Item.EvalData ++++++++++++++++++++++++")
   logwarn( paste("Project=", project.name, " Loading item ID=", id,
-                     " KEYS=", paste(keys,collapse=","), " ",
-                     value, "=", project.config$values[value],
+                     " VALUE=",
+                     value, 
                      sep=""))
 
   if (!is.value(value, project.config=project.config)) {
