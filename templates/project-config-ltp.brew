@@ -72,7 +72,8 @@ project.config$param$naive.values='lastPeriod'
 ## the naive model will be forces
 
 ##project.config$param$naive.ifConstantLastValues=<%=max(2, period.freq)%>
-project.config$param$naive.ifConstantLastValues=<%=period.freq%>
+project.config$param$naive.ifConstantLastValues=<%=max(4, period.freq)%>
+project.config$param$naive.ifConstant0LastValues=<%=period.freq%>
 
 ## +++++++++++++++++++++++++++++++++++++++
 ## logtransform

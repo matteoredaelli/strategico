@@ -34,7 +34,8 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,
                logtransform=param$logtransform, negTo0=param$negTo0,
                naive.values=param$naive.values,
-               naive.ifConstantLastValues=param$naive.ifConstantLastValues)
+               naive.ifConstantLastValues=param$naive.ifConstantLastValues,
+               naive.ifConstant0LastValues=param$naive.ifConstant0LastValues)
 
   models.names <- ltp.GetModels("name")
 
