@@ -2,14 +2,17 @@
               <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden") %>
               <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4) %>
               <%=BuildFormElement_value(project.name=project.name, default=value) %>
+                  <br />
               <input type="submit" name="show" value="Search by ID"/><br />
               </form><br />
 
 
                 <form method="GET" >
                   <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel)%>
+                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel, sep="<br />")%>
+                  <br />
                   <%=BuildFormElement_value(project.name=project.name, default=value)%>
+                  <br />
                  <input type="submit" value="Search by Key" />
                 </form>
 <% if (!is.null(id)) { %>
