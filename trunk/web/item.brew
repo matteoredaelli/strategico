@@ -26,7 +26,7 @@
     id <- as.numeric(ifelse(is.null(GET$id), 1, GET$id))
     item.keys <- try(Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel))
     ##item.keys <- ifelse(is.null(item.keys), c(), item.keys)
-    item.keys.string <- paste(item.keys, collapse="-", sep=",")
+    item.keys.string <- paste(item.keys, collapse="<br />", sep=",")
 
   ########################################################################################
   ##  Change Best model
@@ -95,7 +95,7 @@
   ## TAB Run
   ###############################################################################################################
 
-  b20 <- paste("Item Keys =",
+  b20 <- paste("Item:<br />",
       item.keys.string,
                ##BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=60),
                '<textarea name="param" rows="6" cols="55">',
