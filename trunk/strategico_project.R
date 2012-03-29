@@ -72,6 +72,7 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
   ## and a NA value apperas in the period column
   data <- data[grep("[0-9]+-[0-9]+", data$PERIOD),]
 
+  logwarn( paste("Tot rows =", nrow(data)))
   ## TODO: also rows with NA in one of KEYx column should be deleted
 
   project.keys <- grep("^KEY\\d$", csv.header, value=TRUE)
@@ -569,7 +570,9 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   tablename = DB.GetTableNameProjectData(project.config$project.name)
   DB.EmptyTable(tablename, db.channel)
   logwarn( "Saving project data")
-  dbWriteTable(value=project.data, name=tablename, conn=db.channel, append=T, row.names=FALSE)
+  rows <- nrow(project.data)
+  logwarn( paste("Saving", rows, "records!"))
+  dbWriteTable(value=project.data, name=tablename, conn=db.channel, append=T, row.names=FALSE, verbose=TRUE)
 } # end function
 
 
