@@ -41,9 +41,13 @@ DB.Close <- function(db.channel) {
 }
 
 DB.ExportTable2Csv <- function(tablename, db.channel, output.file, sep=";", dec=",") {
-  sql_statement <- paste("select * from", tablename)
-  records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
-  write.table(records, file=output.file, sep=sep, dec=dec, row.names=FALSE)
+  if(dbExistsTable(db.channel, tablename)) {
+    sql_statement <- paste("select * from", tablename)
+    records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
+    write.table(records, file=output.file, sep=sep, dec=dec, row.names=FALSE)
+  } else {
+    loginfo( paste("Table", tablename, "does not exist and cannot be exported to a csv file"))
+  }
 }
 
 DB.EmptyTable <- function(tablename, db.channel) {
