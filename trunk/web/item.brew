@@ -2,7 +2,7 @@
 ## -*- mode: R -*-
 
   project.name <- GET$project
-
+  options=list(width=800, height=350)
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
@@ -152,17 +152,29 @@
   ## TAB Show best Model
   ###############################################################################################################
 
-    BM <- gvisLineChart(data=subset(item.results, model== best.model, select=c("PERIOD", "V")))
+    best <- subset(item.results, model== best.model, select=c("PERIOD", "V"))
+    BM <- gvisLineChart(data=best, options=options)
     b_BM <- paste(capture.output(cat(BM$html$chart)), collapse="\n")
-    page.sections <- rbind(page.sections, data.frame(title=paste("Best Model", best.model), body=b_BM))
 
+    b_M2 <- ""
+    #if (project.config$period.freq > 1) {
+      df <- best
+      p = sapply(as.character(df$PERIOD), function(x) y=unlist(strsplit(x, "-")))
+      df$PERIOD1 <- p[1,] 
+      df$PERIOD2 <- p[2,] 
+      item.results.best.pivot <- as.data.frame(cast(df, PERIOD2 ~ PERIOD1, df=T, value="V"))
+      item.results.best.pivot <- as.data.frame(cbind(month=rownames(item.results.best.pivot), item.results.best.pivot))
+      BM <- gvisColumnChart(data=item.results.best.pivot, options=options)
+      b_BM2 <- paste(capture.output(cat(BM$html$chart)), collapse="\n")
+    #}
+    page.sections <- rbind(page.sections, data.frame(title=paste("Best Model", best.model), body=paste(b_BM, b_BM2)))
 
   ###############################################################################################################
   ## TAB Show All Models
   ###############################################################################################################
 
     body <- paste('<a href=item_motion_chart.brew?project=', project.name, '&id=',id, '>motion chart</a>', sep="")
-    AM <- gvisLineChart(data=item.results.pivot)
+    AM <- gvisLineChart(data=item.results.pivot, options=options)
     b_AM <- paste(capture.output(cat(AM$html$chart)), collapse="\n")
     page.sections <- rbind(page.sections, data.frame(title="All Models", body=paste(body, b_AM)))
 
@@ -185,7 +197,7 @@
     item.residuals$item_id <- NULL
     item.residuals.pivot <- cast(item.residuals, PERIOD ~ model, df=TRUE, value="V")
     item.residuals.pivot <- data.frame(item.residuals.pivot)
-    ML <- gvisLineChart(data=item.residuals.pivot)
+    ML <- gvisLineChart(data=item.residuals.pivot, options=options)
     b_ML <- paste(capture.output(cat(ML$html$chart)), collapse="\n")
     page.sections <- rbind(page.sections, data.frame(title="Residuals", body=b_ML))
   }
