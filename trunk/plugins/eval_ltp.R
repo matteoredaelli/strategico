@@ -32,7 +32,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
                diff.sea=1,diff.trend=1,max.p=2,max.q=1,max.P=0,max.Q=1, logtransform.es=FALSE,
                increment=1 ,idDiff = FALSE, idLog = FALSE,
                formula.right.lm = param$formula.right.lm,stepwise=param$stepwise,
-               logtransform=param$logtransform, negTo0=param$negTo0,
+               logtransform=param$logtransform, negTo0=param$negTo0, toInteger=param$toInteger,
                naive.values=param$naive.values,
                naive.ifConstantLastValues=param$naive.ifConstantLastValues,
                naive.ifConstant0LastValues=param$naive.ifConstant0LastValues)
