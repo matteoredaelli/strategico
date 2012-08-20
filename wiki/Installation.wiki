@@ -24,7 +24,7 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
 
 You can install them with teh following R command
 {{{
-  install.packages(c("getopt", "logging", "hwriter", "RODBC", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew", "sendmailR", "googleVis", "RMySQL"), dependencies = TRUE)
+  install.packages(c("getopt", "logging", "hwriter", "reshape", "tseries", "forecast", "RUnit", "xtable", "R2HTML","fracdiff", "brew", "sendmailR", "googleVis", "RMySQL"), dependencies = TRUE)
 }}}
 
 For Debian and Ubuntu some of the libraries are available via apt-get command:
