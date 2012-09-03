@@ -176,12 +176,14 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
   string.period.end <- Period.ToString(period.end, n.char=n.char)
 
   filter.key <- BuildFilterWithKeys(key.values=keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
+  if (filter.key != "") filter.key <-  paste(filter.key, "and")
+  
   filter.period <- paste("period >= '", string.period.start, "' and period <= '", string.period.end, "'", sep="")
 
   tablename <- DB.GetTableNameProjectData(project.name)
-  sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, "and", filter.period, "group by period", sep=" ")
-
-  logdebug( sql_statement)
+  sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, filter.period, "group by period", sep=" ")
+  print(sql_statement)
+  logdebug(sql_statement)
   records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
   rownames(records) <- records$period
   records$period <- NULL
