@@ -182,7 +182,6 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
 
   tablename <- DB.GetTableNameProjectData(project.name)
   sql_statement <- paste("select period, sum(", value, ") as V from", tablename, "where", filter.key, filter.period, "group by period", sep=" ")
-  print(sql_statement)
   logdebug(sql_statement)
   records <- DB.RunSQLQuery(sql_statement=sql_statement, db.channel=db.channel)
   rownames(records) <- records$period
