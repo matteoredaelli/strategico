@@ -39,7 +39,10 @@ project.config$param$try.models=<%=
 ## how many points will be predicted
 project.config$param$n.ahead=<%=max(1,n.ahead)%>
 
-
+## +++++++++++++++++++++++++++++++++++++++
+## range
+## +++++++++++++++++++++++++++++++++++++++
+## used by ltp.normalize data,
 project.config$param$range=c(-Inf,Inf)
 
 ## +++++++++++++++++++++++++++++++++++++++
