@@ -560,7 +560,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   project.items <- cbind(item_id=nrow(project.items):1, project.items)
 
   tablename = DB.GetTableNameProjectItems(project.config$project.name)
-  ## preparing data for prymary key in DB  (id must be the rownames)
+  ## preparing data for primary key in DB  (id must be the rownames)
   project.items.orig <- project.items
   DB.EmptyTable(tablename, db.channel)
   logwarn( "Saving project items")
