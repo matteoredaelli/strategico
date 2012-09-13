@@ -601,7 +601,8 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
   records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
  
   if (nrow(records) > 0) {
-    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id)
+    records$parent_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$parent_id) 
     Table <- gvisTable(records, options=list(width=width, height=height))
     b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
     body <- paste(body, "<h1>Too high predictions</h1>\n", b_Table)
