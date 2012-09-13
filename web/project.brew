@@ -62,6 +62,7 @@
 
   if (!is.null(project.name) && !is.null(POST$export.csv) && DB.GetTableNameProjectItems(project.name) %in% strategico.tables ) {
     msg <- Strategico.ExecCommand(project.name, cmd="export.csv", options="", mailto=project.config$mailto, intern=TRUE)
+    msg <- Strategico.ExecCommand(project.name, cmd="build.reports", options="", mailto=project.config$mailto, intern=TRUE)
   }
 
   if (!is.null(project.name) && !is.null(POST$drop.project)) {

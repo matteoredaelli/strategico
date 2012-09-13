@@ -265,7 +265,7 @@ Item.AddLink <- function(project.name, value, id.list, new=TRUE) {
   target <-ifelse(new,
     ' target="_blank"',
     ' ')
-  paste("<a href=item.brew?project=",project.name, "&id=", id.list, "&value=",value,
+  paste("<a href=", strategico.config$strategico.url, "/item.brew?project=",project.name, "&id=", id.list, "&value=",value,
     target,
         ">", id.list, "</a>", sep="")
 }
