@@ -9,8 +9,8 @@ select
   max(V) V
 FROM 
   v_<%=project.name%>_results_<%=value%>
-group by
+GROUP BY
   item_id,
   <%= paste(project.keys, collapse=", ")%>
 order by V desc
-limit 30
+limit 50

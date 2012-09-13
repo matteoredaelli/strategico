@@ -622,22 +622,38 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
 
   template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-values.brew")
   sql <- paste(capture.output(brew(template.file)),  collapse="\n")
-  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
   logdebug(sql)
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+
 
   if (nrow(records) > 0) {
     records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
     Table <- gvisTable(records, options=list(width=width, height=height))
     b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
-    body <- paste(body, "\n<h1>Highest predictions</h1>\n", b_Table)
+    body <- paste(body, "\n<h1>Predictions with higest results</h1>\n", b_Table)
   }
 
+  ## lowest values
+
+  template.file <- file.path(GetTemplatesHome(), "sql-ltp-lowest-values.brew")
+  sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+  logdebug(sql)
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+
+
+  if (nrow(records) > 0) {
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    Table <- gvisTable(records, options=list(width=width, height=height))
+    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+    body <- paste(body, "\n<h1>Predictions with lowest results</h1>\n", b_Table)
+  }
+  
   ## highest maxJump
   
   template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-maxjump.brew")
   sql <- paste(capture.output(brew(template.file)),  collapse="\n")
-  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
   logdebug(sql)
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
   
   if (nrow(records) > 0) {
     records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
@@ -650,14 +666,14 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
   
   template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-ratio-means.brew")
   sql <- paste(capture.output(brew(template.file)),  collapse="\n")
-  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
   logdebug(sql)
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
   
   if (nrow(records) > 0) {
     records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
     Table <- gvisTable(records, options=list(width=width, height=height))
     b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
-    body <- paste(body, "\n<h1>Highest ratio Means</h1>\n", b_Table)
+    body <- paste(body, "\n<h1>Highest ratio Means (between historical and predicted values</h1>\n", b_Table)
   }
 
   ## saving html file
