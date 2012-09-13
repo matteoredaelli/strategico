@@ -459,7 +459,10 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
     filename <- Project.GetCSVFullPathFilename(project.name=project.name)
 
   logwarn( paste("Loading data from file", filename))
-  data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE) 
+  data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE)
+  csv.rows <- nrow(data)
+  logwarn( sprintf("found %d rows in csv file %s", csv.rows, filename))
+  
   project.config.file <- Project.GetConfigFullPathFilename(project.name)
   logwarn( paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
   data <- Project.NormalizeInputDataAndCreateProjectConfig(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
@@ -467,13 +470,20 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
     loginfo( "Something went wrong: not loaing data to DB")
     return (data)
   }
-
+  good.rows <- nrow(data)
+  logwarn( sprintf("found good %d rows in csv  file %s", good.rows, filename))
+  
   ## reloading the new project config file
   project.config <- Project.GetConfig(project.name=project.name)
   
   ## creating DB tables
   Project.CreateDB(project.name=project.name,
                    project.config=project.config, db.channel=db.channel)
+
+  ##saving csv info
+  sql <- sprintf("update strategico_projects set csv_rows=%d, good_rows=%d where name='%s'", csv.rows, good.rows, project.name)
+  logdebug(sql)
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
 
   ## importing csv data to DB
   Project.Items.UpdateData(project.name=project.name, project.data=data, db.channel=db.channel)

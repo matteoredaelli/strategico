@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS strategico_projects (
   name varchar(15) NOT NULL,
   owner varchar(30) default NULL,
+  csv_rows int(11) default 0,
+  good_rows int(11) default 0,	
   PRIMARY KEY  (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
