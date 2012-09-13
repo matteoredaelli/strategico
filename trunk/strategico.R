@@ -247,6 +247,20 @@ if (is.null(opt$item.values)) {
   opt$item.values <- unlist(strsplit(opt$item.values, ","))
 }
 
+#########################################################################
+## CMD build.reports
+#########################################################################
+
+if (opt$cmd == "build.reports") {
+  
+  if (is.null(opt$item.values))
+    UsageAndQuit("Missing parameter item.values")
+  
+  for (v in opt$item.values) 
+    Project.BuildSuspiciousItemsHtmlPage(opt$project.name, db.channel=db.channel, v)
+  
+  q(status=0)
+}
 
 #########################################################################
 ## Normalizing options

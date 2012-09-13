@@ -25,7 +25,7 @@ suppressPackageStartupMessages(library(xtable))
 suppressPackageStartupMessages(library(reshape))
 suppressPackageStartupMessages(library(brew))
 suppressPackageStartupMessages(library(RMySQL))
-
+suppressPackageStartupMessages(library(googleVis))
 
 Quit <- function (msg="", status=-1, save="no") {
   print(msg)

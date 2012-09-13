@@ -581,3 +581,78 @@ Project.NormalizeName <- function(project.name=NULL) {
  n <- ifelse(n == "", "changeme", n)
  n
 }
+
+Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value, project.config=NULL) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+
+  body=""  
+  width=800
+  height=300
+  
+  project.values <- Project.GetValues(project.name, project.config=project.config)
+  project.keys <- Project.GetKeys(project.name, project.config=project.config)
+  
+  ## too-high-children
+
+  template.file <- file.path(GetTemplatesHome(), "sql-ltp-too-high-children.brew")
+  sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+  logdebug(sql)
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+ 
+  if (nrow(records) > 0) {
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    Table <- gvisTable(records, options=list(width=width, height=height))
+    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+    body <- paste(body, "<h1>Too high predictions</h1>\n", b_Table)
+  }
+
+  ## highest values
+
+  template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-values.brew")
+  sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+  logdebug(sql)
+
+  if (nrow(records) > 0) {
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    Table <- gvisTable(records, options=list(width=width, height=height))
+    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+    body <- paste(body, "\n<h1>Highest predictions</h1>\n", b_Table)
+  }
+
+  ## highest maxJump
+  
+  template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-maxjump.brew")
+  sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+  logdebug(sql)
+  
+  if (nrow(records) > 0) {
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    Table <- gvisTable(records, options=list(width=width, height=height))
+    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+    body <- paste(body, "\n<h1>Highest maxJump</h1>\n", b_Table)
+  }
+  
+  ## highest ratio_means
+  
+  template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-ratio-means.brew")
+  sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+  logdebug(sql)
+  
+  if (nrow(records) > 0) {
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    Table <- gvisTable(records, options=list(width=width, height=height))
+    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+    body <- paste(body, "\n<h1>Highest ratio Means</h1>\n", b_Table)
+  }
+
+  ## saving html file
+  
+  template.file <- file.path(GetTemplatesHome(), "suspicious_items.brew")
+  html.page <- file.path(Project.GetPath(project.name), sprintf("suspicious_items_%s.html", value))
+  brew(template.file, output=html.page)
+}
+
