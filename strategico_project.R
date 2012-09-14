@@ -659,7 +659,7 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
     records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
     Table <- gvisTable(records, options=list(width=width, height=height))
     b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
-    body <- paste(body, "\n<h1>Highest maxJump</h1>\n", b_Table)
+    body <- paste(body, "\n<h1>Highest maxJump (excluding BestModel=Naive)</h1>\n", b_Table)
   }
   
   ## highest ratio_means
@@ -673,7 +673,7 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
     records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
     Table <- gvisTable(records, options=list(width=width, height=height))
     b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
-    body <- paste(body, "\n<h1>Highest ratio Means (between historical and predicted values</h1>\n", b_Table)
+    body <- paste(body, "\n<h1>Highest ratio Means (between historical and predicted values)</h1>\n", b_Table)
   }
 
   ## saving html file
