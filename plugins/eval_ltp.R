@@ -24,8 +24,13 @@ suppressPackageStartupMessages(library(ltp))
 
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
   loginfo( paste("Running function", project.config$eval.function, "for item id =", id, "and value =", value))
+  
+  rule.noMaxJumpOver.position <- strtoi(gsub("V", "", value))
+  rule.noMaxJumpOver <- param$rule.noMaxJumpOver[rule.noMaxJumpOver.position]
+  logdebug(sprintf("rule.noMaxJumpOver=%s", rule.noMaxJumpOver))
+  
   model <- ltp(product = item.data, rule=param$rule,
-               ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=param$rule.noMaxJumpOver),
+               ruleSetting=list(rule.noMaxCVOver=param$rule.noMaxCVOver,rule.noMaxJumpOver=rule.noMaxJumpOver),
                try.models = param$try.models, n.ahead = param$n.ahead, n.min = param$n.min, 
                NA2value = param$NA2value, range = param$range, period.freq = project.config$period.freq, 
                period.start = project.config$period.start, period.end = project.config$period.end,
