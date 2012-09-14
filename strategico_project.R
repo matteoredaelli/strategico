@@ -600,7 +600,6 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
   width=800
   height=300
   
-  period.end.string <- ltp::Period.ToString(project.config$period.end)
   project.values <- Project.GetValues(project.name, project.config=project.config)
   project.keys <- Project.GetKeys(project.name, project.config=project.config)
   
