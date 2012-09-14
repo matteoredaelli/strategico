@@ -2,6 +2,8 @@ select
   *
 FROM 
   v_<%=project.name%>_summary_<%=value%>
+WHERE
+  BestModel != 'Naive'
 order by 
   maxJump desc
 limit 30
