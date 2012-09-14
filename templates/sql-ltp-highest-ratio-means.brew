@@ -10,6 +10,8 @@ where
   MeanPredicted != 0 and
   MeanPredicted is not NULL and
   MeanValues != 0 and
-  MeanValues is not NULL
+  MeanValues is not NULL and
+  BestModel != 'Naive' and
+  BestModel = SuggestedModel
 ORDER BY ratio_means DESC
 limit 30
