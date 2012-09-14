@@ -16,7 +16,6 @@ SELECT
 FROM 
   v_<%=project.name%>_results_<%=value%>
 WHERE
-  PERIOD > '<%=period.end.string%>' and
   <%=last.key%> != '' and
   V > 0
 group by
@@ -31,7 +30,6 @@ SELECT
 FROM 
   v_<%=project.name%>_results_<%=value%>
 WHERE
-  PERIOD > '<%=period.end.string%>' and
   <%=project.keys[tot.keys-1]%> !='' and 
   <%=last.key%>='' and
   V > 0

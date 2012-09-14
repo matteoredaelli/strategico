@@ -9,8 +9,6 @@ select
   min(V) V
 FROM 
   v_<%=project.name%>_results_<%=value%>
-WHERE
-  PERIOD > '<%=period.end.string%>'
 GROUP BY
   item_id,
   <%= paste(project.keys, collapse=", ")%>
