@@ -354,15 +354,21 @@ Project.GetStatisticsProjectData <- function(project.name, project.config=NULL, 
     project.config <- Project.GetConfig(project.name)
   }
 
-  t.items <- DB.GetTableNameProjectItems(project.name)
-  t.data.raw <- DB.GetTableNameProjectData(project.name)
+  stats <- list()
 
-  tables <- c(t.items, t.data.raw)
-  rows <- unlist(lapply(tables, function(x) DB.GetTableSize(x,db.channel)))
+  sql <- sprintf("SELECT * from strategico_projects where name='%s'", project.name)
+  records <- try(DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel))
   
-  stats <- as.list(rows)
-  names(stats) <- tables
+  stats$csv_rows <- records[1]$csv_rows
+  stats$good_rows <- records[1]$good_rows
+  
+  stats$keys <- paste(project.config$keys, collapse=",")
+  stats$values <- paste(project.config$values, collapse=",")
+  stats$period.start <- Period.ToString(project.config$period.start)
+  stats$period.end <- Period.ToString(project.config$period.end)
+  stats$period.freq <- project.config$period.freq
 
+  t.data.raw <- DB.GetTableNameProjectData(project.name)
   sql <- "SELECT min(_V_) _V__min, max(_V_) _V__max, avg(_V_) _V__mean, sum(_V_) _V__sum FROM __TABLE_DATA_RAW__"
   sql <- gsub("__TABLE_DATA_RAW__", t.data.raw, sql)
   for (value in GetValueNames(project.config$values)) {
@@ -373,8 +379,8 @@ Project.GetStatisticsProjectData <- function(project.name, project.config=NULL, 
       for (x in cols)
          stats[[x]] <- records[1,x]
   }
-  stats$keys <- paste(project.config$keys, collapse=",")
-  stats$values <- paste(project.config$values, collapse=",")
+
+  
   stats
 }
 
