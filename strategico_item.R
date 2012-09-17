@@ -269,3 +269,149 @@ Item.AddLink <- function(project.name, value, id.list, new=TRUE) {
     target,
         ">", id.list, "</a>", sep="")
 }
+
+Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL, value="V1", db.channel, only.best=FALSE) {
+  options=list(width=800, height=350)
+  result <- list()
+
+  ## id or keys must be not null
+
+  if (is.null(id)) {
+    msg <- "Cannot retrive Item data for missing ID"
+    logerror( msg)
+    return(result)
+  }
+
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+
+  if (!is.value(value, project.config=project.config)) {
+    msg <- paste("Invalid value=", value, ". No data to retreive")
+    logerror( msg)
+    return(result)
+  }
+
+  item.models <- c()
+  item.results <- data.frame()
+  item.summary <- data.frame()
+  item.summar.models <- data.frame()
+
+  ########################################################################################
+  ##  Retriving all results
+  ########################################################################################
+
+  item.results <- Item.DB.GetNormalizedDataAndResults(project.name=project.name,
+                                                      id=id, db.channel=db.channel,
+                                                      value=value, only.best=only.best)
+
+  result$item.results <- item.results
+
+  if (is.null(item.results) || nrow(item.results) < 1) return(result)
+
+  item.results$item_id <- NULL
+  item.results.pivot <- cast(item.results, PERIOD ~ model, df=TRUE, value="V")
+  item.results.pivot <- data.frame(item.results.pivot)
+  rownames(item.results.pivot) <- NULL
+  item.results.best <- Item.DB.GetResults(project.name=project.name, id=id, db.channel=db.channel, value=value, only.best=TRUE)
+  item.results.best$item_id <- NULL
+
+  item.residuals <- Item.DB.GetResiduals(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  item.summary.models <- Item.DB.GetSummaryModels(project.name=project.name, id=id, db.channel=db.channel, value=value)
+
+  if (!is.null(item.summary) && nrow(item.summary) > 0) {
+      item.models <- unique(item.summary.models$model)
+      best.model <- as.character(item.summary[1,]$BestModel)
+      suggested.model <- as.character(item.summary[1,]$SuggestedModel)
+      param <- as.character(item.summary[1,]$Parameters)
+  } else {
+    best.model <- item.models <- suggested.model <- NULL
+    param=""
+  }
+  if(length(param) == 0L) param=""
+    
+  result$param <- param
+  result$best.model <- best.model
+  result$suggested.model <- suggested.model
+  result$results.pivot <- item.results.pivot
+  result$residuals <- item.residuals
+  result$summary <- item.summary
+  result$summary.models <- item.summary.models
+
+
+  ###############################################################################################################
+  ## TAB Summary
+  ###############################################################################################################
+
+  if(!is.null(item.summary.models) && is.data.frame(item.summary.models) && nrow(item.summary.models) > 0) {
+    i.summary.models <- item.summary.models
+    i.summary.models$item_id <- NULL
+    rownames(i.summary.models) <- NULL
+    ## print(xtable(i.summary.models), type="html")
+    ##T1 <- gvisTable(i.summary.models, options=list(width=700, height=250))
+    ##b_T1 <- paste(capture.output(cat(T1$html$chart)), collapse="\n")
+    b_T1 <- paste(capture.output(print(xtable(i.summary.models), type="html")), collapse="\n")
+    result$summary.models.chart <- b_T1
+
+    i.summary <- subset(item.summary, select=c(-item_id, -Parameters))
+    rownames(i.summary) <- NULL
+    ##summary.new <- data.frame(f=colnames(i.summary), as.data.frame(t(i.summary)))
+    b_T2 <- paste(capture.output(print(xtable(t(i.summary)), type="html")), collapse="\n")
+    ##T2 <- gvisTable(summary.new, options=list(width=700, height=510))
+    ##b_T2 <- paste(capture.output(cat(T2$html$chart)), collapse="\n")
+    result$summary.chart <- b_T2
+  }
+
+  ###############################################################################################################
+  ## TAB Show best Model
+  ###############################################################################################################
+
+  best <- subset(item.results, model== best.model, select=c("PERIOD", "V"))
+  BM <- gvisLineChart(data=best, options=options)
+  b_BM <- paste(capture.output(cat(BM$html$chart)), collapse="\n")
+
+  result$best.model.chart <- b_BM
+
+  b_M2 <- ""
+  df <- best
+  p = sapply(as.character(df$PERIOD), function(x) y=unlist(strsplit(x, "-")))
+  df$PERIOD1 <- p[1,]
+  df$PERIOD2 <- p[2,]
+  item.results.best.pivot <- as.data.frame(cast(df, PERIOD2 ~ PERIOD1, df=T, value="V"))
+  item.results.best.pivot <- as.data.frame(cbind(month=rownames(item.results.best.pivot), item.results.best.pivot))
+  BM2 <- gvisColumnChart(data=item.results.best.pivot, options=options)
+  b_BM2 <- paste(capture.output(cat(BM2$html$chart)), collapse="\n")
+  result$best.model.chart2 <- b_BM2
+
+  ###############################################################################################################
+  ## TAB Show All Models
+  ###############################################################################################################
+
+  AM <- gvisLineChart(data=item.results.pivot, options=options)
+  b_AM <- paste(capture.output(cat(AM$html$chart)), collapse="\n")
+  result$all.models.chart <- b_AM
+
+  ###############################################################################################################
+  ## TAB Results
+  ###############################################################################################################
+
+  b_TR <- paste(capture.output(print(xtable(item.results.pivot), type="html")), collapse="\n")
+  ##TR <- gvisTable(item.results.pivot, options=list(width=700, height=500))
+  ##b_TR <- paste(capture.output(cat(TR$html$chart)), collapse="\n")
+  result$results.pivot.chart <- b_TR
+
+  ###############################################################################################################
+  ## TAB Residuals
+  ###############################################################################################################
+
+  if ((!is.null(item.residuals)) && is.data.frame(item.residuals) && nrow(item.residuals) > 0) {
+    item.residuals$item_id <- NULL
+    item.residuals.pivot <- cast(item.residuals, PERIOD ~ model, df=TRUE, value="V")
+    item.residuals.pivot <- data.frame(item.residuals.pivot)
+    ML <- gvisLineChart(data=item.residuals.pivot, options=options)
+    b_ML <- paste(capture.output(cat(ML$html$chart)), collapse="\n")
+    result$residuals.chart <- b_ML
+  }
+
+  result
+}
