@@ -4,7 +4,5 @@ FROM
   v_<%=project.name%>_summary_<%=value%>
 WHERE
   BestModel != 'Naive' and
-  BestModel = SuggestedModel
-order by 
-  maxJump desc
-limit 50
+  BestModel = SuggestedModel and
+  maxJump = '1'

@@ -662,6 +662,20 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
     body <- paste(body, "\n<h1>Highest maxJump (excluding BestModel=Naive)</h1>\n", b_Table)
   }
   
+  ##  maxJump = 1
+  
+  template.file <- file.path(GetTemplatesHome(), "sql-ltp-maxjump-equal-1.brew")
+  sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+  logdebug(sql)
+  records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+  
+  if (nrow(records) > 0) {
+    records$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=records$item_id) 
+    Table <- gvisTable(records, options=list(width=width, height=height))
+    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
+    body <- paste(body, "\n<h1>maxJump=1 (excluding BestModel=Naive)</h1>\n", b_Table)
+  }
+  
   ## highest ratio_means
   
   template.file <- file.path(GetTemplatesHome(), "sql-ltp-highest-ratio-means.brew")

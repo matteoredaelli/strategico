@@ -14,4 +14,4 @@ where
   BestModel != 'Naive' and
   BestModel = SuggestedModel
 ORDER BY ratio_means DESC
-limit 30
+limit 50
