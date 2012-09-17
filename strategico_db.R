@@ -209,44 +209,6 @@ Item.DB.GetSummaryModels <- function(project.name, value, id, db.channel) {
   Item.DB.GetRecords(project.name, id=id, tablename=tablename, db.channel=db.channel)
 }
 
-Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
-
-  tablename = DB.GetTableNameSummary(project.name, value)
-  sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")
-  items <-DB.RunSQLQuery(sql_statement, db.channel=db.channel)
-
-  tot <- nrow(items)
-  if (tot == 0 )
-    logwarn( "NO items found to be updated!")
-  else {
-    for( i in 1:tot) {
-      item <- items[i,]
-      loginfo( paste("Found ID=", items$item_id))
-      loginfo( paste("Param String:", item$Parameters))
-      
-      param <- Param.EvalString(as.character(item$Parameters))
-      Item.Eval(project.name=project.name, id=item$item_id, project.config=project.config,
-               value=value, param=param, db.channel=db.channel
-               )
-    } #end for
-  } #end if
-}
-
-Items.DB.SetBestModel <- function(project.name, value, id.list,
-                                  model, db.channel) {
-  str.id.list <- paste(id.list, collapse=",")
-  logdebug( paste("Setting bestmodel=", model, " for id.list=", str.id.list, sep=""))
-  tablename <- DB.GetTableNameSummary(project.name, value=value)
-  str <- "update _TABLENAME_ set BestModel='_MODEL_' where item_id in (_IDLIST_)"
-  str <- gsub("_TABLENAME_", tablename, str)
-  str <- gsub("_MODEL_", model, str)
-  str <- gsub("_IDLIST_", str.id.list, str)
-
-  DB.RunSQLQuery(sql_statement=str, db.channel=db.channel)
-}
-
 Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
   if(is.null(project.config)) {
     project.config <- Project.GetConfig(project.name)
