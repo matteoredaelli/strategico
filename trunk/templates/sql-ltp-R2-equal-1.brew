@@ -5,4 +5,5 @@ FROM
 WHERE
   BestModel != 'Naive' and
   BestModel = SuggestedModel and
-  maxJump = '1'
+  R2 = '1'
+limit 50
