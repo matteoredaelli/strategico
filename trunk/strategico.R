@@ -253,6 +253,8 @@ if (is.null(opt$item.values)) {
 
 if (opt$cmd == "build.reports") {
   
+  Project.BuildStatsHtmlPage(opt$project.name, db.channel=db.channel)
+
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values")
   
