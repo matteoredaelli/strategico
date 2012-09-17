@@ -332,6 +332,7 @@ Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL
     
   result$param <- param
   result$best.model <- best.model
+  result$models <- item.models
   result$suggested.model <- suggested.model
   result$results.pivot <- item.results.pivot
   result$residuals <- item.residuals
