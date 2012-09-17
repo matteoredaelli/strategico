@@ -692,7 +692,7 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
 
   ## saving html file
   
-  template.file <- file.path(GetTemplatesHome(), "suspicious_items.brew")
+  template.file <- file.path(GetTemplatesHome(), "report_page.brew")
   html.page <- file.path(Project.GetPath(project.name), sprintf("r_suspicious_items_%s.html", value))
   brew(template.file, output=html.page)
 }
