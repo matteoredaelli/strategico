@@ -95,11 +95,9 @@
     b10 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b10)
     page.sections <- rbind(page.sections, data.frame(title="Import CSV", body=b10))
             
-    if (exists.csv && exists.config) {
+    if (exists.csv && exists.config) { 
     
-        b60 <- 'See (csv) imported data <a href="project-status.brew?project=__PROJECT_NAME__&stats=csv">statistics</a> <br />
-
-    <form  method="POST">
+    b60 <- '<form  method="POST">
    <textarea name="param" rows="6" cols="60">__PARAM__</textarea><br />
                    Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
                    <input type="submit" name="run" value="Run"/><br /></form>'
@@ -110,10 +108,10 @@
 
         project.values <- Project.GetValues(project.name=name, project.config)
 
-        b65 <- sprintf('Build reports (suspicious items,..): <form  method="POST"><input type="submit" name="build.reports" value="Build"/></form><br 7>See %s', project.url.html.link)
+        b65 <- sprintf('Build reports (stats, suspicious items,..): <form  method="POST"><input type="submit" name="build.reports" value="Build"/></form><br />See %s', project.url.html.link)
         page.sections <- rbind(page.sections, data.frame(title="Build reports", body=b65))
 
-        b70 <- 'See <a href="project-status.brew?project=__PROJECT_NAME__">statistics</a> or <a href="items.brew?project=__PROJECT_NAME__">browse</a> results'
+        b70 <- '<a href="items.brew?project=__PROJECT_NAME__">browse</a> results'
 	b70 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b70)
 
 	page.sections <- rbind(page.sections, data.frame(title="Analysis", body=b70))

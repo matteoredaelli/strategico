@@ -697,3 +697,38 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
   brew(template.file, output=html.page)
 }
 
+Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.config=NULL) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+
+  body=""  
+  width=800
+  height=300
+  
+  stats_csv <- Project.GetStatisticsProjectData(project.name, project.config=project.config, db.channel)
+  stats_db <- Project.GetStatisticsDB(project.name, project.config=project.config, db.channel)
+
+  b_csv <- paste(capture.output(print(xtable(t(as.data.frame(stats_csv))), type="html")), collapse="\n")
+  body = sprintf("%s<h1>CSV</h1>\n%s", body, b_csv)
+  
+  b_db <- paste(capture.output(print(xtable(t(as.data.frame(stats_db))), type="html")), collapse="\n")
+  body = sprintf("%s\n<h1>DB</h1>\n%s", body, b_db)
+
+  body = sprintf("%s\n<h1>Predictions (models)</h1>\n", body)
+  for (value in GetValueNames(project.config$values)) {
+    stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
+
+    if (!is.null(stats.models) && is.data.frame(stats.models) && nrow(stats.models) > 0) {
+      M <- gvisPieChart(stats.models, options=list(title=""))
+
+      MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats_db[[DB.GetTableNameProjectItems(project.name)]]))
+      b_M <- paste(capture.output(cat(M$html$chart)), collapse="\n")
+      b_MG <- paste(capture.output(cat(MG$html$chart)), collapse="\n")
+      body = sprintf("%s\n<h2>%s</h2>\n%s\n%s", body, value, b_M, b_MG)
+    }
+  }
+
+  template.file <- file.path(GetTemplatesHome(), "report_page.brew")
+  html.page <- file.path(Project.GetPath(project.name), "r_project_stats.html")
+  brew(template.file, output=html.page)
+}
