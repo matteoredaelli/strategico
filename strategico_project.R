@@ -602,7 +602,7 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
 
-  body=""  
+  body <- sprintf("%s :: suspicious items :: %s<hr />", project.name, value)
   width=800
   height=300
   
@@ -707,9 +707,9 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name=project.name)
 
-  body=""  
-  width=800
-  height=300
+  body <- sprintf("%s :: stats<hr />", project.name)
+  width <- 800
+  height <- 300
   
   stats_csv <- Project.GetStatisticsProjectData(project.name, project.config=project.config, db.channel)
   stats_db <- Project.GetStatisticsDB(project.name, project.config=project.config, db.channel)
