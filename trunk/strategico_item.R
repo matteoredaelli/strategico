@@ -296,6 +296,13 @@ Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL
   item.summary <- data.frame()
   item.summar.models <- data.frame()
 
+  item.keys <- try(Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel))
+  ##item.keys <- ifelse(is.null(item.keys), c(), item.keys)
+  item.keys.string <- paste('Key=', item.keys, collapse="<br />", sep="")
+
+  result$keys <- item.keys
+  result$keys.string <- item.keys.string
+
   ########################################################################################
   ##  Retriving all results
   ########################################################################################
