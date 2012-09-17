@@ -311,7 +311,7 @@ Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL
                                                       id=id, db.channel=db.channel,
                                                       value=value, only.best=only.best)
 
-  result$item.results <- item.results
+  result$results <- item.results
 
   if (is.null(item.results) || nrow(item.results) < 1) return(result)
 
