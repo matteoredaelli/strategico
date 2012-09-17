@@ -18,22 +18,6 @@
 ## project website: http://code.google.com/p/strategico/
 ## created: 2011
 
-Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=NULL,
-                      period.start=NULL, period.end=NULL,
-                      project.config=NULL, db.channel) {
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
- 
-  if (is.null(values))
-    values <- GetValueNames(project.config=project.config)
-
-  for (id in id.list) {
-    try(Item.Eval(project.name=project.name, id=id, keys=keys, values=values, param=param,
-             period.start=period.start, period.end=period.end, 
-             project.config=project.config, db.channel=db.channel))
-  }
-}
-
 Item.EmptyFS <- function(project.name, id, value=NULL, recursive = TRUE) {
   if (is.na(id) | id < 0) {
     loginfo( paste("Invalid ID=", id))

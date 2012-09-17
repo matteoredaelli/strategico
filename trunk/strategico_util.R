@@ -82,6 +82,7 @@ setLevel(strategico.config$logger.level, getHandler('basic.stdout'))
 
 MySource("strategico_project.R")
 MySource("strategico_item.R")
+MySource("strategico_items.R")
 MySource("strategico_db.R")
 MySource("strategico_period.R")
 
