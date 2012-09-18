@@ -115,10 +115,21 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
     value=value, output.path=directory, param=param, project.config=project.config, db.channel=db.channel)", sep="")
 
   prediction <- eval(parse(text=EvalFunction))
-  logdebug( "RESULTS:")
+  logdebug("RESULTS:")
   logdebug( rownames(prediction))
   logdebug( prediction)
   t(prediction)
+}
+
+Item.GetBestModel <- function(project.name, project.config=NULL, id, value, db.channel) {
+  if (is.null(project.config))
+    project.config <- Project.GetConfig(project.name=project.name)
+
+  item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
+  if (nrow(item.summary) == 1)
+    return(item.summary$BestModel)
+  else
+    return(NULL)
 }
 
 Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, value="V1",
