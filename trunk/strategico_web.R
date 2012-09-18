@@ -67,7 +67,7 @@ BuildHtmlElement_select <- function(label, name, list.values, default="") {
   opt_selected_template<- '<option value="_V_" SELECTED>_V_</option>'
   optlist <- ""
   
-  if ( is.null(default) | is.na(default) )
+  if ( is.null(default) || is.na(default) )
     default <- ""
 
   ## if ( (is.null(default)) | (default == "") )
