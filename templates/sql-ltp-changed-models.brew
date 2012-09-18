@@ -2,7 +2,8 @@ select
   item_id id,
   <%=paste(project.keys, collapse=", ")%>,
   BestModel,
-  SuggestedModel
+  SuggestedModel,
+  SuggestedModel2
 FROM 
   v_<%=project.name%>_summary_<%=value%>
 WHERE

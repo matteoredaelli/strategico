@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS <%=project.name%>_summary_<%=value%> (
   item_id int(11) NOT NULL,
   BestModel varchar(20) default NULL,
   SuggestedModel varchar(20) default NULL,
+  SuggestedModel2 varchar(20) default NULL,
   BestAICNoOutRangeExclude varchar(20) default NULL,
   BestICNoOutRangeExclude varchar(20) default NULL,
   TotModels int(11) default NULL,
