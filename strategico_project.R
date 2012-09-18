@@ -711,14 +711,16 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
   width <- 800
   height <- 300
   
+  project.keys <- Project.GetKeys(project.name, project.config=project.config)
+
   stats_csv <- Project.GetStatisticsProjectData(project.name, project.config=project.config, db.channel)
   stats_db <- Project.GetStatisticsDB(project.name, project.config=project.config, db.channel)
 
   b_csv <- paste(capture.output(print(xtable(t(as.data.frame(stats_csv))), type="html")), collapse="\n")
-  body = sprintf("%s<h1>CSV</h1>\n%s", body, b_csv)
+  body = sprintf("%s<h1>Import stats</h1>\n%s", body, b_csv)
   
   b_db <- paste(capture.output(print(xtable(t(as.data.frame(stats_db))), type="html")), collapse="\n")
-  body = sprintf("%s\n<h1>DB</h1>\n%s", body, b_db)
+  body = sprintf("%s\n<h1>Database stats</h1>\n%s", body, b_db)
 
   body = sprintf("%s\n<h1>Predictions (models)</h1>\n", body)
   for (value in GetValueNames(project.config$values)) {
@@ -731,6 +733,15 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
       b_M <- paste(capture.output(cat(M$html$chart)), collapse="\n")
       b_MG <- paste(capture.output(cat(MG$html$chart)), collapse="\n")
       body = sprintf("%s\n<h2>%s</h2>\n%s\n%s", body, value, b_M, b_MG)
+
+      template.file <- file.path(GetTemplatesHome(), "sql-ltp-changed-models.brew")
+      sql <- paste(capture.output(brew(template.file)),  collapse="\n")
+      logdebug(sql)
+      records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+      if (nrow(records) > 0) {
+        b_changed_models <- paste(capture.output(print(xtable(as.data.frame(records)), type="html")), collapse="\n")
+        body = sprintf("%s<h3>Changed models</h3>\n%s", body, b_changed_models)
+      }
     }
   }
 
@@ -738,3 +749,4 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
   html.page <- file.path(Project.GetPath(project.name), "r_project_stats.html")
   brew(template.file, output=html.page)
 }
+

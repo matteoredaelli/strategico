@@ -1,0 +1,10 @@
+select 
+  item_id id,
+  <%=paste(project.keys, collapse=", ")%>,
+  BestModel,
+  SuggestedModel
+FROM 
+  v_<%=project.name%>_summary_<%=value%>
+WHERE
+  BestModel != SuggestedModel
+order by item_id
