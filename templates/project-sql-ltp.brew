@@ -136,6 +136,7 @@ select
   <% } %>
   s.BestModel,
   s.SuggestedModel,
+  s.SuggestedModel2,
   s.BestAICNoOutRangeExclude,
   s.BestICNoOutRangeExclude,
   s.Points,
