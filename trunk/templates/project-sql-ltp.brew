@@ -93,6 +93,10 @@ DROP TABLE IF EXISTS <%=project.name%>_summary_<%=value%>;
 CREATE TABLE IF NOT EXISTS <%=project.name%>_summary_<%=value%> (
   item_id int(11) NOT NULL,
   BestModel varchar(20) default NULL,
+  SuggestedModel varchar(20) default NULL,
+  BestAICNoOutRangeExclude varchar(20) default NULL,
+  BestICNoOutRangeExclude varchar(20) default NULL,
+  TotModels int(11) default NULL,
   Points int(11) default NULL,
   NotZeroPoints int(11) default NULL,
   LastNotEqualValues double default NULL,
@@ -100,11 +104,7 @@ CREATE TABLE IF NOT EXISTS <%=project.name%>_summary_<%=value%> (
   MeanValues double default NULL,
   MeanPredictedRatioMeanValues double default NULL,
   SdPredictedRatioSdValues double default NULL,
-  BestAICNoOutRangeExclude varchar(20) default NULL,
-  BestICNoOutRangeExclude varchar(20) default NULL,
   Timestamp double default NULL,
-  SuggestedModel varchar(20) default NULL,
-  TotModels int(11) default NULL,
   Parameters varchar(1000) default NULL,
   ReturnCode int(11) default NULL,
   Run int(11) default NULL,
@@ -134,15 +134,15 @@ select
   i.<%=key%>,
   <% } %>
   s.BestModel,
+  s.SuggestedModel,
+  s.BestAICNoOutRangeExclude,
+  s.BestICNoOutRangeExclude,
   s.Points,
   s.LastNotEqualValues,
   s.MeanPredicted,
   s.MeanValues,
   s.MeanPredictedRatioMeanValues,
-  s.SdPredictedRatioSdValues,
-  s.BestAICNoOutRangeExclude,
-  s.BestICNoOutRangeExclude,
-  s.SuggestedModel
+  s.SdPredictedRatioSdValues
 from
   <%=project.name%>_items i inner join 
   <%=project.name%>_summary_<%=value%> s on (i.item_id = s.item_id) inner join 
