@@ -56,7 +56,7 @@
   item.summary <- result$summary
   item.summary.models <- result$summary.models
   item.results <- result$results
-
+  
   b1 <- paste(
              '<form method="GET">', 
               BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
@@ -83,13 +83,8 @@
   if (!is.null(item.results) && nrow(item.results) > 0) {
   
 
-  if(!is.null(item.models)  && length(item.models) > 1) {
-    b100 <- ""
-    for (model in item.models) {
-      b100 <- paste(b100, 
-                    BuildHtmlElement_input(name="model", default=model, type="radio"),
-                         model, " ", sep="")
-    }
+  if(!is.null(item.models)  && length(item.models) > 1 &&  (!is.null(result$best.model))) {
+    b100 <- BuildHtmlElement_select("Best Model", "model", item.models, default=ifelse(is.null(result$best.model), "", result$best.model))
     b100 <- paste(b100, '
                     <input type="submit" name="setmodel" value="Set best model" />
                 </form>')

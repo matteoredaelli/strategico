@@ -358,7 +358,7 @@ Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL
   ## TAB Show best Model
   ###############################################################################################################
 
-  best <- subset(item.results, model== best.model, select=c("PERIOD", "V"))
+  best <- subset(item.results, model==best.model, select=c("PERIOD", "V"))
   BM <- gvisLineChart(data=best, options=options)
   b_BM <- paste(capture.output(cat(BM$html$chart)), collapse="\n")
 
