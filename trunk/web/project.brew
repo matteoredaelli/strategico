@@ -98,6 +98,7 @@
     if (exists.csv && exists.config) { 
     
     b60 <- '<form  method="POST">
+       <input name="project.name" type="hidden" value="__PROJECT_NAME__"	 size="10" /> 
    <textarea name="param" rows="6" cols="60">__PARAM__</textarea><br />
                    Press run for starting eval (LTP) job(s) for your project.<br />It can take from few seconds to hours:
                    <input type="submit" name="run" value="Run"/><br /></form>'
@@ -108,7 +109,10 @@
 
         project.values <- Project.GetValues(project.name=name, project.config)
 
-        b65 <- sprintf('Build reports (stats, suspicious items,..): <form  method="POST"><input type="submit" name="build.reports" value="Build"/></form><br />See %s', project.url.html.link)
+        b65 <- sprintf('Build reports (stats, suspicious items,..): <form  method="POST">
+                <input name="project.name" type="hidden" value="__PROJECT_NAME__"         size="10" />
+                <input type="submit" name="build.reports" value="Build"/></form><br />See %s', project.url.html.link)
+	b65 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b65)
         page.sections <- rbind(page.sections, data.frame(title="Build reports", body=b65))
 
         b70 <- '<a href="items.brew?project=__PROJECT_NAME__">browse</a> results'
@@ -125,8 +129,10 @@
 
     b100 <- 'This step will delete this project (database tables and all files). Are you sure??
                 <form  method="POST">
+                   <input name="project.name" type="hidden" value="__PROJECT_NAME__"	 size="10" /> 
                    <input type="submit" name="drop.project" value="Drop project"/><br />
                 </form>'
+    b100 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b100)
     page.sections <- rbind(page.sections, data.frame(title=paste("Drop", project.name), body=b100))
   }
   template.file <- file.path(GetWebTemplatesHome(), "page.brew")
