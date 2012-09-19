@@ -4,6 +4,8 @@
   source(file.path(strategico.home, "strategico_util.R"))
     
   project.name <- ifelse(is.null(POST$project), GET$project, POST$project)
+  project.values <- Project.GetValues(project.name=project.name, project.config)
+
 
   MySource("strategico_web.R")
 
@@ -65,7 +67,10 @@
   }
 
   if (!is.null(project.name) && !is.null(POST$build.reports) && DB.GetTableNameProjectItems(project.name) %in% strategico.tables ) {
-    msg <- Strategico.ExecCommand(project.name, cmd="build.reports", options="", mailto=project.config$mailto, intern=TRUE)
+    #msg <- Strategico.ExecCommand(project.name, cmd="build.reports", options="", mailto=project.config$mailto, intern=TRUE)
+    Project.BuildStatsHtmlPage(project.name, db.channel=db.channel)
+    for (v in project.values) 
+      Project.BuildSuspiciousItemsHtmlPage(project.name, db.channel=db.channel, v)
   }
 
   if (!is.null(project.name) && !is.null(POST$drop.project)) {
@@ -106,8 +111,6 @@
 	b60 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b60)
         b60 <- gsub("__PARAM__", Param.ToString(project.config$param), b60)
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
-
-        project.values <- Project.GetValues(project.name=name, project.config)
 
         b65 <- sprintf('Build reports (stats, suspicious items,..): <form  method="POST">
                 <input name="project.name" type="hidden" value="__PROJECT_NAME__"         size="10" />
