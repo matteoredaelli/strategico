@@ -359,8 +359,8 @@ Project.GetStatisticsProjectData <- function(project.name, project.config=NULL, 
   sql <- sprintf("SELECT * from strategico_projects where name='%s'", project.name)
   records <- try(DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel))
   
-  stats$csv_rows <- records[1]$csv_rows
-  stats$good_rows <- records[1]$good_rows
+  stats$csv_rows <- records[1,]$csv_rows
+  stats$good_rows <- records[1,]$good_rows
   
   stats$keys <- paste(project.config$keys, collapse=",")
   stats$values <- paste(project.config$values, collapse=",")
@@ -713,8 +713,9 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
   
   project.keys <- Project.GetKeys(project.name, project.config=project.config)
 
-  stats_csv <- Project.GetStatisticsProjectData(project.name, project.config=project.config, db.channel)
-  stats_db <- Project.GetStatisticsDB(project.name, project.config=project.config, db.channel)
+  stats <- Project.GetStatistics(project.name, project.config=project.config, db.channel=db.channel)
+  stats_csv <- stats$csv
+  stats_db <- stats$db
 
   b_csv <- paste(capture.output(print(xtable(t(as.data.frame(stats_csv))), type="html")), collapse="\n")
   body = sprintf("%s<h1>Import stats</h1>\n%s", body, b_csv)

@@ -248,13 +248,20 @@ if (is.null(opt$item.values)) {
 }
 
 #########################################################################
-## CMD build.reports
+## CMD report.stats
 #########################################################################
 
-if (opt$cmd == "build.reports") {
-  
+if (opt$cmd == "report.stats") {
   Project.BuildStatsHtmlPage(opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
 
+#########################################################################
+## CMD report.suspicious
+#########################################################################
+
+if (opt$cmd == "report.suspicious") {
+  
   if (is.null(opt$item.values))
     UsageAndQuit("Missing parameter item.values")
   
