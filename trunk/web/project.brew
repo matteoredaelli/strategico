@@ -66,9 +66,13 @@
     msg <- Strategico.ExecCommand(project.name, cmd="export.csv", options="", mailto=project.config$mailto, intern=TRUE)
   }
 
-  if (!is.null(project.name) && !is.null(POST$build.reports) && DB.GetTableNameProjectItems(project.name) %in% strategico.tables ) {
-    #msg <- Strategico.ExecCommand(project.name, cmd="build.reports", options="", mailto=project.config$mailto, intern=TRUE)
+  if (!is.null(project.name) && !is.null(POST$report.stats) && DB.GetTableNameProjectItems(project.name) %in% strategico.tables ) {
+    #msg <- Strategico.ExecCommand(project.name, cmd="report.stats", options="", mailto=project.config$mailto, intern=TRUE)
     Project.BuildStatsHtmlPage(project.name, db.channel=db.channel)
+  }
+
+  if (!is.null(project.name) && !is.null(POST$report.suspicious) && DB.GetTableNameProjectItems(project.name) %in% strategico.tables ) {
+    #msg <- Strategico.ExecCommand(project.name, cmd="report.suspicious", options="", mailto=project.config$mailto, intern=TRUE)
     for (v in project.values) 
       Project.BuildSuspiciousItemsHtmlPage(project.name, db.channel=db.channel, v)
   }
@@ -112,11 +116,15 @@
         b60 <- gsub("__PARAM__", Param.ToString(project.config$param), b60)
         page.sections <- rbind(page.sections, data.frame(title="Run", body=b60))
 
-        b65 <- sprintf('Build reports (stats, suspicious items,..): <form  method="POST">
+        b65 <- sprintf('<form  method="POST">
                 <input name="project.name" type="hidden" value="__PROJECT_NAME__"         size="10" />
-                <input type="submit" name="build.reports" value="Build"/></form><br />See %s', project.url.html.link)
+                <input type="submit" name="report.stats" value="Build Project Stats"/></form><br />')
 	b65 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b65)
-        page.sections <- rbind(page.sections, data.frame(title="Build reports", body=b65))
+        b67 <- sprintf('<form  method="POST">
+                <input name="project.name" type="hidden" value="__PROJECT_NAME__"         size="10" />
+                <input type="submit" name="report.suspicious" value="Build Suspicious Items"/></form><br />See %s', project.url.html.link)
+	b67 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b67)
+        page.sections <- rbind(page.sections, data.frame(title="Create reports", body=paste(b65, b67, sep="\n")))
 
         b70 <- '<a href="items.brew?project=__PROJECT_NAME__">browse</a> results'
 	b70 <- gsub("__PROJECT_NAME__", ifelse(is.null(project.name), "", project.name), b70)
