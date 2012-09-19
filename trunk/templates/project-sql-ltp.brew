@@ -152,6 +152,20 @@ from
 order by
   i.item_id
 ;
+
+create or replace view v_<%=project.name%>_changed_models_<%=value%> as
+select
+  item_id id,
+  <%=paste(project.keys, collapse=", ")%>,
+  BestModel,
+  SuggestedModel,
+  SuggestedModel2
+FROM
+  v_<%=project.name%>_summary_<%=value%>
+WHERE
+  BestModel != SuggestedModel
+order by item_id;
+
 <% } # end for project.values%>
 
 create or replace view v_<%=project.name%>_results as

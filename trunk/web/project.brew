@@ -4,7 +4,7 @@
   source(file.path(strategico.home, "strategico_util.R"))
     
   project.name <- ifelse(is.null(POST$project), GET$project, POST$project)
-  project.values <- Project.GetValues(project.name=project.name, project.config)
+  project.values <- Project.GetValues(project.name=project.name)
 
 
   MySource("strategico_web.R")

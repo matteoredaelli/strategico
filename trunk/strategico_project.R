@@ -734,15 +734,6 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
       b_M <- paste(capture.output(cat(M$html$chart)), collapse="\n")
       b_MG <- paste(capture.output(cat(MG$html$chart)), collapse="\n")
       body = sprintf("%s\n<h2>%s</h2>\n%s\n%s", body, value, b_M, b_MG)
-
-      template.file <- file.path(GetTemplatesHome(), "sql-ltp-changed-models.brew")
-      sql <- paste(capture.output(brew(template.file)),  collapse="\n")
-      logdebug(sql)
-      records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
-      if (nrow(records) > 0) {
-        b_changed_models <- paste(capture.output(print(xtable(as.data.frame(records)), type="html")), collapse="\n")
-        body = sprintf("%s<h3>Changed models</h3>\n%s", body, b_changed_models)
-      }
     }
   }
 
