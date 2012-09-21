@@ -22,7 +22,7 @@ Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=
                       period.start=NULL, period.end=NULL,
                       project.config=NULL, db.channel) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   if (is.null(values))
     values <- GetValueNames(project.config=project.config)
@@ -36,7 +36,7 @@ Items.Eval <- function(project.name, id.list=c(), keys=NULL, values=NULL, param=
 
 Items.DB.EvalFromSummary <- function(project.name, value, verbose=FALSE, project.config=NULL, db.channel) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   tablename = DB.GetTableNameSummary(project.name, value)
   sql_statement <- paste("select * from ", tablename, " where Run=1", sep="")

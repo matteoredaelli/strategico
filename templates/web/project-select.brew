@@ -1,0 +1,32 @@
+<script>
+  function validateForm()
+  {
+    var x=document.forms["form-select-project"]["project"].value;
+    if (x==null || x=="") {
+      alert("Project name must be filled out");
+      return false;
+    }
+    if (x==null || x=="") {
+      alert("project name must be filled out");
+      return false;
+    }
+
+    if (x.length > 10 ) {
+      alert("Project name must be not more than 10 fields");
+      return false;
+    }
+
+    var good_patt=new RegExp("^[a-z][a-z0-9]*$");
+    if (!good_patt.test(x)) {
+      alert("Project name must contain only lowercase letters and numbers. The first character must be a letter");
+      return false;
+    }
+    return true;
+  }
+</script>
+<p>
+  <form name="form-project-menu" class="form-inline" method="POST" action="project-menu.brew" onsubmit="return validateForm()">
+    <input type="text" name="project" class="input-medium" placeholder="project name">
+    <button type="submit" class="btn btn-primary" name="next">Next</button>
+  </form>
+</p>

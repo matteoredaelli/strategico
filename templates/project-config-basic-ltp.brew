@@ -1,0 +1,6 @@
+project.name='<%=project.name%>'
+mailto=''
+csv.sep=';'
+csv.dec=','
+save=list('gitems', 'summary')
+eval.function='ltp'

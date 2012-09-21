@@ -1,98 +1,107 @@
-<!doctype html>
-<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Strategico :: <%=page.title%></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-	<title>Strategico :: <%=if (!is.null(project.name)) paste(project.name, ":: ")%><%=page.title%></title>
-	<meta name="description" content="">
-	<meta name="author" content="">
+    <!-- Le styles -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
-	<meta name="viewport" content="width=device-width,initial-scale=1">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-	<link rel="stylesheet" href="css/style.css">
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
+  </head>
 
-	<script src="js/libs/modernizr-2.0.6.min.js"></script>
+  <body>
 
-</head>
-<body>
-	<div id="header-container">
-		<header class="wrapper clearfix">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="<%=sprintf("%s/project-select.brew", strategico.config$strategico.url)%>">Strategico</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="<%=sprintf("%s/project-select.brew", strategico.config$strategico.url)%>">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
 
-			<h1 id="title"><img src="images/R-logo.png" />Strategico 
-                          <%=if (!is.null(project.name)) paste("::", project.name)%>
-                          <!-- <%=page.title%> -->
-                        </h1>
-			<nav>
-				<ul>
-<% if(!is.null(project.name)) { %>
-					<li><a href="index.brew?">Home</a></li>
-					<li><a href="project.brew?project=<%=project.name%>"><%=project.name%></a></li>
-                                        <li><a href=<%=strategico.config$projects.url%> target="_blank">All projects</a></li>
-<%} %>
-				</ul>
-			</nav>
-		</header>
-	</div>
-	<div id="main-container">
-		<div id="main" class="wrapper clearfix">
-		        <article>
-			  <!--
-				<header>
-					<h1><%=page.title%></h1> 
-					<p></p>
-				</header>
-			 -->
-				<%
-				   tot.sections <- nrow(page.sections)
-				   if (tot.sections > 0) for (i in 1:tot.sections) {
-				     section <- page.sections[i,]
-				%>
-				<section>
-					<a name="<%=as.character(section$title)%>"><h2><%=as.character(section$title) %></h2></a>
-					<%=as.character(section$body)%>
-				</section>
-		           <%} %>
-                        </article>
-			<aside>
-				<h3>Menu</h3>
-				<%
-				   if (tot.sections > 0) for (i in 1:tot.sections) {
-				     section <- page.sections[i,]
-				%>
-					<a href="#<%=as.character(section$title)%>"><%=as.character(section$title) %></a><br/>
-				<%} %>
-			</aside>			
-		</div> <!-- #main -->
-	</div> <!-- #main-container -->
-<%
-   DB.Close(db.channel)
-%>
-	<div id="footer-container">
-		<footer class="wrapper">
-			<!--<h3>Strategico</h3> -->
-                        Powered by <a href="http://code.google.com/p/strategico/">Strategico</a>,  <a href="http://code.google.com/p/ltp/">Long Term Prediction</a> and <a href="http://www.r-project.org/">R</a> OpenSource projects.
-		</footer>
-	</div>
+    <div class="container">
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit">
+        <h1><%=page.title%></h1>
+        <%=page.body%>
+      </div>
 
-<script src="js/script.js"></script>
-<script>
-	var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']]; // Change UA-XXXXX-X to be your site's ID
-	(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
-	g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-	s.parentNode.insertBefore(g,s)}(document,'script'));
-</script>
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="span4">
+          <h2>Messages</h2>
+          <p class="text-info"><%=page.msg%></p>
+        </div>
+        <div class="span4">
+          <h2>Help</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+       </div>
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+      </div>
 
-<!--[if lt IE 7 ]>
-	<script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.2/CFInstall.min.js"></script>
-	<script>window.attachEvent("onload",function(){CFInstall.check({mode:"overlay"})})</script>
-<![endif]-->
+      <hr>
 
-</body>
+      <footer>
+        <p>Powered by <a href="http://code.google.com/p/strategico/">Strategico</a>,  <a href="http://code.google.com/p/ltp/">Long Term Prediction</a> and <a href="http://www.r-project.org/">R</a> OpenSource projects.</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="bootstrap/js/jquery.js"></script>
+    <script src="bootstrap/js/bootstrap-transition.js"></script>
+    <script src="bootstrap/js/bootstrap-alert.js"></script>
+    <script src="bootstrap/js/bootstrap-modal.js"></script>
+    <script src="bootstrap/js/bootstrap-dropdown.js"></script>
+    <script src="bootstrap/js/bootstrap-scrollspy.js"></script>
+    <script src="bootstrap/js/bootstrap-tab.js"></script>
+    <script src="bootstrap/js/bootstrap-tooltip.js"></script>
+    <script src="bootstrap/js/bootstrap-popover.js"></script>
+    <script src="bootstrap/js/bootstrap-button.js"></script>
+    <script src="bootstrap/js/bootstrap-collapse.js"></script>
+    <script src="bootstrap/js/bootstrap-carousel.js"></script>
+    <script src="bootstrap/js/bootstrap-typeahead.js"></script>
+
+  </body>
 </html>

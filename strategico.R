@@ -115,7 +115,7 @@ if (opt$cmd == "runit") {
   library('RUnit')
   
   project.name <- "sample"
-  project.config <- Project.GetConfig(project.name)
+  project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   test.suite <- defineTestSuite("StrategicoTestSuite",
                               dirs = paste(GetStrategicoHome(), "tests", sep="/"),
@@ -137,13 +137,23 @@ if ( is.null(opt$project.name) )
   UsageAndQuit("Missing project name!")
 
 #########################################################################
+## create
+#########################################################################
+
+if (opt$cmd == "create") {
+
+  Project.Create(project.name=opt$project.name, db.channel=db.channel)
+  q(status=0)
+}
+
+#########################################################################
 ## Reading project.config
 #########################################################################
 
 if (!Project.Exists(opt$project.name))
-  UsageAndQuit( paste("Missing directory for project name=", opt$project.name))
+  UsageAndQuit(sprintf("The project '%s' does nto exist! Bye", opt$project.name))
 
-project.config <- Project.GetConfig(opt$project.name)
+project.config <- Project.GetConfig(opt$project.name, db.channel=db.channel)
 
 #########################################################################
 ## create.db

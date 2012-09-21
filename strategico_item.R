@@ -123,7 +123,7 @@ Item.EvalData <- function(project.name, id=NULL, keys=NULL, item.data=NULL,
 
 Item.GetBestModel <- function(project.name, project.config=NULL, id, value, db.channel) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   item.summary <- Item.DB.GetSummary(project.name=project.name, id=id, db.channel=db.channel, value=value)
   if (nrow(item.summary) == 1)
@@ -144,7 +144,7 @@ Item.GetData <- function(project.name, project.config=NULL, id=NULL, keys=NULL, 
   }
   
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   if (!is.value(value, project.config=project.config)) {
     msg <- paste("Invalid value=", value, ". No data to retreive") 
@@ -278,7 +278,7 @@ Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL
   }
 
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   if (!is.value(value, project.config=project.config)) {
     msg <- paste("Invalid value=", value, ". No data to retreive")

@@ -26,21 +26,112 @@ Project.CreateDB <- function(project.name, project.config=NULL, db.channel=db.ch
   sapply(mysql, function(s) DB.RunSQLQuery(sql_statement=s, db.channel=db.channel))
 }
 
+Project.insertRowDB <- function(project.name, db.channel, config_basic) {
+  sql <- sprintf("insert into strategico_projects (name, config_basic) values ('%s',\"%s\")", project.name, config_basic)
+  logwarn( sprintf("Inserting project '%s': %s", project.name, sql))
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+}
+
+Project.selectRowDB <- function(project.name, db.channel) {
+  sql <- sprintf("select * from strategico_projects where name = '%s'", project.name)
+  logwarn( sprintf("Retreiving project'%s': %s", project.name, sql))
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+}
+
+Project.dropRowDB <- function(project.name, db.channel) {
+  sql <- sprintf("delete from strategico_projects where name = '%s'", project.name)
+  logwarn( sprintf("Dropping project '%s': %s", project.name, sql))
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+}
+
+Project.updateRowDB <- function(project.name, db.channel, config_basic=NULL, config_csv=NULL, param=NULL, csv_rows=NULL, good_rows=NULL) {
+  if (!is.null(config_basic)) {
+    sql <- sprintf("update strategico_projects set config_basic=\"%s\" where name = '%s'", config_basic, project.name)
+    DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+  }
+  if (!is.null(config_csv)) {
+    sql <- sprintf("update strategico_projects set config_csv=\"%s\" where name = '%s'", config_csv, project.name)
+    DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+  }
+  if (!is.null(param)) {
+    sql <- sprintf("update strategico_projects set param=\"%s\" where name = '%s'", param, project.name)
+    DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+  }
+  if (!is.null(csv_rows)) {
+    sql <- sprintf("update strategico_projects set csv_rows=\"%s\" where name = '%s'", csv_rows, project.name)
+    DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+  }
+  if (!is.null(good_rows)) {
+    sql <- sprintf("update strategico_projects set good_rows=\"%s\" where name = '%s'", good_rows, project.name)
+    DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+  }
+}
+
+
+Project.Create <- function(project.name, db.channel) {
+  sql <- "
+CREATE TABLE IF NOT EXISTS strategico_projects (
+  name varchar(15) NOT NULL,
+  owner varchar(30) default NULL,
+  csv_rows int(11) default 0,
+  good_rows int(11) default 0,
+  config_basic varchar(1000) default '',
+  config_csv varchar(1000) default '',
+  param varchar(1000) default '',
+  PRIMARY KEY  (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+"
+  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+
+  records <- Project.selectRowDB(project.name, db.channel)
+  
+  if (nrow(records) == 1) {
+    logwarn(sprintf("The project '%s': already exists", project.name))
+    return(1)
+  }
+
+  logwarn( sprintf("Creating project '%s'", project.name))
+
+  project.path <- Project.GetPath(project.name)
+  logwarn( sprintf("Creating folder '%s'", project.path))
+  dir.create(project.path, showWarnings = FALSE)
+  Sys.chmod(project.path, "777")
+
+  template.file <- file.path(GetTemplatesHome(), "project-config-basic-ltp.brew")
+  config.basic <- paste(capture.output(brew(template.file)),  collapse="\n")
+  logdebug(sprintf("Config basic:\n'%s'", config.basic))
+
+  logwarn("Insert project row in strategico_projects DB table")
+  Project.insertRowDB(project.name, db.channel, config.basic)
+}
+
 Project.CreateProjectConfig <- function(project.name, mailto=NULL,
                                        period.start, period.end, period.freq, n.ahead=6,
-                                       project.keys, project.values) {
-  logdebug( "Generating Project Config file")
-  input.file <- file.path(GetTemplatesHome(), paste("project-config-ltp.brew", sep=""))
-  logdebug( paste("Template file =", input.file))
-  output.file <- Project.GetConfigFullPathFilename(project.name)
-  logdebug( paste("Target file =", output.file))
-  brew(input.file, output=output.file)
+                                       project.keys, project.values, db.channel) {
+  records <- Project.selectRowDB(project.name, db.channel) 
+  if (nrow(records) != 1) {
+    logdebug(sprintf("No row found (too many rows) in strartegico_projects table about project '%s'", project.name))
+    return(1)
+  }
+
+  template.file <- file.path(GetTemplatesHome(), "project-config-csv-ltp.brew")
+  config_csv <- paste(capture.output(brew(template.file)),  collapse="\n")
+  logdebug(sprintf("Config:\n'%s'", config.csv))
+
+  template.file <- file.path(GetTemplatesHome(), "project-config-param-ltp.brew")
+  param <- paste(capture.output(brew(template.file)),  collapse="\n")
+  logdebug(sprintf("Param:\n'%s'", param))
+
+  logwarn("Update csv config and param in strategico_projects DB table")
+  Project.updateRowDB(project.name, db.channel=db.channel, config_csv=config_csv, param=param)
+
   return(0)
 }
 
 
-Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data, mailto, n.ahead) {
+Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data, mailto, n.ahead, db.channel) {
   
+  loginfo( sprintf("Found %d rows and %d columns", nrow(data), ncol(data)))
   if (is.null(data) ) {
     logerror( paste("No data found, no config file will be created for project", project.name))
     return(NULL)
@@ -130,14 +221,16 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
   Project.CreateProjectConfig(project.name, mailto=mailto,
                               period.start=period.start, period.end=period.end, period.freq=period.freq,
                               n.ahead=n.ahead,
-                              project.keys=project.keys, project.values=project.values)
+                              project.keys=project.keys, project.values=project.values, db.channel=db.channel)
   data
 }
+
+## TODO missing db.channel
 
 Project.BuildSQLscript <- function(project.name, project.config=NULL) {
   logdebug( "Generating SQL script")
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
   project.keys <- GetKeyNames(project.name=project.name, project.config=project.config)
   project.values <- GetValueNames(project.name=project.name, project.config=project.config)
@@ -151,7 +244,7 @@ Project.BuildSQLscript <- function(project.name, project.config=NULL) {
 
 Project.DropDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
 
   tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
@@ -159,13 +252,12 @@ Project.DropDB <- function(project.name, project.config=NULL, db.channel) {
 
   views <- Project.GetViewNames(project.name=project.name, project.config=project.config)
   lapply(views, function(x) DB.DropView(x,db.channel))
-  sql <- paste("delete from strategico_projects where name = '", project.name, "'", sep="")
-  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
+  Project.dropRowDB(project.name, db.channel)
 }
 
 Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
 
   tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
@@ -191,7 +283,7 @@ Project.EmptyFS <- function(project.name, recursive = TRUE) {
 
 Project.ExportResultsCSV <- function(project.name, project.config=NULL, value, db.channel, file) {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
   if(is.null(file)) {
     name <- paste(project.name, "-results-", value, ".csv", sep="")
@@ -219,7 +311,7 @@ Project.GetKeyValues <- function(key.name, project.name, db.channel) {
  
 Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   tablename = DB.GetTableNameProjectItems(project.name)
   where.condition <- BuildFilterWithKeys(keys, sep="=", collapse=" and ", na.rm=keys.na.rm)
@@ -266,26 +358,58 @@ Project.GetCSVFullPathFilename <- function(project.name) {
   filename <- file.path(project.path, Project.GetCSVFilename(project.name))
 }
 
-Project.GetConfig <- function(project.name, quit=FALSE) {
-  default.project.config <- file.path(strategico.config$projects.home, "project.config")
-  logdebug( paste("Reading default config file", default.project.config))
-  source(default.project.config)
+Project.GetConfig <- function(project.name, db.channel, quit=FALSE) {
+  project.config <- list()
+  param <- list()
+
+  #default.project.config <- file.path(strategico.config$projects.home, "project.config")
+  #logdebug( paste("Reading default config file", default.project.config))
+  #source(default.project.config)
 
   plugins.path <- GetPluginsPath()
   ##project.path <- Project.GetPath(project.name)
   
-  filename <- Project.GetConfigFullPathFilename(project.name)
-  logdebug( paste("Reading config file", filename))
-  if (!file.exists(filename)) {
-    logdebug( paste("... missing config file", filename))
-  } else {
-    try(source(filename))
+  #filename <- Project.GetConfigFullPathFilename(project.name)
+  #logdebug( paste("Reading config file", filename))
+  #if (!file.exists(filename)) {
+  #  logdebug( paste("... missing config file", filename))
+  #} else {
+  #  try(source(filename))
+  #}
+  
+  records <- Project.selectRowDB(project.name, db.channel)
+  if(nrow(records) != 1) {
+    loginfo("Unexpected number of rows in strategico_projects tables")
+    return(project.config)
   }
+  config.string <- records[1,]$config_basic
+  config_csv <- records[1,]$config_csv
+  if (!is.null(config_csv) && config_csv != '')
+    config.string <- sprintf("%s\n%s", config.string, config_csv)
+
+  param.string <- records[1,]$param
+
+  logdebug( sprintf("Config = %s", config.string))
+  logdebug( sprintf("Param = %s", param.string))
+
+  cmd <- paste("project.config$", unlist(strsplit(config.string, "\\n")), sep="", collapse=";")
+  cmd <- gsub("\r", "", cmd)
+  logdebug(sprintf("evaluating %s", cmd))
+  eval(parse(text=cmd))
+
+  if (!is.null(param.string) && param.string != '') {
+    cmd <- paste("param$", unlist(strsplit(param.string, "\\n")), sep="", collapse=";")
+  cmd <- gsub("\r", "", cmd)
+    logdebug(sprintf("evaluating %s", cmd))
+    eval(parse(text=cmd))
+  }
+  project.config$param <- param
+    
   eval.file <- paste("eval_", project.config$eval.function, ".R", sep="")
   eval.file <- file.path(GetPluginsPath(), eval.file)
   logdebug( paste("Reading eval file", eval.file))
   if (! file.exists(eval.file)) {
-    loginfo( paste("... missing eval file", eval.file))
+    loginfo( paste("... miyyssing eval file", eval.file))
     loginfo( "You MUST add it!!!!!!!!!!!!!!!!!!! and quit right now...")
   } else {
     try(source(eval.file))
@@ -295,7 +419,7 @@ Project.GetConfig <- function(project.name, quit=FALSE) {
 
 Project.GetExpectedCSVHeader <- function(project.name=NULL, project.config=NULL) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   
   project.keys <- Project.GetKeys(project.name, project.config=project.config)
   project.values <- Project.GetValues(project.name, project.config=project.config)
@@ -306,14 +430,14 @@ Project.GetExpectedCSVHeader <- function(project.name=NULL, project.config=NULL)
   
 Project.GetKeys <- function(project.name=NULL, project.config=NULL) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
  
   BuildKeyNames(project.config$keys, na.rm=FALSE) 
 }
 
 Project.GetValues <- function(project.name=NULL, project.config=NULL) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
  
   GetValueNames(values=project.config$values) 
 }
@@ -351,7 +475,7 @@ Project.GetStatistics <-function(project.name, project.config=NULL, db.channel) 
   
 Project.GetStatisticsProjectData <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
 
   stats <- list()
@@ -386,7 +510,7 @@ Project.GetStatisticsProjectData <- function(project.name, project.config=NULL, 
 
 Project.GetStatisticsDB <- function(project.name, project.config=NULL, db.channel) {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
 
   tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
@@ -414,7 +538,7 @@ Project.GetStatistics.Models <- function(project.name, value, db.channel) {
 
 Project.GetTableNames <- function(project.name, project.config=NULL) {
   if(is.null(project.config)) 
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   tables <- c(
               DB.GetTableNameProjectData(project.name),
@@ -437,7 +561,7 @@ Project.GetTableNames <- function(project.name, project.config=NULL) {
 
 Project.GetViewNames <- function(project.name, project.config=NULL) {
   if(is.null(project.config)) 
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   tables <- c() 
   tables <- append(tables, paste("v", project.name, "results", sep="_"))
@@ -445,7 +569,8 @@ Project.GetViewNames <- function(project.name, project.config=NULL) {
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
                       paste("v_", DB.GetTableNameResults(project.name, value), sep=""),
-                      paste("v_", DB.GetTableNameSummary(project.name, value), sep="")
+                      paste("v_", DB.GetTableNameSummary(project.name, value), sep=""),
+                      sprintf("v_%s_changed_models_%s", project.name, value)
                       )
     tables <- append(tables, value.tables)
   }
@@ -459,19 +584,18 @@ Project.GetUrl <- function(project.name, projects.url = strategico.config$projec
   
 Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel, filename=NULL, mailto='nobody@localhost', n.ahead=6) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   if (is.null(filename))
     filename <- Project.GetCSVFullPathFilename(project.name=project.name)
 
   logwarn( paste("Loading data from file", filename))
-  data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE)
+  #data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote=project.config$csv.quote, header=TRUE)
+  data=read.table(filename, sep=project.config$csv.sep, dec=project.config$csv.dec, quote='"', header=TRUE)
   csv.rows <- nrow(data)
   logwarn( sprintf("found %d rows in csv file %s", csv.rows, filename))
   
-  project.config.file <- Project.GetConfigFullPathFilename(project.name)
-  logwarn( paste("Config file", project.config.file, "doesn't exist: I'll create it for you"))
-  data <- Project.NormalizeInputDataAndCreateProjectConfig(project.name, data=data, mailto=mailto, n.ahead=n.ahead)
+  data <- Project.NormalizeInputDataAndCreateProjectConfig(project.name, data=data, mailto=mailto, n.ahead=n.ahead, db.channel=db.channel)
   if (is.null(data)) {
     loginfo( "Something went wrong: not loaing data to DB")
     return (data)
@@ -480,16 +604,15 @@ Project.ImportFromCSV <- function(project.name, project.config=NULL, db.channel,
   logwarn( sprintf("found good %d rows in csv  file %s", good.rows, filename))
   
   ## reloading the new project config file
-  project.config <- Project.GetConfig(project.name=project.name)
+  project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   
   ## creating DB tables
   Project.CreateDB(project.name=project.name,
                    project.config=project.config, db.channel=db.channel)
 
   ##saving csv info
-  sql <- sprintf("update strategico_projects set csv_rows=%d, good_rows=%d where name='%s'", csv.rows, good.rows, project.name)
-  logdebug(sql)
-  DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+  Project.updateRowDB(project.name, db.channel, csv_rows=csv.rows)
+  Project.updateRowDB(project.name, db.channel, good_rows=good.rows)
 
   ## importing csv data to DB
   Project.Items.UpdateData(project.name=project.name, project.data=data, db.channel=db.channel)
@@ -502,11 +625,8 @@ Project.ImportDataFromDB <- function(project.name, db.name, db.user, db.pass, sq
 }
 
 Project.IsValid <- function(project.name, db.channel) {
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
-
-  ## TODO:
-  TRUE
+  records <- Project.selectRowDB(project.name, db.channel)
+  return(nrow(records == 1))
 }
 
 Project.IsValidName <- function(project.name) {
@@ -537,7 +657,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   project.path <- Project.GetPath(project.name)
   dir.create(project.path, showWarnings = FALSE)
   
-  project.config <- Project.GetConfig(project.name=project.name)
+  project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
@@ -600,7 +720,7 @@ Project.NormalizeName <- function(project.name=NULL) {
 
 Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value, project.config=NULL) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   body <- sprintf("%s :: suspicious items :: %s<hr />", project.name, value)
   width=800
@@ -705,7 +825,7 @@ Project.BuildSuspiciousItemsHtmlPage <- function(project.name, db.channel, value
 
 Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.config=NULL) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   body <- sprintf("%s :: stats<hr />", project.name)
   width <- 800
