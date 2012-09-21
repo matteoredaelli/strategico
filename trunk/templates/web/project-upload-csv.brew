@@ -1,0 +1,16 @@
+<p>
+  <form name="form-project-upload-csv" class="form-inline" enctype="multipart/form-data" method="POST">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="file" name="project_file" class="input-medium">
+    <button type="submit" class="btn" name="upload">upload</button>
+    <button type="submit" class="btn" name="refresh">refresh</button>
+  </form>
+</p>
+<p>
+<%if (csv_exists) { %>
+  <form name="form-project-next" class="form-inline" method="POST" action="project-menu.brew">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <button type="submit" class="btn btn-large btn-primary">back</button>
+  </form>
+</p>
+<%}%>

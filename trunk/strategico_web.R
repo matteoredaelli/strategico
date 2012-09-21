@@ -24,32 +24,6 @@ options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
 
 db.channel <- DB.Connect()
-strategico.tables <- dbListTables(db.channel)
-
-##project.name <- ifelse(exists("project.name"), project.name, COOKIES$strategico.project)
-project.name <- Project.NormalizeName(project.name=GET$project)
-##COOKIES$strategico.project <- project.name
-
-project.config <- NULL
-project.keys <- c()
-project.path <-  NULL
-
-if(length(project.name) == 0)
-  project.name <- NULL
-
-if (!is.null(project.name)) {
-  project.config <- Project.GetConfig(project.name=project.name, quit=FALSE)
-  if (!is.null(project.config)) {
-    project.keys <- GetKeyNames(project.config$keys)
-  }
-
-  project.path <- Project.GetPath(project.name)
-
-}
-
-id=GET$id
-value=ifelse(is.null(GET$value), "V1", GET$value)
-
 
 BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
   if(is.null(default) | is.na(default) | length(default)==0L) default <- ""
@@ -102,7 +76,7 @@ BuildFormElement_project <- function(label="Project", default=NULL) {
 
 BuildFormElement_keys <- function(db.channel, project.name=NULL, project.config=NULL, default=NULL, sep=" ") {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   
   list.values <- GetUniqueKeyValues(project.name=project.name, project.config=project.config, db.channel=db.channel)
   
@@ -120,7 +94,7 @@ BuildFormElement_keys <- function(db.channel, project.name=NULL, project.config=
 
 BuildFormElement_value <- function(project.name=NULL, project.config=NULL, default=NULL) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   
   list.values <- GetValueNames(values=project.config$values, project.name=project.name, project.config=project.config)
   BuildHtmlElement_select("Value", "value", list.values, default=default)

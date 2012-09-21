@@ -1,0 +1,5 @@
+period.start=c(<%=paste(period.start, sep="", collapse=", ")%>)
+period.end=c(<%=paste(period.end, sep="", collapse=", ")%>)
+period.freq=<%=period.freq%>
+keys=c('<%=paste(project.keys, collapse="', '", sep="")%>')
+values=c('<%=paste(project.values, collapse="', '", sep="")%>')

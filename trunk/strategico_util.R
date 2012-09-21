@@ -146,7 +146,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
                          ts.periods.string=NULL, period.start.string, period.freq,
                          calculate.period.end=TRUE, param=NULL, project.config=NULL, db.channel) {
   if (is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name=project.name, db.channel=db.channel)
   }
   ts.values <- unlist(lapply(strsplit(ts.string,","), as.numeric))
 
@@ -185,7 +185,7 @@ EvalTSString <- function(project.name, id=NULL, ts.string,
 GetKeyNames <- function(keys=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(keys)) {
     if (is.null(project.config))
-      project.config <- Project.GetConfig(project.name)
+      project.config <- Project.GetConfig(project.name, db.channel=db.channel)
    
     keys <- project.config$keys
   }
@@ -208,7 +208,7 @@ GetStrHTMLformItem.Eval <- function(project.path, item.path, value, param) {
 
 GetUniqueKeyValues <- function(project.name=NULL, project.config=NULL, db.channel) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name=project.name, db.channel=db.channel)
 
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
   sapply(keys, function(k) Project.GetKeyValues(k, project.name=project.name, db.channel=db.channel))
@@ -217,7 +217,7 @@ GetUniqueKeyValues <- function(project.name=NULL, project.config=NULL, db.channe
 GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
   if (is.null(values)) {
     if (is.null(project.config))
-      project.config <- Project.GetConfig(project.name)
+      project.config <- Project.GetConfig(project.name, db.channel=db.channel)
     values <- project.config$values
   }
   paste("V", 1:length(values), sep="")
@@ -243,12 +243,15 @@ Strategico.ExecCommand <- function(project.name, cmd, options="", mailto="nobody
 Strategico.Sendmail <- function(project.name, project.config=NULL, subject, body=" ", to=NULL) {
   library(sendmailR)
   if (is.null(to)) to <- project.config$mailto
-  if (!is.null(to)) {
-    logdebug( paste("Sending email to", to))
-    subject <- paste("strategico", project.name, subject, sep=" :: ")
-    sendmail(from=strategico.config$mail.from, to=to, subject=subject, msg=body,
-             control=list(smtpServer=strategico.config$mail.smtp))
+
+  if (is.null(to) || to == '') {
+    logwarn("No sending email: maito paameter is empty")
+    return(1)
   }
+  logdebug( paste("Sending email to", to))
+  subject <- paste("strategico", project.name, subject, sep=" :: ")
+  sendmail(from=strategico.config$mail.from, to=to, subject=subject, msg=body,
+           control=list(smtpServer=strategico.config$mail.smtp))
 }
 
 Param.EvalString <- function(param.string) {
@@ -263,15 +266,15 @@ Param.EvalString <- function(param.string) {
 
 Param.MergeWithDefault <- function(project.name=NULL, project.config=NULL, param) {
   if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name=project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   
   c(param,project.config$param[setdiff(names(project.config$param),names(param))])
 }
 
-Param.ToString <- function(param) {
+Param.ToString <- function(param, collapse="; ") {
   param <- lapply(param,function(p){if((length(p)==1)&(is.character(p))) p=paste("'",p,"'",sep="") else p })
   param <- param[names(param)!=""]
-  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse="; ")))
+  gsub(" ","",gsub("\"","'",paste(names(param),param,sep="=",collapse=collapse)))
 }
 
 SubsetByKeys <- function(data, keys, keys.na.rm=TRUE) {

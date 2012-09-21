@@ -211,7 +211,7 @@ Item.DB.GetSummaryModels <- function(project.name, value, id, db.channel) {
 
 Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
   project.path <- Project.GetPath(project.name)
   tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
@@ -226,7 +226,7 @@ Project.DBExportTables2Csv <- function(project.name, project.config=NULL, db.cha
 
 Project.DBExportViews2Csv <- function(project.name, project.config=NULL, db.channel, sep=";", dec=",") {
   if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name)
+    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   }
   project.path <- Project.GetPath(project.name)
   tables <- Project.GetViewNames(project.name=project.name, project.config=project.config)

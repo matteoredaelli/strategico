@@ -1,0 +1,66 @@
+<h2>Drop</h2>
+<p>If you do not need this project, please drop it.</p>
+<p>
+  <form name="form-project-drop" class="form-inline" method="POST" action="project-select.brew">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="drop">
+    <button type="submit" class="btn btn-large btn-primary btn btn-danger">drop</button>
+  </form>
+</p>
+<h2>Exporting data</h2>
+<p>
+<table>
+<tr>
+<td>
+  <form name="form-project-menu-10" class="form-inline" method="POST" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="report.stats">
+    <button type="submit" class="btn btn-large btn-primary btn btn-info">build Stats</button>
+  </form>
+</td>
+<td>
+  <form name="form-project-menu-10" class="form-inline" method="POST" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="report.suspicious">
+    <button type="submit" class="btn btn-large btn-primary btn btn-info">build suspicious items</button>
+  </form>
+</td>
+<td>
+  <form name="form-project-menu-20" class="form-inline" method="POST" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="export.csv">
+    <button type="submit" class="btn btn-large btn-primary btn-info">export csv</button>
+  </form>
+</td>
+</tr>
+</table>
+</p>
+<p>The created files can be see <a href="<%=sprintf('%s/%s/', strategico.config$projects.url, project.name)%>" target="_blank">here</a></p>
+<h2>Run</h2>
+<p>
+<table>
+<tr>
+<td>
+  <form name="form-project-set-configuration" class="form-inline" method="POST" action="project-set-configuration.brew">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <button type="submit" class="btn btn-large btn-primary">basic configurations</button>
+  </form>
+</td>
+<td>
+  <form name="form-project-upload-csv" class="form-inline" method="POST" action="project-upload-csv.brew">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <button type="submit" class="btn btn-large btn-primary">upload-csv</button>
+  </form>
+</td>
+<%if (csv_exists) { %>
+<td>
+  <form name="form-project-run" class="form-inline" method="POST" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="eval.items">
+    <button type="submit" class="btn btn-large btn-primary">run</button>
+  </form>
+</td>
+<%}%>
+</tr>
+</table>
+</p>
