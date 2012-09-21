@@ -1,0 +1,22 @@
+<%
+# -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+    
+  MySource("strategico_web.R")
+
+  page.title <- "Select project"
+  page.msg <- ""
+
+  if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "drop") {
+    logdebug("Dropping project")
+    msg <- Strategico.ExecCommand(POST$project, cmd="drop", intern=TRUE)
+    page.msg <- sprintf("Project deleted! %s", msg)
+  }
+
+  template.file <- file.path(GetWebTemplatesHome(), "project-select.brew")
+  page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
+%>
