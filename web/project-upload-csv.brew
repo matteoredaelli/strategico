@@ -1,0 +1,42 @@
+<%
+# -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+    
+  MySource("strategico_web.R")
+
+  project.name <- POST$project
+  page.title <- sprintf("%s :: upload csv", project.name)
+  page.msg <- ""
+
+  csv_exists <- Project.CSVFile.Exist(project.name)
+
+  if (!is.null(project.name) && !is.null(POST$project_file) && !is.null(FILES) && !is.null(FILES$project_file)) {
+    destination.path <- Project.GetPath(project.name)
+    logdebug(paste("Creating project folder", destination.path, "if it does not exists"))
+
+    file.ext <- file_ext(FILES$project_file$name)
+    filename <- paste(project.name, file.ext, sep=".")
+    ##filename <- paste(project.name, "csv", sep=".")
+    destination.file <- file.path(destination.path, filename)
+    file.copy(FILES$project_file$tmp_name, destination.file, overwrite=TRUE)
+    Sys.chmod(destination.file, "777")
+
+    if (file.ext == 'zip') {
+      unzip(destination.file, exdir = destination.path)
+      ## if the csv file exists (was contained in the zip file and then unzipped)
+      if (Project.CSVFile.Exist(project.name))
+        file.ext = 'csv'
+    }
+    if (file.ext == 'csv') {
+      uploading=TRUE
+      msg <- Strategico.ExecCommand(project.name, cmd="import.csv", intern=TRUE)
+    }
+  }
+
+  template.file <- file.path(GetWebTemplatesHome(), "project-upload-csv.brew")
+  page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
+%>

@@ -1,0 +1,54 @@
+<%
+# -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+    
+  MySource("strategico_web.R")
+
+  project.name <- POST$project
+  page.title <- sprintf("Project %s", project.name)
+  page.msg <- ""
+
+  records <- Project.selectRowDB(project.name, db.channel)
+  if (nrow(records) == 0) {
+    Project.Create(project.name, db.channel)
+    page.msg <- "Project created!"
+  } 
+
+  
+  csv_exists <- Project.CSVFile.Exist(project.name)
+
+  if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd != "eval.items") {
+    logdebug("Executing command '%s' for project '%s'", POST$cmd, project.name)
+    msg <- Strategico.ExecCommand(POST$project, cmd=POST$cmd, intern=TRUE)
+  }
+  if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "eval.items") {
+    logdebug("Executing command '%s' for project '%s'", POST$cmd, project.name)
+    options.base <- " --id.range "
+
+    ## running parallel jobs
+    maxid <- Project.GetMaxID(project.name, db.channel=db.channel)
+    if (maxid == 0) {
+       msg <- "no items found, cannot run..."
+    } else {
+      id.step <- as.integer(maxid / strategico.config$command.eval.jobs) + 1
+      start <- 1
+      msg <- ""
+      for (c in 1:strategico.config$command.eval.jobs) {
+         end <- min(start + id.step, maxid)
+         options <- paste(options.base, start, ":", end, sep="")
+         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, intern=FALSE)
+         msg <- paste(msg, "<br />", msg.new)
+         start <- end + 1
+      } #end for
+    }
+  } # end eval.items
+
+
+
+  template.file <- file.path(GetWebTemplatesHome(), "project-menu.brew")
+  page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
+%>
