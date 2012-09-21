@@ -1,0 +1,30 @@
+<%
+# -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+    
+  MySource("strategico_web.R")
+
+  project.name <- POST$project
+  page.title <- sprintf("Project %s :: configurations", project.name)
+  page.msg <- ""
+
+  if (!is.null(POST$config_basic)) {
+    Project.updateRowDB(project.name, db.channel, config_basic=POST$config_basic, config_csv=POST$config_csv, param=POST$param)
+    page.msg <- "Basic configuration updated"
+  }
+
+  records <- Project.selectRowDB(project.name, db.channel)
+
+  if (nrow(records) == 1) {
+    config_basic <- records[1,]$config_basic
+    config_csv <- records[1,]$config_csv
+    param <- records[1,]$param
+    template.file <- file.path(GetWebTemplatesHome(), "project-set-configuration.brew")
+    page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+  } else {
+    page.body <- '<p class="text-error">No project found!</p>'
+  }
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
+%>
