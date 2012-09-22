@@ -80,6 +80,7 @@ MySource(filename="strategico.config", file.path=GetEtcPath())
 basicConfig()
 setLevel(strategico.config$logger.level, getHandler('basic.stdout'))
 
+MySource("strategico_projects.R")
 MySource("strategico_project.R")
 MySource("strategico_item.R")
 MySource("strategico_items.R")
