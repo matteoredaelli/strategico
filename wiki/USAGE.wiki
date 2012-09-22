@@ -10,6 +10,7 @@ R --slave --no-save --no-restore --no-environ --silent --args --cmd runit < stra
 == Quick start ==
 
 {{{
+Rscript strategico.R -n sample --cmd create
 Rscript strategico.R -n sample --cmd import.csv
 Rscript strategico.R -n sample --cmd eval.items
 Rscript strategico.R -n sample --cmd export.csv
@@ -51,6 +52,16 @@ Rscript strategico.R --cmd empty.db -n sample
 
 {{{
 ./strategico.R --cmd export.csv -n sample
+}}}
+
+== Export reports ==
+
+{{{
+./strategico.R --cmd build.suspicious -n sample
+}}}
+
+{{{
+./strategico.R --cmd build.stats -n sample
 }}}
 
 == Runit ==
