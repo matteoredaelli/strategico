@@ -441,13 +441,6 @@ Project.GetValues <- function(project.name=NULL, project.config=NULL) {
  
   GetValueNames(values=project.config$values) 
 }
-
-Project.GetList <- function(projects.home = strategico.config$projects.home) {
-  logdebug( paste("Projects in", projects.home, ":"))
-  projects <- dir(projects.home)
-  logdebug( paste(projects, collapse=", "))
-  projects
-}
   
 Project.GetMaxID <- function(project.name, verbose=FALSE, db.channel) {
   tablename = DB.GetTableNameProjectItems(project.name)
@@ -624,17 +617,12 @@ Project.ImportDataFromDB <- function(project.name, db.name, db.user, db.pass, sq
   DB.RunSQLQuery(sql_statement=sql_statement, db.name=db.name, db.user=db.user, db.pass=db.pass)
 }
 
-Project.IsValid <- function(project.name, db.channel) {
-  records <- Project.selectRowDB(project.name, db.channel)
-  return(nrow(records == 1))
-}
-
 Project.IsValidName <- function(project.name) {
   ! (project.name %in% c("strategico"))
 }
 
 Project.Exists <- function(project.name) {
-  project.name %in% Project.GetList()
+  project.name %in% Projects.GetProjects()
 }
 
 is.value <- function(value, project.name=NULL, project.config=NULL) {
