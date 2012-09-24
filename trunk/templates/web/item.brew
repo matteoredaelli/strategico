@@ -1,4 +1,4 @@
-<h2>Seelct item</h2>
+<h2>Select item</h2>
 <form name="form-item-search" class="form-inline" method="GET" action="">
     <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
     <input type="hidden" name="cmd" class="input-medium" value="search">
@@ -23,13 +23,24 @@
 
 <%=result$results.pivot.chart%>
 
+<h2>Change model</h2>
+<form name="form-item-changemodel" class="form-inline" method="GET" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="id" class="input-small" value="<%=id%>">
+    <input type="hidden" name="value" class="input-small" value="<%=value%>">
+    <input type="hidden" name="cmd" class="input-medium" value="setmodel">
+    <%=BuildHtmlElement_select("Best Model", "model", item.models, default=ifelse(is.null(result$best.model), "", result$best.model))%>
+    <button type="submit" class="btn btn-large btn-warning btn-large" name="setmodel" ">Set best model</button>
+</form>
+
+<h2>Run</h2>
 <form name="form-item-run" class="form-inline" method="GET" action="">
     <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="id" class="input-small" value="<%=id%>">
+    <input type="hidden" name="value" class="input-small" value="<%=value%>">
     <input type="hidden" name="cmd" class="input-medium" value="eval">
-    <textarea name="param" rows="6" cols="55">
-      <%=result$param%>
-    </textarea>
-    <button type="submit" class="btn btn-large btn-primary btn-large" name="eval">Run</button>
+    <textarea name="param" rows="6" cols="55"><%=result$param%></textarea>
+    <button type="submit" class="btn btn-large btn-warning btn-large" name="eval">Run</button>
 </form>
 
 <h2>Residuals</h2>
