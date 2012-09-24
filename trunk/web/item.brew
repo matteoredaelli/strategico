@@ -1,13 +1,18 @@
 <%
 ## -*- mode: R -*-
 
-  project.name <- GET$project
-  options=list(width=800, height=350)
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
+
+  POST$project <- GET$project
+  project.name <- GET$project
   MySource("strategico_web.R")
 
-  page.title <- "Item"
+  options=list(width=800, height=350)
+
+  project.config <- Project.GetConfig(project.name, db.channel)
+
+  page.title <- ""
   page.msg <- ""
 
   item.models <- c()
@@ -15,10 +20,10 @@
   item.summary <- data.frame()
   item.summar.models <- data.frame()
  
-  page.title <- paste("<br />Item", GET$id)
-  page.sections	<- data.frame()
-  
-  if (!is.null(project.name) && !is.null(project.config) && !is.null(GET$id)) {
+  if (is.null(project.name) || is.null(project.config) || is.null(GET$id)) {
+    page.body <- ""
+    page.msg <- "Missing parameters (project, id or value)"
+  } else {
     param <- ifelse(is.null(GET$param), "", GET$param)
     value <- ifelse(is.null(GET$value), "V1", GET$value)
     str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
@@ -27,6 +32,7 @@
   ## settings is or item.keys depending on which variables were passed in GET input
 
     id <- as.numeric(ifelse(is.null(GET$id), 1, GET$id))
+  page.title <- sprintf("Project %s, Item %s, value %s", project.name, id, value)
 
   ########################################################################################
   ##  Change Best model
@@ -60,9 +66,13 @@
   item.summary.models <- result$summary.models
   item.results <- result$results
   
-  template.file <- file.path(GetWebTemplatesHome(), "project-select.brew")
+  if (is.null(result$models)) {
+    page.msg <- "No Item / results found"
+  }
+  template.file <- file.path(GetWebTemplatesHome(), "item.brew")
   page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
 
+  }
   template.page <- file.path(GetWebTemplatesHome(), "page.brew")
   brew(template.page)
 %>

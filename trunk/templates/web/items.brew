@@ -1,20 +1,16 @@
-             <form method="GET" action="item.brew">
-              <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden") %>
-              <%=BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4) %>
-              <%=BuildFormElement_value(project.name=project.name, default=value) %>
-                  <br />
-              <input type="submit" name="show" value="Search by ID"/><br />
-              </form><br />
+<form method="GET" action="item.brew">
+  <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" >
+  ID <input type="text" name="id" class="input-small" value="<%=id%>" >
+  VALUE <input type="text" name="value" class="input-small" value="<%=value%>" >
+  <button type="submit" class="btn btn-large btn-primary btn-large">Show results</button>
+</form>
+<br />
 
-
-                <form method="GET" >
-                  <%=BuildHtmlElement_input(name="project", default=project.name, type="hidden")%>
-                  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel, sep="<br />")%>
-                  <br />
-                  <%=BuildFormElement_value(project.name=project.name, default=value)%>
-                  <br />
-                 <input type="submit" value="Search by Key" />
-                </form>
-<% if (!is.null(id)) { %>
-                <br /><br />Selected  item <%=paste(id, value)%> <a href=item.brew?project=<%=project.name%>&id=<%=id%>&value=<%=value%>>details</a>
-<% } %>
+<form method="GET" >
+  <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" >
+  <%=BuildFormElement_keys(project.name=project.name, default=item.keys, db.channel=db.channel, sep="<br />")%>
+  <br />
+  Value <input type="text" name="value" class="input-small" value="<%=value%>" >
+  <br />
+  <button type="submit" class="btn btn-large btn-primary btn-large">Search by keys</button>
+</form>

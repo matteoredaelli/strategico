@@ -3,9 +3,9 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
     
+  project.name <- POST$project
   MySource("strategico_web.R")
 
-  project.name <- POST$project
   page.title <- sprintf("Project %s", project.name)
   page.msg <- ""
 
@@ -45,6 +45,8 @@
   } # end eval.items
 
 
+  if (!is.null(POST$project))
+    project.url <- Project.GetUrl(POST$project)
 
   template.file <- file.path(GetWebTemplatesHome(), "project-menu.brew")
   page.body <- paste(capture.output(brew(template.file)),  collapse="\n")

@@ -2,10 +2,10 @@
 # -*- mode: R -*-
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
-    
-  MySource("strategico_web.R")
 
   project.name <- POST$project
+  MySource("strategico_web.R")
+
   page.title <- sprintf("%s :: upload csv", project.name)
   page.msg <- ""
 
