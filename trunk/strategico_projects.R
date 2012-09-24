@@ -28,6 +28,6 @@ Projects.GetProjectsFS <- function(projects.home = strategico.config$projects.ho
   logdebug( paste("Projects in", projects.home, ":"))
   projects <- dir(projects.home)
   logdebug( paste(projects, collapse=", "))
-  projects
+  setdiff(projects, "project.config")
 }
 
