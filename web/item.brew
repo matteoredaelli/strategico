@@ -37,7 +37,8 @@
   ########################################################################################
   ##  Change Best model
   ########################################################################################
-  if (!is.null(GET$setmodel) && !is.null(GET$model)) {
+  if (GET$cmd == "setmodel" && !is.null(GET$model)) {
+    page.msg <- "Changed best model"
     Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
                         db.channel=db.channel, model=GET$model)
   }
@@ -45,7 +46,7 @@
   ########################################################################################
   ##  Run
   ########################################################################################
-  if (!is.null(GET$eval) ) {
+  if (GET$cmd == "eval") {
     param.r <- Param.EvalString(param)
     
   ##cmd <- paste(strategico.command, " --cmd eval.items --id.list=", id, " -v ", value, " --eval.param=\"", param, "\"", sep="")
@@ -54,6 +55,7 @@
 
     Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
            db.channel=db.channel, param=param.r)
+    page.msg <- "Run executed"
   }
 
   ########################################################################################
