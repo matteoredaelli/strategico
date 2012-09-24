@@ -3,10 +3,12 @@
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
     
+  project.name <- NULL
   MySource("strategico_web.R")
 
   page.title <- "Select project"
   page.msg <- ""
+
 
   if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "drop") {
     logdebug("Dropping project")

@@ -1,0 +1,37 @@
+<h2>Seelct item</h2>
+<form name="form-item-search" class="form-inline" method="GET" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="search">
+    ID <input type="text" name="id" class="input-small" value="<%=id%>">
+    VALUE <input type="text" name="value" class="input-small" value="<%=value%>">
+    <button type="submit" class="btn btn-large btn-primary btn-large">Show results</button>
+</form>
+<br />
+<% if (!is.null(result$models)) { %>
+<h2>Summary</h2>
+<p><%=paste(result$keys.string)%></p>
+<%=result$summary.models.chart%>
+<%=result$summary.chart%>
+
+<h2>Best Model <%=result$best.model%></h2>
+<%=result$best.model.chart%>
+<%=result$best.model.chart2%>
+
+<h2>All models</h2>
+    <a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a>
+    <%=result$all.models.chart%>
+
+<%=result$results.pivot.chart%>
+
+<form name="form-item-run" class="form-inline" method="GET" action="">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="eval">
+    <textarea name="param" rows="6" cols="55">
+      <%=result$param%>
+    </textarea>
+    <button type="submit" class="btn btn-large btn-primary btn-large" name="eval">Run</button>
+</form>
+
+<h2>Residuals</h2>
+<%=result$residuals.chart%>
+<%}%>

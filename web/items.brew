@@ -4,68 +4,38 @@
   source(file.path(strategico.home, "strategico_util.R"))
 
   project.name <- GET$project
-
   MySource("strategico_web.R")
 
-  page.title <- "results"
-  page.sections	<- data.frame()
+  project.config <- Project.GetConfig(project.name, db.channel)
+  project.keys <- Project.GetKeys(project.name, project.config=project.config)
 
-  if (!is.null(project.name) && !is.null(project.config)) {
+  page.title <- "Search Items"
+  page.msg <- ""
 
+  if (is.null(project.name)  || is.null(project.config)) {
+     page.body <- ""
+     page.msg <- "Missing project or project.config not defined"
+  } else {
+     value <- ifelse(is.null(GET$value), "V1", GET$value)
      if (is.null(GET$KEY1)) {
        id <- 1
-       id.children <- NULL
        item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
      } else {
        for (k in project.keys)
-       GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+         GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
        item.keys <- as.character( unlist(GET[project.keys]))
 
        id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
 
        if (!is.null(id.result) && length(id.result)>0 ) {
          id <- as.numeric(id.result[1])
-         ##id.children <- Item.GetChildren(id=id, project.name=project.name, db.channel=db.channel)
        } else {
          id <- NULL
-         id.children <- NULL
        }
      }
   
-     ##id.children <- c(id, id.children)
-
      template.file <- file.path(GetWebTemplatesHome(), "items.brew")
-     b1 <- paste(capture.output(brew(template.file)),  collapse="\n")
-     page.sections <- data.frame(title="Search", body=b1)
-
-
-##     if (!is.null(id) && !is.null(item.keys)) { 
-##	 items.summary <- Item.DB.GetVSummary(id=id.children, project.name=project.name, db.channel=db.channel, value=value)
-##	 items.summary <- data.frame(items.summary)
-
-##	 if ( !is.null(items.summary) && nrow(items.summary) > 1) {
-##          items.summary$item_id <- Item.AddLink(project.name=project.name, value=value, id.list=items.summary$item_id) 
-	  ##items.summary <- subset(items.summary, 
-	##		      select=c(-MeanPredictedRatioMeanValues, 
-	##			       -SdPredictedRatioSdValues,
-	##			       ##-BestAICNoOutRangeExclude, -Points, 
-	##			       -BestICNoOutRangeExclude, -LastNotEqualValues
-	##			      )
-	##		     )
-
-##	  rownames(items.summary) <- NULL
-##	  if (nrow(items.summary) > 1) {
-##	    Table <- gvisTable(items.summary, options=list(width=700, height=300))
-##	    b_Table <- paste(capture.output(cat(Table$html$chart)), collapse="\n")
-##	  }
-##	  else {
-##	    b_Table <- capture.output(print(xtable(items.summary), type="html"))
-##	  }
-##	  page.sections <- rbind(page.sections, data.frame(title="Results", body=b_Table))
-##	 }
-##
-##     } # null(id)
-
+     page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
   }
   template.file <- file.path(GetWebTemplatesHome(), "page.brew")
   brew(template.file)

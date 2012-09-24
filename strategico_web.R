@@ -25,6 +25,12 @@ suppressPackageStartupMessages(library(googleVis))
 
 db.channel <- DB.Connect()
 
+project <- list()
+project$name <- project.name
+if (!is.null(project$name)) {
+  project$url <- Project.GetUrl(POST$project)
+}
+
 BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
   if(is.null(default) | is.na(default) | length(default)==0L) default <- ""
   str <- '_LABEL_ <input name="_NAME_" type="_TYPE_" value="_V_" size="_SIZE_" />'
