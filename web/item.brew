@@ -7,6 +7,9 @@
   source(file.path(strategico.home, "strategico_util.R"))
   MySource("strategico_web.R")
 
+  page.title <- "Item"
+  page.msg <- ""
+
   item.models <- c()
   item.results <- data.frame()
   item.summary <- data.frame()
@@ -57,83 +60,9 @@
   item.summary.models <- result$summary.models
   item.results <- result$results
   
-  b1 <- paste(
-             '<form method="GET">', 
-              BuildHtmlElement_input(name="project", default=project.name, type="hidden"),
-              BuildHtmlElement_input(label="ID", name="id", default=id, type="text", size=4),
-              BuildFormElement_value(project.name=project.name, default=value),
-              '<input type="submit" name="show" value="Search"/><br />')
+  template.file <- file.path(GetWebTemplatesHome(), "project-select.brew")
+  page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
 
-  page.sections <- data.frame(title="Search item", body=b1)
-
-  ###############################################################################################################
-  ## TAB Run
-  ###############################################################################################################
-
-  b20 <- paste(result$keys.string, '<br />', 
-               ##BuildHtmlElement_input(label="Params", name="param", default=param, type="text", size=60),
-               '<textarea name="param" rows="6" cols="55">',
-               result$param, '</textarea>',
-               '<input type="submit" name="eval" value="Run" />')
-  page.sections <- rbind(page.sections, data.frame(title="Run", body=b20))
-
-  ###############################################################################################################
-  ## TAB Set Best Model
-  ###############################################################################################################
-  if (!is.null(item.results) && nrow(item.results) > 0) {
-  
-
-  if(!is.null(item.models)  && length(item.models) > 1 &&  (!is.null(result$best.model))) {
-    b100 <- BuildHtmlElement_select("Best Model", "model", item.models, default=ifelse(is.null(result$best.model), "", result$best.model))
-    b100 <- paste(b100, '
-                    <input type="submit" name="setmodel" value="Set best model" />
-                </form>')
-    page.sections <- rbind(page.sections, data.frame(title="Set Best", body=b100))
-  }
-
-  ###############################################################################################################
-  ## TAB Summary
-  ###############################################################################################################
-
-  if(!is.null(item.summary.models) && is.data.frame(item.summary.models) && nrow(item.summary.models) > 0) {
-
-      page.sections <- rbind(page.sections, data.frame(title="Summary", body=paste(result$summary.models.chart,result$summary.chart, sep="<br />")))
-  }
-
-
-  if(!is.null(item.results) && is.data.frame(item.results) && nrow(item.results) > 0) {
-
-  ###############################################################################################################
-  ## TAB Show best Model
-  ###############################################################################################################
-
-    page.sections <- rbind(page.sections, data.frame(title=paste("Best Model", result$best.model), body=paste(result$best.model.chart,result$best.model.chart2)))
-
-  ###############################################################################################################
-  ## TAB Show All Models
-  ###############################################################################################################
-
-    body <- paste('<a href=item_motion_chart.brew?project=', project.name, '&id=',id, '>motion chart</a>', sep="")
-    page.sections <- rbind(page.sections, data.frame(title="All Models", body=paste(body, result$all.models.chart)))
-
-  ###############################################################################################################
-  ## TAB Results
-  ###############################################################################################################
-
-    page.sections <- rbind(page.sections, data.frame(title="Result table", body=result$results.pivot.chart))
-
-  } ## item results not null
-
-  ###############################################################################################################
-  ## TAB Residuals
-  ###############################################################################################################
-
-  if ((!is.null(result$residuals)) && is.data.frame(result$residuals) && nrow(result$residuals) > 0) { 
-    page.sections <- rbind(page.sections, data.frame(title="Residuals", body=result$residuals.chart))
-  }
-
-  }
- } # if 
-  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
-  brew(template.file)
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
 %>
