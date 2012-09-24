@@ -150,7 +150,7 @@ if (opt$cmd == "create") {
 ## Reading project.config
 #########################################################################
 
-if (!Project.Exists(opt$project.name))
+if (!Project.ExistsFS(opt$project.name))
   UsageAndQuit(sprintf("The project '%s' does nto exist! Bye", opt$project.name))
 
 project.config <- Project.GetConfig(opt$project.name, db.channel=db.channel)

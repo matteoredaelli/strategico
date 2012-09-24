@@ -265,7 +265,7 @@ Project.EmptyDB <- function(project.name, project.config=NULL, db.channel) {
 }
 
 Project.EmptyFS <- function(project.name, recursive = TRUE) {
-  if (!Project.Exists(project.name)) {
+  if (!Project.ExistsFS(project.name)) {
     logwarn( paste("Project folder=", project.name, "doesn't exist"))
   } else {
     project.path <- paste(Project.GetPath(project.name), "/", sep="")
@@ -623,6 +623,10 @@ Project.IsValidName <- function(project.name) {
 
 Project.Exists <- function(project.name) {
   project.name %in% Projects.GetProjects()
+}
+
+Project.ExistsFS <- function(project.name) {
+  project.name %in% Projects.GetProjectsFS()
 }
 
 is.value <- function(value, project.name=NULL, project.config=NULL) {

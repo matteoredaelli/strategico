@@ -23,3 +23,11 @@ Projects.GetProjects <- function(db.channel) {
   logwarn("Retreiving projects list")
   DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel) 
 }
+
+Projects.GetProjectsFS <- function(projects.home = strategico.config$projects.home) {
+  logdebug( paste("Projects in", projects.home, ":"))
+  projects <- dir(projects.home)
+  logdebug( paste(projects, collapse=", "))
+  projects
+}
+
