@@ -30,8 +30,30 @@ UsageAndQuit <- function(msg.err="\n") {
   
   options <- "
   --help | -h : show help and exit
+  --cmd COMMANDS: where COMMANDS can be
+            create
+            create.db
+            drop
+            drop.db
+            empty.db
+            empty.fs
+            eval.children
+            eval.items
+            eval.items.from.db
+            eval.ts
+            export.csv 
+            import.csv
+            report.stats
+            report.suspicious
+            runit
+            set.best.model
+            statistics
+  
   TODO (http://code.google.com/p/strategico/wiki/USAGE)
 "
+## the list of commands was extracted using
+## grep "f (opt\$cmd ==" strategico.R | sort | cut -f2 -d\
+  
   cat(paste("\nUsage: ", self, options))
   q(status=1)
 }
