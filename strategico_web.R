@@ -77,7 +77,7 @@ BuildHtmlKeyElement <- function(label, name, value, list.values=NULL) {
 }
 
 BuildFormElement_project <- function(label="Project", default=NULL) {
-  BuildHtmlElement_select(label=label, name="project",list.values=Projects.GetProjects(), default=default)
+  BuildHtmlElement_select(label=label, name="project",list.values=Projects.GetProjectsFS(), default=default)
 }
 
 BuildFormElement_keys <- function(db.channel, project.name=NULL, project.config=NULL, default=NULL, sep=" ") {
