@@ -93,6 +93,9 @@ BuildFullKey <- function(keys, config.keys, fill.with="") {
 
 ## TODO should manage NA (and NULL) as alias of  ''
 BuildKeyNames <- function(key.values, na.rm=FALSE) {
+  if(is.null(key.values))
+    return(NULL)
+
   idx = if (na.rm)
     grep('^$', key.values, invert=TRUE)
   else

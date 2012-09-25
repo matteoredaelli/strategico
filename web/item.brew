@@ -10,8 +10,6 @@
 
   options=list(width=800, height=350)
 
-  project.config <- Project.GetConfig(project.name, db.channel)
-
   page.title <- ""
   page.msg <- ""
 
@@ -20,10 +18,12 @@
   item.summary <- data.frame()
   item.summar.models <- data.frame()
  
-  if (is.null(project.name) || is.null(project.config) || is.null(GET$id)) {
+  if (is.null(project.name) || is.null(GET$id)) {
     page.body <- ""
     page.msg <- "Missing parameters (project, id or value)"
   } else {
+    project.config <- Project.GetConfig(project.name, db.channel)
+
     param <- ifelse(is.null(GET$param), "", GET$param)
     value <- ifelse(is.null(GET$value), "V1", GET$value)
     str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
