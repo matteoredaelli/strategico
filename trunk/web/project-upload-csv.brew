@@ -6,10 +6,16 @@
   project.name <- POST$project
   MySource("strategico_web.R")
 
-  page.title <- sprintf("%s :: upload csv", project.name)
-  page.msg <- ""
-
   csv_exists <- Project.CSVFile.Exist(project.name)
+  records <- Project.selectRowDB(project.name, db.channel) 
+  csv_rows <- good_rows <- 0
+  if (nrow(records) == 1) {
+    csv_rows <- records[1,]$csv_rows
+    good_rows <- records[1,]$good_rows
+  }
+
+  page.title <- sprintf("%s :: upload csv", project.name)
+  page.msg <- sprintf("CSV stats: found %s rows, imported %s rows.", csv_rows, good_rows)
 
   if (!is.null(project.name) && !is.null(POST$project_file) && !is.null(FILES) && !is.null(FILES$project_file)) {
     destination.path <- Project.GetPath(project.name)
@@ -32,6 +38,7 @@
       uploading=TRUE
       msg <- Strategico.ExecCommand(project.name, cmd="import.csv", intern=TRUE)
     }
+    page.msg <- sprintf("%s<br />The upload of the csv file can take some time. After that, a batch job will start and import the data to the database...", page.msg)
   }
 
   template.file <- file.path(GetWebTemplatesHome(), "project-upload-csv.brew")

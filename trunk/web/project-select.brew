@@ -14,6 +14,7 @@
     logdebug("Dropping project")
     msg <- Strategico.ExecCommand(POST$project, cmd="drop", intern=TRUE)
     page.msg <- sprintf("Project deleted! %s", msg)
+    Sys.sleep(5)
   }
 
   template.file <- file.path(GetWebTemplatesHome(), "project-select.brew")
