@@ -428,10 +428,7 @@ Project.GetExpectedCSVHeader <- function(project.name=NULL, project.config=NULL)
   expected.header
 }
   
-Project.GetKeys <- function(project.name=NULL, project.config=NULL) {
-  if (is.null(project.config))
-    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
- 
+Project.GetKeys <- function(project.name=NULL, project.config) {
   BuildKeyNames(project.config$keys, na.rm=FALSE) 
 }
 

@@ -12,9 +12,9 @@
   page.title <- "Search Items"
   page.msg <- ""
 
-  if (is.null(project.name)  || is.null(project.config)) {
+  if (is.null(project.name)  || is.null(project.keys) || is.null(project.config)) {
      page.body <- ""
-     page.msg <- "Missing project or project.config not defined"
+     page.msg <- "Missing project or csv file not uploaded"
   } else {
      value <- ifelse(is.null(GET$value), "V1", GET$value)
      if (is.null(GET$KEY1)) {
