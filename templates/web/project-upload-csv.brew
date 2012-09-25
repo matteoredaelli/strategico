@@ -6,11 +6,3 @@
     <button type="submit" class="btn" name="refresh">refresh</button>
   </form>
 </p>
-<p>
-<%if (csv_exists) { %>
-  <form name="form-project-next" class="form-inline" method="POST" action="project-menu.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
-    <button type="submit" class="btn btn-large btn-primary">back</button>
-  </form>
-</p>
-<%}%>

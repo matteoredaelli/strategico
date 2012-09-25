@@ -119,6 +119,11 @@ function Confirm()
     <input type="hidden" name="cmd" class="input-medium" value="export.csv">
     <button type="submit" class="btn btn-large btn-primary btn-info">export csv</button>
   </form>
+  <form name="form-project-drop" class="form-inline" method="POST" action="project-select.brew">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="cmd" class="input-medium" value="drop">
+    <button type="submit" class="btn btn-large btn-danger" onclick="return Confirm();">Drop project</button>
+  </form>
 <%} %>
         </div>
       </div>
