@@ -1,0 +1,13 @@
+<p>
+  <form name="form-project-set-config-basic" class="form-inline" method="POST">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    Basic <textarea rows="7" cols="65" name="config_basic"><%=config_basic%></textarea>
+    CSV <textarea rows="7" cols="65" name="config_csv"><%=config_csv%></textarea>
+    Params <textarea rows="18" cols="65" name="param"><%=param%></textarea>
+    <button type="submit" class="btn btn-warning">save</button>
+  </form>
+  <form name="form-project-next" class="form-inline" method="POST" action="project-menu.brew">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <button type="submit" class="btn btn-large btn-primary btn-large">Back</button>
+  </form>
+</p>

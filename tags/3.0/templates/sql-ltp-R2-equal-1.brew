@@ -1,0 +1,9 @@
+select 
+  *
+FROM 
+  v_<%=project.name%>_summary_<%=value%>
+WHERE
+  BestModel != 'Naive' and
+  BestModel = SuggestedModel and
+  R2 = '1'
+limit 50

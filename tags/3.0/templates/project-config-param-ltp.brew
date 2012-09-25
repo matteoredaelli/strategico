@@ -1,0 +1,16 @@
+try.models=<%= ifelse(period.freq==1, "c('mean','trend','lm','es','naive')", "c('mean','trend','lm','es','arima','naive')")%>
+n.ahead=<%=max(1,n.ahead)%>
+range=c(-Inf,Inf)
+NA2value=0
+n.min=5
+naive.values='lastPeriod'
+naive.ifConstantLastValues=<%=max(4, period.freq)%>
+naive.ifConstant0LastValues=<%=period.freq%>
+logtransform=FALSE
+stepwise = TRUE
+formula.right.lm='<%=ifelse(period.freq==1, "trend+trend2", "S*trend+S*trend2")%>'
+rule='BestAIC'
+rule.noMaxCVOver=2
+rule.noMaxJumpOver=c(<%=paste(rep(Inf, length(project.values)), collapse=",", sep="")%>)
+negTo0=TRUE
+toInteger=TRUE

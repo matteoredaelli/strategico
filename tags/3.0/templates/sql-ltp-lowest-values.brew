@@ -1,0 +1,16 @@
+<%
+ tot.keys <- length(project.keys)
+ last.key <- project.keys[tot.keys]
+%>
+
+select 
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>,
+  min(V) V
+FROM 
+  v_<%=project.name%>_results_<%=value%>
+GROUP BY
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>
+order by V
+limit 50

@@ -1,0 +1,80 @@
+<%
+## -*- mode: R -*-
+
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+
+  POST$project <- GET$project
+  project.name <- GET$project
+  MySource("strategico_web.R")
+
+  options=list(width=800, height=350)
+
+  page.title <- ""
+  page.msg <- ""
+
+  item.models <- c()
+  item.results <- data.frame()
+  item.summary <- data.frame()
+  item.summar.models <- data.frame()
+ 
+  if (is.null(project.name) || is.null(GET$id)) {
+    page.body <- ""
+    page.msg <- "Missing parameters (project, id or value)"
+  } else {
+    project.config <- Project.GetConfig(project.name, db.channel)
+
+    param <- ifelse(is.null(GET$param), "", GET$param)
+    value <- ifelse(is.null(GET$value), "V1", GET$value)
+    str.skip.models <- ifelse(is.null(GET$skip.models), "", GET$skip.models)
+    skip.models <- unlist(strsplit(str.skip.models, ","))
+  
+  ## settings is or item.keys depending on which variables were passed in GET input
+
+    id <- as.numeric(ifelse(is.null(GET$id), 1, GET$id))
+  page.title <- sprintf("Project %s, Item %s, value %s", project.name, id, value)
+
+  ########################################################################################
+  ##  Change Best model
+  ########################################################################################
+  if (!is.null(GET$cmd) && GET$cmd == "setmodel" && !is.null(GET$model)) {
+    page.msg <- "Changed best model"
+    Items.DB.SetBestModel(project.name=project.name, value=value, id=id,
+                        db.channel=db.channel, model=GET$model)
+  }
+
+  ########################################################################################
+  ##  Run
+  ########################################################################################
+  if (!is.null(GET$cmd) && GET$cmd == "eval") {
+    param.r <- Param.EvalString(param)
+    
+  ##cmd <- paste(strategico.command, " --cmd eval.items --id.list=", id, " -v ", value, " --eval.param=\"", param, "\"", sep="")
+  ##  rc <- system(cmd, wait=strategico.config$command.wait, intern=TRUE)
+  ##  cat(rc)
+
+    Item.Eval(project.name=project.name, project.config=project.config, value=value, id=id,
+           db.channel=db.channel, param=param.r)
+    page.msg <- "Run executed"
+  }
+
+  ########################################################################################
+  ##  Retriving all results
+  ########################################################################################
+
+  result <- Item.GetResultsWithCharts(project.name=project.name, project.config=project.config, id=id, value=value, db.channel=db.channel)
+  item.models <- result$models 
+  item.summary <- result$summary
+  item.summary.models <- result$summary.models
+  item.results <- result$results
+  
+  if (is.null(result$models)) {
+    page.msg <- "No Item / results found"
+  }
+  template.file <- file.path(GetWebTemplatesHome(), "item.brew")
+  page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+
+  }
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
+%>

@@ -1,0 +1,42 @@
+<%
+## -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+
+  project.name <- GET$project
+  MySource("strategico_web.R")
+
+  project.config <- Project.GetConfig(project.name, db.channel)
+  project.keys <- Project.GetKeys(project.name, project.config=project.config)
+
+  page.title <- "Search Items"
+  page.msg <- ""
+
+  if (is.null(project.name)  || is.null(project.keys) || is.null(project.config)) {
+     page.body <- ""
+     page.msg <- "Missing project or csv file not uploaded"
+  } else {
+     value <- ifelse(is.null(GET$value), "V1", GET$value)
+     if (is.null(GET$KEY1)) {
+       id <- 1
+       item.keys <- Item.GetKeys(project.name=project.name, id=id, db.channel=db.channel)
+     } else {
+       for (k in project.keys)
+         GET[[k]]=ifelse(is.null(GET[[k]]), "", GET[[k]])
+       item.keys <- as.character( unlist(GET[project.keys]))
+
+       id.result <- Project.GetIDs(project.name=project.name, keys=item.keys, db.channel=db.channel)
+
+       if (!is.null(id.result) && length(id.result)>0 ) {
+         id <- as.numeric(id.result[1])
+       } else {
+         id <- NULL
+       }
+     }
+  
+     template.file <- file.path(GetWebTemplatesHome(), "items.brew")
+     page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+  }
+  template.file <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.file)
+%>

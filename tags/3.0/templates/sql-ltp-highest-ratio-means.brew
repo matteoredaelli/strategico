@@ -1,0 +1,17 @@
+SELECT
+  item_id,
+  <%= paste(project.keys, collapse=", ")%>,
+  round(abs(MeanPredicted / MeanValues),1) ratio_means,
+  MeanPredicted,
+  MeanValues
+FROM
+  v_<%=project.name%>_summary_<%=value%>
+where
+  MeanPredicted != 0 and
+  MeanPredicted is not NULL and
+  MeanValues != 0 and
+  MeanValues is not NULL and
+  BestModel != 'Naive' and
+  BestModel = SuggestedModel
+ORDER BY ratio_means DESC
+limit 50

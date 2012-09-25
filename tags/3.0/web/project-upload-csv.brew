@@ -1,0 +1,49 @@
+<%
+# -*- mode: R -*-
+  strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
+  source(file.path(strategico.home, "strategico_util.R"))
+
+  project.name <- POST$project
+  MySource("strategico_web.R")
+
+  csv_exists <- Project.CSVFile.Exist(project.name)
+  records <- Project.selectRowDB(project.name, db.channel) 
+  csv_rows <- good_rows <- 0
+  if (nrow(records) == 1) {
+    csv_rows <- records[1,]$csv_rows
+    good_rows <- records[1,]$good_rows
+  }
+
+  page.title <- sprintf("%s :: upload csv", project.name)
+  page.msg <- sprintf("CSV stats: found %s rows, imported %s rows.", csv_rows, good_rows)
+
+  if (!is.null(project.name) && !is.null(POST$project_file) && !is.null(FILES) && !is.null(FILES$project_file)) {
+    destination.path <- Project.GetPath(project.name)
+    logdebug(paste("Creating project folder", destination.path, "if it does not exists"))
+
+    file.ext <- file_ext(FILES$project_file$name)
+    filename <- paste(project.name, file.ext, sep=".")
+    ##filename <- paste(project.name, "csv", sep=".")
+    destination.file <- file.path(destination.path, filename)
+    file.copy(FILES$project_file$tmp_name, destination.file, overwrite=TRUE)
+    Sys.chmod(destination.file, "777")
+
+    if (file.ext == 'zip') {
+      unzip(destination.file, exdir = destination.path)
+      ## if the csv file exists (was contained in the zip file and then unzipped)
+      if (Project.CSVFile.Exist(project.name))
+        file.ext = 'csv'
+    }
+    if (file.ext == 'csv') {
+      uploading=TRUE
+      msg <- Strategico.ExecCommand(project.name, cmd="import.csv", intern=TRUE)
+    }
+    page.msg <- sprintf("%s<br />The upload of the csv file can take some time. After that, a batch job will start and import the data to the database...", page.msg)
+  }
+
+  template.file <- file.path(GetWebTemplatesHome(), "project-upload-csv.brew")
+  page.body <- paste(capture.output(brew(template.file)),  collapse="\n")
+
+  template.page <- file.path(GetWebTemplatesHome(), "page.brew")
+  brew(template.page)
+%>
