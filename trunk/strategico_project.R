@@ -821,6 +821,7 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
   height <- 300
   
   project.keys <- Project.GetKeys(project.name, project.config=project.config)
+  project.values <- GetValueNames(project.config$values)
 
   stats <- Project.GetStatistics(project.name, project.config=project.config, db.channel=db.channel)
   stats_csv <- stats$csv
@@ -833,7 +834,23 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
   body = sprintf("%s\n<h1>Database stats</h1>\n%s", body, b_db)
 
   body = sprintf("%s\n<h1>Predictions (models)</h1>\n", body)
-  for (value in GetValueNames(project.config$values)) {
+  for (value in project.values) {
+
+    sql <- sprintf("select min(Timestamp) t1, max(Timestamp) t2 from %s", DB.GetTableNameSummary(project.name, value))
+    records <- DB.RunSQLQuery(sql_statement=sql, db.channel=db.channel)
+
+    if (nrow(records) == 1 ) {
+       oldest.run <- as.POSIXct(records[1,]$t1, origin="1970-01-01")
+       newest.run <- as.POSIXct(records[1,]$t2, origin="1970-01-01")
+       delta.run <- round(difftime(newest.run, oldest.run, units="hours"), 1)
+    } else {
+       oldest.run <- "UNKNOWN"
+       newest.run <- "UNKNOWN"
+       delta.run <- "UNKNOWN"
+    }
+    
+    run.stats <- sprintf("Started=%s<br r/>Last update=%s<br />Delta time=%s hours.<br />", oldest.run, newest.run, delta.run)
+
     stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
 
     if (!is.null(stats.models) && is.data.frame(stats.models) && nrow(stats.models) > 0) {
@@ -842,7 +859,7 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
       MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats_db[[DB.GetTableNameProjectItems(project.name)]]))
       b_M <- paste(capture.output(cat(M$html$chart)), collapse="\n")
       b_MG <- paste(capture.output(cat(MG$html$chart)), collapse="\n")
-      body = sprintf("%s\n<h2>%s</h2>\n%s\n%s", body, value, b_M, b_MG)
+      body = sprintf("%s\n<h2>%s</h2>%s\n%s\n%s", body, value, run.stats, b_M, b_MG)
     }
   }
 
