@@ -32,7 +32,7 @@
 </p>
 <p>
   <form name="form-project-menu" class="form-inline" method="POST" action="project-menu.brew" onsubmit="return validateForm()">
-    <input type="text" name="project" class="input-medium" placeholder="project name">
+    <input type="text" name="project" class="input-medium" placeholder="project name" />
     <button type="submit" class="btn btn-warning" name="next">Create</button>
   </form>
 </p>
