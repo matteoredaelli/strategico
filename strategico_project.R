@@ -852,7 +852,7 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
     run.stats <- sprintf("\nStarted=%s<br />Last update=%s<br />Delta time=%s hours.<br />", oldest.run, newest.run, delta.run)
 
     perc <- paste(stats_db[[sprintf("perc_predictions_%s", value)]], "%", sep="")
-    run.stats.bar <- sprintf('<div class="progress"> <div class="bar bar-success" style="width: %s"></div> </div>', perc)
+    run.stats.bar <- sprintf('<div class="progress progress-success progress-striped active" style="margin-bottom: 9px;"> <div class="bar" style="width: %s"></div> </div>', perc)
     stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
 
     if (!is.null(stats.models) && is.data.frame(stats.models) && nrow(stats.models) > 0) {
