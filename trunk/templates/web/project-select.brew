@@ -25,13 +25,13 @@
   }
 </script>
 <p>
-  <form name="form-project-menu" class="form-inline" method="POST" action="project-menu.brew" onsubmit="return validateForm()">
+  <form name="form-project-menu-select" class="form-inline" method="POST" action="project-menu.brew" onsubmit="return validateForm()">
     <%=BuildFormElement_project(label="")%>
     <button type="submit" class="btn btn-primary" name="next">Next</button>
   </form>
 </p>
 <p>
-  <form name="form-project-menu" class="form-inline" method="POST" action="project-menu.brew" onsubmit="return validateForm()">
+  <form name="form-project-menu-create" class="form-inline" method="POST" action="project-menu.brew" onsubmit="return validateForm()">
     <input type="text" name="project" class="input-medium" placeholder="project name" />
     <button type="submit" class="btn btn-warning" name="next">Create</button>
   </form>
