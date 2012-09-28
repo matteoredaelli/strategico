@@ -69,11 +69,11 @@
           <h2>Run</h2>
 <%if (!is.null(project.name)) { %>
   <form name="form-project-set-configuration" class="form-inline" method="POST" action="project-set-configuration.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
     <button type="submit" class="btn btn-large btn-warning">basic configurations</button>
   </form>
   <form name="form-project-upload-csv" class="form-inline" method="POST" action="project-upload-csv.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
     <button type="submit" class="btn btn-large btn-warning">upload-csv</button>
   </form>
 <script language="jscript" type="text/javascript">
@@ -84,8 +84,8 @@ function Confirm()
 </script>
 
   <form name="form-project-run" class="form-inline" method="POST" action="project-menu.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
-    <input type="hidden" name="cmd" class="input-medium" value="eval.items">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
+    <input type="hidden" name="cmd" class="input-medium" value="eval.items" />
     <button type="submit" class="btn btn-large btn-danger" onclick="return Confirm();">run</button>
   </form>
 <%} %>
@@ -95,7 +95,7 @@ function Confirm()
           <h2>Analysis</h2>
 <%if (!is.null(project$name)) { %>
   <form name="form-project-items" class="form-inline" method="GET" action="items.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
     <button type="submit" class="btn btn-large btn-primary">Search Items</button>
   </form>
           <a class="brand" href="<%=project$url%>" target="_blank">Project files</a>
@@ -105,23 +105,23 @@ function Confirm()
           <h2>Export</h2>
 <%if (!is.null(project.name)) { %>
   <form name="form-project-menu-10" class="form-inline" method="POST" action="project-menu.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
-    <input type="hidden" name="cmd" class="input-medium" value="report.stats">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
+    <input type="hidden" name="cmd" class="input-medium" value="report.stats" />
     <button type="submit" class="btn btn-large btn-primary btn btn-info">build Stats</button>
   </form>
   <form name="form-project-menu-10" class="form-inline" method="POST" action="project-menu.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
-    <input type="hidden" name="cmd" class="input-medium" value="report.suspicious">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
+    <input type="hidden" name="cmd" class="input-medium" value="report.suspicious" />
     <button type="submit" class="btn btn-large btn-primary btn btn-info">build suspicious items</button>
   </form>
   <form name="form-project-menu-20" class="form-inline" method="POST" action="project-menu.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
-    <input type="hidden" name="cmd" class="input-medium" value="export.csv">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
+    <input type="hidden" name="cmd" class="input-medium" value="export.csv" />
     <button type="submit" class="btn btn-large btn-primary btn-info">export csv</button>
   </form>
   <form name="form-project-drop" class="form-inline" method="POST" action="project-select.brew">
-    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>">
-    <input type="hidden" name="cmd" class="input-medium" value="drop">
+    <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
+    <input type="hidden" name="cmd" class="input-medium" value="drop" />
     <button type="submit" class="btn btn-large btn-danger" onclick="return Confirm();">Drop project</button>
   </form>
 <%} %>
@@ -139,6 +139,7 @@ function Confirm()
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+<!--
     <script src="bootstrap/js/jquery.js"></script>
     <script src="bootstrap/js/bootstrap-transition.js"></script>
     <script src="bootstrap/js/bootstrap-alert.js"></script>
@@ -152,6 +153,6 @@ function Confirm()
     <script src="bootstrap/js/bootstrap-collapse.js"></script>
     <script src="bootstrap/js/bootstrap-carousel.js"></script>
     <script src="bootstrap/js/bootstrap-typeahead.js"></script>
-
+-->
   </body>
 </html>
