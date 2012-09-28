@@ -6,7 +6,7 @@
   project.name <- POST$project
   MySource("strategico_web.R")
 
-  page.title <- sprintf("Project %s :: configurations", project.name)
+  page.title <- sprintf("Project %s :: configs", project.name)
   page.msg <- ""
 
   if (!is.null(POST$config_basic)) {

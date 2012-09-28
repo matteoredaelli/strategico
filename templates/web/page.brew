@@ -54,7 +54,7 @@
 
     <div class="container">
 
-      <div class="alert alert-info">
+      <div class="alert alert-warning">
           <p class="text-info"><%=page.msg%></p>
       </div>
       <!-- Main hero unit for a primary marketing message or call to action -->
@@ -70,7 +70,7 @@
 <%if (!is.null(project.name)) { %>
   <form name="form-project-set-configuration" class="form-inline" method="POST" action="project-set-configuration.brew">
     <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
-    <button type="submit" class="btn btn-large btn-warning">basic configurations</button>
+    <button type="submit" class="btn btn-large btn-warning">configurations</button>
   </form>
   <form name="form-project-upload-csv" class="form-inline" method="POST" action="project-upload-csv.brew">
     <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
@@ -98,7 +98,7 @@ function Confirm()
     <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
     <button type="submit" class="btn btn-large btn-primary">Search Items</button>
   </form>
-          <a class="brand" href="<%=project$url%>" target="_blank">Project files</a>
+          <strong><a class="brand" href="<%=project$url%>" target="_blank">Project files</a></strong>
 <%} %>
         </div>
         <div class="span4">

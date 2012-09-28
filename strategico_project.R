@@ -849,8 +849,10 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
        delta.run <- "UNKNOWN"
     }
     
-    run.stats <- sprintf("Started=%s<br r/>Last update=%s<br />Delta time=%s hours.<br />", oldest.run, newest.run, delta.run)
+    run.stats <- sprintf("\nStarted=%s<br />Last update=%s<br />Delta time=%s hours.<br />", oldest.run, newest.run, delta.run)
 
+    perc <- paste(stats_db[[sprintf("perc_predictions_%s", value)]], "%", sep="")
+    run.stats.bar <- sprintf('<div class="progress"> <div class="bar bar-success" style="width: %s"></div> </div>', perc)
     stats.models <- Project.GetStatistics.Models(project.name, value, db.channel)
 
     if (!is.null(stats.models) && is.data.frame(stats.models) && nrow(stats.models) > 0) {
@@ -859,7 +861,7 @@ Project.BuildStatsHtmlPage <- function(project.name, db.channel, value, project.
       MG <- gvisGauge(stats.models, options=list(title=value, min=0, max=stats_db[[DB.GetTableNameProjectItems(project.name)]]))
       b_M <- paste(capture.output(cat(M$html$chart)), collapse="\n")
       b_MG <- paste(capture.output(cat(MG$html$chart)), collapse="\n")
-      body = sprintf("%s\n<h2>%s</h2>%s\n%s\n%s", body, value, run.stats, b_M, b_MG)
+      body = sprintf("%s\n<h2>%s</h2>%s\n%s\n%s\n%s", body, value, run.stats, run.stats.bar, b_M, b_MG)
     }
   }
 
