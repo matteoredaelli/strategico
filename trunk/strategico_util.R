@@ -249,7 +249,7 @@ Strategico.Sendmail <- function(project.name, project.config=NULL, subject, body
   if (is.null(to)) to <- project.config$mailto
 
   if (is.null(to) || to == '') {
-    logwarn("No sending email: maito paameter is empty")
+    logwarn("Not sending emails: mailto parameter is empty")
     return(1)
   }
   logdebug( paste("Sending email to", to))
@@ -296,45 +296,6 @@ SubsetByID <- function(data, id) {
   eval(parse(text = cmd))
 }
 
-.Project.Items.UpdateDataRecursively.ununsed <- function(project.path, data, keys, values=NULL, stats=FALSE) {
-  if (is.null(values))
-    folder <- project.path
-  else
-    folder <- paste(project.path, paste(values,collapse="/"), sep="/")
-
-  logwarn( folder)
-  dir.create(folder, recursive = TRUE, showWarnings = FALSE)
-
-  vals.names <- .GetFields(names(data),"value")
-  temp=by(data[,vals.names,drop=FALSE],data$PERIOD, function(x) apply(x,2, sum, na.rm=TRUE))
-  item_data <- as.data.frame(t(matrix(unlist(temp),nrow=length(vals.names))))
-  rownames(item_data) <- names(temp)[!sapply(temp,is.null)]
-  colnames(item_data) <- vals.names
-  save(item_data, file= paste(folder, "item.Rdata", sep="/"))
-  
-  if("data_csv"%in%project.config$save)
-    write.csv(item_data,
-              file= paste(folder, "item.csv", sep="/"),
-              row.names = FALSE
-              )
-  
-  if (length(keys) > 0) {
-    key <- keys[1]
-    newKeys <- keys[-1]
-    keyValues <- levels(factor(data[,key]))   ###CHANGED
-    for (keyValue in keyValues) {
-      ##	   print(keyValue)
-      newValues = values
-      newValues[key] = (keyValue)
-      ##	    print( values[1,])
-      
-      newData <- data[data[,key]==keyValue,]
-      
-      .Project.Items.UpdateDataRecursively(project.path=project.path, data=newData, keys=newKeys, values=newValues)
-    }
-  }
-}
-
 StrToRange <- function(str) {
   values <- unlist(strsplit(str, ":"), as.numeric)
   as.integer(values[1]):as.integer(values[2])
@@ -343,7 +304,7 @@ StrToRange <- function(str) {
 SW.License <- function() {"GPL V3+"}
 
 SW.Description <- function() {
-  paste("Strategico - Copyright(c) 2010, 2011
+  paste("Strategico - Copyright(c) 2010, 2011, 2012
 Version: ", SW.Version(),"
 License: ", SW.License(),"
 Contributors: ",SW.Contributors())
@@ -356,7 +317,7 @@ SW.Contributors <- function() {"
 "
 }
 
-SW.Version <- function() {"Release 1.2.0"}
+SW.Version <- function() {"Release 3.0"}
 
 Vector.ToString <- function(values) {
    paste(values, collapse=",")
