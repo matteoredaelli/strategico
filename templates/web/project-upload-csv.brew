@@ -1,4 +1,12 @@
 <p>
+The csv file must have:<br />
+<ul>
+    <li>the first row must have the column names: KEY1, KEY2, ..., PERIOD, V1, ...</li>
+    <li>PERIOD (like 2012-08) is a string with two numbers separated by -  The first one is usually the year, the second is usually the quarter, the month,..</li>
+    <li>columns separated by ;</li>
+    <li>decimals with .</li>
+</ul>
+
   <form name="form-project-upload-csv" class="form-inline" enctype="multipart/form-data" method="POST">
     <input type="hidden" name="project" class="input-medium" value="<%=project.name%>" />
     <input type="file" name="project_file" class="input-medium" />
