@@ -231,13 +231,15 @@ is.value <- function(value, project.name=NULL, project.config=NULL) {
   value %in% GetValueNames(project.name=project.name, project.config=project.config)
 }
 
-Strategico.ExecCommand <- function(project.name, cmd, options="", mailto="nobody@localhost", intern=TRUE, wait=strategico.config$command.wait) {
+Strategico.ExecCommand <- function(project.name, cmd, options="", mailto=NULL, intern=TRUE, wait=strategico.config$command.wait) {
   strategico.command <- strategico.config$strategico.command
   strategico.command <- gsub("__PROJECT_NAME__", project.name, strategico.command)
   strategico.command <- gsub("__CMD__", cmd, strategico.command)
   if (!is.null(mailto))
     strategico.command <- gsub("__MAILTO__", mailto, strategico.command)
   strategico.command <- gsub("__OPTIONS__", options, strategico.command)
+  project.path <- Project.GetPath(project.name)
+  strategico.command <- gsub("__WORKDIR__", project.path, strategico.command)
   logdebug(paste("Running command:", strategico.command))
   rc <- system(strategico.command, wait=wait, intern=intern)
   logdebug(rc)
