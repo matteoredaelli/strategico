@@ -156,3 +156,4 @@ function Confirm()
 -->
   </body>
 </html>
+<% DB.Close(db.channel) %>

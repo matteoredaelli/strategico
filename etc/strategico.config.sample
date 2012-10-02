@@ -26,7 +26,7 @@ strategico.config <-
        command.wait=FALSE,
        command.eval.jobs=2,
        strategico.command="$STRATEGICO_HOME/strategico.R -n __PROJECT_NAME__ --cmd __CMD__ __OPTIONS__ -M __MAILTO__",
-       ##strategico.command="PATH=/opt/R/bin:$PATH sudo -u r -i /usr/bin/sbatch --workdir=/var/www/slurm --mail-type=ALL --mail-user=__MAILTO__ --job-name=__PROJECT_NAME__-__CMD__ $STRATEGICO_HOME/strategico.R  -n __PROJECT_NAME__ --cmd __CMD__ __OPTIONS__ -M __MAILTO__",
+       ##strategico.command="PATH=/opt/R/bin:$PATH sudo -u r -i /usr/bin/sbatch --workdir=__WORKDIR__ --mail-type=ALL --mail-user=__MAILTO__ --job-name=__PROJECT_NAME__-__CMD__ $STRATEGICO_HOME/strategico.R  -n __PROJECT_NAME__ --cmd __CMD__ __OPTIONS__ -M __MAILTO__",
 
        storage="db",	
 

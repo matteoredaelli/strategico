@@ -19,7 +19,7 @@
 ## created: 2011
 
 setContentType("text/html")
-#RApacheOutputErrors(TRUE)
+RApacheOutputErrors(TRUE)
 #options(hverbose=TRUE,verbose=FALSE)
 options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
