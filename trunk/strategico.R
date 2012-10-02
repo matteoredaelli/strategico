@@ -202,8 +202,8 @@ if (opt$cmd == "statistics") {
 ## drop
 #########################################################################
 if (opt$cmd == "drop") {
-  Project.DropDB(project.name=opt$project.name, db.channel=db.channel)
-  Project.EmptyFS(project.name=opt$project.name)
+  try(Project.DropDB(project.name=opt$project.name, db.channel=db.channel))
+  try(Project.EmptyFS(project.name=opt$project.name))
   Strategico.Sendmail(to=opt$mailto, subject=opt$cmd, project.name=opt$project.name, body="Finished")
   q(status=0)
 }
