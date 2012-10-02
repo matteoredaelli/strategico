@@ -19,16 +19,22 @@
 ## created: 2011
 
 setContentType("text/html")
-##RApacheOutputErrors(FALSE)
+#RApacheOutputErrors(TRUE)
+#options(hverbose=TRUE,verbose=FALSE)
 options(hverbose=FALSE,verbose=FALSE)
 suppressPackageStartupMessages(library(googleVis))
 
 db.channel <- DB.Connect()
 
 project <- list()
-project$name <- project.name
+project$name <- NULL
+if (!is.null(GET) && !is.null(GET$project))
+  project$name <- GET$project
+if (!is.null(POST) && !is.null(POST$project))
+  project$name <- POST$project
+
 if (!is.null(project$name)) {
-  project$url <- Project.GetUrl(POST$project)
+  project$url <- Project.GetUrl(project$name)
 }
 
 BuildHtmlElement_input <- function(label="", name, default="", type="text", size=20) {
@@ -80,7 +86,7 @@ BuildFormElement_project <- function(label="Project", default=NULL) {
   BuildHtmlElement_select(label=label, name="project",list.values=Projects.GetProjectsFS(), default=default)
 }
 
-BuildFormElement_keys <- function(db.channel, project.name=NULL, project.config=NULL, default=NULL, sep=" ") {
+BuildFormElement_keys <- function(db.channel, project.name, project.config=NULL, default=NULL, sep=" ") {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name, db.channel=db.channel)
   

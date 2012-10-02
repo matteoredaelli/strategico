@@ -1,16 +1,16 @@
 <%
 # -*- mode: R -*-
+  project.name <- "sample"
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
     
-  project.name <- NULL
   MySource("strategico_web.R")
 
   page.title <- "Select project"
   page.msg <- ""
 
 
-  if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "drop") {
+  if (!is.null(POST) && !is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "drop") {
     logdebug("Dropping project")
     msg <- Strategico.ExecCommand(POST$project, cmd="drop", intern=TRUE)
     page.msg <- sprintf("Project deleted! %s", msg)
