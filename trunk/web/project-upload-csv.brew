@@ -37,6 +37,7 @@
     if (file.ext == 'csv') {
       uploading=TRUE
       msg <- Strategico.ExecCommand(project.name, cmd="import.csv", intern=TRUE)
+      page.msg <- sprintf("%s<br />%s", page.msg, msg)
     }
     page.msg <- sprintf("%s<br />The upload of the csv file can take some time. After that, a batch job will start and import the data to the database...", page.msg)
   }

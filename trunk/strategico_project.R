@@ -116,7 +116,7 @@ Project.CreateProjectConfig <- function(project.name, mailto=NULL,
 
   template.file <- file.path(GetTemplatesHome(), "project-config-csv-ltp.brew")
   config_csv <- paste(capture.output(brew(template.file)),  collapse="\n")
-  logdebug(sprintf("Config:\n'%s'", config.csv))
+  logdebug(sprintf("Config:\n'%s'", config_csv))
 
   template.file <- file.path(GetTemplatesHome(), "project-config-param-ltp.brew")
   param <- paste(capture.output(brew(template.file)),  collapse="\n")

@@ -9,10 +9,22 @@
   page.title <- sprintf("Project %s", project.name)
   page.msg <- ""
 
-  records <- Project.selectRowDB(project.name, db.channel)
-  if (nrow(records) == 0) {
-    Project.Create(project.name, db.channel)
-    page.msg <- "Project created!"
+  mailto <- NULL
+
+  if (!is.null(POST$project)) {
+ 
+    ## retriving mailto param
+
+    project.config <- Project.GetConfig(project.name = project.name, db.channel=db.channel)
+    mailto <- project.config$mailto
+
+    ## creating project if not exists
+
+    records <- Project.selectRowDB(project.name, db.channel)
+    if (nrow(records) == 0) {
+      Project.Create(project.name, db.channel)
+      page.msg <- "Project created!"
+    }
   } 
 
   
@@ -20,7 +32,7 @@
 
   if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd != "eval.items") {
     logdebug("Executing command '%s' for project '%s'", POST$cmd, project.name)
-    msg <- Strategico.ExecCommand(POST$project, cmd=POST$cmd, intern=TRUE)
+    msg <- Strategico.ExecCommand(POST$project, cmd=POST$cmd, intern=TRUE, mailto=mailto)
   }
   if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "eval.items") {
     logdebug("Executing command '%s' for project '%s'", POST$cmd, project.name)
@@ -37,7 +49,7 @@
       for (c in 1:strategico.config$command.eval.jobs) {
          end <- min(start + id.step, maxid)
          options <- paste(options.base, start, ":", end, sep="")
-         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, intern=FALSE)
+         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, intern=FALSE, mailto=mailto)
          msg <- paste(msg, "<br />", msg.new)
          start <- end + 1
       } #end for
