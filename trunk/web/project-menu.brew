@@ -32,7 +32,7 @@
 
   if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd != "eval.items") {
     logdebug("Executing command '%s' for project '%s'", POST$cmd, project.name)
-    msg <- Strategico.ExecCommand(POST$project, cmd=POST$cmd, intern=TRUE, mailto=mailto)
+    page.msg <- Strategico.ExecCommand(POST$project, cmd=POST$cmd, intern=TRUE, mailto=mailto)
   }
   if (!is.null(POST$project) && !is.null(POST$cmd) && POST$cmd == "eval.items") {
     logdebug("Executing command '%s' for project '%s'", POST$cmd, project.name)
@@ -49,8 +49,8 @@
       for (c in 1:strategico.config$command.eval.jobs) {
          end <- min(start + id.step, maxid)
          options <- paste(options.base, start, ":", end, sep="")
-         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, intern=FALSE, mailto=mailto)
-         msg <- paste(msg, "<br />", msg.new)
+         msg.new <- Strategico.ExecCommand(project.name, cmd="eval.items", options=options, intern=TRUE, mailto=mailto)
+         page.msg <- paste(page.msg, "<br />", msg.new)
          start <- end + 1
       } #end for
     }

@@ -118,6 +118,9 @@ Project.CreateProjectConfig <- function(project.name, mailto=NULL,
   config_csv <- paste(capture.output(brew(template.file)),  collapse="\n")
   logdebug(sprintf("Config:\n'%s'", config_csv))
 
+  if (is.null(mailto)) 
+    mailto="noreply@localhost"
+
   template.file <- file.path(GetTemplatesHome(), "project-config-param-ltp.brew")
   param <- paste(capture.output(brew(template.file)),  collapse="\n")
   logdebug(sprintf("Param:\n'%s'", param))
@@ -309,7 +312,7 @@ Project.GetKeyValues <- function(key.name, project.name, db.channel) {
   sort(records[,1])
 }
  
-Project.GetIDs <- function(keys, project.name, db.channel, keys.na.rm=FALSE) {
+Project.GetIDs <- function(keys, project.name, db.channel, project.config=NULL, keys.na.rm=FALSE) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
