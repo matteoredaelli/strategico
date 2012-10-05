@@ -183,8 +183,16 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
   logwarn( paste("Project keys are:", paste(project.keys, collapse=", ", sep= "")))
 
   logwarn("Removing strange characters from KEYs columns")
+
+
   for (k in project.keys) {
+    ## removing ' " \
     data[,k] = gsub("[/'\"\\]", "", data[,k])
+    ## empty string
+    data[,k] = gsub("^$", "EMPTY", data[,k])
+    ## NA
+    data[,k] = gsub("^NA$", "EMPTY", data[,k])
+    data[,k] = gsub("^N/A$", "EMPTY", data[,k])
   }
   
   project.values <- grep("^V\\d$", csv.header, value=TRUE)
@@ -412,7 +420,7 @@ Project.GetConfig <- function(project.name, db.channel, quit=FALSE) {
   eval.file <- file.path(GetPluginsPath(), eval.file)
   logdebug( paste("Reading eval file", eval.file))
   if (! file.exists(eval.file)) {
-    loginfo( paste("... miyyssing eval file", eval.file))
+    loginfo( paste("... missing eval file", eval.file))
     loginfo( "You MUST add it!!!!!!!!!!!!!!!!!!! and quit right now...")
   } else {
     try(source(eval.file))
@@ -654,6 +662,10 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   ## estrai/filtra la lista degli item e li salva nel file items-list.Rdata
 
   key_fields <- .GetFields( colnames(project.data) ,"key" )
+
+  ## removing NA values
+  
+  project.data[is.na(project.data)] <- "EMPTY"
   
   project.data$PERIOD <- factor(project.data$PERIOD)
   for (i in key_fields){
