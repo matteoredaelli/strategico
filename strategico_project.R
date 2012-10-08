@@ -191,8 +191,8 @@ Project.NormalizeInputDataAndCreateProjectConfig <- function(project.name, data,
     ## empty string
     data[,k] = gsub("^$", "EMPTY", data[,k])
     ## NA
-    data[,k] = gsub("^NA$", "EMPTY", data[,k])
-    data[,k] = gsub("^N/A$", "EMPTY", data[,k])
+    data[,k] = gsub("^NA$", "__NA__", data[,k])
+    data[,k] = gsub("^N/A$", "__NA__", data[,k])
   }
   
   project.values <- grep("^V\\d$", csv.header, value=TRUE)
@@ -694,6 +694,7 @@ Project.Items.UpdateData <- function(project.name, project.data, db.channel) {
   project.items.orig <- project.items
   DB.EmptyTable(tablename, db.channel)
   logwarn( "Saving project items")
+  #write.csv2(project.items, file="/tmp/a.csv")
   dbWriteTable(value=project.items, name=tablename, conn=db.channel, append=T, row.names=FALSE)
   
   project.items <- project.items.orig
