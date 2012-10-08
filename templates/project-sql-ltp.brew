@@ -185,3 +185,9 @@ select
     V1.PERIOD = <%=value%>.PERIOD
   <%}%>
 ;
+
+create or replace view v_<%=project.name%>_historical_data_and_results as
+  select * from  <%=project.name%>_data_raw 
+  union 
+  select * from  v_<%=project.name%>_results
+;
