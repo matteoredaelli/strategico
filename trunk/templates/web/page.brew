@@ -44,8 +44,8 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="<%=sprintf("%s/project-select.brew", strategico.config$strategico.url)%>">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><a href="http://code.google.com/p/strategico/">About</a></li>
+              <li><a href="http://code.google.com/p/strategico/issues/list">Issues</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>

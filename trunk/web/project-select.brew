@@ -1,6 +1,7 @@
 <%
 # -*- mode: R -*-
   project.name <- "sample"
+  project.name <- NULL
   strategico.home <- as.character(Sys.getenv("STRATEGICO_HOME"))
   source(file.path(strategico.home, "strategico_util.R"))
     
