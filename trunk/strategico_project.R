@@ -565,7 +565,8 @@ Project.GetViewNames <- function(project.name, project.config=NULL) {
     project.config <- Project.GetConfig(project.name, db.channel=db.channel)
 
   tables <- c() 
-  tables <- append(tables, paste("v", project.name, "results", sep="_"))
+  tables <- append(tables, sprintf("v_%s_results", project.name))
+  tables <- append(tables, sprintf("v_%s_historical_data_and_results", project.name))
   
   for (value in GetValueNames(project.config$values)) {
     value.tables <- c(
