@@ -254,15 +254,14 @@ Project.BuildSQLscript <- function(project.name, project.config=NULL) {
 }
 
 Project.DropDB <- function(project.name, project.config=NULL, db.channel) {
-  if(is.null(project.config)) {
-    project.config <- Project.GetConfig(project.name, db.channel=db.channel)
-  }
+  db.objects <- dbListTables(db.channel)
+  pattern <- sprintf("^%s_", project.name)
+  tables <- grep(pattern, db.objects, value =TRUE)
+  lapply(tables, function(x) try(DB.DropTable(x,db.channel)))
 
-  tables <- Project.GetTableNames(project.name=project.name, project.config=project.config)
-  lapply(tables, function(x) DB.DropTable(x,db.channel))
-
-  views <- Project.GetViewNames(project.name=project.name, project.config=project.config)
-  lapply(views, function(x) DB.DropView(x,db.channel))
+  pattern <- sprintf("^v_%s_", project.name)
+  views <- grep(pattern, db.objects, value =TRUE)
+  lapply(views, function(x) try(DB.DropView(x,db.channel)))
   Project.dropRowDB(project.name, db.channel)
 }
 

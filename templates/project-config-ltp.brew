@@ -111,7 +111,7 @@ project.config$param$rule='BestAIC'
 ## ratio among predicted and observed data (Jump)
 ## greater or equal to :
 project.config$param$rule.noMaxCVOver=2
-project.config$param$rule.noMaxJumpOver=c(<%=paste(rep(Inf, length(project.values)), collapse=",", sep="")%>)
+project.config$param$rule.noMaxJumpOver=c(<%=paste(rep(4, length(project.values)), collapse=",", sep="")%>)
 
 ## +++++++++++++++++++++++++++++++++++++++
 ## negTo0
