@@ -427,6 +427,30 @@ Project.GetConfig <- function(project.name, db.channel, quit=FALSE) {
   project.config
 }
 
+Project.SetConfig <- function(project.name, config.field, key, key.val, db.channel) {
+  param <- list()
+
+  records <- Project.selectRowDB(project.name, db.channel)
+  if(nrow(records) != 1) {
+    loginfo("Unexpected number of rows in strategico_projects tables")
+    return(project.config)
+  }
+  config_basic <- records[1,]$config_basic
+  config_csv <- records[1,]$config_csv
+  param.string <- records[1,]$param
+
+  logdebug( sprintf("Config_basic= %s", config_basicstring))
+  logdebug( sprintf("Config_csv= %s", config_basicstring))
+  logdebug( sprintf("Param = %s", param.string))
+
+  pattern <- sprintf("%s=([^\n$])+", key)
+  new.value <- sprintf("%s=%s", key, key.val)
+  new.config <- gsub(pattern, new.value,  records[1,][[config.field]])
+
+  cmd <- sprintf("Project.updateRowDB(project.name=project.name, db.channel=db.channel, %s=new.config)", config.field)
+  eval(parse(text = cmd))
+}
+
 Project.GetExpectedCSVHeader <- function(project.name=NULL, project.config=NULL) {
   if (is.null(project.config))
     project.config <- Project.GetConfig(project.name, db.channel=db.channel)
