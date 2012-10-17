@@ -239,7 +239,7 @@ Project.DBExportViews2Csv <- function(project.name, project.config=NULL, db.chan
          )
 }
 
-Project.DB.AddOrUpdate <- function(project.name, db.channel, config="", params="") {
+Project.DB.AddOrUpdate.ununsed <- function(project.name, db.channel, config="", params="") {
   logdebug(paste("deleting record name=", project.name, "from strategico_projects table"))
   sql <- "delete from strategico_projects where name='__PROJECT_NAME__'"
   sql <- gsub("__PROJECT_NAME__", project.name, sql)
