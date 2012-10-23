@@ -17,10 +17,10 @@
 <%=result$best.model.chart%>
 
 <h2>All models</h2>
-    <a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a>
     <%=result$all.models.chart%>
 
 <%=result$best.model.chart2%>
+<br /><a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a><br />
 <%=result$results.pivot.chart%>
 
 <h2>Change model</h2>
