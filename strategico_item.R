@@ -266,7 +266,7 @@ Item.AddLink <- function(project.name, value, id.list, new=TRUE) {
 }
 
 Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL, value="V1", db.channel, only.best=FALSE) {
-  options=list(width=800, height=350)
+  options=list(width=900, height=400, legend="bottom")
   result <- list()
 
   ## id or keys must be not null

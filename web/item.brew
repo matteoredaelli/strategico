@@ -8,8 +8,6 @@
   project.name <- GET$project
   MySource("strategico_web.R")
 
-  options=list(width=800, height=350)
-
   page.title <- ""
   page.msg <- ""
 
