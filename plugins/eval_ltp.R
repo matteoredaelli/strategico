@@ -49,6 +49,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
   ## ###################################################################################
 
   if ("model" %in% project.config$save) {
+    dir.create(output.path, showWarnings = FALSE, recursive = TRUE)
     filename <- paste(output.path, "/model.RData", sep = "")
     logdebug( paste("Saving Model to file", filename))
     save(file=filename, model)
@@ -168,6 +169,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     ## Creating Saving Images
     ## ###################################################################################
     if ("images"%in%project.config$save) {
+      dir.create(output.path, showWarnings = FALSE, recursive = TRUE)
       PlotLtpResults(model, directory=output.path)
     }
     
@@ -175,6 +177,7 @@ ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.
     ## Creating and Saving Reports
     ## ###################################################################################
     if ("report"%in%project.config$save) {
+      dir.create(output.path, showWarnings = FALSE, recursive = TRUE)
       ltp.HTMLreport(obj=model, id=id, value=value, value.description=project.config$values[value], directory=output.path)
     }
   }
