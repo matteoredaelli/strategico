@@ -15,14 +15,17 @@
 
 <h2>Best Model <%=result$best.model%></h2>
 <%=result$best.model.chart%>
+<%=result$best.model.chart2%>
 
 <h2>All models</h2>
-    <%=result$all.models.chart%>
+    <h3>Only Forecast</h3>
     <%=result$all.models.chart2%>
 
-<%=result$best.model.chart2%>
+    <h3>Actual + Forecast</h3>
+    <%=result$all.models.chart%>
+
+    <%=result$results.pivot.chart%>
 <br /><a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a><br />
-<%=result$results.pivot.chart%>
 
 <h2>Change model</h2>
 <form name="form-item-changemodel" class="form-inline" method="GET" action="">
