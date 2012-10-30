@@ -394,6 +394,14 @@ Item.GetResultsWithCharts <- function(project.name, project.config=NULL, id=NULL
   b_AM <- paste(capture.output(cat(AM$html$chart)), collapse="\n")
   result$all.models.chart <- b_AM
 
+  AM2 <- gvisLineChart(data=subset(item.results.pivot, PERIOD >= Period.ToString(project.config$period.end)), options=options)
+  nrow <- nrow(item.results.pivot)
+  #only.pred <- item.results.pivot[nrow - project.config$param$n.ahead:nrow,]
+  only.pred <- subset(item.results.pivot, PERIOD >= Period.ToString(project.config$period.end))
+  AM2 <- gvisLineChart(data=only.pred, options=options)
+  b_AM2 <- paste(capture.output(cat(AM2$html$chart)), collapse="\n")
+  result$all.models.chart2 <- b_AM2
+
   ###############################################################################################################
   ## TAB Results
   ###############################################################################################################
