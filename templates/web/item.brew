@@ -18,6 +18,7 @@
 
 <h2>All models</h2>
     <%=result$all.models.chart%>
+    <%=result$all.models.chart2%>
 
 <%=result$best.model.chart2%>
 <br /><a href=item_motion_chart.brew?project=<%=project.name%>&id=<%=id%>>motion chart</a><br />
