@@ -18,8 +18,6 @@
 ## authors: L. Finos, M. Redaelli, M. Rinaldo
 ## created: 2011
 
-
-suppressPackageStartupMessages(library(ast))
 suppressPackageStartupMessages(library(ltp))
 
 ltp.Item.EvalDataByValue <- function(project.name, id, item.data, value, output.path=".", param=NULL, project.config, db.channel) {
