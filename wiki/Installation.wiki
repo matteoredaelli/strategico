@@ -18,7 +18,6 @@ and the following R libraries (see [http://cran.r-project.org/web/packages/ CRAN
  * [http://cran.r-project.org/web/packages/R2HTML/index.html R2HTML library]
  * [http://cran.r-project.org/web/packages/RUnit/index.html runit]
  * [http://cran.r-project.org/web/packages/xtable/index.html xtable library]
- * [http://sirio.stat.unipd.it/index.php?id=libast ast library]
  * [http://cran.r-project.org/web/packages/brew/index.html brew]
  * [http://cran.r-project.org/web/packages/sendmailR/index.html sendmailR]
 
