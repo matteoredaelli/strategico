@@ -215,7 +215,8 @@ GetUniqueKeyValues <- function(project.name=NULL, project.config=NULL, db.channe
     project.config <- Project.GetConfig(project.name=project.name, db.channel=db.channel)
 
   keys <- paste("KEY", 1:length(project.config$keys), sep="")
-  sapply(keys, function(k) Project.GetKeyValues(k, project.name=project.name, db.channel=db.channel))
+  result <- sapply(keys, function(k) Project.GetKeyValues(k, project.name=project.name, db.channel=db.channel))
+  as.data.frame(result)
 }
 
 GetValueNames <- function(values=NULL, project.name=NULL, project.config=NULL) {
